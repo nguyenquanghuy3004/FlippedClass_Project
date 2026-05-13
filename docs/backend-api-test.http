@@ -1,0 +1,192 @@
+### Backend API test guide for IntelliJ HTTP Client
+### Run Spring Boot first, then run requests from top to bottom.
+### After each POST, copy the returned id into the variables below.
+
+@baseUrl = http://localhost:8080
+@courseId = 1
+@documentId = 1
+@pathId = 1
+@node1Id = 1
+@node2Id = 2
+@connectionId = 1
+
+### 1. Course - create
+### Expected: 201 Created, response has id/title/description/status/createdAt/updatedAt.
+POST {{baseUrl}}/api/courses
+Content-Type: application/json
+
+{
+  "title": "Spring Boot Basic",
+  "description": "Khoa hoc CRUD backend co ban",
+  "status": "ACTIVE"
+}
+
+### 1. Course - list all
+### Expected: 200 OK, response is an array of courses.
+GET {{baseUrl}}/api/courses
+
+### 1. Course - get by id
+### Expected: 200 OK if found, 404 if courseId does not exist.
+GET {{baseUrl}}/api/courses/{{courseId}}
+
+### 1. Course - update
+### Expected: 200 OK, response has updated title/description/status.
+PUT {{baseUrl}}/api/courses/{{courseId}}
+Content-Type: application/json
+
+{
+  "title": "Spring Boot Basic - Updated",
+  "description": "Da cap nhat mo ta khoa hoc",
+  "status": "ACTIVE"
+}
+
+### 2. CourseDocument - create under course
+### Expected: 201 Created, response has id/courseId/title/documentType/url/description/createdAt.
+POST {{baseUrl}}/api/courses/{{courseId}}/documents
+Content-Type: application/json
+
+{
+  "title": "Slide gioi thieu Spring Boot",
+  "documentType": "PDF",
+  "url": "https://example.com/spring-boot-intro.pdf",
+  "description": "Tai lieu doc truoc buoi hoc"
+}
+
+### 2. CourseDocument - list by course
+### Expected: 200 OK, response is an array of documents for this course.
+GET {{baseUrl}}/api/courses/{{courseId}}/documents
+
+### 2. CourseDocument - update
+### Expected: 200 OK, response has updated document data.
+PUT {{baseUrl}}/api/course-documents/{{documentId}}
+Content-Type: application/json
+
+{
+  "title": "Slide gioi thieu Spring Boot - Updated",
+  "documentType": "PDF",
+  "url": "https://example.com/spring-boot-intro-v2.pdf",
+  "description": "Tai lieu da cap nhat"
+}
+
+### 3. LearningPath - create under course
+### Expected: 201 Created, response has id/courseId/title/description/status/createdAt/updatedAt.
+POST {{baseUrl}}/api/courses/{{courseId}}/learning-paths
+Content-Type: application/json
+
+{
+  "title": "Lo trinh Spring Boot CRUD",
+  "description": "Hoc tao API CRUD theo tung module",
+  "status": "ACTIVE"
+}
+
+### 3. LearningPath - list by course
+### Expected: 200 OK, response is an array of learning paths for this course.
+GET {{baseUrl}}/api/courses/{{courseId}}/learning-paths
+
+### 3. LearningPath - get by id
+### Expected: 200 OK if found, 404 if pathId does not exist.
+GET {{baseUrl}}/api/learning-paths/{{pathId}}
+
+### 3. LearningPath - update
+### Expected: 200 OK, response has updated learning path data.
+PUT {{baseUrl}}/api/learning-paths/{{pathId}}
+Content-Type: application/json
+
+{
+  "title": "Lo trinh Spring Boot CRUD - Updated",
+  "description": "Cap nhat lo trinh hoc",
+  "status": "ACTIVE"
+}
+
+### 4. LearningNode - create first node under learning path
+### Expected: 201 Created, response has id/learningPathId/title/nodeType/status/displayOrder.
+POST {{baseUrl}}/api/learning-paths/{{pathId}}/nodes
+Content-Type: application/json
+
+{
+  "title": "Bai 1 - Tao Course API",
+  "description": "Hoc controller, service, repository",
+  "content": "Noi dung bai hoc ve CRUD Course",
+  "nodeType": "LESSON",
+  "status": "UNLOCKED",
+  "displayOrder": 1,
+  "estimatedMinutes": 30
+}
+
+### 4. LearningNode - create second node under learning path
+### Expected: 201 Created. displayOrder must be different inside the same learning path.
+POST {{baseUrl}}/api/learning-paths/{{pathId}}/nodes
+Content-Type: application/json
+
+{
+  "title": "Bai 2 - Tao Learning Node API",
+  "description": "Hoc cach tao node trong learning path",
+  "content": "Noi dung bai hoc ve LearningNode",
+  "nodeType": "PRACTICE",
+  "status": "LOCKED",
+  "displayOrder": 2,
+  "estimatedMinutes": 45
+}
+
+### 4. LearningNode - list by learning path
+### Expected: 200 OK, response is an array ordered by displayOrder ascending.
+GET {{baseUrl}}/api/learning-paths/{{pathId}}/nodes
+
+### 4. LearningNode - get by id
+### Expected: 200 OK if found, 404 if node1Id does not exist.
+GET {{baseUrl}}/api/nodes/{{node1Id}}
+
+### 4. LearningNode - update
+### Expected: 200 OK, response has updated node data.
+PUT {{baseUrl}}/api/nodes/{{node1Id}}
+Content-Type: application/json
+
+{
+  "title": "Bai 1 - Tao Course API - Updated",
+  "description": "Cap nhat mo ta node",
+  "content": "Noi dung moi",
+  "nodeType": "LESSON",
+  "status": "UNLOCKED",
+  "displayOrder": 1,
+  "estimatedMinutes": 35
+}
+
+### 5. NodeConnection - create connection from node 1 to node 2
+### Expected: 201 Created, sourceNodeId and targetNodeId must be different and in the same learning path.
+POST {{baseUrl}}/api/learning-paths/{{pathId}}/connections
+Content-Type: application/json
+
+{
+  "sourceNodeId": {{node1Id}},
+  "targetNodeId": {{node2Id}},
+  "conditionType": "COMPLETED",
+  "conditionValue": "true"
+}
+
+### 5. NodeConnection - list by learning path
+### Expected: 200 OK, response is an array of node connections for this learning path.
+GET {{baseUrl}}/api/learning-paths/{{pathId}}/connections
+
+### 5. NodeConnection - delete
+### Expected: 204 No Content.
+DELETE {{baseUrl}}/api/node-connections/{{connectionId}}
+
+### Optional cleanup - delete node 2
+### Expected: 204 No Content.
+DELETE {{baseUrl}}/api/nodes/{{node2Id}}
+
+### Optional cleanup - delete node 1
+### Expected: 204 No Content.
+DELETE {{baseUrl}}/api/nodes/{{node1Id}}
+
+### Optional cleanup - delete learning path
+### Expected: 204 No Content.
+DELETE {{baseUrl}}/api/learning-paths/{{pathId}}
+
+### Optional cleanup - delete course document
+### Expected: 204 No Content.
+DELETE {{baseUrl}}/api/course-documents/{{documentId}}
+
+### Optional cleanup - delete course
+### Expected: 204 No Content.
+DELETE {{baseUrl}}/api/courses/{{courseId}}
