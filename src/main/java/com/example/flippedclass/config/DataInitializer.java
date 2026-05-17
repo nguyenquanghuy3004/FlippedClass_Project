@@ -1,7 +1,7 @@
 package com.example.flippedclass.config;
 
 import com.example.flippedclass.entity.Role;
-import com.example.flippedclass.entity.RoleName;
+import enums.RoleName;
 import com.example.flippedclass.entity.User;
 import com.example.flippedclass.repository.RoleRepository;
 import com.example.flippedclass.repository.UserRepository;

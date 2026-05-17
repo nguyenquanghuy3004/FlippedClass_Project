@@ -1,6 +1,6 @@
 package com.example.flippedclass.dto;
 
-import com.example.flippedclass.entity.VisibilityType;
+import enums.VisibilityType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

@@ -5,7 +5,7 @@ import com.example.flippedclass.dto.SignupRequest;
 import com.example.flippedclass.dto.JwtResponse;
 import com.example.flippedclass.dto.MessageResponse;
 import com.example.flippedclass.entity.Role;
-import com.example.flippedclass.entity.RoleName;
+import enums.RoleName;
 import com.example.flippedclass.entity.User;
 import com.example.flippedclass.repository.RoleRepository;
 import com.example.flippedclass.repository.UserRepository;

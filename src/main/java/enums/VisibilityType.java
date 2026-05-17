@@ -1,4 +1,4 @@
-package com.example.flippedclass.entity;
+package enums;
 
 public enum VisibilityType {
     PUBLIC,

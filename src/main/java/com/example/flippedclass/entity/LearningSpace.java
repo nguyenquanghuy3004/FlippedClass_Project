@@ -1,5 +1,6 @@
 package com.example.flippedclass.entity;
 
+import enums.VisibilityType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
