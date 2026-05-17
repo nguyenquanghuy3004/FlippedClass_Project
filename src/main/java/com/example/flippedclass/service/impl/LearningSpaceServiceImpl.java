@@ -80,4 +80,22 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         }
         return sb.toString();
     }
+
+    @Override
+    public void deleteLearningSpace(Long id){
+
+        // 1. Lấy thông tin user đang đăng nhập
+        Object mentor = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = (mentor instanceof UserDetails) ? ((UserDetails) mentor).getUsername() : mentor.toString();
+
+
+        LearningSpace learningSpace = learningSpaceRepository.findByIdAndIsDeletedFalse(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learing space or đã bị xóa"));
+
+        if(!learningSpace.getOwner().getUsername().equals(username)){
+            throw new IllegalArgumentException("Bạn khoooongg có quyền xóa");
+
+        }
+        learningSpace.setDeleted(true);
+        learningSpaceRepository.save(learningSpace);
+    }
 }
