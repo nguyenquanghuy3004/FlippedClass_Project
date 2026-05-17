@@ -25,6 +25,11 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
     @Override
     public LearningSpaceResponse createLearningSpace(CreateLearningSpaceRequest request) {
+        // Manual validation for name
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên Learning Space không được để trống");
+        }
+
         // 1. Get current logged in user
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username;
@@ -35,7 +40,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         }
 
         User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User không tìm thấy"));
 
         // 2. Generate unique invite code
         String inviteCode;
