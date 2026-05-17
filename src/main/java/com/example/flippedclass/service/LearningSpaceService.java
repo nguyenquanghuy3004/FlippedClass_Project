@@ -6,4 +6,5 @@ import com.example.flippedclass.dto.LearningSpaceResponse;
 public interface LearningSpaceService {
     LearningSpaceResponse createLearningSpace(CreateLearningSpaceRequest request);
     void deleteLearningSpace(Long id);
+    void restoreLearningSpace(Long id);
 }

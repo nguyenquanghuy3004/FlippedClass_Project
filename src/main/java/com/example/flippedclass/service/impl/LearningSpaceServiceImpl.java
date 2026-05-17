@@ -80,7 +80,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         }
         return sb.toString();
     }
-
+// Delete learning Space
     @Override
     public void deleteLearningSpace(Long id){
 
@@ -92,10 +92,37 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         LearningSpace learningSpace = learningSpaceRepository.findByIdAndIsDeletedFalse(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learing space or đã bị xóa"));
 
         if(!learningSpace.getOwner().getUsername().equals(username)){
-            throw new IllegalArgumentException("Bạn khoooongg có quyền xóa");
+            throw new IllegalArgumentException("Bạn khoongg có quyền xóa");
 
         }
         learningSpace.setDeleted(true);
+        learningSpaceRepository.save(learningSpace);
+    }
+
+    // Restore learning Space
+    @Override
+    public void restoreLearningSpace(Long id){
+
+        // 1. Lấy thông tin user đang đăng nhập
+        Object mentor = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = (mentor instanceof UserDetails) ? ((UserDetails) mentor).getUsername() : mentor.toString();
+
+        // Tim lowp
+        LearningSpace learningSpace = learningSpaceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy learning space"));
+
+        // Kieernm tra xem ai là ng có thê restore
+        if(!learningSpace.getOwner().getUsername().equals(username)){
+            throw new IllegalArgumentException("Bạn không có quyền khôi phục learning space");
+        }
+
+        //Ktra lớp có thực sự bị xóa
+        if(!learningSpace.isDeleted()){
+            throw new IllegalArgumentException("Lớp đang hoạt động, không cần khôi phục !!!");
+        }
+
+        // Khôi phụcc
+        learningSpace.setDeleted(false);
         learningSpaceRepository.save(learningSpace);
     }
 }

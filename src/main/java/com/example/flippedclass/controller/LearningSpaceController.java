@@ -28,4 +28,11 @@ public class LearningSpaceController {
         learningSpaceService.deleteLearningSpace(id);
         return ResponseEntity.ok(new MessageResponse("Xóa thành công"));
     }
+
+    @PutMapping("/{id}/restore")
+    public ResponseEntity<?> restoreLearningSpace(@PathVariable Long id){
+        learningSpaceService.restoreLearningSpace(id);
+        return ResponseEntity.ok(new MessageResponse("Khôi phục thành công !!!"));
+
+    }
 }
