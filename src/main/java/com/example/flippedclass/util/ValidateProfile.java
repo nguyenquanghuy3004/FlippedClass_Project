@@ -2,13 +2,8 @@ package com.example.flippedclass.util;
 
 import com.example.flippedclass.dto.CompleteProfileRequest;
 
-public class Validate {
+public class ValidateProfile {
 
-    /**
-     * Kiểm tra định dạng cơ bản của hồ sơ sinh viên gửi lên.
-     * Nếu không hợp lệ sẽ ném ra IllegalArgumentException, 
-     * Spring Boot GlobalExceptionHandler sẽ tự động bắt lấy và trả về mã lỗi 400.
-     */
     public static void validateCompleteProfile(CompleteProfileRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Error: Request body must not be null!");

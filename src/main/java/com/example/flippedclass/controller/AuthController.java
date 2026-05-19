@@ -1,13 +1,8 @@
 package com.example.flippedclass.controller;
 
-import com.example.flippedclass.dto.LoginRequest;
-import com.example.flippedclass.dto.SignupRequest;
-import com.example.flippedclass.dto.JwtResponse;
-import com.example.flippedclass.dto.MessageResponse;
-import com.example.flippedclass.dto.TokenRequest;
-import com.example.flippedclass.dto.CompleteProfileRequest;
-import com.example.flippedclass.dto.GoogleJwtResponse;
+import com.example.flippedclass.dto.*;
 import com.example.flippedclass.entity.Role;
+import com.example.flippedclass.util.ValidateChangePass;
 import enums.RoleName;
 import enums.AuthProvider;
 import com.example.flippedclass.entity.User;
@@ -17,7 +12,7 @@ import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.repository.StudentProfileRepository;
 import com.example.flippedclass.security.jwt.JwtUtils;
 import com.example.flippedclass.service.UserDetailsImpl;
-import com.example.flippedclass.util.Validate;
+import com.example.flippedclass.util.ValidateProfile;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +41,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    @Autowired
+    ValidateChangePass validate;
+
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -214,7 +212,7 @@ public class AuthController {
 
     @PostMapping("/complete-profile")
     public ResponseEntity<?> completeProfile(@RequestBody CompleteProfileRequest request) {
-        Validate.validateCompleteProfile(request);
+        ValidateProfile.validateCompleteProfile(request);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -247,4 +245,39 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("Profile completed successfully!"));
     }
+
+    // Change password
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassWord(@RequestBody ChangePasswordRequest changePass) {
+        // Gọi validate dữ liệu thô từ component tự viết
+        validate.validatePassWord(changePass);
+
+        // Lấy thông tin tài khoản đang đăng nhập hiện tại từ Security Context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body(new MessageResponse("Error: Unauthorized!"));
+        }
+        String username = authentication.getName();
+
+        // Tìm tài khoản trong Database
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+
+        // Xác thực mật khẩu cũ bằng BCrypt Matches
+        if (!encoder.matches(changePass.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Error: Incorrect old password!");
+        }
+
+        // Kiểm tra tránh đổi mật khẩu mới trùng mật khẩu cũ
+        if (encoder.matches(changePass.getNewPassWord(), user.getPassword())) {
+            throw new IllegalArgumentException("Error: New password must be different from old password!");
+        }
+
+        // Mã hóa mật khẩu mới và lưu lại
+        user.setPassword(encoder.encode(changePass.getNewPassWord()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new MessageResponse("Password changed successfully!"));
+    }
+
 }
