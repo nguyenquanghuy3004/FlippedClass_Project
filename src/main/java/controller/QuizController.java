@@ -32,13 +32,13 @@ public class QuizController {
     }
 
     @PutMapping("/{id}")
-    public QuizResponse update(@PathVariable @Positive(message = "id must be a positive number") Long id,
-                          @Valid @RequestBody UpdateQuizRequest request) {
+    public QuizResponse update(@PathVariable("id") @Positive(message = "id must be a positive number") Long id,
+                               @Valid @RequestBody UpdateQuizRequest request) {
         return quizService.update(id, request);
     }
 
     @GetMapping("/{id}")
-    public QuizResponse getById(@PathVariable @Positive(message = "id must be a positive number") Long id) {
+    public QuizResponse getById(@PathVariable("id") @Positive(message = "id must be a positive number") Long id) {
         return quizService.getById(id);
     }
 
@@ -49,42 +49,42 @@ public class QuizController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable @Positive(message = "id must be a positive number") Long id) {
+    public void delete(@PathVariable("id") @Positive(message = "id must be a positive number") Long id) {
         quizService.delete(id);
     }
 
     @PostMapping("/{quizId}/questions")
     @ResponseStatus(HttpStatus.CREATED)
-    public QuizQuestionResponse addQuestion(@PathVariable @Positive(message = "quizId must be a positive number") Long quizId,
-                                       @Valid @RequestBody CreateQuizQuestionRequest request) {
+    public QuizQuestionResponse addQuestion(@PathVariable("quizId") @Positive(message = "quizId must be a positive number") Long quizId,
+                                            @Valid @RequestBody CreateQuizQuestionRequest request) {
         return quizService.addQuestion(quizId, request);
     }
 
     @GetMapping("/{quizId}/questions")
-    public List<QuizQuestionResponse> getQuestions(@PathVariable @Positive(message = "quizId must be a positive number") Long quizId) {
+    public List<QuizQuestionResponse> getQuestions(@PathVariable("quizId") @Positive(message = "quizId must be a positive number") Long quizId) {
         return quizService.getQuestions(quizId);
     }
 
     @DeleteMapping("/questions/{questionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteQuestion(@PathVariable @Positive(message = "questionId must be a positive number") Long questionId) {
+    public void deleteQuestion(@PathVariable("questionId") @Positive(message = "questionId must be a positive number") Long questionId) {
         quizService.deleteQuestion(questionId);
     }
 
     @PostMapping("/{quizId}/attempts")
     @ResponseStatus(HttpStatus.CREATED)
-    public QuizAttemptResponse submitAttempt(@PathVariable @Positive(message = "quizId must be a positive number") Long quizId,
-                                        @Valid @RequestBody SubmitQuizAttemptRequest request) {
+    public QuizAttemptResponse submitAttempt(@PathVariable("quizId") @Positive(message = "quizId must be a positive number") Long quizId,
+                                             @Valid @RequestBody SubmitQuizAttemptRequest request) {
         return quizService.submitAttempt(quizId, request);
     }
 
     @GetMapping("/{quizId}/attempts")
-    public List<QuizAttemptResponse> getAttempts(@PathVariable @Positive(message = "quizId must be a positive number") Long quizId) {
+    public List<QuizAttemptResponse> getAttempts(@PathVariable("quizId") @Positive(message = "quizId must be a positive number") Long quizId) {
         return quizService.getAttempts(quizId);
     }
 
     @GetMapping("/{quizId}/statistics")
-    public QuizStatisticsResponse getStatistics(@PathVariable @Positive(message = "quizId must be a positive number") Long quizId) {
+    public QuizStatisticsResponse getStatistics(@PathVariable("quizId") @Positive(message = "quizId must be a positive number") Long quizId) {
         return quizService.getStatistics(quizId);
     }
 }
