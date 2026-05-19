@@ -30,10 +30,18 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = true) // Hỗ trợ tài khoản Google không có mật khẩu
     private String password;
 
     private String fullName;
+
+    private String avatarUrl;
+
+    @Enumerated(EnumType.STRING)
+    private enums.AuthProvider provider;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private StudentProfile studentProfile;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(  name = "user_roles", 
