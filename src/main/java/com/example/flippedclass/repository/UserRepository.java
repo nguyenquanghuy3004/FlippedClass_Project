@@ -13,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
     long countByRolesName(enums.RoleName name);
+
+    Optional<User> findByResetPasswordToken(String resetPasswordToken);
 }

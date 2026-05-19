@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.time.LocalDateTime;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -48,4 +49,10 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"), 
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
+
+    // Mã token để khôi phục mật khẩu
+    private String resetPasswordToken;
+
+    // Thời gian hết hạn của token khôi phục (15 phút sau khi tạo)
+    private LocalDateTime resetPasswordTokenExpiry;
 }
