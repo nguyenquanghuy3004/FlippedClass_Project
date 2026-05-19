@@ -23,8 +23,8 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("[FlippedClass] Yêu Cầu Khôi Phục Mật Khẩu Tài Khoản");
 
-            // URL dẫn đến trang web Frontend đổi mật khẩu thực tế
-            String resetLink = "http://localhost:3000/reset-password?token=" + resetToken;
+            // URL dẫn đến trang web Frontend đổi mật khẩu thực tế (Sử dụng cổng 5173 mặc định của Vite)
+            String resetLink = "http://localhost:5173/reset-password?token=" + resetToken;
 
             // Giao diện email HTML siêu đẳng cấp doanh nghiệp
             String htmlContent = "<div style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e8ed; border-radius: 12px; background-color: #ffffff;\">"
