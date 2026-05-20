@@ -1,7 +1,7 @@
 package com.example.flippedclass.service;
 
-import com.example.flippedclass.dto.CreateLearningSpaceRequest;
-import com.example.flippedclass.dto.LearningSpaceResponse;
+import com.example.flippedclass.dto.req.CreateLearningSpaceRequest;
+import com.example.flippedclass.dto.res.LearningSpaceResponse;
 
 public interface LearningSpaceService {
     LearningSpaceResponse createLearningSpace(CreateLearningSpaceRequest request);

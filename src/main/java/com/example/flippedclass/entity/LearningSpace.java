@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import enums.LearningSpaceStatus;
 
 import java.time.LocalDateTime;
 
@@ -33,6 +34,7 @@ public class LearningSpace {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
     private String inviteCode;
 
@@ -40,8 +42,8 @@ public class LearningSpace {
     @Column(nullable = false)
     private VisibilityType visibility;
 
-    @Column(nullable = false)
-    private boolean isDeleted = false;
+//    @Column(nullable = false)
+//    private boolean isDeleted = false;
 
     @CreationTimestamp
     @Column(updatable = false)

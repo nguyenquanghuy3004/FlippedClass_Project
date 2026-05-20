@@ -1,9 +1,10 @@
 package com.example.flippedclass.service.impl;
 
-import com.example.flippedclass.dto.CreateLearningSpaceRequest;
-import com.example.flippedclass.dto.LearningSpaceResponse;
+import com.example.flippedclass.dto.req.CreateLearningSpaceRequest;
+import com.example.flippedclass.dto.res.LearningSpaceResponse;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.entity.User;
+import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.LearningSpaceRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.LearningSpaceService;
@@ -12,13 +13,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 public class LearningSpaceServiceImpl implements LearningSpaceService {
 
     @Autowired
     private LearningSpaceRepository learningSpaceRepository;
+
+    @Autowired
+    private LearningSpaceMemberRepository memberRepository;
 
     @Autowired
     private UserRepository userRepository;

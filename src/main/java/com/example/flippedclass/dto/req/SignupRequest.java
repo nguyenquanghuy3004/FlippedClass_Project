@@ -1,4 +1,4 @@
-package com.example.flippedclass.dto;
+package com.example.flippedclass.dto.req;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

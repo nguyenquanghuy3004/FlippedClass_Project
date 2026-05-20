@@ -1,6 +1,6 @@
 package com.example.flippedclass.util;
 
-import com.example.flippedclass.dto.CompleteProfileRequest;
+import com.example.flippedclass.dto.req.CompleteProfileRequest;
 
 public class ValidateProfile {
 

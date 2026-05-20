@@ -1,4 +1,4 @@
-package com.example.flippedclass.dto;
+package com.example.flippedclass.dto.req;
 
 import enums.VisibilityType;
 import jakarta.validation.constraints.NotNull;

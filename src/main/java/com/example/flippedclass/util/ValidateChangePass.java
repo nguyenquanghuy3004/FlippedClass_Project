@@ -1,5 +1,5 @@
 package com.example.flippedclass.util;
-import com.example.flippedclass.dto.ChangePasswordRequest;
+import com.example.flippedclass.dto.req.ChangePasswordRequest;
 import org.springframework.stereotype.Component;
 @Component
 public class ValidateChangePass {

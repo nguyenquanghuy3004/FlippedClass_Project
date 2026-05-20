@@ -1,6 +1,6 @@
 package com.example.flippedclass.util;
 
-import com.example.flippedclass.dto.ResetPasswordRequest;
+import com.example.flippedclass.dto.req.ResetPasswordRequest;
 import org.springframework.stereotype.Component;
 
 @Component // Kích hoạt Spring Bean để có thể @Autowired

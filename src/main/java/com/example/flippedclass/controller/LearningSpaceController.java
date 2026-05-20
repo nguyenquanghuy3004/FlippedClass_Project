@@ -1,8 +1,8 @@
 package com.example.flippedclass.controller;
 
-import com.example.flippedclass.dto.CreateLearningSpaceRequest;
-import com.example.flippedclass.dto.LearningSpaceResponse;
-import com.example.flippedclass.dto.MessageResponse;
+import com.example.flippedclass.dto.req.CreateLearningSpaceRequest;
+import com.example.flippedclass.dto.res.LearningSpaceResponse;
+import com.example.flippedclass.dto.res.MessageResponse;
 import com.example.flippedclass.service.LearningSpaceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,4 +35,6 @@ public class LearningSpaceController {
         return ResponseEntity.ok(new MessageResponse("Khôi phục thành công !!!"));
 
     }
+    @PostMapping
+    public ResponseEntity<?> generateInviteCode(@PathVariable )
 }

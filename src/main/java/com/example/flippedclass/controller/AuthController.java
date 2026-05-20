@@ -1,6 +1,9 @@
 package com.example.flippedclass.controller;
 
-import com.example.flippedclass.dto.*;
+import com.example.flippedclass.dto.req.*;
+import com.example.flippedclass.dto.res.GoogleJwtResponse;
+import com.example.flippedclass.dto.res.JwtResponse;
+import com.example.flippedclass.dto.res.MessageResponse;
 import com.example.flippedclass.entity.Role;
 import com.example.flippedclass.service.EmailService;
 import com.example.flippedclass.util.ValidateChangePass;
