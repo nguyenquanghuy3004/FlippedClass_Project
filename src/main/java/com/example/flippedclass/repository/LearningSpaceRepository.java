@@ -1,6 +1,7 @@
 package com.example.flippedclass.repository;
 
 import com.example.flippedclass.entity.LearningSpace;
+import enums.LearningSpaceStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +14,11 @@ public interface LearningSpaceRepository extends JpaRepository<LearningSpace, Lo
 
     boolean existsByInviteCode(String inviteCode);
 
-    Optional<LearningSpace> findByIdAndIsDeletedFalse(Long id);
+    Optional<LearningSpace> findByInviteCode(String inviteCode);
 
-    Page<LearningSpace> findByIsDeletedFalse(Pageable pageable);
+    Optional<LearningSpace> findByInviteCodeAndStatus(String inviteCode, LearningSpaceStatus status);
+
+    Optional<LearningSpace> findByIdAndStatus(Long id, LearningSpaceStatus status);
+
+    Page<LearningSpace> findByStatus(LearningSpaceStatus status, Pageable pageable);
 }
