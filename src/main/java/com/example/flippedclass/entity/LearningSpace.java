@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.UpdateTimestamp;
 import enums.LearningSpaceStatus;
 
@@ -24,10 +25,12 @@ public class LearningSpace {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Nationalized
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
