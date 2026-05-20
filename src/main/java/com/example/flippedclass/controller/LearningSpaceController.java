@@ -7,6 +7,7 @@ import com.example.flippedclass.dto.res.LearningSpaceResponse;
 import com.example.flippedclass.dto.res.MessageResponse;
 import com.example.flippedclass.service.LearningSpaceService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,33 +16,30 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/learning-spaces")
 public class LearningSpaceController {
 
-    private final LearningSpaceService learningSpaceService;
-
-    public LearningSpaceController(LearningSpaceService learningSpaceService) {
-        this.learningSpaceService = learningSpaceService;
-    }
+    @Autowired
+    private LearningSpaceService learningSpaceService;
 
     @PostMapping
-    public ResponseEntity<LearningSpaceResponse> createLearningSpace(
-            @Valid @RequestBody CreateLearningSpaceRequest request) {
-        return ResponseEntity.ok(learningSpaceService.createLearningSpace(request));
-    }
-
-    @PostMapping("/join")
-    public ResponseEntity<JoinLearningSpaceResponse> joinLearningSpace(
-            @RequestBody JoinLearningSpaceRequest request) {
-        return ResponseEntity.ok(learningSpaceService.joinLearningSpace(request));
+    public ResponseEntity<LearningSpaceResponse> createLearningSpace(@Valid @RequestBody CreateLearningSpaceRequest request) {
+        LearningSpaceResponse response = learningSpaceService.createLearningSpace(request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<MessageResponse> deleteLearningSpace(@PathVariable Long id) {
+    public ResponseEntity<?> deleteLearningSpace (@PathVariable Long id){
         learningSpaceService.deleteLearningSpace(id);
         return ResponseEntity.ok(new MessageResponse("Xóa thành công"));
     }
 
     @PutMapping("/{id}/restore")
-    public ResponseEntity<MessageResponse> restoreLearningSpace(@PathVariable Long id) {
+    public ResponseEntity<?> restoreLearningSpace(@PathVariable Long id){
         learningSpaceService.restoreLearningSpace(id);
-        return ResponseEntity.ok(new MessageResponse("Khôi phục thành công"));
+        return ResponseEntity.ok(new MessageResponse("Khôi phục thành công !!!"));
+
+    }
+
+    @PostMapping("/join")
+    public ResponseEntity<JoinLearningSpaceResponse>joinLearningSpace(@RequestBody JoinLearningSpaceRequest request){
+        return ResponseEntity.ok(learningSpaceService.joinLearningSpace(request));
     }
 }

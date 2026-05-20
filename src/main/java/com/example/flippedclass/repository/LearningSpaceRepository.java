@@ -14,11 +14,16 @@ public interface LearningSpaceRepository extends JpaRepository<LearningSpace, Lo
 
     boolean existsByInviteCode(String inviteCode);
 
+//    Optional<LearningSpace> findByIdAndIsDeletedFalse(Long id);
+
+//    Page<LearningSpace> findByIsDeletedFalse(Pageable pageable);
+
+
     Optional<LearningSpace> findByInviteCode(String inviteCode);
 
     Optional<LearningSpace> findByInviteCodeAndStatus(String inviteCode, LearningSpaceStatus status);
 
     Optional<LearningSpace> findByIdAndStatus(Long id, LearningSpaceStatus status);
 
-    Page<LearningSpace> findByStatus(LearningSpaceStatus status, Pageable pageable);
+   Page<LearningSpace> findByStatus(LearningSpaceStatus status, Pageable pageable);
 }

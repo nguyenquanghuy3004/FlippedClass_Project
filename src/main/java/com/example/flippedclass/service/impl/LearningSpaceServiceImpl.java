@@ -10,59 +10,75 @@ import com.example.flippedclass.entity.User;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.LearningSpaceRepository;
 import com.example.flippedclass.repository.UserRepository;
-import com.example.flippedclass.service.InviteCodeGenerator;
 import com.example.flippedclass.service.LearningSpaceService;
+import com.example.flippedclass.service.InviteCodeGenerator;
 import com.example.flippedclass.util.ValidateJoinLearningSpace;
 import enums.LearningSpaceStatus;
 import enums.MemberRole;
 import enums.MemberStatus;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LearningSpaceServiceImpl implements LearningSpaceService {
 
-    private final LearningSpaceRepository learningSpaceRepository;
-    private final LearningSpaceMemberRepository memberRepository;
-    private final UserRepository userRepository;
-    private final InviteCodeGenerator inviteCodeGenerator;
-    private final ValidateJoinLearningSpace validateJoinLearningSpace;
+    @Autowired
+    private LearningSpaceRepository learningSpaceRepository;
 
-    public LearningSpaceServiceImpl(
-            LearningSpaceRepository learningSpaceRepository,
-            LearningSpaceMemberRepository memberRepository,
-            UserRepository userRepository,
-            InviteCodeGenerator inviteCodeGenerator,
-            ValidateJoinLearningSpace validateJoinLearningSpace) {
-        this.learningSpaceRepository = learningSpaceRepository;
-        this.memberRepository = memberRepository;
-        this.userRepository = userRepository;
-        this.inviteCodeGenerator = inviteCodeGenerator;
-        this.validateJoinLearningSpace = validateJoinLearningSpace;
+    @Autowired
+    private LearningSpaceMemberRepository memberRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private InviteCodeGenerator inviteCodeGenerator;
+
+    @Autowired
+    private ValidateJoinLearningSpace validateJoinLearningSpace;
+
+    // -------------------PRIVATE HELPERS =================
+    private User getCurrentUser() {
+        return userRepository.findByUsername(getCurrentUsername())
+                .orElseThrow(() -> new IllegalArgumentException("User không tìm thấy"));
     }
 
+    private String getCurrentUsername() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails userDetails) {
+            return userDetails.getUsername();
+        }
+        return principal.toString();
+    }
+
+    // ------------------- create -------------------
     @Override
-    @Transactional
     public LearningSpaceResponse createLearningSpace(CreateLearningSpaceRequest request) {
+        // Manual validation for name
         if (request.getName() == null || request.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Tên Learning Space không được để trống");
         }
 
+        // Get current loggedin user
         User owner = getCurrentUser();
+
+
+        // Create Entity and save
         String inviteCode = inviteCodeGenerator.generateUniqueInviteCode();
 
         LearningSpace learningSpace = new LearningSpace();
-        learningSpace.setName(request.getName().trim());
+        learningSpace.setName(request.getName());
         learningSpace.setDescription(request.getDescription());
         learningSpace.setVisibility(request.getVisibility());
         learningSpace.setOwner(owner);
         learningSpace.setInviteCode(inviteCode);
-        learningSpace.setStatus(LearningSpaceStatus.ACTIVE);
-
+        
         LearningSpace savedSpace = learningSpaceRepository.save(learningSpace);
 
+        // tạo luôn OWNER trong bảng member (không bắt buộc spec join, nhưng nên có)
         LearningSpaceMember ownerMember = new LearningSpaceMember();
         ownerMember.setLearningSpace(savedSpace);
         ownerMember.setUser(owner);
@@ -70,6 +86,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         ownerMember.setStatus(MemberStatus.ACTIVE);
         memberRepository.save(ownerMember);
 
+        // Return Response DTO
         return LearningSpaceResponse.builder()
                 .id(savedSpace.getId())
                 .name(savedSpace.getName())
@@ -85,46 +102,50 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Override
     @Transactional
     public JoinLearningSpaceResponse joinLearningSpace(JoinLearningSpaceRequest request) {
+        // Validate request
         validateJoinLearningSpace.validate(request);
 
+        // Find learning space by active status and invite code
+        LearningSpace learningSpace = learningSpaceRepository.findByInviteCodeAndStatus(request.getInviteCode(), LearningSpaceStatus.ACTIVE)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lớp học với mã mời này hoặc lớp đã bị xóa"));
+
+        // Get current user
         User currentUser = getCurrentUser();
-        String normalizedCode = inviteCodeGenerator.normalize(request.getInviteCode());
 
-        LearningSpace space = learningSpaceRepository.findByInviteCode(normalizedCode)
-                .orElseThrow(() -> new IllegalArgumentException("Mã mời không hợp lệ"));
-
-        if (space.getStatus() == LearningSpaceStatus.ARCHIVE) {
-            throw new IllegalArgumentException("Lớp đã được lưu trữ, không thể tham gia");
-        }
-        if (space.getStatus() == LearningSpaceStatus.DELETE) {
-            throw new IllegalArgumentException("Lớp đã bị xóa, không thể tham gia");
-        }
-        if (space.getStatus() != LearningSpaceStatus.ACTIVE) {
-            throw new IllegalArgumentException("Lớp không khả dụng để tham gia");
+        // Check if user is already a member
+        if (memberRepository.existsByLearningSpaceAndUser(learningSpace, currentUser)) {
+            throw new IllegalArgumentException("Bạn đã tham gia lớp học này rồi");
         }
 
-        if (space.getOwner().getId().equals(currentUser.getId())) {
-            throw new IllegalArgumentException("Bạn là chủ sở hữu lớp này, không cần tham gia bằng mã mời");
-        }
-
-        if (memberRepository.existsByLearningSpaceAndUser(space, currentUser)) {
-            throw new IllegalArgumentException("Bạn đã tham gia lớp này rồi");
-        }
-
+        // Add user as a member
         LearningSpaceMember member = new LearningSpaceMember();
-        member.setLearningSpace(space);
+        member.setLearningSpace(learningSpace);
         member.setUser(currentUser);
         member.setRole(MemberRole.MEMBER);
         member.setStatus(MemberStatus.ACTIVE);
         memberRepository.save(member);
 
+        // Return Response
         JoinLearningSpaceResponse response = new JoinLearningSpaceResponse();
-        response.setMessage("Tham gia lớp học thành công");
-        response.setLearningSpaceId(space.getId());
-        response.setLearningSpaceName(space.getName());
+        response.setMessage("Tham gia lớp học thành công!");
+        response.setLearningSpaceId(learningSpace.getId());
+        response.setLearningSpaceName(learningSpace.getName());
         response.setRole(MemberRole.MEMBER);
         return response;
     }
+
+    private String generateRandomString(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * chars.length());
+            sb.append(chars.charAt(index));
+        }
+        return sb.toString();
+    }
+
+
+// Delete learning Space
 
     @Override
     @Transactional
@@ -141,6 +162,8 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         learningSpaceRepository.save(learningSpace);
     }
 
+
+    // Restore learning Space
     @Override
     @Transactional
     public void restoreLearningSpace(Long id) {
@@ -160,16 +183,5 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         learningSpaceRepository.save(learningSpace);
     }
 
-    private User getCurrentUser() {
-        return userRepository.findByUsername(getCurrentUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User không tìm thấy"));
-    }
 
-    private String getCurrentUsername() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails userDetails) {
-            return userDetails.getUsername();
-        }
-        return principal.toString();
-    }
 }

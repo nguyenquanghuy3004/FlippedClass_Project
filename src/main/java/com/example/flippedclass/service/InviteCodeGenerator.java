@@ -1,32 +1,32 @@
 package com.example.flippedclass.service;
 
 import com.example.flippedclass.repository.LearningSpaceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-
 @Service
 public class InviteCodeGenerator {
+    private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int CODE_LEGHT = 8;
 
-    private final String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private final int codeLength = 8;
     private final SecureRandom random = new SecureRandom();
-    private final LearningSpaceRepository learningSpaceRepository;
 
-    public InviteCodeGenerator(LearningSpaceRepository learningSpaceRepository) {
-        this.learningSpaceRepository = learningSpaceRepository;
-    }
+   @Autowired
+    LearningSpaceRepository learningSpaceRepository;
 
-    public String generateInviteCode() {
-        StringBuilder sb = new StringBuilder(codeLength);
-        for (int i = 0; i < codeLength; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
+   // generate random invite code
+    public String generateInviteCode(){
+        StringBuilder sb = new StringBuilder(CODE_LEGHT);
+        for (int i = 0; i < CODE_LEGHT ; i++){
+            sb.append(CHARS.charAt(random.nextInt(CHARS.length())));
         }
         return sb.toString();
     }
 
-    public String normalize(String inviteCode) {
-        return inviteCode == null ? "" : inviteCode.trim().toUpperCase();
+    // chuẩn hóa mã User nhập khi join
+    public String normallize(String inviteCode){
+        return inviteCode == null ? "" : inviteCode.trim().toLowerCase();
     }
 
     public String generateUniqueInviteCode() {
@@ -35,5 +35,6 @@ public class InviteCodeGenerator {
             inviteCode = generateInviteCode();
         } while (learningSpaceRepository.existsByInviteCode(inviteCode));
         return inviteCode;
+
     }
 }
