@@ -5,9 +5,7 @@ import com.example.flippedclass.dto.res.GoogleJwtResponse;
 import com.example.flippedclass.dto.res.JwtResponse;
 import com.example.flippedclass.dto.res.MessageResponse;
 import com.example.flippedclass.entity.Role;
-import com.example.flippedclass.service.EmailService;
 import com.example.flippedclass.util.ValidateChangePass;
-import com.example.flippedclass.util.ValidateResetPass;
 import enums.RoleName;
 import enums.AuthProvider;
 import com.example.flippedclass.entity.User;
@@ -46,12 +44,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    private ValidateResetPass validateResetPass;
 
-
-    @Autowired
-    private EmailService emailService;
 
     @Autowired
     ValidateChangePass validate;
@@ -290,50 +283,6 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("Password changed successfully!"));
-    }
-
-    // 1. API Yêu cầu Khôi phục mật khẩu (Forgot Password)
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Email must not be blank!"));
-        }
-        // Tìm User theo Email
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email address not found."));
-        // Sinh ra Token ngẫu nhiên và đặt thời gian hết hạn là 15 phút sau
-        String token = java.util.UUID.randomUUID().toString();
-        user.setResetPasswordToken(token);
-        user.setResetPasswordTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15));
-        userRepository.save(user);
-
-        // Kích hoạt gửi Email HTML chạy ngầm Background dưới nền
-        emailService.sendResetPasswordEmail(user.getEmail(), token);
-
-        // Trả về thông báo thành công cho FE lập tức (dưới 0.1 giây)
-        return ResponseEntity.ok(new MessageResponse("Reset password link has been sent to your email successfully!"));
-    }
-
-
-    // 2. API Thực hiện Khôi phục mật khẩu (Reset Password)
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
-        validateResetPass.validateResetPassword(request);
-
-        User user = userRepository.findByResetPasswordToken(request.getToken())
-                .orElseThrow(() -> new RuntimeException("Invalid or expired reset token."));
-        // Kiểm tra thời gian hết hạn của token
-        if (user.getResetPasswordTokenExpiry().isBefore(java.time.LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Reset token has expired!"));
-        }
-        // Mã hóa mật khẩu mới và lưu lại
-        user.setPassword(encoder.encode(request.getNewPassword()));
-
-        // Xóa trắng token cũ đi để bảo mật
-        user.setResetPasswordToken(null);
-        user.setResetPasswordTokenExpiry(null);
-        userRepository.save(user);
-        return ResponseEntity.ok(new MessageResponse("Password reset successfully!"));
     }
 
 }

@@ -50,9 +50,4 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    // Mã token để khôi phục mật khẩu
-    private String resetPasswordToken;
-
-    // Thời gian hết hạn của token khôi phục (15 phút sau khi tạo)
-    private LocalDateTime resetPasswordTokenExpiry;
 }
