@@ -35,7 +35,6 @@ public class LearningSpaceController {
     public ResponseEntity<?> restoreLearningSpace(@PathVariable Long id){
         learningSpaceService.restoreLearningSpace(id);
         return ResponseEntity.ok(new MessageResponse("Khôi phục thành công "));
-
     }
 
     @PostMapping("/join")
