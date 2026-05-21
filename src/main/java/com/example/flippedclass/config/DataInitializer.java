@@ -49,7 +49,7 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    //Phương thức khởi tạo tài khoản Giảng viên kiêm Admin hệ thống (Superuser)
+    //Phương thức khởi tạo tài khoản Giảng viên kiêm Admin hệ thống
 
     private void seedSuperUser(String email, String username, String fullName, String password) {
         // Chỉ tạo tài khoản khi email này chưa tồn tại trong cơ sở dữ liệu
