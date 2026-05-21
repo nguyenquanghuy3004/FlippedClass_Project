@@ -9,7 +9,6 @@ public class ValidateChangePass {
             throw new IllegalArgumentException("Request body must not be null");
         }
 
-
         if (request.getOldPassword() == null || request.getOldPassword().trim().isEmpty()) {
             throw new IllegalArgumentException("Old password must not be blank");
         }

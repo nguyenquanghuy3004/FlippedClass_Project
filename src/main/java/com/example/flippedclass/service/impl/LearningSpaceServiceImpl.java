@@ -65,7 +65,6 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         // Get current loggedin user
         User owner = getCurrentUser();
 
-
         // Create Entity and save
         String inviteCode = inviteCodeGenerator.generateUniqueInviteCode();
 

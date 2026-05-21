@@ -1,6 +1,6 @@
 package com.example.flippedclass.security.jwt;
 
-import com.example.flippedclass.service.UserDetailsImpl;
+import com.example.flippedclass.service.impl.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

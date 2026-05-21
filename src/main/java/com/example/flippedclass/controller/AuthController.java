@@ -16,7 +16,7 @@ import com.example.flippedclass.repository.RoleRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.repository.StudentProfileRepository;
 import com.example.flippedclass.security.jwt.JwtUtils;
-import com.example.flippedclass.service.UserDetailsImpl;
+import com.example.flippedclass.service.impl.UserDetailsImpl;
 import com.example.flippedclass.util.ValidateProfile;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,13 +103,13 @@ public class AuthController {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+                    .body(new MessageResponse("Username is already taken!"));
         }
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+                    .body(new MessageResponse("Email is already in use!"));
         }
 
         // Tạo tài khoản mới
@@ -155,7 +155,7 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody TokenRequest tokenRequest) {
         if (tokenRequest == null || tokenRequest.getIdTokenString() == null || tokenRequest.getIdTokenString().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Google Token (idTokenString) must not be blank!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Google Token (idTokenString) must not be blank!"));
         }
 
         try {
@@ -165,7 +165,7 @@ public class AuthController {
 
             GoogleIdToken idToken = verifier.verify(tokenRequest.getIdTokenString());
             if (idToken == null) {
-                return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid Google Token!"));
+                return ResponseEntity.badRequest().body(new MessageResponse("Invalid Google Token!"));
             }
 
             GoogleIdToken.Payload payload = idToken.getPayload();
@@ -185,7 +185,7 @@ public class AuthController {
 
                 // Mặc định cho đăng ký Google là ROLE_STUDENT
                 Role studentRole = roleRepository.findByName(RoleName.STUDENT)
-                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        .orElseThrow(() -> new RuntimeException("Role is not found."));
                 user.setRoles(new HashSet<>(Collections.singletonList(studentRole)));
 
                 user = userRepository.save(user);
@@ -228,21 +228,21 @@ public class AuthController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).body(new MessageResponse("Error: Unauthorized!"));
+            return ResponseEntity.status(401).body(new MessageResponse("Unauthorized!"));
         }
 
         String username = authentication.getName();
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+                .orElseThrow(() -> new RuntimeException("User not found."));
 
         // Kiểm tra xem đã có profile chưa
         if (user.getStudentProfile() != null) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Student Profile is already complete!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Student Profile is already complete!"));
         }
 
         // Kiểm tra xem MSSV có bị trùng lặp không
         if (studentProfileRepository.existsByStudentCode(request.getStudentCode())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Student Code (MSSV) is already taken!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Student Code (MSSV) is already taken!"));
         }
 
         // Tạo profile mới
@@ -267,22 +267,22 @@ public class AuthController {
         // Lấy thông tin tài khoản đang đăng nhập hiện tại từ Security Context
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).body(new MessageResponse("Error: Unauthorized!"));
+            return ResponseEntity.status(401).body(new MessageResponse("Unauthorized!"));
         }
         String username = authentication.getName();
 
         // Tìm tài khoản trong Database
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+                .orElseThrow(() -> new RuntimeException("User not found."));
 
         // Xác thực mật khẩu cũ bằng BCrypt Matches
         if (!encoder.matches(changePass.getOldPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Error: Incorrect old password!");
+            throw new IllegalArgumentException("Incorrect old password!");
         }
 
         // Kiểm tra tránh đổi mật khẩu mới trùng mật khẩu cũ
         if (encoder.matches(changePass.getNewPassWord(), user.getPassword())) {
-            throw new IllegalArgumentException("Error: New password must be different from old password!");
+            throw new IllegalArgumentException("New password must be different from old password!");
         }
 
         // Mã hóa mật khẩu mới và lưu lại
@@ -296,18 +296,20 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email must not be blank!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Email must not be blank!"));
         }
         // Tìm User theo Email
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Error: Email address not found."));
+                .orElseThrow(() -> new RuntimeException("Email address not found."));
         // Sinh ra Token ngẫu nhiên và đặt thời gian hết hạn là 15 phút sau
         String token = java.util.UUID.randomUUID().toString();
         user.setResetPasswordToken(token);
         user.setResetPasswordTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15));
         userRepository.save(user);
+
         // Kích hoạt gửi Email HTML chạy ngầm Background dưới nền
         emailService.sendResetPasswordEmail(user.getEmail(), token);
+
         // Trả về thông báo thành công cho FE lập tức (dưới 0.1 giây)
         return ResponseEntity.ok(new MessageResponse("Reset password link has been sent to your email successfully!"));
     }

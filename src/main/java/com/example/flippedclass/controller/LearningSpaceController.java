@@ -34,7 +34,7 @@ public class LearningSpaceController {
     @PutMapping("/{id}/restore")
     public ResponseEntity<?> restoreLearningSpace(@PathVariable Long id){
         learningSpaceService.restoreLearningSpace(id);
-        return ResponseEntity.ok(new MessageResponse("Khôi phục thành công !!!"));
+        return ResponseEntity.ok(new MessageResponse("Khôi phục thành công "));
 
     }
 
