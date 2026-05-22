@@ -98,6 +98,28 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
                 .build();
     }
 
+    // update -------------------------
+    @Transactional
+    @Override
+    public LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail){
+        LearningSpace space = learningSpaceRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy Learning Space hoặc đã bị xóa"));
+
+
+        String username = getCurrentUsername(); // check Auth
+        if (!space.getOwner().getUsername().equals(username)) {
+            throw new IllegalArgumentException("Bạn không có quyền cập nhật Learning Space này");
+        }
+
+
+        space.setName(spaceDetail.getName());
+        space.setDescription(spaceDetail.getDescription());
+        space.setVisibility(spaceDetail.getVisibility());
+        return learningSpaceRepository.save(space);
+    }
+
+
+
+
     @Override
     @Transactional
     public JoinLearningSpaceResponse joinLearningSpace(JoinLearningSpaceRequest request) {

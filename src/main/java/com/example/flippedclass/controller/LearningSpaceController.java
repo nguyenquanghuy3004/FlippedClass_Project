@@ -5,6 +5,7 @@ import com.example.flippedclass.dto.req.JoinLearningSpaceRequest;
 import com.example.flippedclass.dto.res.JoinLearningSpaceResponse;
 import com.example.flippedclass.dto.res.LearningSpaceResponse;
 import com.example.flippedclass.dto.res.MessageResponse;
+import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.service.LearningSpaceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class LearningSpaceController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteLearningSpace (@PathVariable Long id){
         learningSpaceService.deleteLearningSpace(id);
         return ResponseEntity.ok(new MessageResponse("Xóa thành công"));
@@ -40,5 +41,12 @@ public class LearningSpaceController {
     @PostMapping("/join")
     public ResponseEntity<JoinLearningSpaceResponse>joinLearningSpace(@RequestBody JoinLearningSpaceRequest request){
         return ResponseEntity.ok(learningSpaceService.joinLearningSpace(request));
+    }
+
+    @PutMapping("/{id}/update")
+    public ResponseEntity<?> updateLearingSpace(@PathVariable Long id, @RequestBody LearningSpace spaceDetail){
+         LearningSpace update =  learningSpaceService.updateLearningSpace(id, spaceDetail);
+            return ResponseEntity.ok(update);
+
     }
 }

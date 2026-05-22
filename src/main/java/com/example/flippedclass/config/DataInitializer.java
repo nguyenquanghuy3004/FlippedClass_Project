@@ -33,7 +33,8 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 1. Khởi tạo các Role nếu chưa tồn tại
+
+        // Khởi tạo các Role nếu chưa tồn tại
         for (RoleName roleName : RoleName.values()) {
             if (roleRepository.findByName(roleName).isEmpty()) {
                 Role role = new Role();
@@ -42,8 +43,7 @@ public class DataInitializer implements CommandLineRunner {
             }
         }
 
-        // 2. Khởi tạo duy nhất 1 tài khoản Giảng viên kiêm Quản trị viên (Superuser) nếu chưa có Mentor nào
-        // Đây là mô hình chạy cho cá nhân giảng viên tự vận hành (Model B). Giảng viên nắm giữ cả 2 quyền tối cao.
+
         if (userRepository.countByRolesName(RoleName.MENTOR) == 0) {
             seedSuperUser("giangvien@fpt.edu.vn", "giangvien", "Thay Nguyen Van A", initialPassword);
         }

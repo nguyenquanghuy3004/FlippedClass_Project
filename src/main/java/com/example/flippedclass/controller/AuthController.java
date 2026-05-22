@@ -197,7 +197,7 @@ public class AuthController {
                     .map(role -> role.getName().name())
                     .collect(Collectors.toList());
 
-            // Check xem đã hoàn thành profile (có StudentProfile) chưa
+            // Check xem da hoafn thanh profile (có StudentProfile)
             boolean isProfileComplete = (user.getStudentProfile() != null);
 
             return ResponseEntity.ok(new GoogleJwtResponse(
@@ -228,17 +228,17 @@ public class AuthController {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found."));
 
-        // Kiểm tra xem đã có profile chưa
+        // ktra đã có profile chưa
         if (user.getStudentProfile() != null) {
             return ResponseEntity.badRequest().body(new MessageResponse("Student Profile is already complete!"));
         }
 
-        // Kiểm tra xem MSSV có bị trùng lặp không
+        //ktra MSSV có bị trùng lặp không
         if (studentProfileRepository.existsByStudentCode(request.getStudentCode())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Student Code (MSSV) is already taken!"));
         }
 
-        // Tạo profile mới
+        // tạo profile mới
         StudentProfile profile = new StudentProfile();
         profile.setUser(user);
         profile.setStudentCode(request.getStudentCode());
@@ -251,34 +251,34 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("Profile completed successfully!"));
     }
 
-    // Change password
+    // change password
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassWord(@RequestBody ChangePasswordRequest changePass) {
         // Gọi validate dữ liệu thô từ component tự viết
         validate.validatePassWord(changePass);
 
-        // Lấy thông tin tài khoản đang đăng nhập hiện tại từ Security Context
+   // lay thog tin tai khoan dang nhap
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body(new MessageResponse("Unauthorized!"));
         }
         String username = authentication.getName();
 
-        // Tìm tài khoản trong Database
+        // tim tk trong DB
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found."));
 
-        // Xác thực mật khẩu cũ bằng BCrypt Matches
+        // xac thuc mat khau BCrypt Matches
         if (!encoder.matches(changePass.getOldPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Incorrect old password!");
         }
 
-        // Kiểm tra tránh đổi mật khẩu mới trùng mật khẩu cũ
+        // check mat khau moi trach trung voi cu
         if (encoder.matches(changePass.getNewPassWord(), user.getPassword())) {
             throw new IllegalArgumentException("New password must be different from old password!");
         }
 
-        // Mã hóa mật khẩu mới và lưu lại
+        // ma hoa vaf luu
         user.setPassword(encoder.encode(changePass.getNewPassWord()));
         userRepository.save(user);
 

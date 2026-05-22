@@ -15,7 +15,7 @@ public class InviteCodeGenerator {
    @Autowired
     LearningSpaceRepository learningSpaceRepository;
 
-   // generate random invite code
+   // random ivitecode
     public String generateInviteCode(){
         StringBuilder sb = new StringBuilder(CODE_LEGHT);
         for (int i = 0; i < CODE_LEGHT ; i++){
