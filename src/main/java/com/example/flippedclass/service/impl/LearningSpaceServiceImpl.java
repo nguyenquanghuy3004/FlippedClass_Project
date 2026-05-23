@@ -54,6 +54,13 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         return principal.toString();
     }
 
+    // Kiểm tra user hiện tại có phải ADMIN không — ADMIN bypass mọi kiểm tra owner
+    private boolean isCurrentUserAdmin() {
+        return SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
     // ------------------- create -------------------
     @Override
     public LearningSpaceResponse createLearningSpace(CreateLearningSpaceRequest request) {
@@ -104,12 +111,13 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     public LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail){
         LearningSpace space = learningSpaceRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy Learning Space hoặc đã bị xóa"));
 
-
-        String username = getCurrentUsername(); // check Auth
-        if (!space.getOwner().getUsername().equals(username)) {
-            throw new IllegalArgumentException("Bạn không có quyền cập nhật Learning Space này");
+        // ADMIN bypass kiểm tra owner
+        if (!isCurrentUserAdmin()) {
+            String username = getCurrentUsername();
+            if (!space.getOwner().getUsername().equals(username)) {
+                throw new IllegalArgumentException("Bạn không có quyền cập nhật Learning Space này");
+            }
         }
-
 
         space.setName(spaceDetail.getName());
         space.setDescription(spaceDetail.getDescription());
@@ -171,14 +179,18 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Override
     @Transactional
     public void deleteLearningSpace(Long id) {
-        String username = getCurrentUsername();
         LearningSpace learningSpace = learningSpaceRepository
                 .findByIdAndStatus(id, LearningSpaceStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning Space hoặc đã bị xóa"));
 
-        if (!learningSpace.getOwner().getUsername().equals(username)) {
-            throw new IllegalArgumentException("Bạn không có quyền xóa");
+        // ADMIN bypass kiểm tra owner
+        if (!isCurrentUserAdmin()) {
+            String username = getCurrentUsername();
+            if (!learningSpace.getOwner().getUsername().equals(username)) {
+                throw new IllegalArgumentException("Bạn không có quyền xóa");
+            }
         }
+
         learningSpace.setStatus(LearningSpaceStatus.DELETE);
         learningSpaceRepository.save(learningSpace);
     }
@@ -188,12 +200,15 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Override
     @Transactional
     public void restoreLearningSpace(Long id) {
-        String username = getCurrentUsername();
         LearningSpace learningSpace = learningSpaceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy learning space"));
 
-        if (!learningSpace.getOwner().getUsername().equals(username)) {
-            throw new IllegalArgumentException("Bạn không có quyền khôi phục learning space");
+        // ADMIN bypass kiểm tra owner
+        if (!isCurrentUserAdmin()) {
+            String username = getCurrentUsername();
+            if (!learningSpace.getOwner().getUsername().equals(username)) {
+                throw new IllegalArgumentException("Bạn không có quyền khôi phục learning space");
+            }
         }
 
         if (learningSpace.getStatus() != LearningSpaceStatus.DELETE) {

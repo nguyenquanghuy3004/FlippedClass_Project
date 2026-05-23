@@ -73,8 +73,7 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
@@ -94,15 +93,11 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Username is already taken!"));
+            return ResponseEntity.badRequest() .body(new MessageResponse("Username is already taken!"));
         }
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Email is already in use!"));
+            return ResponseEntity.badRequest() .body(new MessageResponse("Email is already in use!"));
         }
 
         // Tạo tài khoản mới
@@ -122,10 +117,8 @@ public class AuthController {
             strRoles.forEach(role -> {
                 switch (role.toLowerCase()) {
                     case "admin":
-                        Role adminRole = roleRepository.findByName(RoleName.ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-                        break;
+                        // Không cho phép tự đăng ký ADMIN qua API công khai
+                        throw new IllegalArgumentException("Không thể tự đăng ký vai trò ADMIN");
                     case "mentor":
                         Role mentorRole = roleRepository.findByName(RoleName.MENTOR)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
@@ -147,7 +140,7 @@ public class AuthController {
 
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody TokenRequest tokenRequest) {
-        if (tokenRequest == null || tokenRequest.getIdTokenString() == null || tokenRequest.getIdTokenString().trim().isEmpty()) {
+        if (tokenRequest == null || tokenRequest.getIdToken() == null || tokenRequest.getIdToken().trim().isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Google Token (idTokenString) must not be blank!"));
         }
 
@@ -156,7 +149,7 @@ public class AuthController {
                     .setAudience(Collections.singletonList(googleClientId))
                     .build();
 
-            GoogleIdToken idToken = verifier.verify(tokenRequest.getIdTokenString());
+            GoogleIdToken idToken = verifier.verify(tokenRequest.getIdToken());
             if (idToken == null) {
                 return ResponseEntity.badRequest().body(new MessageResponse("Invalid Google Token!"));
             }

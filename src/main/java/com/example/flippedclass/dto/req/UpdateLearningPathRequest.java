@@ -5,6 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TokenRequest {
-    private String idToken;
+public class UpdateLearningPathRequest {
+    private String title;
+    private String description;
+
 }

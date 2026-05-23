@@ -22,11 +22,11 @@ public class StudentProfile {
     private User user;
 
     @Column(nullable = false, unique = true)
-    private String studentCode; // MSSV
+    private String studentCode;
 
-    private String className; // Lớp học
+    private String className;
 
-    private String major; // Chuyên ngành
+    private String major;
 
-    private Integer enrollmentYear; // Năm nhập học
+    private Integer enrollmentYear;
 }

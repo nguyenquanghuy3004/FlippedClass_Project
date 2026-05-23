@@ -44,44 +44,55 @@ public class DataInitializer implements CommandLineRunner {
         }
 
 
+        // Tài khoản ADMIN hệ thống (chỉ có role ADMIN)
+        if (userRepository.countByRolesName(RoleName.ADMIN) == 0) {
+            seedAdmin("admin@system.vn", "admin", "System Admin", initialPassword);
+        }
+
+        // Tài khoản MENTOR mẫu (chỉ có role MENTOR)
         if (userRepository.countByRolesName(RoleName.MENTOR) == 0) {
-            seedSuperUser("giangvien@fpt.edu.vn", "giangvien", "Thay Nguyen Van A", initialPassword);
+            seedMentor("giangvien@fpt.edu.vn", "giangvien", "Thay Nguyen Van A", initialPassword);
         }
     }
 
-    //Phương thức khởi tạo tài khoản Giảng viên kiêm Admin hệ thống
 
-    private void seedSuperUser(String email, String username, String fullName, String password) {
-        // Chỉ tạo tài khoản khi email này chưa tồn tại trong cơ sở dữ liệu
+    // Tạo tài khoản Admin hệ thống (chỉ có role ADMIN)
+    private void seedAdmin(String email, String username, String fullName, String password) {
         if (!userRepository.existsByEmail(email)) {
-            User user = new User();
-            user.setEmail(email);
-            user.setUsername(username);
-            user.setFullName(fullName);
-            // Mã hóa mật khẩu bằng BCrypt trước khi lưu vào Database để đảm bảo an toàn tuyệt đối
-            user.setPassword(passwordEncoder.encode(password));
-            user.setProvider(AuthProvider.LOCAL);
-            user.setAvatarUrl("https://ui-avatars.com/api/?name=" + fullName.replace(" ", "+") + "&background=random");
+            User user = buildBaseUser(email, username, fullName, password);
 
-            // Khởi tạo tập hợp chứa các vai trò hệ thống
-            Set<Role> roles = new HashSet<>();
-            
-            // Tìm kiếm Role MENTOR và Role ADMIN từ Database
-            Role mentorRole = roleRepository.findByName(RoleName.MENTOR)
-                    .orElseThrow(() -> new RuntimeException("Error: Role MENTOR not found."));
             Role adminRole = roleRepository.findByName(RoleName.ADMIN)
                     .orElseThrow(() -> new RuntimeException("Error: Role ADMIN not found."));
-                    
-            // Gán cả hai vai trò này vào tập hợp roles
-            roles.add(mentorRole);
-            roles.add(adminRole);
+            user.setRoles(new HashSet<>(Collections.singleton(adminRole)));
 
-            // Thiết lập danh sách vai trò cho người dùng
-            user.setRoles(roles);
-            
-            // Lưu người dùng (Superuser) vào Database
             userRepository.save(user);
-            System.out.println(">>> Da khoi tao thanh cong tai khoan Superuser: " + email);
+            System.out.println(">>> Da khoi tao thanh cong tai khoan ADMIN: " + email);
         }
+    }
+
+    // Tạo tài khoản Mentor mẫu (chỉ có role MENTOR)
+    private void seedMentor(String email, String username, String fullName, String password) {
+        if (!userRepository.existsByEmail(email)) {
+            User user = buildBaseUser(email, username, fullName, password);
+
+            Role mentorRole = roleRepository.findByName(RoleName.MENTOR)
+                    .orElseThrow(() -> new RuntimeException("Role MENTOR not found."));
+            user.setRoles(new HashSet<>(Collections.singleton(mentorRole)));
+
+            userRepository.save(user);
+            System.out.println(">>> Da khoi tao thanh cong tai khoan MENTOR: " + email);
+        }
+    }
+
+    // Helper: tạo User cơ bản (chưa có role)
+    private User buildBaseUser(String email, String username, String fullName, String password) {
+        User user = new User();
+        user.setEmail(email);
+        user.setUsername(username);
+        user.setFullName(fullName);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setProvider(AuthProvider.LOCAL);
+        user.setAvatarUrl("https://ui-avatars.com/api/?name=" + fullName.replace(" ", "+") + "&background=random");
+        return user;
     }
 }
