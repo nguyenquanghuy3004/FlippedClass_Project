@@ -20,15 +20,16 @@ public class QuizQuestion {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String content;
 
-    @Column(nullable = false, length = 1000)
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String options;
 
-    @Column(nullable = false, length = 10)
+    @Column(length = 50)
     private String correctAnswer;
 
-    @Column(nullable = false)
-    private Integer points;
+    @Column
+    @Builder.Default
+    private Integer points = 1;
 }

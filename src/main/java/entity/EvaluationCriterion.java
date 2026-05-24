@@ -22,15 +22,16 @@ public class EvaluationCriterion {
     @JoinColumn(name = "session_id", nullable = false)
     private EvaluationSession session;
 
-    @Column(nullable = false, length = 150)
+    @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(length = 300)
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    @Column(nullable = false, precision = 5, scale = 2)
+    @Column(precision = 5, scale = 2)
     private BigDecimal maxScore;
 
-    @Column(nullable = false)
-    private Integer sortOrder;
+    @Column
+    @Builder.Default
+    private Integer sortOrder = 0;
 }

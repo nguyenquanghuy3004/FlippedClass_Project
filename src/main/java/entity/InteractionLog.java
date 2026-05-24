@@ -1,6 +1,5 @@
 package entity;
 
-import entity.enums.InteractionType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,16 +22,16 @@ public class InteractionLog {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    @Column(nullable = false, length = 100)
-    private String courseName;
+    @Column(name = "learning_path_id")
+    private Long learningPathId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private InteractionType type;
+    @Column(name = "interaction_type", length = 50)
+    private String interactionType;
 
-    @Column(nullable = false, length = 500)
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String summary;
 
-    @Column(nullable = false)
-    private LocalDateTime occurredAt;
+    @Column(updatable = false)
+    @Builder.Default
+    private LocalDateTime occurredAt = LocalDateTime.now();
 }

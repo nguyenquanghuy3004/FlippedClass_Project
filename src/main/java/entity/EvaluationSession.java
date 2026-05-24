@@ -20,21 +20,23 @@ public class EvaluationSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 200)
-    private String title;
-
-    @Column(nullable = false, length = 100)
-    private String courseName;
+    @Column(name = "learning_path_id")
+    private Long learningPathId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecturer_id", nullable = false)
     private User lecturer;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
+    private String title;
+
     private LocalDateTime gradingStartAt;
 
-    @Column(nullable = false)
     private LocalDateTime gradingDeadlineAt;
+
+    @Column(updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

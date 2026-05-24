@@ -3,12 +3,13 @@ package dto.response;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @Builder
 public class StudentProfileResponse {
-    private UserResponse student;
-    private List<InteractionLogResponse> recentInteractions;
-    private List<GradeEntryResponse> gradeHistory;
+    private Long id;
+    private UserResponse user;
+    private String studentCode;
+    private String className;
+    private String major;
+    private Integer enrollmentYear;
 }

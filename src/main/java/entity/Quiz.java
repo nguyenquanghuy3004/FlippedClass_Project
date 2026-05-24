@@ -18,15 +18,18 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 200)
-    private String title;
-
-    @Column(length = 500)
-    private String description;
+    @Column(name = "learning_node_id")
+    private Long learningNodeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecturer_id", nullable = false)
     private User lecturer;
+
+    @Column(nullable = false, length = 255)
+    private String title;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String description;
 
     @Column(nullable = false)
     private Integer durationMinutes;
@@ -34,6 +37,7 @@ public class Quiz {
     @Column(nullable = false)
     private boolean active;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    @Column(updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

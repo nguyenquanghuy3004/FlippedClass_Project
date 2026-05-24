@@ -17,22 +17,20 @@ import java.util.List;
 @Data
 public class CreateEvaluationSessionRequest {
 
-    @NotBlank(message = "title is required")
-    @Size(min = 3, max = 200, message = "title must be between 3 and 200 characters")
-    private String title;
-
-    @NotBlank(message = "courseName is required")
-    @Size(min = 2, max = 100, message = "courseName must be between 2 and 100 characters")
-    private String courseName;
+    @NotNull(message = "learningPathId is required")
+    @Positive(message = "learningPathId must be a positive number")
+    private Long learningPathId;
 
     @NotNull(message = "lecturerId is required")
     @Positive(message = "lecturerId must be a positive number")
     private Long lecturerId;
 
-    @NotNull(message = "gradingStartAt is required")
+    @NotBlank(message = "title is required")
+    @Size(min = 3, max = 255, message = "title must be between 3 and 255 characters")
+    private String title;
+
     private LocalDateTime gradingStartAt;
 
-    @NotNull(message = "gradingDeadlineAt is required")
     private LocalDateTime gradingDeadlineAt;
 
     @NotEmpty(message = "at least one evaluation criterion is required")
@@ -51,10 +49,10 @@ public class CreateEvaluationSessionRequest {
     public static class CriterionItem {
 
         @NotBlank(message = "criterion name is required")
-        @Size(min = 2, max = 150, message = "criterion name must be between 2 and 150 characters")
+        @Size(min = 2, max = 255, message = "criterion name must be between 2 and 255 characters")
         private String name;
 
-        @Size(max = 300, message = "criterion description must not exceed 300 characters")
+        @Size(max = 500, message = "criterion description must not exceed 500 characters")
         private String description;
 
         @NotNull(message = "criterion maxScore is required")

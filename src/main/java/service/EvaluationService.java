@@ -23,7 +23,7 @@ public interface EvaluationService {
 
     InteractionLogResponse addInteractionLog(CreateInteractionLogRequest request);
 
-    List<InteractionLogResponse> getInteractionHistory(Long studentId, String courseName);
+    List<InteractionLogResponse> getInteractionHistory(Long studentId, Long learningPathId);
 
-    StudentProfileResponse getStudentProfile(Long studentId);
+    StudentProfileResponse getStudentProfile(Long userId);
 }
