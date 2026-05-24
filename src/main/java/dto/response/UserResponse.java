@@ -1,14 +1,20 @@
 package dto.response;
 
-import entity.enums.UserRole;
 import lombok.Builder;
 import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @Builder
 public class UserResponse {
     private Long id;
+    private String username;
     private String email;
     private String fullName;
-    private UserRole role;
+    private String avatarUrl;
+    private String provider;
+    private Set<String> roles;
+    private LocalDateTime createdAt;
 }

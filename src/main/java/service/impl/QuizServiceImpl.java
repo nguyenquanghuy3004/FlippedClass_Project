@@ -9,7 +9,6 @@ import entity.Quiz;
 import entity.QuizAttempt;
 import entity.QuizQuestion;
 import entity.User;
-import entity.enums.UserRole;
 import exception.BusinessException;
 import exception.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -51,15 +50,14 @@ public class QuizServiceImpl implements QuizService {
     @Override
     public QuizResponse create(CreateQuizRequest request) {
         User lecturer = UserServiceImpl.findUser(userRepository, request.getLecturerId());
-        UserServiceImpl.requireRole(lecturer, UserRole.LECTURER);
 
         Quiz quiz = Quiz.builder()
+                .learningNodeId(request.getLearningNodeId())
+                .lecturer(lecturer)
                 .title(request.getTitle().trim())
                 .description(trimToNull(request.getDescription()))
-                .lecturer(lecturer)
                 .durationMinutes(request.getDurationMinutes() != null ? request.getDurationMinutes() : 30)
                 .active(request.getActive() == null || request.getActive())
-                .createdAt(LocalDateTime.now())
                 .build();
         return toResponse(quizRepository.save(quiz));
     }
@@ -130,7 +128,6 @@ public class QuizServiceImpl implements QuizService {
     public QuizAttemptResponse submitAttempt(Long quizId, SubmitQuizAttemptRequest request) {
         Quiz quiz = findQuiz(quizId);
         User student = UserServiceImpl.findUser(userRepository, request.getStudentId());
-        UserServiceImpl.requireRole(student, UserRole.STUDENT);
 
         List<QuizQuestion> questions = questionRepository.findByQuizId(quizId);
         if (questions.isEmpty()) {
@@ -232,10 +229,11 @@ public class QuizServiceImpl implements QuizService {
     private QuizResponse toResponse(Quiz quiz) {
         return QuizResponse.builder()
                 .id(quiz.getId())
-                .title(quiz.getTitle())
-                .description(quiz.getDescription())
+                .learningNodeId(quiz.getLearningNodeId())
                 .lecturerId(quiz.getLecturer().getId())
                 .lecturerName(quiz.getLecturer().getFullName())
+                .title(quiz.getTitle())
+                .description(quiz.getDescription())
                 .durationMinutes(quiz.getDurationMinutes())
                 .active(quiz.isActive())
                 .createdAt(quiz.getCreatedAt())

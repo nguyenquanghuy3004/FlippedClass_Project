@@ -1,6 +1,5 @@
 package dto.response;
 
-import entity.enums.InteractionType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,8 +10,8 @@ import java.time.LocalDateTime;
 public class InteractionLogResponse {
     private Long id;
     private Long studentId;
-    private String courseName;
-    private InteractionType type;
+    private Long learningPathId;
+    private String interactionType;
     private String summary;
     private LocalDateTime occurredAt;
 }

@@ -10,11 +10,12 @@ import java.util.List;
 @Builder
 public class EvaluationSessionResponse {
     private Long id;
-    private String title;
-    private String courseName;
+    private Long learningPathId;
     private Long lecturerId;
     private String lecturerName;
+    private String title;
     private LocalDateTime gradingStartAt;
     private LocalDateTime gradingDeadlineAt;
+    private LocalDateTime createdAt;
     private List<CriterionResponse> criteria;
 }

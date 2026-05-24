@@ -9,5 +9,5 @@ public interface InteractionLogRepository extends JpaRepository<InteractionLog, 
 
     List<InteractionLog> findByStudentIdOrderByOccurredAtDesc(Long studentId);
 
-    List<InteractionLog> findByStudentIdAndCourseNameOrderByOccurredAtDesc(Long studentId, String courseName);
+    List<InteractionLog> findByStudentIdAndLearningPathIdOrderByOccurredAtDesc(Long studentId, Long learningPathId);
 }

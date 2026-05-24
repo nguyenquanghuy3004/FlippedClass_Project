@@ -27,15 +27,19 @@ public class QuizAttempt {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    @Column(nullable = false, precision = 5, scale = 2)
-    private BigDecimal score;
+    @Column(precision = 5, scale = 2)
+    @Builder.Default
+    private BigDecimal score = BigDecimal.ZERO;
 
-    @Column(nullable = false)
-    private Integer totalQuestions;
+    @Column
+    @Builder.Default
+    private Integer totalQuestions = 0;
 
-    @Column(nullable = false)
-    private Integer correctAnswers;
+    @Column
+    @Builder.Default
+    private Integer correctAnswers = 0;
 
-    @Column(nullable = false)
-    private LocalDateTime submittedAt;
+    @Column
+    @Builder.Default
+    private LocalDateTime submittedAt = LocalDateTime.now();
 }
