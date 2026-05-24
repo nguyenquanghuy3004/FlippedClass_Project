@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .avatarUrl(user.getAvatarUrl())
-                .provider(user.getProvider())
+                .provider(user.getProvider() != null ? user.getProvider().name() : null)
                 .roles(roleNames)
                 .createdAt(user.getCreatedAt())
                 .build();

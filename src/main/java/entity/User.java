@@ -35,9 +35,8 @@ public class User {
     @Column(length = 1000)
     private String avatarUrl;
 
-    @Column(length = 50)
-    @Builder.Default
-    private String provider = "LOCAL";
+    @Enumerated(EnumType.STRING)
+    private enums.AuthProvider provider;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
