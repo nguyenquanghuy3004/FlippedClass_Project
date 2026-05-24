@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Table(name = "learning_path")
 @Entity
@@ -45,4 +46,7 @@ public class LearningPath {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private LearningPathStatus status = LearningPathStatus.ACTIVE;
+
+
+    private List<LearningNode> nodes;
 }
