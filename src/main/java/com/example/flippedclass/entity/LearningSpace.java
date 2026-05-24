@@ -7,7 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.UpdateTimestamp;
+import enums.LearningSpaceStatus;
 
 import java.time.LocalDateTime;
 
@@ -23,10 +25,12 @@ public class LearningSpace {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Nationalized
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,11 +41,15 @@ public class LearningSpace {
     private String inviteCode;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private LearningSpaceStatus status = LearningSpaceStatus.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VisibilityType visibility;
 
-    @Column(nullable = false)
-    private boolean isDeleted = false;
+//    @Column(nullable = false)
+//    private boolean isDeleted = false;
 
     @CreationTimestamp
     @Column(updatable = false)

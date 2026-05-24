@@ -3,6 +3,7 @@ package com.example.flippedclass.config;
 import com.example.flippedclass.security.jwt.AuthEntryPointJwt;
 import com.example.flippedclass.security.jwt.AuthTokenFilter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,13 +22,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
-    private final UserDetailsService userDetailsService;
-    private final AuthEntryPointJwt unauthorizedHandler;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
-    public WebSecurityConfig(UserDetailsService userDetailsService, AuthEntryPointJwt unauthorizedHandler) {
-        this.userDetailsService = userDetailsService;
-        this.unauthorizedHandler = unauthorizedHandler;
-    }
+    @Autowired
+    private AuthEntryPointJwt unauthorizedHandler;
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -51,16 +50,21 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    private static final String[] PUBLIC_URLS = {
+            "/swagger", "/swagger-ui/**", "/swagger-ui.html",
+            "/api-docs", "/api-docs/**", "/v3/api-docs/**",
+            "/google-test.html", "/error"
+    };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll() // Cho phép truy cập
-                                                                                                // không cần login vào
-                                                                                                // auth endpoint
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(PUBLIC_URLS).permitAll()
                         .requestMatchers("/api/test/**").permitAll()
-                        .anyRequest().authenticated() // Tất cả các request khác đều phải được xác thực
+                        .anyRequest().authenticated()
                 );
 
         http.authenticationProvider(authenticationProvider());

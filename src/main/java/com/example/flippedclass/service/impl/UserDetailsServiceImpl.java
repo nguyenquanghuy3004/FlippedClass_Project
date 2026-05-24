@@ -1,4 +1,4 @@
-package com.example.flippedclass.service;
+package com.example.flippedclass.service.impl;
 
 import com.example.flippedclass.entity.User;
 import com.example.flippedclass.repository.UserRepository;

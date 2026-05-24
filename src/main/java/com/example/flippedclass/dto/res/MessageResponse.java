@@ -1,4 +1,4 @@
-package com.example.flippedclass.dto;
+package com.example.flippedclass.dto.res;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
