@@ -5,7 +5,6 @@ import dto.request.CreateEvaluationSessionRequest;
 import dto.request.CreateInteractionLogRequest;
 import dto.request.SubmitGradeRequest;
 import entity.*;
-import entity.enums.UserRole;
 import exception.BusinessException;
 import exception.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -25,28 +24,30 @@ public class EvaluationServiceImpl implements EvaluationService {
     private final InteractionLogRepository interactionLogRepository;
     private final GradeEntryRepository gradeEntryRepository;
     private final UserRepository userRepository;
+    private final StudentProfileRepository studentProfileRepository;
 
     public EvaluationServiceImpl(EvaluationSessionRepository sessionRepository,
                                  EvaluationCriterionRepository criterionRepository,
                                  InteractionLogRepository interactionLogRepository,
                                  GradeEntryRepository gradeEntryRepository,
-                                 UserRepository userRepository) {
+                                 UserRepository userRepository,
+                                 StudentProfileRepository studentProfileRepository) {
         this.sessionRepository = sessionRepository;
         this.criterionRepository = criterionRepository;
         this.interactionLogRepository = interactionLogRepository;
         this.gradeEntryRepository = gradeEntryRepository;
         this.userRepository = userRepository;
+        this.studentProfileRepository = studentProfileRepository;
     }
 
     @Override
     public EvaluationSessionResponse createSession(CreateEvaluationSessionRequest request) {
         User lecturer = UserServiceImpl.findUser(userRepository, request.getLecturerId());
-        UserServiceImpl.requireRole(lecturer, UserRole.LECTURER);
 
         EvaluationSession session = EvaluationSession.builder()
-                .title(request.getTitle().trim())
-                .courseName(request.getCourseName().trim())
+                .learningPathId(request.getLearningPathId())
                 .lecturer(lecturer)
+                .title(request.getTitle().trim())
                 .gradingStartAt(request.getGradingStartAt())
                 .gradingDeadlineAt(request.getGradingDeadlineAt())
                 .build();
@@ -82,10 +83,9 @@ public class EvaluationServiceImpl implements EvaluationService {
     public GradingContextResponse getGradingContext(Long sessionId, Long studentId) {
         EvaluationSession session = findSession(sessionId);
         User student = UserServiceImpl.findUser(userRepository, studentId);
-        UserServiceImpl.requireRole(student, UserRole.STUDENT);
 
         List<InteractionLogResponse> history = interactionLogRepository
-                .findByStudentIdAndCourseNameOrderByOccurredAtDesc(studentId, session.getCourseName())
+                .findByStudentIdAndLearningPathIdOrderByOccurredAtDesc(studentId, session.getLearningPathId())
                 .stream()
                 .map(this::toInteractionResponse)
                 .toList();
@@ -109,18 +109,16 @@ public class EvaluationServiceImpl implements EvaluationService {
         EvaluationSession session = findSession(request.getSessionId());
         User student = UserServiceImpl.findUser(userRepository, request.getStudentId());
         User lecturer = UserServiceImpl.findUser(userRepository, request.getLecturerId());
-        UserServiceImpl.requireRole(student, UserRole.STUDENT);
-        UserServiceImpl.requireRole(lecturer, UserRole.LECTURER);
 
         if (!session.getLecturer().getId().equals(lecturer.getId())) {
             throw new BusinessException("Lecturer does not own this evaluation session");
         }
 
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(session.getGradingStartAt())) {
+        if (session.getGradingStartAt() != null && now.isBefore(session.getGradingStartAt())) {
             throw new BusinessException("Grading has not started yet");
         }
-        if (now.isAfter(session.getGradingDeadlineAt())) {
+        if (session.getGradingDeadlineAt() != null && now.isAfter(session.getGradingDeadlineAt())) {
             throw new BusinessException("Grading deadline has passed");
         }
 
@@ -129,7 +127,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         if (!criterion.getSession().getId().equals(session.getId())) {
             throw new BusinessException("Criterion does not belong to this session");
         }
-        if (request.getScore().compareTo(criterion.getMaxScore()) > 0) {
+        if (criterion.getMaxScore() != null && request.getScore().compareTo(criterion.getMaxScore()) > 0) {
             throw new BusinessException("Score cannot exceed max score " + criterion.getMaxScore());
         }
 
@@ -143,7 +141,7 @@ public class EvaluationServiceImpl implements EvaluationService {
                         .build());
 
         entry.setScore(request.getScore());
-        entry.setComment(request.getComment().trim());
+        entry.setComment(request.getComment() != null ? request.getComment().trim() : null);
         entry.setLecturer(lecturer);
         entry.setGradedAt(now);
 
@@ -162,13 +160,12 @@ public class EvaluationServiceImpl implements EvaluationService {
     @Override
     public InteractionLogResponse addInteractionLog(CreateInteractionLogRequest request) {
         User student = UserServiceImpl.findUser(userRepository, request.getStudentId());
-        UserServiceImpl.requireRole(student, UserRole.STUDENT);
 
         InteractionLog log = InteractionLog.builder()
                 .student(student)
-                .courseName(request.getCourseName().trim())
-                .type(request.getType())
-                .summary(request.getSummary().trim())
+                .learningPathId(request.getLearningPathId())
+                .interactionType(request.getInteractionType())
+                .summary(request.getSummary() != null ? request.getSummary().trim() : null)
                 .occurredAt(request.getOccurredAt() != null ? request.getOccurredAt() : LocalDateTime.now())
                 .build();
 
@@ -176,34 +173,27 @@ public class EvaluationServiceImpl implements EvaluationService {
     }
 
     @Override
-    public List<InteractionLogResponse> getInteractionHistory(Long studentId, String courseName) {
+    public List<InteractionLogResponse> getInteractionHistory(Long studentId, Long learningPathId) {
         UserServiceImpl.findUser(userRepository, studentId);
-        List<InteractionLog> logs = courseName != null && !courseName.isBlank()
-                ? interactionLogRepository.findByStudentIdAndCourseNameOrderByOccurredAtDesc(studentId, courseName.trim())
+        List<InteractionLog> logs = learningPathId != null
+                ? interactionLogRepository.findByStudentIdAndLearningPathIdOrderByOccurredAtDesc(studentId, learningPathId)
                 : interactionLogRepository.findByStudentIdOrderByOccurredAtDesc(studentId);
         return logs.stream().map(this::toInteractionResponse).toList();
     }
 
     @Override
-    public StudentProfileResponse getStudentProfile(Long studentId) {
-        User student = UserServiceImpl.findUser(userRepository, studentId);
-        UserServiceImpl.requireRole(student, UserRole.STUDENT);
-
-        List<InteractionLogResponse> interactions = interactionLogRepository
-                .findByStudentIdOrderByOccurredAtDesc(studentId)
-                .stream()
-                .limit(20)
-                .map(this::toInteractionResponse)
-                .toList();
-
-        List<GradeEntryResponse> grades = gradeEntryRepository.findByStudentId(studentId).stream()
-                .map(this::toGradeResponse)
-                .toList();
+    public StudentProfileResponse getStudentProfile(Long userId) {
+        User user = UserServiceImpl.findUser(userRepository, userId);
+        StudentProfile profile = studentProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("Student profile not found for user: " + userId));
 
         return StudentProfileResponse.builder()
-                .student(UserServiceImpl.toResponse(student))
-                .recentInteractions(interactions)
-                .gradeHistory(grades)
+                .id(profile.getId())
+                .user(UserServiceImpl.toResponse(user))
+                .studentCode(profile.getStudentCode())
+                .className(profile.getClassName())
+                .major(profile.getMajor())
+                .enrollmentYear(profile.getEnrollmentYear())
                 .build();
     }
 
@@ -234,12 +224,13 @@ public class EvaluationServiceImpl implements EvaluationService {
 
         return EvaluationSessionResponse.builder()
                 .id(session.getId())
-                .title(session.getTitle())
-                .courseName(session.getCourseName())
+                .learningPathId(session.getLearningPathId())
                 .lecturerId(session.getLecturer().getId())
                 .lecturerName(session.getLecturer().getFullName())
+                .title(session.getTitle())
                 .gradingStartAt(session.getGradingStartAt())
                 .gradingDeadlineAt(session.getGradingDeadlineAt())
+                .createdAt(session.getCreatedAt())
                 .criteria(criteria)
                 .build();
     }
@@ -248,8 +239,8 @@ public class EvaluationServiceImpl implements EvaluationService {
         return InteractionLogResponse.builder()
                 .id(log.getId())
                 .studentId(log.getStudent().getId())
-                .courseName(log.getCourseName())
-                .type(log.getType())
+                .learningPathId(log.getLearningPathId())
+                .interactionType(log.getInteractionType())
                 .summary(log.getSummary())
                 .occurredAt(log.getOccurredAt())
                 .build();

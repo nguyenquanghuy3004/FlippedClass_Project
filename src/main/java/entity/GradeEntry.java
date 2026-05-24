@@ -26,23 +26,24 @@ public class GradeEntry {
     private EvaluationSession session;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
-    private User student;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "criterion_id", nullable = false)
     private EvaluationCriterion criterion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecturer_id", nullable = false)
     private User lecturer;
 
-    @Column(nullable = false, precision = 5, scale = 2)
+    @Column(precision = 5, scale = 2)
     private BigDecimal score;
 
-    @Column(nullable = false, length = 1000)
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String comment;
 
-    @Column(nullable = false)
-    private LocalDateTime gradedAt;
+    @Column
+    @Builder.Default
+    private LocalDateTime gradedAt = LocalDateTime.now();
 }

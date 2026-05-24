@@ -2,23 +2,30 @@ package service.impl;
 
 import dto.request.CreateUserRequest;
 import dto.response.UserResponse;
+import entity.Role;
 import entity.User;
-import entity.enums.UserRole;
 import exception.BusinessException;
 import exception.NotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import repository.RoleRepository;
 import repository.UserRepository;
 import service.UserService;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -28,17 +35,34 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("Email already exists: " + email);
         }
 
+        String username = request.getUsername().trim();
+        if (userRepository.existsByUsername(username)) {
+            throw new BusinessException("Username already exists: " + username);
+        }
+
+        Set<String> roleNames = request.getRoles().stream()
+                .map(String::toUpperCase)
+                .collect(Collectors.toSet());
+        Set<Role> roles = roleRepository.findByNameIn(roleNames);
+        if (roles.size() != roleNames.size()) {
+            Set<String> found = roles.stream().map(Role::getName).collect(Collectors.toSet());
+            Set<String> missing = roleNames.stream().filter(r -> !found.contains(r)).collect(Collectors.toSet());
+            throw new BusinessException("Roles not found: " + missing);
+        }
+
         User user = User.builder()
+                .username(username)
                 .email(email)
-                .fullName(request.getFullName().trim())
-                .role(request.getRole())
+                .password(request.getPassword())
+                .fullName(request.getFullName() != null ? request.getFullName().trim() : null)
+                .roles(roles)
                 .build();
-        return mapToResponse(userRepository.save(user));
+        return toResponse(userRepository.save(user));
     }
 
     @Override
     public UserResponse getById(Long id) {
-        return mapToResponse(findUser(id));
+        return toResponse(findUser(id));
     }
 
     @Override
@@ -61,21 +85,18 @@ public class UserServiceImpl implements UserService {
     }
 
     static UserResponse toResponse(User user) {
+        Set<String> roleNames = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
         return UserResponse.builder()
                 .id(user.getId())
+                .username(user.getUsername())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
-                .role(user.getRole())
+                .avatarUrl(user.getAvatarUrl())
+                .provider(user.getProvider())
+                .roles(roleNames)
+                .createdAt(user.getCreatedAt())
                 .build();
-    }
-
-    private UserResponse mapToResponse(User user) {
-        return toResponse(user);
-    }
-
-    static void requireRole(User user, UserRole role) {
-        if (user.getRole() != role) {
-            throw new BusinessException("User " + user.getId() + " is not a " + role);
-        }
     }
 }

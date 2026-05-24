@@ -1,8 +1,11 @@
 package entity;
 
-import entity.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -17,13 +20,39 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(unique = true, length = 100)
+    private String username;
+
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 255)
+    private String password;
+
+    @Column(length = 255)
     private String fullName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private UserRole role;
+    @Column(length = 1000)
+    private String avatarUrl;
+
+    @Column(length = 50)
+    @Builder.Default
+    private String provider = "LOCAL";
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
+
+    @Column(updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 }

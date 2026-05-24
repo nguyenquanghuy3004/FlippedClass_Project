@@ -6,7 +6,6 @@ import dto.request.CreateInteractionLogRequest;
 import dto.request.SubmitGradeRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -53,8 +52,8 @@ public class EvaluationController {
     public List<InteractionLogResponse> getInteractionHistory(
             @PathVariable @Positive(message = "studentId must be a positive number") Long studentId,
             @RequestParam(required = false)
-            @Size(min = 2, max = 100, message = "courseName must be between 2 and 100 characters") String courseName) {
-        return evaluationService.getInteractionHistory(studentId, courseName);
+            @Positive(message = "learningPathId must be a positive number") Long learningPathId) {
+        return evaluationService.getInteractionHistory(studentId, learningPathId);
     }
 
     @PostMapping("/interactions")

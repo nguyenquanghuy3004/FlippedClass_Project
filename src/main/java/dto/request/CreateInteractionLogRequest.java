@@ -1,7 +1,5 @@
 package dto.request;
 
-import entity.enums.InteractionType;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
@@ -17,15 +15,14 @@ public class CreateInteractionLogRequest {
     @Positive(message = "studentId must be a positive number")
     private Long studentId;
 
-    @NotBlank(message = "courseName is required")
-    @Size(min = 2, max = 100, message = "courseName must be between 2 and 100 characters")
-    private String courseName;
+    @NotNull(message = "learningPathId is required")
+    @Positive(message = "learningPathId must be a positive number")
+    private Long learningPathId;
 
-    @NotNull(message = "type is required")
-    private InteractionType type;
+    @Size(max = 50, message = "interactionType must not exceed 50 characters")
+    private String interactionType;
 
-    @NotBlank(message = "summary is required")
-    @Size(min = 5, max = 500, message = "summary must be between 5 and 500 characters")
+    @Size(min = 5, max = 2000, message = "summary must be between 5 and 2000 characters")
     private String summary;
 
     @PastOrPresent(message = "occurredAt must not be in the future")
