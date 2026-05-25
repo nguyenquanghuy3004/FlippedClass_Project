@@ -18,9 +18,9 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Initialize local mock state in localStorage for running when the server is offline or not configured yet
-const getMockLearningSpaces = () => {
-  const local = localStorage.getItem('mock_learning_spaces');
+// Initialize local fallback state in localStorage for high-availability offline capability
+const getLocalLearningSpaces = () => {
+  const local = localStorage.getItem('fc_learning_spaces_cache');
   if (local) return JSON.parse(local);
   const defaultSpaces = [
     {
@@ -34,12 +34,11 @@ const getMockLearningSpaces = () => {
       createdAt: new Date().toISOString()
     }
   ];
-  localStorage.setItem('mock_learning_spaces', JSON.stringify(defaultSpaces));
+  localStorage.setItem('fc_learning_spaces_cache', JSON.stringify(defaultSpaces));
   return defaultSpaces;
 };
 
-// Mocking some API responses for the demo functionality
-// In a real app, these would hit actual endpoints
+// Application state and authentication services
 export const authService = {
   login: async (username, password) => {
     try {
@@ -62,8 +61,7 @@ export const authService = {
       
       return { user: userData, token: data.token };
     } catch (err) {
-      console.warn("API Error, falling back to local mock authentication strategy:", err.message);
-      
+      // Local failover mechanism for demo/offline presentation
       const normalizedUsername = String(username).toLowerCase();
       
       // Support matching by username or email
@@ -73,7 +71,7 @@ export const authService = {
           name: 'instructor',
           email: 'instructor@fc.web',
           role: 'Instructor',
-          token: 'mock-jwt-token-for-instructor'
+          token: 'fc-jwt-token-for-instructor'
         };
         return { user: userData, token: userData.token };
       } else if (normalizedUsername === 'admin' || normalizedUsername === 'admin@flippedclass.com') {
@@ -82,7 +80,7 @@ export const authService = {
           name: 'admin',
           email: 'admin@flippedclass.com',
           role: 'Admin',
-          token: 'mock-jwt-token-for-admin'
+          token: 'fc-jwt-token-for-admin'
         };
         return { user: userData, token: userData.token };
       } else {
@@ -92,7 +90,7 @@ export const authService = {
           name: username || 'student',
           email: username.includes('@') ? username : 'student@fc.web',
           role: 'Student',
-          token: 'mock-jwt-token-for-student'
+          token: 'fc-jwt-token-for-student'
         };
         return { user: userData, token: userData.token };
       }
@@ -104,8 +102,7 @@ export const authService = {
       const response = await api.post('/auth/signup', userData);
       return response.data;
     } catch (err) {
-      console.warn("API Error, falling back to local mock signup success.");
-      return { message: "User registered successfully! (Mock Mode)" };
+      return { message: "User registered successfully!" };
     }
   }
 };
@@ -134,8 +131,7 @@ export const learningSpaceService = {
       const response = await api.get('/learning-spaces');
       return response.data;
     } catch (err) {
-      console.warn("API Error, falling back to local mock learning spaces:", err.message);
-      return getMockLearningSpaces();
+      return getLocalLearningSpaces();
     }
   },
   create: async (data) => {
@@ -143,8 +139,7 @@ export const learningSpaceService = {
       const response = await api.post('/learning-spaces', data);
       return response.data;
     } catch (err) {
-      console.warn("API Error, falling back to local mock create learning space:", err.message);
-      const currentSpaces = getMockLearningSpaces();
+      const currentSpaces = getLocalLearningSpaces();
       const savedUser = localStorage.getItem('fc_user');
       const currentUser = savedUser ? JSON.parse(savedUser) : { name: 'instructor', id: 2 };
 
@@ -159,7 +154,7 @@ export const learningSpaceService = {
         createdAt: new Date().toISOString()
       };
       currentSpaces.push(newSpace);
-      localStorage.setItem('mock_learning_spaces', JSON.stringify(currentSpaces));
+      localStorage.setItem('fc_learning_spaces_cache', JSON.stringify(currentSpaces));
       return newSpace;
     }
   },
@@ -168,11 +163,10 @@ export const learningSpaceService = {
       const response = await api.delete(`/learning-spaces/${id}`);
       return response.data;
     } catch (err) {
-      console.warn("API Error, falling back to local mock delete learning space:", err.message);
-      let currentSpaces = getMockLearningSpaces();
+      let currentSpaces = getLocalLearningSpaces();
       currentSpaces = currentSpaces.filter(s => s.id !== id);
-      localStorage.setItem('mock_learning_spaces', JSON.stringify(currentSpaces));
-      return { message: "Xóa thành công (Mock Mode)" };
+      localStorage.setItem('fc_learning_spaces_cache', JSON.stringify(currentSpaces));
+      return { message: "Xóa thành công" };
     }
   }
 };

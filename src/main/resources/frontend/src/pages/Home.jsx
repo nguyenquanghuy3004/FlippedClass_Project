@@ -170,7 +170,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Visual Showcase (Styled Mockup of Flipped Concept) */}
+          {/* Visual Showcase (Styled Process of Flipped Concept) */}
           <div className="lg:col-span-5 relative">
             <div className="bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 relative z-10">
               {/* Concept chart */}

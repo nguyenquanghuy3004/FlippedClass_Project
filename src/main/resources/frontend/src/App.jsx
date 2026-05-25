@@ -11,6 +11,8 @@ import StudentDashboard from './pages/student/StudentDashboard.jsx';
 import EvaluationPage from './pages/instructor/EvaluationPage.jsx';
 import RoadmapPage from './pages/instructor/RoadmapPage.jsx';
 import SubjectsPage from './pages/instructor/SubjectsPage.jsx';
+import QuestionBankPage from './pages/instructor/QuestionBankPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
 
 const DashboardSwitch = () => {
   const { user } = useAuth();
@@ -40,6 +42,8 @@ function App() {
             <Route path="/subjects" element={<SubjectsPage />} />
             <Route path="/evaluation" element={<EvaluationPage />} />
             <Route path="/roadmaps" element={<RoadmapPage />} />
+            <Route path="/questions" element={<QuestionBankPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

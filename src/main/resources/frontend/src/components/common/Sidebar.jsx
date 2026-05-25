@@ -22,10 +22,16 @@ const Sidebar = () => {
     Instructor: [
       { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
       { id: 'subjects', label: 'Môn học', path: '/subjects', icon: BookOpen },
+      { id: 'questions', label: 'Ngân hàng câu hỏi', path: '/questions', icon: ClipboardList },
       { id: 'roadmaps', label: 'Roadmaps', path: '/roadmaps', icon: Map },
       { id: 'evaluation', label: 'Đánh giá học viên', path: '/evaluation', icon: GraduationCap },
+      { id: 'profile', label: 'Hồ sơ cá nhân', path: '/profile', icon: Settings },
     ],
-    Student: [],
+    Student: [
+      { id: 'dashboard', label: 'Lớp học của tôi', path: '/dashboard', icon: School },
+      { id: 'roadmaps', label: 'Lộ trình học tập', path: '/roadmaps', icon: Map },
+      { id: 'profile', label: 'Hồ sơ cá nhân', path: '/profile', icon: Settings },
+    ],
     Admin: []
   };
 
