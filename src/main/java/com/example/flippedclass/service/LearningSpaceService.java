@@ -1,10 +1,9 @@
 package com.example.flippedclass.service;
 
-import com.example.flippedclass.dto.req.CreateLearningSpaceRequest;
-import com.example.flippedclass.dto.req.JoinLearningSpaceRequest;
-import com.example.flippedclass.dto.req.UpdateLearningSpaceRequest;
-import com.example.flippedclass.dto.res.JoinLearningSpaceResponse;
-import com.example.flippedclass.dto.res.LearningSpaceResponse;
+import com.example.flippedclass.dto.request.CreateLearningSpaceRequest;
+import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
+import com.example.flippedclass.dto.response.JoinLearningSpaceResponse;
+import com.example.flippedclass.dto.response.LearningSpaceResponse;
 import com.example.flippedclass.entity.LearningSpace;
 import jakarta.transaction.Transactional;
 
@@ -12,7 +11,6 @@ public interface LearningSpaceService {
 
     LearningSpaceResponse createLearningSpace(CreateLearningSpaceRequest request);
 
-    // update -------------------------
     @Transactional
     LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail);
 

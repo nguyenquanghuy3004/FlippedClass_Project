@@ -1,10 +1,10 @@
 package com.example.flippedclass.controller;
 
-import com.example.flippedclass.dto.req.CreateLearningSpaceRequest;
-import com.example.flippedclass.dto.req.JoinLearningSpaceRequest;
-import com.example.flippedclass.dto.res.JoinLearningSpaceResponse;
-import com.example.flippedclass.dto.res.LearningSpaceResponse;
-import com.example.flippedclass.dto.res.MessageResponse;
+import com.example.flippedclass.dto.request.CreateLearningSpaceRequest;
+import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
+import com.example.flippedclass.dto.response.JoinLearningSpaceResponse;
+import com.example.flippedclass.dto.response.LearningSpaceResponse;
+import com.example.flippedclass.dto.response.MessageResponse;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.service.LearningSpaceService;
 import jakarta.validation.Valid;

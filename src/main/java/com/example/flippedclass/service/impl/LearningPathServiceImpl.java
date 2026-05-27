@@ -1,9 +1,9 @@
 package com.example.flippedclass.service.impl;
 
-import com.example.flippedclass.dto.req.CreateLearningPathRequest;
-import com.example.flippedclass.dto.req.ReorderLearningPathRequest;
-import com.example.flippedclass.dto.req.UpdateLearningPathRequest;
-import com.example.flippedclass.dto.res.LearningPathResponse;
+import com.example.flippedclass.dto.request.CreateLearningPathRequest;
+import com.example.flippedclass.dto.request.ReorderLearningPathRequest;
+import com.example.flippedclass.dto.request.UpdateLearningPathRequest;
+import com.example.flippedclass.dto.response.LearningPathResponse;
 import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.repository.LearningPathRepository;

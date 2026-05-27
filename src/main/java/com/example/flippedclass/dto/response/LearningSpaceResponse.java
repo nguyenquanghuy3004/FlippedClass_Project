@@ -1,4 +1,4 @@
-package com.example.flippedclass.dto.res;
+package com.example.flippedclass.dto.response;
 
 import enums.VisibilityType;
 import lombok.Builder;

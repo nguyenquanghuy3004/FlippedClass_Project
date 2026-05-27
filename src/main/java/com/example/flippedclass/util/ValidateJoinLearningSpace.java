@@ -1,6 +1,6 @@
 package com.example.flippedclass.util;
 
-import com.example.flippedclass.dto.req.JoinLearningSpaceRequest;
+import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
 import org.springframework.stereotype.Component;
 
 @Component

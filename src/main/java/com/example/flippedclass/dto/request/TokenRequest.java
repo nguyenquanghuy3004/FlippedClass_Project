@@ -1,4 +1,4 @@
-package com.example.flippedclass.dto.req;
+package com.example.flippedclass.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;

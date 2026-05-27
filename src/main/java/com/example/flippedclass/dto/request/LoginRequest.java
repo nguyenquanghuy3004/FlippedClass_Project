@@ -1,6 +1,5 @@
-package com.example.flippedclass.dto.req;
+package com.example.flippedclass.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,5 +8,6 @@ import lombok.Setter;
 public class LoginRequest {
 
 	private String username;
+	private String email;
 	private String password;
 }

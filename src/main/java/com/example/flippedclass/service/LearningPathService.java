@@ -1,9 +1,9 @@
 package com.example.flippedclass.service;
 
-import com.example.flippedclass.dto.req.CreateLearningPathRequest;
-import com.example.flippedclass.dto.req.ReorderLearningPathRequest;
-import com.example.flippedclass.dto.req.UpdateLearningPathRequest;
-import com.example.flippedclass.dto.res.LearningPathResponse;
+import com.example.flippedclass.dto.request.CreateLearningPathRequest;
+import com.example.flippedclass.dto.request.ReorderLearningPathRequest;
+import com.example.flippedclass.dto.request.UpdateLearningPathRequest;
+import com.example.flippedclass.dto.response.LearningPathResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

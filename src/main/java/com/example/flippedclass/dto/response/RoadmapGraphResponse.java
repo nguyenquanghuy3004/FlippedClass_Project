@@ -1,4 +1,4 @@
-package com.example.flippedclass.dto.res;
+package com.example.flippedclass.dto.response;
 
 import lombok.*;
 
@@ -24,7 +24,7 @@ public class RoadmapGraphResponse {
         private String description;
         private Double x;
         private Double y;
-        private String type; // Thêm loại (ví dụ: 'lesson')
+        private String type;
     }
 
     @Getter
