@@ -1,6 +1,6 @@
 package com.example.flippedclass.service;
 
-import com.example.flippedclass.dto.NodeConnectionRequest;
+import com.example.flippedclass.dto.request.NodeConnectionRequest;
 import com.example.flippedclass.dto.NodeConnectionResponse;
 import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.LearningPath;

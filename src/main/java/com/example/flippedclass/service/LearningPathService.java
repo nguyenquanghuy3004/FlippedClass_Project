@@ -1,6 +1,6 @@
 package com.example.flippedclass.service;
 
-import com.example.flippedclass.dto.LearningPathRequest;
+import com.example.flippedclass.dto.request.LearningPathRequest;
 import com.example.flippedclass.dto.LearningPathResponse;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.entity.LearningPath;

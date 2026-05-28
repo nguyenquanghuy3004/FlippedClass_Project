@@ -1,6 +1,6 @@
 package com.example.flippedclass.controller;
 
-import com.example.flippedclass.dto.NodeConnectionRequest;
+import com.example.flippedclass.dto.request.NodeConnectionRequest;
 import com.example.flippedclass.dto.NodeConnectionResponse;
 import com.example.flippedclass.service.NodeConnectionService;
 import java.util.List;

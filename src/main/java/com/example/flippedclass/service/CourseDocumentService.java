@@ -2,7 +2,7 @@ package com.example.flippedclass.service;
 
 import com.example.flippedclass.entity.CourseDocument;
 import com.example.flippedclass.repository.CourseDocumentRepository;
-import com.example.flippedclass.dto.CourseDocumentRequest;
+import com.example.flippedclass.dto.request.CourseDocumentRequest;
 import com.example.flippedclass.dto.CourseDocumentResponse;
 import com.example.flippedclass.entity.LearningPath;
 

@@ -1,4 +1,4 @@
-package com.example.flippedclass.dto;
+package com.example.flippedclass.dto.request;
 
 public class NodeConnectionRequest {
     private Long sourceNodeId;

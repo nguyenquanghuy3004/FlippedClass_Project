@@ -2,7 +2,7 @@ package com.example.flippedclass.controller;
 
 import java.util.List;
 
-import com.example.flippedclass.dto.CourseDocumentRequest;
+import com.example.flippedclass.dto.request.CourseDocumentRequest;
 import com.example.flippedclass.dto.CourseDocumentResponse;
 import com.example.flippedclass.service.CourseDocumentService;
 import org.springframework.http.HttpStatus;
