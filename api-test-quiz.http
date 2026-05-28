@@ -1,0 +1,16 @@
+@baseUrl = http://127.0.0.1:8080
+@nodeId = 1
+@quizId = 1
+@studentId = 1
+
+### View Quiz List by Node
+GET {{baseUrl}}/api/learning-nodes/{{nodeId}}/quizzes
+Accept: application/json
+
+### View Quiz Detail
+GET {{baseUrl}}/api/quizzes/{{quizId}}
+Accept: application/json
+
+### View Student Quiz Attempts
+GET {{baseUrl}}/api/students/{{studentId}}/quiz-attempts
+Accept: application/json

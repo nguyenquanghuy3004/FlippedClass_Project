@@ -1,0 +1,25 @@
+@baseUrl = http://127.0.0.1:8080
+@studentId = 1
+@learningSpaceId = 1
+@learningPathId = 1
+@nodeId = 1
+
+### 1. Student Dashboard
+GET {{baseUrl}}/api/students/{{studentId}}/dashboard
+Accept: application/json
+
+### 2. View Roadmap List by Learning Space
+GET {{baseUrl}}/api/learning-spaces/{{learningSpaceId}}/learning-paths
+Accept: application/json
+
+### 3. View Node List by Learning Path
+GET {{baseUrl}}/api/learning-paths/{{learningPathId}}/nodes
+Accept: application/json
+
+### 4. View Document List by Learning Path
+GET {{baseUrl}}/api/learning-paths/{{learningPathId}}/documents
+Accept: application/json
+
+### 5. View Quiz List by Learning Node
+GET {{baseUrl}}/api/learning-nodes/{{nodeId}}/quizzes
+Accept: application/json

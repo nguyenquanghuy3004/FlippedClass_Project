@@ -1,0 +1,83 @@
+@baseUrl = http://127.0.0.1:8080
+@learningSpaceId = 1
+@learningPathId = 1
+
+### SQL seed sample for LMS_PLATFORM
+# Run this manually in SQL Server if the database is empty.
+#
+# USE LMS_PLATFORM;
+#
+# INSERT INTO users (id, username, email, password_hash, full_name, role, status, created_at, updated_at)
+# VALUES (1, 'lecturer1', 'lecturer1@example.com', 'test-password-hash', 'Lecturer One', 'LECTURER', 'ACTIVE', GETDATE(), GETDATE());
+#
+# INSERT INTO learning_spaces (id, name, description, owner_id, invite_code, status, visibility, created_at, updated_at)
+# VALUES (1, 'Test Learning Space', 'Learning space for RoadMap/Document API test', 1, 'TEST001', 'ACTIVE', 'PUBLIC', GETDATE(), GETDATE());
+#
+# INSERT INTO learning_paths (
+#     id,
+#     learning_space_id,
+#     lecturer_id,
+#     title,
+#     description,
+#     status,
+#     position,
+#     thumbnail_url,
+#     estimated_duration_hours,
+#     visibility,
+#     created_at,
+#     updated_at
+# )
+# VALUES (
+#     1,
+#     1,
+#     1,
+#     'Roadmap 1',
+#     'Roadmap description',
+#     'ACTIVE',
+#     1,
+#     NULL,
+#     2.5,
+#     'PUBLIC',
+#     GETDATE(),
+#     GETDATE()
+# );
+#
+# INSERT INTO course_documents (id, learning_path_id, title, description, document_type, url, created_at)
+# VALUES (1, 1, 'Document 1', 'Document description', 'PDF', 'https://example.com/document.pdf', GETDATE());
+
+### View Road Map List
+# Expected response sample:
+# HTTP/1.1 200
+# [
+#   {
+#     "id": 1,
+#     "learningSpaceId": 1,
+#     "lecturerId": 1,
+#     "title": "Roadmap 1",
+#     "description": "Roadmap description",
+#     "status": "ACTIVE",
+#     "position": 1,
+#     "createdAt": "2026-05-22T10:00:00",
+#     "updatedAt": "2026-05-22T10:00:00"
+#   }
+# ]
+GET {{baseUrl}}/api/learning-spaces/{{learningSpaceId}}/learning-paths
+Accept: application/json
+
+### View Document List
+# Expected response sample:
+# HTTP/1.1 200
+# [
+#   {
+#     "id": 1,
+#     "learningPathId": 1,
+#     "title": "Document 1",
+#     "documentType": "PDF",
+#     "url": "https://example.com/document.pdf",
+#     "description": "Document description",
+#     "createdAt": "2026-05-22T10:00:00"
+#   }
+# ]
+GET {{baseUrl}}/api/learning-paths/{{learningPathId}}/documents
+Accept: application/json
+
