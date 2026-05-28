@@ -24,7 +24,7 @@ public class QuizController {
     public QuizController(QuizService quizService) {
         this.quizService = quizService;
     }
-    //ssss
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -87,5 +87,11 @@ public class QuizController {
     @GetMapping("/{quizId}/statistics")
     public QuizStatisticsResponse getStatistics(@PathVariable("quizId") @Positive(message = "quizId must be a positive number") Long quizId) {
         return quizService.getStatistics(quizId);
+    }
+
+    @GetMapping("/learning-node/{nodeId}/active")
+    public List<QuizResponse> getActiveQuizzesByLearningNode(
+            @PathVariable("nodeId") @Positive(message = "nodeId must be a positive number") Long nodeId) {
+        return quizService.getActiveQuizzesByLearningNode(nodeId);
     }
 }

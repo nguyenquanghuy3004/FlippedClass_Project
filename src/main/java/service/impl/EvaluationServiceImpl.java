@@ -25,27 +25,32 @@ public class EvaluationServiceImpl implements EvaluationService {
     private final GradeEntryRepository gradeEntryRepository;
     private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final LearningPathRepository learningPathRepository;
 
     public EvaluationServiceImpl(EvaluationSessionRepository sessionRepository,
                                  EvaluationCriterionRepository criterionRepository,
                                  InteractionLogRepository interactionLogRepository,
                                  GradeEntryRepository gradeEntryRepository,
                                  UserRepository userRepository,
-                                 StudentProfileRepository studentProfileRepository) {
+                                 StudentProfileRepository studentProfileRepository,
+                                 LearningPathRepository learningPathRepository) {
         this.sessionRepository = sessionRepository;
         this.criterionRepository = criterionRepository;
         this.interactionLogRepository = interactionLogRepository;
         this.gradeEntryRepository = gradeEntryRepository;
         this.userRepository = userRepository;
         this.studentProfileRepository = studentProfileRepository;
+        this.learningPathRepository = learningPathRepository;
     }
 
     @Override
     public EvaluationSessionResponse createSession(CreateEvaluationSessionRequest request) {
         User lecturer = UserServiceImpl.findUser(userRepository, request.getLecturerId());
+        LearningPath path = learningPathRepository.findById(request.getLearningPathId())
+                .orElseThrow(() -> new NotFoundException("Learning path not found: " + request.getLearningPathId()));
 
         EvaluationSession session = EvaluationSession.builder()
-                .learningPathId(request.getLearningPathId())
+                .learningPath(path)
                 .lecturer(lecturer)
                 .title(request.getTitle().trim())
                 .gradingStartAt(request.getGradingStartAt())
@@ -85,7 +90,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         User student = UserServiceImpl.findUser(userRepository, studentId);
 
         List<InteractionLogResponse> history = interactionLogRepository
-                .findByStudentIdAndLearningPathIdOrderByOccurredAtDesc(studentId, session.getLearningPathId())
+                .findByStudentIdAndLearningPathIdOrderByOccurredAtDesc(studentId, session.getLearningPath().getId())
                 .stream()
                 .map(this::toInteractionResponse)
                 .toList();
@@ -160,10 +165,12 @@ public class EvaluationServiceImpl implements EvaluationService {
     @Override
     public InteractionLogResponse addInteractionLog(CreateInteractionLogRequest request) {
         User student = UserServiceImpl.findUser(userRepository, request.getStudentId());
+        LearningPath path = learningPathRepository.findById(request.getLearningPathId())
+                .orElseThrow(() -> new NotFoundException("Learning path not found: " + request.getLearningPathId()));
 
         InteractionLog log = InteractionLog.builder()
                 .student(student)
-                .learningPathId(request.getLearningPathId())
+                .learningPath(path)
                 .interactionType(request.getInteractionType())
                 .summary(request.getSummary() != null ? request.getSummary().trim() : null)
                 .occurredAt(request.getOccurredAt() != null ? request.getOccurredAt() : LocalDateTime.now())
@@ -224,7 +231,7 @@ public class EvaluationServiceImpl implements EvaluationService {
 
         return EvaluationSessionResponse.builder()
                 .id(session.getId())
-                .learningPathId(session.getLearningPathId())
+                .learningPathId(session.getLearningPath().getId())
                 .lecturerId(session.getLecturer().getId())
                 .lecturerName(session.getLecturer().getFullName())
                 .title(session.getTitle())
@@ -239,7 +246,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         return InteractionLogResponse.builder()
                 .id(log.getId())
                 .studentId(log.getStudent().getId())
-                .learningPathId(log.getLearningPathId())
+                .learningPathId(log.getLearningPath().getId())
                 .interactionType(log.getInteractionType())
                 .summary(log.getSummary())
                 .occurredAt(log.getOccurredAt())

@@ -22,8 +22,9 @@ public class InteractionLog {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    @Column(name = "learning_path_id")
-    private Long learningPathId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_path_id", nullable = false)
+    private LearningPath learningPath;
 
     @Column(name = "interaction_type", length = 50)
     private String interactionType;

@@ -18,8 +18,9 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "learning_node_id")
-    private Long learningNodeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_node_id", nullable = false)
+    private LearningNode learningNode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecturer_id", nullable = false)

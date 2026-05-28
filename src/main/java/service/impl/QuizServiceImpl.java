@@ -17,6 +17,7 @@ import repository.QuizAttemptRepository;
 import repository.QuizQuestionRepository;
 import repository.QuizRepository;
 import repository.UserRepository;
+import repository.LearningNodeRepository;
 import service.QuizService;
 
 import java.math.BigDecimal;
@@ -36,23 +37,28 @@ public class QuizServiceImpl implements QuizService {
     private final QuizQuestionRepository questionRepository;
     private final QuizAttemptRepository attemptRepository;
     private final UserRepository userRepository;
+    private final LearningNodeRepository learningNodeRepository;
 
     public QuizServiceImpl(QuizRepository quizRepository,
                            QuizQuestionRepository questionRepository,
                            QuizAttemptRepository attemptRepository,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           LearningNodeRepository learningNodeRepository) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.attemptRepository = attemptRepository;
         this.userRepository = userRepository;
+        this.learningNodeRepository = learningNodeRepository;
     }
 
     @Override
     public QuizResponse create(CreateQuizRequest request) {
         User lecturer = UserServiceImpl.findUser(userRepository, request.getLecturerId());
+        entity.LearningNode node = learningNodeRepository.findById(request.getLearningNodeId())
+                .orElseThrow(() -> new NotFoundException("Learning node not found: " + request.getLearningNodeId()));
 
         Quiz quiz = Quiz.builder()
-                .learningNodeId(request.getLearningNodeId())
+                .learningNode(node)
                 .lecturer(lecturer)
                 .title(request.getTitle().trim())
                 .description(trimToNull(request.getDescription()))
@@ -213,6 +219,13 @@ public class QuizServiceImpl implements QuizService {
                 .build();
     }
 
+    @Override
+    public List<QuizResponse> getActiveQuizzesByLearningNode(Long learningNodeId) {
+        return quizRepository.findByLearningNode_IdAndActiveTrue(learningNodeId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     private Quiz findQuiz(Long id) {
         return quizRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Quiz not found: " + id));
@@ -229,7 +242,7 @@ public class QuizServiceImpl implements QuizService {
     private QuizResponse toResponse(Quiz quiz) {
         return QuizResponse.builder()
                 .id(quiz.getId())
-                .learningNodeId(quiz.getLearningNodeId())
+                .learningNodeId(quiz.getLearningNode().getId())
                 .lecturerId(quiz.getLecturer().getId())
                 .lecturerName(quiz.getLecturer().getFullName())
                 .title(quiz.getTitle())

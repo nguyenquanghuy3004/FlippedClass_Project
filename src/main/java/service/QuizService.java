@@ -31,4 +31,6 @@ public interface QuizService {
     List<QuizAttemptResponse> getAttempts(Long quizId);
 
     QuizStatisticsResponse getStatistics(Long quizId);
+
+    List<QuizResponse> getActiveQuizzesByLearningNode(Long learningNodeId);
 }
