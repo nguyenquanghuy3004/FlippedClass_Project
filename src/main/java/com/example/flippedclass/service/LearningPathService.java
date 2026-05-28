@@ -2,9 +2,10 @@ package com.example.flippedclass.service;
 
 import com.example.flippedclass.dto.LearningPathRequest;
 import com.example.flippedclass.dto.LearningPathResponse;
-import com.example.flippedclass.entity.Course;
+import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.enums.LearningPathStatus;
+import com.example.flippedclass.repository.LearningSpaceRepository;
 import com.example.flippedclass.repository.LearningPathRepository;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -15,16 +16,18 @@ import org.springframework.web.server.ResponseStatusException;
 public class LearningPathService {
 
     private final LearningPathRepository learningPathRepository;
-    private final CourseService courseService;
+    private final LearningSpaceRepository learningSpaceRepository;
 
-    public LearningPathService(LearningPathRepository learningPathRepository, CourseService courseService) {
+    public LearningPathService(
+            LearningPathRepository learningPathRepository,
+            LearningSpaceRepository learningSpaceRepository
+    ) {
         this.learningPathRepository = learningPathRepository;
-        this.courseService = courseService;
+        this.learningSpaceRepository = learningSpaceRepository;
     }
 
-    public List<LearningPathResponse> findByCourse(Long courseId) {
-        courseService.getCourse(courseId);
-        return learningPathRepository.findByCourseId(courseId).stream()
+    public List<LearningPathResponse> findByLearningSpace(Long learningSpaceId) {
+        return learningPathRepository.findByLearningSpace_IdOrderByPositionAsc(learningSpaceId).stream()
                 .map(LearningPathResponse::from)
                 .toList();
     }
@@ -33,10 +36,10 @@ public class LearningPathService {
         return LearningPathResponse.from(getLearningPath(id));
     }
 
-    public LearningPathResponse create(Long courseId, LearningPathRequest request) {
-        Course course = courseService.getCourse(courseId);
+    public LearningPathResponse create(Long learningSpaceId, LearningPathRequest request) {
+        LearningSpace learningSpace = getLearningSpace(learningSpaceId);
         LearningPath learningPath = new LearningPath();
-        learningPath.setCourse(course);
+        learningPath.setLearningSpace(learningSpace);
         applyRequest(learningPath, request);
         return LearningPathResponse.from(learningPathRepository.save(learningPath));
     }
@@ -56,6 +59,11 @@ public class LearningPathService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Learning path not found"));
     }
 
+    private LearningSpace getLearningSpace(Long id) {
+        return learningSpaceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Learning space not found"));
+    }
+
     private void applyRequest(LearningPath learningPath, LearningPathRequest request) {
         if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Learning path title is required");
@@ -64,5 +72,6 @@ public class LearningPathService {
         learningPath.setTitle(request.getTitle().trim());
         learningPath.setDescription(request.getDescription());
         learningPath.setStatus(request.getStatus() == null ? LearningPathStatus.DRAFT : request.getStatus());
+        learningPath.setPosition(request.getPosition());
     }
 }

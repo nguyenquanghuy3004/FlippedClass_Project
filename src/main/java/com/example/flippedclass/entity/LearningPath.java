@@ -5,10 +5,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -28,8 +28,8 @@ public class LearningPath {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "learning_space_id", nullable = false)
+    private LearningSpace learningSpace;
 
     @Column(nullable = false)
     private String title;
@@ -41,10 +41,13 @@ public class LearningPath {
     @Column(nullable = false)
     private LearningPathStatus status = LearningPathStatus.DRAFT;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "position")
+    private Integer position;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "learningPath")
@@ -69,12 +72,16 @@ public class LearningPath {
         return id;
     }
 
-    public Course getCourse() {
-        return course;
+    public Long getLearningSpaceId() {
+        return learningSpace == null ? null : learningSpace.getId();
     }
 
-    public void setCourse(Course course) {
-        this.course = course;
+    public LearningSpace getLearningSpace() {
+        return learningSpace;
+    }
+
+    public void setLearningSpace(LearningSpace learningSpace) {
+        this.learningSpace = learningSpace;
     }
 
     public String getTitle() {
@@ -99,6 +106,14 @@ public class LearningPath {
 
     public void setStatus(LearningPathStatus status) {
         this.status = status;
+    }
+
+    public Integer getPosition() {
+        return position;
+    }
+
+    public void setPosition(Integer position) {
+        this.position = position;
     }
 
     public LocalDateTime getCreatedAt() {

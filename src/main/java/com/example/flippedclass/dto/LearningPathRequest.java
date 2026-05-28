@@ -6,6 +6,7 @@ public class LearningPathRequest {
     private String title;
     private String description;
     private LearningPathStatus status;
+    private Integer position;
 
     public String getTitle() {
         return title;
@@ -30,4 +31,13 @@ public class LearningPathRequest {
     public void setStatus(LearningPathStatus status) {
         this.status = status;
     }
+
+    public Integer getPosition() {
+        return position;
+    }
+
+    public void setPosition(Integer position) {
+        this.position = position;
+    }
+
 }

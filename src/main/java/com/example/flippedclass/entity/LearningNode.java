@@ -46,7 +46,7 @@ public class LearningNode {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "node_type", nullable = false)
     private NodeType nodeType = NodeType.LESSON;
 
     @Enumerated(EnumType.STRING)
@@ -56,12 +56,13 @@ public class LearningNode {
     @Column(name = "display_order", nullable = false)
     private Integer displayOrder;
 
+    @Column(name = "estimated_minutes")
     private Integer estimatedMinutes;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist

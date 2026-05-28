@@ -4,7 +4,7 @@ import com.example.flippedclass.entity.CourseDocument;
 import com.example.flippedclass.repository.CourseDocumentRepository;
 import com.example.flippedclass.dto.CourseDocumentRequest;
 import com.example.flippedclass.dto.CourseDocumentResponse;
-import com.example.flippedclass.entity.Course;
+import com.example.flippedclass.entity.LearningPath;
 
 import java.net.URI;
 import java.util.List;
@@ -16,24 +16,24 @@ import org.springframework.web.server.ResponseStatusException;
 public class CourseDocumentService {
 
     private final CourseDocumentRepository documentRepository;
-    private final CourseService courseService;
+    private final LearningPathService learningPathService;
 
-    public CourseDocumentService(CourseDocumentRepository documentRepository, CourseService courseService) {
+    public CourseDocumentService(CourseDocumentRepository documentRepository, LearningPathService learningPathService) {
         this.documentRepository = documentRepository;
-        this.courseService = courseService;
+        this.learningPathService = learningPathService;
     }
 
-    public List<CourseDocumentResponse> findByCourse(Long courseId) {
-        courseService.getCourse(courseId);
-        return documentRepository.findByCourseId(courseId).stream()
+    public List<CourseDocumentResponse> findByLearningPath(Long learningPathId) {
+        learningPathService.getLearningPath(learningPathId);
+        return documentRepository.findByLearningPathId(learningPathId).stream()
                 .map(CourseDocumentResponse::from)
                 .toList();
     }
 
-    public CourseDocumentResponse create(Long courseId, CourseDocumentRequest request) {
-        Course course = courseService.getCourse(courseId);
+    public CourseDocumentResponse create(Long learningPathId, CourseDocumentRequest request) {
+        LearningPath learningPath = learningPathService.getLearningPath(learningPathId);
         CourseDocument document = new CourseDocument();
-        document.setCourse(course);
+        document.setLearningPath(learningPath);
         applyRequest(document, request);
         return CourseDocumentResponse.from(documentRepository.save(document));
     }

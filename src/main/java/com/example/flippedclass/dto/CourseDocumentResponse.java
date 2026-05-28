@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public class CourseDocumentResponse {
     private Long id;
-    private Long courseId;
+    private Long learningPathId;
     private String title;
     private DocumentType documentType;
     private String url;
@@ -17,7 +17,7 @@ public class CourseDocumentResponse {
     public static CourseDocumentResponse from(CourseDocument document) {
         CourseDocumentResponse response = new CourseDocumentResponse();
         response.id = document.getId();
-        response.courseId = document.getCourse().getId();
+        response.learningPathId = document.getLearningPath().getId();
         response.title = document.getTitle();
         response.documentType = document.getDocumentType();
         response.url = document.getUrl();
@@ -30,8 +30,8 @@ public class CourseDocumentResponse {
         return id;
     }
 
-    public Long getCourseId() {
-        return courseId;
+    public Long getLearningPathId() {
+        return learningPathId;
     }
 
     public String getTitle() {

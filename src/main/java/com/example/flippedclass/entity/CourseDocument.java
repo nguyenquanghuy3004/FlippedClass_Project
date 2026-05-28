@@ -24,14 +24,14 @@ public class CourseDocument {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "learning_path_id", nullable = false)
+    private LearningPath learningPath;
 
     @Column(nullable = false)
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "document_type", nullable = false)
     private DocumentType documentType;
 
     @Column(nullable = false, length = 1000)
@@ -40,7 +40,7 @@ public class CourseDocument {
     @Column(columnDefinition = "nvarchar(max)")
     private String description;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
@@ -52,12 +52,12 @@ public class CourseDocument {
         return id;
     }
 
-    public Course getCourse() {
-        return course;
+    public LearningPath getLearningPath() {
+        return learningPath;
     }
 
-    public void setCourse(Course course) {
-        this.course = course;
+    public void setLearningPath(LearningPath learningPath) {
+        this.learningPath = learningPath;
     }
 
     public String getTitle() {

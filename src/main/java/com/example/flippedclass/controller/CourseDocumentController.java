@@ -24,18 +24,18 @@ public class CourseDocumentController {
         this.documentService = documentService;
     }
 
-    @GetMapping("/api/courses/{courseId}/documents")
-    public List<CourseDocumentResponse> findByCourse(@PathVariable Long courseId) {
-        return documentService.findByCourse(courseId);
+    @GetMapping("/api/learning-paths/{learningPathId}/documents")
+    public List<CourseDocumentResponse> findByLearningPath(@PathVariable Long learningPathId) {
+        return documentService.findByLearningPath(learningPathId);
     }
 
-    @PostMapping("/api/courses/{courseId}/documents")
+    @PostMapping("/api/learning-paths/{learningPathId}/documents")
     @ResponseStatus(HttpStatus.CREATED)
     public CourseDocumentResponse create(
-            @PathVariable Long courseId,
+            @PathVariable Long learningPathId,
             @RequestBody CourseDocumentRequest request
     ) {
-        return documentService.create(courseId, request);
+        return documentService.create(learningPathId, request);
     }
 
     @PutMapping("/api/course-documents/{documentId}")

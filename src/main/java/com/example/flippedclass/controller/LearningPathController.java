@@ -23,18 +23,18 @@ public class LearningPathController {
         this.learningPathService = learningPathService;
     }
 
-    @GetMapping("/api/courses/{courseId}/learning-paths")
-    public List<LearningPathResponse> findByCourse(@PathVariable Long courseId) {
-        return learningPathService.findByCourse(courseId);
+    @GetMapping("/api/learning-spaces/{learningSpaceId}/learning-paths")
+    public List<LearningPathResponse> findByLearningSpace(@PathVariable Long learningSpaceId) {
+        return learningPathService.findByLearningSpace(learningSpaceId);
     }
 
-    @PostMapping("/api/courses/{courseId}/learning-paths")
+    @PostMapping("/api/learning-spaces/{learningSpaceId}/learning-paths")
     @ResponseStatus(HttpStatus.CREATED)
     public LearningPathResponse create(
-            @PathVariable Long courseId,
+            @PathVariable Long learningSpaceId,
             @RequestBody LearningPathRequest request
     ) {
-        return learningPathService.create(courseId, request);
+        return learningPathService.create(learningSpaceId, request);
     }
 
     @GetMapping("/api/learning-paths/{id}")

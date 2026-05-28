@@ -6,20 +6,22 @@ import java.time.LocalDateTime;
 
 public class LearningPathResponse {
     private Long id;
-    private Long courseId;
+    private Long learningSpaceId;
     private String title;
     private String description;
     private LearningPathStatus status;
+    private Integer position;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public static LearningPathResponse from(LearningPath learningPath) {
         LearningPathResponse response = new LearningPathResponse();
         response.id = learningPath.getId();
-        response.courseId = learningPath.getCourse().getId();
+        response.learningSpaceId = learningPath.getLearningSpaceId();
         response.title = learningPath.getTitle();
         response.description = learningPath.getDescription();
         response.status = learningPath.getStatus();
+        response.position = learningPath.getPosition();
         response.createdAt = learningPath.getCreatedAt();
         response.updatedAt = learningPath.getUpdatedAt();
         return response;
@@ -29,8 +31,8 @@ public class LearningPathResponse {
         return id;
     }
 
-    public Long getCourseId() {
-        return courseId;
+    public Long getLearningSpaceId() {
+        return learningSpaceId;
     }
 
     public String getTitle() {
@@ -43,6 +45,10 @@ public class LearningPathResponse {
 
     public LearningPathStatus getStatus() {
         return status;
+    }
+
+    public Integer getPosition() {
+        return position;
     }
 
     public LocalDateTime getCreatedAt() {

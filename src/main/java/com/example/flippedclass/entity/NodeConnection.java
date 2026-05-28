@@ -39,11 +39,13 @@ public class NodeConnection {
     @JoinColumn(name = "target_node_id", nullable = false)
     private LearningNode targetNode;
 
+    @Column(name = "condition_type")
     private String conditionType;
 
+    @Column(name = "condition_value")
     private String conditionValue;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
