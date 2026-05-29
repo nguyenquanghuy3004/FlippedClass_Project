@@ -1,7 +1,7 @@
 package com.example.flippedclass.controller;
 
 import com.example.flippedclass.dto.request.LearningPathRequest;
-import com.example.flippedclass.dto.LearningPathResponse;
+import com.example.flippedclass.dto.response.LearningPathResponse;
 import com.example.flippedclass.service.LearningPathService;
 import java.util.List;
 import org.springframework.http.HttpStatus;

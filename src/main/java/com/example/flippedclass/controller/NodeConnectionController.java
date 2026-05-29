@@ -1,7 +1,7 @@
 package com.example.flippedclass.controller;
 
 import com.example.flippedclass.dto.request.NodeConnectionRequest;
-import com.example.flippedclass.dto.NodeConnectionResponse;
+import com.example.flippedclass.dto.response.NodeConnectionResponse;
 import com.example.flippedclass.service.NodeConnectionService;
 import java.util.List;
 import org.springframework.http.HttpStatus;

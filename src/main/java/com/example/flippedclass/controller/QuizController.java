@@ -1,6 +1,6 @@
 package com.example.flippedclass.controller;
 
-import com.example.flippedclass.dto.QuizResponse;
+import com.example.flippedclass.dto.response.QuizResponse;
 import com.example.flippedclass.service.QuizService;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;

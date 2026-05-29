@@ -1,4 +1,4 @@
-package com.example.flippedclass.dto;
+package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.CourseDocument;
 import com.example.flippedclass.enums.DocumentType;

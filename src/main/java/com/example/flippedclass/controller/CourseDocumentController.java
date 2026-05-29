@@ -3,7 +3,7 @@ package com.example.flippedclass.controller;
 import java.util.List;
 
 import com.example.flippedclass.dto.request.CourseDocumentRequest;
-import com.example.flippedclass.dto.CourseDocumentResponse;
+import com.example.flippedclass.dto.response.CourseDocumentResponse;
 import com.example.flippedclass.service.CourseDocumentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;

@@ -1,6 +1,6 @@
 package com.example.flippedclass.controller;
 
-import com.example.flippedclass.dto.StudentDashboardResponse;
+import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.service.StudentDashboardService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
