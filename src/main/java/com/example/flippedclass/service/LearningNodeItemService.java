@@ -1,16 +1,15 @@
 package com.example.flippedclass.service;
 
 import com.example.flippedclass.dto.response.CreateLearningNodeItemRequest;
-import com.example.flippedclass.entity.LearningNodeItem;
-import org.springframework.stereotype.Service;
+import com.example.flippedclass.dto.response.LearningNodeItemResponse;
 
 import java.util.List;
 
-@Service
 public interface LearningNodeItemService {
-    LearningNodeItem createItem(CreateLearningNodeItemRequest request);
 
-    List<LearningNodeItem> getItemByNodeId(Long nodeId);
+    LearningNodeItemResponse createItem(Long nodeId, CreateLearningNodeItemRequest request);
+
+    List<LearningNodeItemResponse> getItemByNodeId(Long nodeId);
 
     void delete(Long id);
 

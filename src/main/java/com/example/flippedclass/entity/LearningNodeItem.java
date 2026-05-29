@@ -1,6 +1,6 @@
 package com.example.flippedclass.entity;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import enums.ItemType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,14 +16,15 @@ public class LearningNodeItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false,length = 50)
+    @Column(nullable = false, length = 50)
     private ItemType itemType;
 
-    @Column(columnDefinition =  "NVARCHAR(MAX)")
-    private String Url;
+    @Column(name = "url", columnDefinition = "NVARCHAR(MAX)")
+    private String url;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String content;
@@ -31,12 +32,11 @@ public class LearningNodeItem {
     @Column(nullable = false)
     private Integer position;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "learning_node_id",nullable = false)
+    @JoinColumn(name = "learning_node_id", nullable = false)
     private LearningNode learningNode;
 
     @Column(name = "quiz_id")
     private Long quizId;
-
 }
-

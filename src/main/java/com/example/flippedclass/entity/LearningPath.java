@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "learning_paths")
+@Table(name = "learning_path")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -50,7 +50,6 @@ public class LearningPath {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private LearningPathStatus status = LearningPathStatus.ACTIVE;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

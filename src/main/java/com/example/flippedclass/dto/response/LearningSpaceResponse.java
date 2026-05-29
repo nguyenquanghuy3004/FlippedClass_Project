@@ -1,5 +1,6 @@
 package com.example.flippedclass.dto.response;
 
+import enums.LearningSpaceStatus;
 import enums.VisibilityType;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,4 +20,5 @@ public class LearningSpaceResponse {
     private Long ownerId;
     private String ownerUsername;
     private LocalDateTime createdAt;
+    private LearningSpaceStatus status;
 }

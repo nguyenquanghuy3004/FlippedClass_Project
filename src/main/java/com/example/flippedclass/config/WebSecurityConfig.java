@@ -57,7 +57,7 @@ public class WebSecurityConfig {
 
     private static final String[] PUBLIC_URLS = {"/swagger", "/swagger-ui/**", "/swagger-ui.html",
             "/api-docs", "/api-docs/**", "/v3/api-docs/**",
-            "/google-test.html", "/error"
+            "/google-test.html", "/error", "/uploads/**"
     };
 
     @Bean

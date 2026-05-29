@@ -24,7 +24,7 @@ public class SpaceSecurityEvaluator {
 
         // ĐẶC QUYỀN ADMIN: Nếu người dùng là Admin hệ thống thì tự động cho phép truy cập luôn
         for (org.springframework.security.core.GrantedAuthority authority : auth.getAuthorities()) {
-            if (authority.getAuthority().equals("ROLE_ADMIN")) {
+            if (authority.getAuthority().equals("ADMIN")) {
                 return true;
             }
         }

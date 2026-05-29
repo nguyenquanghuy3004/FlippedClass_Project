@@ -1,24 +1,24 @@
 package com.example.flippedclass.dto.response;
 
-import enums.LearningPathStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
 @Builder
-public class LearningPathResponse {
+public class LearningNodeResponse {
     private Long id;
     private String title;
-    private String description;
-    private Integer position;
-    private LearningPathStatus status;
-    private Long learningSpaceId;
-    private List<LearningNodeResponse> nodes; // ADDED THIS FIELD
+//    private String description;
+    private Long learningPathId;
+//    private Double positionX;
+//    private Double positionY;
+    private String status;
+    private String nodeType;
+    private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -1,49 +1,64 @@
 package com.example.flippedclass.service.impl;
 
 import com.example.flippedclass.dto.response.CreateLearningNodeItemRequest;
+import com.example.flippedclass.dto.response.LearningNodeItemResponse;
 import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.LearningNodeItem;
 import com.example.flippedclass.repository.LearningNodeItemRepository;
 import com.example.flippedclass.repository.LearningNodeRepository;
+import com.example.flippedclass.service.FileStorageService;
 import com.example.flippedclass.service.LearningNodeItemService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import com.example.flippedclass.util.VideoUrlNormalizer;
+import enums.ItemType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class LearningNodeItemServiceImpl implements LearningNodeItemService {
 
-    private final LearningNodeItemRepository learningNodeItemRepository;
-    private final LearningNodeRepository learningNodeRepository;
+    @Autowired
+    private LearningNodeItemRepository learningNodeItemRepository;
+
+    @Autowired
+    private LearningNodeRepository learningNodeRepository;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @Override
     @Transactional
-    public LearningNodeItem createItem(CreateLearningNodeItemRequest request) {
-        LearningNode node = learningNodeRepository.findById(request.getLearningNodeId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài học tương ứng"));
+    public LearningNodeItemResponse createItem(Long nodeId, CreateLearningNodeItemRequest request) {
+        LearningNode node = learningNodeRepository.findById(nodeId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài học tương ứng"));
 
-        List<LearningNodeItem> existingItems = learningNodeItemRepository.findByLearningNodeIdOrderByPosition(request.getLearningNodeId());
+        String normalizedUrl = normalizeItemUrl(request.getItemType(), request.getUrl());
+
+        List<LearningNodeItem> existingItems = learningNodeItemRepository.findByLearningNodeIdOrderByPosition(nodeId);
         int nextPosition = existingItems.isEmpty() ? 1 : existingItems.get(existingItems.size() - 1).getPosition() + 1;
 
         LearningNodeItem item = LearningNodeItem.builder()
                 .title(request.getTitle())
                 .itemType(request.getItemType())
-                .Url(request.getUrl())
+                .url(normalizedUrl)
                 .content(request.getContent())
                 .position(nextPosition)
                 .learningNode(node)
                 .quizId(request.getQuizId())
                 .build();
 
-        return learningNodeItemRepository.save(item);
+        return toResponse(learningNodeItemRepository.save(item));
     }
 
     @Override
-    public List<LearningNodeItem> getItemByNodeId(Long nodeId) {
-        return learningNodeItemRepository.findByLearningNodeIdOrderByPosition(nodeId);
+    @Transactional(readOnly = true)
+    public List<LearningNodeItemResponse> getItemByNodeId(Long nodeId) {
+        return learningNodeItemRepository.findByLearningNodeIdOrderByPosition(nodeId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
@@ -63,5 +78,29 @@ public class LearningNodeItemServiceImpl implements LearningNodeItemService {
                 learningNodeItemRepository.save(item);
             });
         }
+    }
+
+    private String normalizeItemUrl(ItemType itemType, String url) {
+        if (itemType == ItemType.VIDEO && url != null && !url.isBlank()) {
+            return VideoUrlNormalizer.normalize(url);
+        }
+        return url;
+    }
+
+    private LearningNodeItemResponse toResponse(LearningNodeItem item) {
+        String url = item.getItemType() == ItemType.VIDEO
+                ? VideoUrlNormalizer.normalize(item.getUrl())
+                : item.getUrl();
+
+        return LearningNodeItemResponse.builder()
+                .id(item.getId())
+                .title(item.getTitle())
+                .itemType(item.getItemType())
+                .url(url)
+                .fullUrl(fileStorageService.toFullUrl(url))
+                .content(item.getContent())
+                .position(item.getPosition())
+                .quizId(item.getQuizId())
+                .build();
     }
 }

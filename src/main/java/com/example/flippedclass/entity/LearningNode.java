@@ -44,11 +44,11 @@ public class LearningNode {
     private Integer estimatedMinutes = 0;
 
     // Tọa độ phục vụ vẽ sơ đồ Graph/Mindmap
-    @Column(name = "position_x")
-    private Double positionX;
-
-    @Column(name = "position_y")
-    private Double positionY;
+//    @Column(name = "position_x")
+//    private Double positionX;
+//
+//    @Column(name = "position_y")
+//    private Double positionY;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "learning_path_id", nullable = false)

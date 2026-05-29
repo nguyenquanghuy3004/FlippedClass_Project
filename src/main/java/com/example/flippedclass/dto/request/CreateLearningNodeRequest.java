@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateLearningNodeRequest {
+public class  CreateLearningNodeRequest {
     private String title;
     private String description;
     private Long learningPathId;

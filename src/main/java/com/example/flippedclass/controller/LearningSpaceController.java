@@ -1,5 +1,5 @@
 package com.example.flippedclass.controller;
-
+//tại sao khi tôi tạo learningpath xong tôi F5 lại thì lại mất trong
 import com.example.flippedclass.dto.request.CreateLearningSpaceRequest;
 import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
 import com.example.flippedclass.dto.response.JoinLearningSpaceResponse;
@@ -7,11 +7,13 @@ import com.example.flippedclass.dto.response.LearningSpaceResponse;
 import com.example.flippedclass.dto.response.MessageResponse;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.service.LearningSpaceService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -21,15 +23,22 @@ public class LearningSpaceController {
     @Autowired
     private LearningSpaceService learningSpaceService;
 
-    @PreAuthorize("hasRole('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR')")
     @PostMapping
+    @Transactional
     public ResponseEntity<LearningSpaceResponse> createLearningSpace(@Valid @RequestBody CreateLearningSpaceRequest request) {
         LearningSpaceResponse response = learningSpaceService.createLearningSpace(request);
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAuthority('MENTOR')")
+    @GetMapping("/my-spaces")
+    public ResponseEntity<List<LearningSpaceResponse>> getMySpaces() {
+        return ResponseEntity.ok(learningSpaceService.getMySpaces());
+    }
 
-    @PreAuthorize("hasRole('MENTOR') or hasRole('ADMIN')")
+
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteLearningSpace (@PathVariable Long id){
         learningSpaceService.deleteLearningSpace(id);
@@ -37,11 +46,18 @@ public class LearningSpaceController {
     }
 
 
-    @PreAuthorize("hasRole('MENTOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")
     @PutMapping("/{id}/restore")
     public ResponseEntity<?> restoreLearningSpace(@PathVariable Long id){
         learningSpaceService.restoreLearningSpace(id);
         return ResponseEntity.ok(new MessageResponse("Khôi phục thành công "));
+    }
+
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")
+    @PutMapping("/{id}/archive")
+    public ResponseEntity<?> archiveLearningSpace(@PathVariable Long id){
+        learningSpaceService.archiveLearningSpace(id);
+        return ResponseEntity.ok(new MessageResponse("Lưu trữ thành công "));
     }
 
     @PostMapping("/join")
@@ -49,7 +65,7 @@ public class LearningSpaceController {
         return ResponseEntity.ok(learningSpaceService.joinLearningSpace(request));
     }
 
-    @PreAuthorize("hasRole('MENTOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")
     @PutMapping("/{id}/update")
     public ResponseEntity<?> updateLearingSpace(@PathVariable Long id, @RequestBody LearningSpace spaceDetail){
          LearningSpace update =  learningSpaceService.updateLearningSpace(id, spaceDetail);

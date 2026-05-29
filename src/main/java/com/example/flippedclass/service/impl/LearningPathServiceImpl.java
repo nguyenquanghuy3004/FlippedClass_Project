@@ -3,6 +3,7 @@ package com.example.flippedclass.service.impl;
 import com.example.flippedclass.dto.request.CreateLearningPathRequest;
 import com.example.flippedclass.dto.request.ReorderLearningPathRequest;
 import com.example.flippedclass.dto.request.UpdateLearningPathRequest;
+import com.example.flippedclass.dto.response.LearningNodeResponse;
 import com.example.flippedclass.dto.response.LearningPathResponse;
 import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.entity.LearningSpace;
@@ -31,12 +32,13 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Transactional
     public LearningPathResponse createLearningPath(Long spaceId, CreateLearningPathRequest request) {
         LearningSpace space = learningSpaceRepository.findByIdAndStatus(spaceId, LearningSpaceStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning Space hoặc đã bị xóa"));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning or Space đã bị xóa"));
 
         Integer nextPosition = learningPathRepository
                 .findFirstByLearningSpaceIdAndStatusOrderByPositionDesc(spaceId, LearningPathStatus.ACTIVE)
                 .map(lp -> lp.getPosition() + 1)
-                .orElse(1);
+
+                    .orElse(1);
 
         LearningPath path = new LearningPath();
         path.setTitle(request.getTitle());
@@ -44,6 +46,7 @@ public class LearningPathServiceImpl implements LearningPathService {
         path.setPosition(nextPosition);
         path.setStatus(LearningPathStatus.ACTIVE);
         path.setLearningSpace(space);
+        path.setLecturer(space.getOwner()); // Fix: Set lecturer to avoid DB constraint violation
 
         return toResponse(learningPathRepository.save(path));
     }
@@ -133,6 +136,22 @@ public class LearningPathServiceImpl implements LearningPathService {
     }
 
     private LearningPathResponse toResponse(LearningPath path) {
+        List<LearningNodeResponse> nodeResponses = new java.util.ArrayList<>();
+        if (path.getNodes() != null) {
+            nodeResponses = path.getNodes().stream().map(node -> 
+                com.example.flippedclass.dto.response.LearningNodeResponse.builder()
+                    .id(node.getId())
+                    .title(node.getTitle())
+//                    .description(node.getDescription())
+                    .learningPathId(path.getId())
+                    .status(node.getStatus())
+                    .nodeType(node.getNodeType())
+                    .createdAt(node.getCreatedAt())
+                    .updatedAt(node.getUpdatedAt())
+                    .build()
+            ).toList();
+        }
+
         return LearningPathResponse.builder()
                 .id(path.getId())
                 .title(path.getTitle())
@@ -140,6 +159,7 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .position(path.getPosition())
                 .status(path.getStatus())
                 .learningSpaceId(path.getLearningSpace().getId())
+                .nodes(nodeResponses)
                 .createdAt(path.getCreatedAt())
                 .updatedAt(path.getUpdatedAt())
                 .build();

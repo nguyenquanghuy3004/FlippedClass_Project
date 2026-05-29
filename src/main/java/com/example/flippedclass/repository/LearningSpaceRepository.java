@@ -5,8 +5,10 @@ import enums.LearningSpaceStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,5 +27,11 @@ public interface LearningSpaceRepository extends JpaRepository<LearningSpace, Lo
 
     Optional<LearningSpace> findByIdAndStatus(Long id, LearningSpaceStatus status);
 
-   Page<LearningSpace> findByStatus(LearningSpaceStatus status, Pageable pageable);
+    @EntityGraph(attributePaths = {"owner"})
+    List<LearningSpace> findByOwnerIdAndStatus(Long ownerId, LearningSpaceStatus status);
+
+    @EntityGraph(attributePaths = {"owner"})
+    List<LearningSpace> findByOwnerId(Long ownerId);
+
+    Page<LearningSpace> findByStatus(LearningSpaceStatus status, Pageable pageable);
 }

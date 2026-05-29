@@ -16,4 +16,5 @@ public interface LearningPathRepository extends JpaRepository<LearningPath, Long
     Optional<LearningPath> findByIdAndLearningSpaceId(Long id, Long learningSpaceId);
 
     Optional<LearningPath> findFirstByLearningSpaceIdAndStatusOrderByPositionDesc(Long learningSpaceId, LearningPathStatus status);
+
 }
