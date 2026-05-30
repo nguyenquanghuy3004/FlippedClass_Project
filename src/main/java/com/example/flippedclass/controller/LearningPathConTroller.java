@@ -96,4 +96,28 @@ public class LearningPathController {
         learningPathService.reorderLearningPaths(spaceId, request);
         return ResponseEntity.ok(new MessageResponse("Cập nhật thứ tự thành công"));
     }
+
+    @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
+    @DeleteMapping("/{pathId}/learning-nodes/{nodeId}")
+    public ResponseEntity<?> deleteNode( @PathVariable Long spaceId,@PathVariable Long pathId,
+            @PathVariable Long nodeId) {
+        learningNodeService.deleteNode(nodeId);
+        return ResponseEntity.ok(new MessageResponse("Xóa bài học thành công"));
+    }
+
+    @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
+    @PutMapping("/{pathId}/learning-nodes/{nodeId}")
+    public ResponseEntity<LearningNodeResponse> updateNode(
+            @PathVariable Long spaceId,
+            @PathVariable Long pathId,
+            @PathVariable Long nodeId,
+            @RequestBody CreateLearningNodeRequest request) {
+        return ResponseEntity.ok(learningNodeService.updateLearningNode(nodeId, request));
+    }
+
+    @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
+    @GetMapping("/deleted")
+    public ResponseEntity<List<LearningPathResponse>> getDeletedLearningPaths(@PathVariable Long spaceId) {
+        return ResponseEntity.ok(learningPathService.getDeletedLearningPaths(spaceId));
+    }
 }

@@ -25,4 +25,6 @@ public interface LearningPathService {
     void deleteLearningPath(Long spaceId, Long pathId);
 
     void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request);
+
+    List<LearningPathResponse> getDeletedLearningPaths(Long spaceId);
 }

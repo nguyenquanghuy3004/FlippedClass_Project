@@ -22,6 +22,7 @@ public class CourseDocument {
     @JoinColumn(name = "learning_path_id", nullable = false)
     private LearningPath learningPath;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 255)
     private String title;
 

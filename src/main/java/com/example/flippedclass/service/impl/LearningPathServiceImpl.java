@@ -102,8 +102,8 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Transactional
     public void restoreLearningPath(Long spaceId, Long pathId) {
         LearningPath path = findPathInSpace(spaceId, pathId);
-        if (path.getStatus() != LearningPathStatus.ARCHIVED) {
-            throw new IllegalArgumentException("Chỉ có thể khôi phục roadmap đã lưu trữ");
+        if (path.getStatus() != LearningPathStatus.ARCHIVED && path.getStatus() != LearningPathStatus.DELETED) {
+            throw new IllegalArgumentException("Chỉ có thể khôi phục roadmap đã lưu trữ hoặc đã xóa");
         }
         path.setStatus(LearningPathStatus.ACTIVE);
     }
@@ -163,5 +163,14 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .createdAt(path.getCreatedAt())
                 .updatedAt(path.getUpdatedAt())
                 .build();
+    }
+
+    @Override
+    public List<LearningPathResponse> getDeletedLearningPaths(Long spaceId) {
+        return learningPathRepository
+                .findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.DELETED)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 }

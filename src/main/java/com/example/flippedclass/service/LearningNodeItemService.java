@@ -1,6 +1,6 @@
 package com.example.flippedclass.service;
 
-import com.example.flippedclass.dto.response.CreateLearningNodeItemRequest;
+import com.example.flippedclass.dto.request.CreateLearningNodeItemRequest;
 import com.example.flippedclass.dto.response.LearningNodeItemResponse;
 
 import java.util.List;

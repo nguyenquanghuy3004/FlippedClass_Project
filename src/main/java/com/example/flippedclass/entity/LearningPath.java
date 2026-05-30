@@ -23,6 +23,7 @@ public class LearningPath {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 255)
     private String title;
 

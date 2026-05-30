@@ -17,7 +17,20 @@ public final class VideoUrlNormalizer {
         String normalized = url.trim();
 
         if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+            String pdfFromHttp = extractPdfPathIfPresent(normalized);
+            if (pdfFromHttp != null) {
+                return pdfFromHttp;
+            }
             return normalized;
+        }
+
+        String pdfFixed = extractPdfPathIfPresent(normalized);
+        if (pdfFixed != null) {
+            return pdfFixed;
+        }
+
+        if (normalized.matches("(?i)^/?uploads/pdfs/.+")) {
+            return normalized.startsWith("/") ? normalized : "/" + normalized;
         }
 
         // Sửa lỗi FE ghép sai: uploads/videos + uuid.mp4 (thiếu /)
@@ -30,6 +43,22 @@ public final class VideoUrlNormalizer {
         }
 
         return normalized;
+    }
+
+    /** Lấy /uploads/pdfs/... nếu URL bị lồng nhầm trong /uploads/videos/... */
+    private static String extractPdfPathIfPresent(String path) {
+        if (path == null || path.isBlank()) {
+            return null;
+        }
+        int idx = path.toLowerCase().indexOf("/uploads/pdfs/");
+        if (idx < 0) {
+            return null;
+        }
+        String relative = path.substring(idx);
+        if (path.startsWith("http://") || path.startsWith("https://")) {
+            return relative;
+        }
+        return relative.startsWith("/") ? relative : "/" + relative;
     }
 
     public static String toFullUrl(String baseUrl, String url) {

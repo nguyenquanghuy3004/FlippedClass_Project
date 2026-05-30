@@ -1,6 +1,6 @@
 package com.example.flippedclass.service.impl;
 
-import com.example.flippedclass.dto.response.CreateLearningNodeItemRequest;
+import com.example.flippedclass.dto.request.CreateLearningNodeItemRequest;
 import com.example.flippedclass.dto.response.LearningNodeItemResponse;
 import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.LearningNodeItem;
@@ -81,16 +81,36 @@ public class LearningNodeItemServiceImpl implements LearningNodeItemService {
     }
 
     private String normalizeItemUrl(ItemType itemType, String url) {
-        if (itemType == ItemType.VIDEO && url != null && !url.isBlank()) {
+        if (url == null || url.isBlank()) {
+            return url;
+        }
+        if (itemType == ItemType.VIDEO) {
             return VideoUrlNormalizer.normalize(url);
+        }
+        if (itemType == ItemType.PDF) {
+            return normalizePdfUrl(url);
         }
         return url;
     }
 
+    private String normalizePdfUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return url;
+        }
+        int idx = url.toLowerCase().indexOf("/uploads/pdfs/");
+        if (idx >= 0) {
+            return url.substring(idx);
+        }
+        return url.startsWith("/") ? url : "/" + url;
+    }
+
     private LearningNodeItemResponse toResponse(LearningNodeItem item) {
-        String url = item.getItemType() == ItemType.VIDEO
-                ? VideoUrlNormalizer.normalize(item.getUrl())
-                : item.getUrl();
+        String url = item.getUrl();
+        if (item.getItemType() == ItemType.VIDEO) {
+            url = VideoUrlNormalizer.normalize(url);
+        } else if (item.getItemType() == ItemType.PDF) {
+            url = normalizePdfUrl(url);
+        }
 
         return LearningNodeItemResponse.builder()
                 .id(item.getId())
