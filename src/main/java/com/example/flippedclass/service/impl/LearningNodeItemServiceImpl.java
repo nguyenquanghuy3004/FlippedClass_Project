@@ -9,7 +9,7 @@ import com.example.flippedclass.repository.LearningNodeRepository;
 import com.example.flippedclass.service.FileStorageService;
 import com.example.flippedclass.service.LearningNodeItemService;
 import com.example.flippedclass.util.VideoUrlNormalizer;
-import enums.ItemType;
+import com.example.flippedclass.enums.ItemType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

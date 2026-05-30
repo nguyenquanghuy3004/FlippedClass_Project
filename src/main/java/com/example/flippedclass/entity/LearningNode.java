@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "learning_nodes")
@@ -50,4 +52,13 @@ public class LearningNode {
     @Column(name = "updated_at")
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "learningNode", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
+    @Builder.Default
+    private List<LearningNodeItem> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "learningNode", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Quiz> quizzes = new ArrayList<>();
 }

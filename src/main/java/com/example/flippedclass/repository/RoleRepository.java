@@ -8,7 +8,7 @@ import java.util.Set;
 
 public interface RoleRepository extends JpaRepository<Role, Integer> {
 
-    Optional<Role> findByName(String name);
+    Optional<Role> findByName(com.example.flippedclass.enums.RoleName name);
 
-    Set<Role> findByNameIn(Set<String> names);
+    Set<Role> findByNameIn(Set<com.example.flippedclass.enums.RoleName> names);
 }

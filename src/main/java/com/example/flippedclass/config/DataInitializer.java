@@ -2,8 +2,9 @@ package com.example.flippedclass.config;
 
 import com.example.flippedclass.entity.Role;
 import com.example.flippedclass.entity.User;
-import enums.AuthProvider;
-import enums.RoleName;
+
+import com.example.flippedclass.enums.AuthProvider;
+import com.example.flippedclass.enums.RoleName;
 import com.example.flippedclass.repository.RoleRepository;
 import com.example.flippedclass.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 
 @Component
 public class DataInitializer implements CommandLineRunner {

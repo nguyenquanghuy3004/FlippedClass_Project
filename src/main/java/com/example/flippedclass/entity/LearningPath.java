@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "learning_paths")
@@ -32,9 +34,10 @@ public class LearningPath {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default
-    private String status = "ACTIVE";
+    private com.example.flippedclass.enums.LearningPathStatus status = com.example.flippedclass.enums.LearningPathStatus.ACTIVE;
 
     @Column(name = "position")
     @Builder.Default
@@ -45,9 +48,10 @@ public class LearningPath {
     @Builder.Default
     private Integer estimatedDurationHours = 0;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default
-    private String visibility = "PRIVATE";
+    private com.example.flippedclass.enums.VisibilityType visibility = com.example.flippedclass.enums.VisibilityType.PRIVATE;
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default
@@ -56,4 +60,12 @@ public class LearningPath {
     @Column(name = "updated_at")
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "learningPath", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<LearningNode> nodes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "learningPath", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CourseDocument> courseDocuments = new ArrayList<>();
 }

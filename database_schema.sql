@@ -1,0 +1,364 @@
+--
+--     create table course_documents (
+--         created_at datetime2(7),
+--         id bigint identity not null,
+--         learning_path_id bigint not null,
+--         document_type varchar(50),
+--         url varchar(1000),
+--         description NVARCHAR(MAX),
+--         title varchar(255) not null,
+--         primary key (id)
+--     );
+--
+--     create table evaluation_criteria (
+--         max_score numeric(5,2),
+--         sort_order int,
+--         id bigint identity not null,
+--         session_id bigint not null,
+--         description NVARCHAR(MAX),
+--         name varchar(255) not null,
+--         primary key (id)
+--     );
+--
+--     create table evaluation_sessions (
+--         created_at datetime2(7),
+--         grading_deadline_at datetime2(7),
+--         grading_start_at datetime2(7),
+--         id bigint identity not null,
+--         learning_path_id bigint not null,
+--         lecturer_id bigint not null,
+--         title varchar(255) not null,
+--         primary key (id)
+--     );
+--
+--     create table grade_entries (
+--         score numeric(5,2),
+--         criterion_id bigint not null,
+--         graded_at datetime2(7),
+--         id bigint identity not null,
+--         lecturer_id bigint not null,
+--         session_id bigint not null,
+--         student_id bigint not null,
+--         comment NVARCHAR(MAX),
+--         primary key (id)
+--     );
+--
+--     create table interaction_logs (
+--         id bigint identity not null,
+--         learning_path_id bigint not null,
+--         occurred_at datetime2(7),
+--         student_id bigint not null,
+--         interaction_type varchar(50),
+--         summary NVARCHAR(MAX),
+--         primary key (id)
+--     );
+--
+--     create table learning_node_items (
+--          item_type VARCHAR(50) NOT NULL,
+--         position int not null,
+--         id bigint identity not null,
+--         learning_node_id bigint not null,
+--         quiz_id bigint,
+--         content NVARCHAR(MAX),
+--         title varchar(255) not null,
+--         url NVARCHAR(MAX),
+--         primary key (id)
+--     );
+--
+--     create table learning_nodes (
+--         display_order int,
+--         estimated_minutes int,
+--         position_x float(53),
+--         position_y float(53),
+--         created_at datetime2(7),
+--         id bigint identity not null,
+--         learning_path_id bigint not null,
+--         updated_at datetime2(7),
+--         status varchar(20),
+--         node_type varchar(50),
+--         content NVARCHAR(MAX),
+--         description NVARCHAR(MAX),
+--         title varchar(255) not null,
+--         primary key (id)
+--     );
+--
+--     create table learning_paths (
+--         estimated_duration_hours int,
+--         position int not null,
+--         created_at datetime2(7),
+--         id bigint identity not null,
+--         learning_space_id bigint not null,
+--         lecturer_id bigint not null,
+--         updated_at datetime2(7),
+--         status varchar(20) not null check ((status in ('ACTIVE','DELETED','ARCHIVED'))),
+--         visibility varchar(20) check ((visibility in ('PUBLIC','PRIVATE'))),
+--         description NVARCHAR(MAX),
+--         title varchar(255) not null,
+--         primary key (id)
+--     );
+--
+--     create table learning_space_members (
+--         id bigint identity not null,
+--         joined_at datetime2(7),
+--         learning_space_id bigint not null,
+--         user_id bigint not null,
+--         role varchar(20) not null check ((role in ('OWNER','SUPPORTER','MEMBER'))),
+--         status varchar(20) not null check ((status in ('ACTIVE','BLOCKED','PENDING'))),
+--         primary key (id)
+--     );
+--
+--     create table learning_spaces (
+--         created_at datetime2(7),
+--         id bigint identity not null,
+--         owner_id bigint not null,
+--         updated_at datetime2(7),
+--         status varchar(20) not null check ((status in ('ACTIVE','DELETE','ARCHIVE'))),
+--         description NVARCHAR(MAX),
+--         invite_code varchar(255) not null,
+--         name nvarchar(255) not null,
+--         visibility varchar(255) not null check ((visibility in ('PUBLIC','PRIVATE'))),
+--         primary key (id)
+--     );
+--
+--     create table node_connections (
+--         created_at datetime2(7),
+--         id bigint identity not null,
+--         learning_path_id bigint not null,
+--         source_node_id bigint not null,
+--         target_node_id bigint not null,
+--         condition_type varchar(50),
+--         condition_value varchar(255),
+--         primary key (id)
+--     );
+--
+--     create table quiz_attempts (
+--         correct_answers int,
+--         score numeric(5,2),
+--         total_questions int,
+--         id bigint identity not null,
+--         quiz_id bigint not null,
+--         student_id bigint not null,
+--         submitted_at datetime2(7),
+--         primary key (id)
+--     );
+--
+--     create table quiz_questions (
+--         points int,
+--         id bigint identity not null,
+--         quiz_id bigint not null,
+--         correct_answer varchar(50),
+--         content NVARCHAR(MAX) not null,
+--         options NVARCHAR(MAX),
+--         primary key (id)
+--     );
+--
+--     create table quizzes (
+--         active bit,
+--         duration_minutes int not null,
+--         created_at datetime2(7),
+--         id bigint identity not null,
+--         learning_node_id bigint not null,
+--         lecturer_id bigint not null,
+--         description NVARCHAR(MAX),
+--         title varchar(255) not null,
+--         primary key (id)
+--     );
+--
+--     create table roles (
+--         id int identity not null,
+--         name varchar(20) check ((name in ('ADMIN','STUDENT','MENTOR'))),
+--         primary key (id)
+--     );
+--
+--     create table student_profiles (
+--         enrollment_year int,
+--         id bigint identity not null,
+--         user_id bigint not null,
+--         class_name varchar(255),
+--         major varchar(255),
+--         student_code varchar(255) not null,
+--         primary key (id)
+--     );
+--
+--     create table user_roles (
+--         role_id int not null,
+--         user_id bigint not null,
+--         primary key (role_id, user_id)
+--     );
+--
+--     create table users (
+--         created_at datetime2(7),
+--         id bigint identity not null,
+--         updated_at datetime2(7),
+--         provider varchar(50) check ((provider in ('LOCAL','GOOGLE'))),
+--         username varchar(100) not null,
+--         avatar_url varchar(1000),
+--         email varchar(255) not null,
+--         full_name NVARCHAR(MAX),
+--         password varchar(255),
+--         primary key (id)
+--     );
+--
+--     alter table grade_entries
+--        add constraint uq_grade_entries unique (session_id, student_id, criterion_id);
+--
+--     alter table learning_space_members
+--        add constraint UKsddbss3myr5hb0rlxurd9tgrr unique (learning_space_id, user_id);
+--
+--     alter table learning_spaces
+--        add constraint UK9v13l3g5tnf6uqp4xd8ah7qbq unique (invite_code);
+--
+--     create unique nonclustered index UKofx66keruapi6vyqpv6f2or37
+--        on roles (name) where name is not null;
+--
+--     alter table student_profiles
+--        add constraint UKhlcwb2egnj8mj3e0mouse1lgy unique (user_id);
+--
+--     alter table student_profiles
+--        add constraint UK18jiqjra9dkkbn0d2d51plp0o unique (student_code);
+--
+--     alter table users
+--        add constraint UKr43af9ap4edm43mmtq01oddj6 unique (username);
+--
+--     alter table users
+--        add constraint UK6dotkott2kjsp8vw4d0m25fb7 unique (email);
+--
+--     alter table course_documents
+--        add constraint FK42dmoipmcu79tfoyq7nwa5xtq
+--        foreign key (learning_path_id)
+--        references learning_paths;
+--
+--     alter table evaluation_criteria
+--        add constraint FKe6arduwfwydygiexyeyfayckx
+--        foreign key (session_id)
+--        references evaluation_sessions;
+--
+--     alter table evaluation_sessions
+--        add constraint FKd53s78qx6oafqvjxv3rq6prc4
+--        foreign key (learning_path_id)
+--        references learning_paths;
+--
+--     alter table evaluation_sessions
+--        add constraint FK5cbo55y2o8iljf6qxko631qw1
+--        foreign key (lecturer_id)
+--        references users;
+--
+--     alter table grade_entries
+--        add constraint FKnven1b04g2nvmny1mys89g6vw
+--        foreign key (criterion_id)
+--        references evaluation_criteria;
+--
+--     alter table grade_entries
+--        add constraint FK6ui1caq9lu4as6h0jxpwdhp88
+--        foreign key (lecturer_id)
+--        references users;
+--
+--     alter table grade_entries
+--        add constraint FKgss8dph01x90nwwqqjlxtfmdm
+--        foreign key (session_id)
+--        references evaluation_sessions;
+--
+--     alter table grade_entries
+--        add constraint FKh2itw0xspj67do316hfe3smqp
+--        foreign key (student_id)
+--        references users;
+--
+--     alter table interaction_logs
+--        add constraint FKqjgrblnrnjwh179p63ncv85kf
+--        foreign key (learning_path_id)
+--        references learning_paths;
+--
+--     alter table interaction_logs
+--        add constraint FK80vyjdxy15khjyw367ukqn6ea
+--        foreign key (student_id)
+--        references users;
+--
+--     alter table learning_node_items
+--        add constraint FKh3lntcl7la52fkha82jgw08au
+--        foreign key (learning_node_id)
+--        references learning_nodes;
+--
+--     alter table learning_nodes
+--        add constraint FKemjunnhwe200qimra1ej7hasw
+--        foreign key (learning_path_id)
+--        references learning_paths;
+--
+--     alter table learning_paths
+--        add constraint FKc2iyo1y4l17xcgk1kd1k4avpf
+--        foreign key (learning_space_id)
+--        references learning_spaces;
+--
+--     alter table learning_paths
+--        add constraint FKmlkd3farybm8cx7qy2htntjks
+--        foreign key (lecturer_id)
+--        references users;
+--
+--     alter table learning_space_members
+--        add constraint FK8w1rq89x1lun4jp1265odkt7g
+--        foreign key (learning_space_id)
+--        references learning_spaces;
+--
+--     alter table learning_space_members
+--        add constraint FK5kpkl2ikjeo8lc26f2uvqccny
+--        foreign key (user_id)
+--        references users;
+--
+--     alter table learning_spaces
+--        add constraint FKlqtnvxworrtwb6er91dha36op
+--        foreign key (owner_id)
+--        references users;
+--
+--     alter table node_connections
+--        add constraint FK5a6d115a00vcn3489jg0cerhg
+--        foreign key (learning_path_id)
+--        references learning_paths;
+--
+--     alter table node_connections
+--        add constraint FKh56pg8at48rns0srh9iclvlvu
+--        foreign key (source_node_id)
+--        references learning_nodes;
+--
+--     alter table node_connections
+--        add constraint FKd9ooxabej566yn6rxfk3khvxm
+--        foreign key (target_node_id)
+--        references learning_nodes;
+--
+--     alter table quiz_attempts
+--        add constraint FKfwipvfipnnwsoacoyv5k7fbxc
+--        foreign key (quiz_id)
+--        references quizzes;
+--
+--     alter table quiz_attempts
+--        add constraint FKl6lkk2u7vw7q7kw3udhupe7ut
+--        foreign key (student_id)
+--        references users;
+--
+--     alter table quiz_questions
+--        add constraint FKanfmgf6ksbdnv7ojb0pfve54q
+--        foreign key (quiz_id)
+--        references quizzes;
+--
+--     alter table quizzes
+--        add constraint FKtdstpyavt5kpey1s4u4mp3he0
+--        foreign key (learning_node_id)
+--        references learning_nodes;
+--
+--     alter table quizzes
+--        add constraint FKb2iw16xneuio8y0x8aamwylil
+--        foreign key (lecturer_id)
+--        references users;
+--
+--     alter table student_profiles
+--        add constraint FK32koy3tgqtaujxhfsn0b9pel2
+--        foreign key (user_id)
+--        references users;
+--
+--     alter table user_roles
+--        add constraint FKh8ciramu9cc9q3qcqiv4ue8a6
+--        foreign key (role_id)
+--        references roles;
+--
+--     alter table user_roles
+--        add constraint FKhfh9dx7w3ubf1co1vdev94g3f
+--        foreign key (user_id)
+--        references users;

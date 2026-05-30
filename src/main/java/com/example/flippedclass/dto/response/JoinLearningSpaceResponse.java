@@ -1,6 +1,6 @@
 package com.example.flippedclass.dto.response;
 
-import enums.MemberRole;
+import com.example.flippedclass.enums.MemberRole;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,6 +1,6 @@
 package com.example.flippedclass.dto.response;
 
-import enums.ItemType;
+import com.example.flippedclass.enums.ItemType;
 import lombok.Getter;
 import lombok.Setter;
 @Getter @Setter

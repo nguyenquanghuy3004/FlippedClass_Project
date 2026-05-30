@@ -7,6 +7,7 @@ import com.example.flippedclass.dto.response.MessageResponse;
 import com.example.flippedclass.entity.Role;
 import com.example.flippedclass.entity.StudentProfile;
 import com.example.flippedclass.entity.User;
+import com.example.flippedclass.enums.AuthProvider;
 import com.example.flippedclass.repository.RoleRepository;
 import com.example.flippedclass.repository.StudentProfileRepository;
 import com.example.flippedclass.repository.UserRepository;
@@ -18,8 +19,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import enums.AuthProvider;
-import enums.RoleName;
+
+import com.example.flippedclass.enums.RoleName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;

@@ -1,7 +1,7 @@
 package com.example.flippedclass.repository;
 
 import com.example.flippedclass.entity.LearningSpace;
-import enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.LearningSpaceStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

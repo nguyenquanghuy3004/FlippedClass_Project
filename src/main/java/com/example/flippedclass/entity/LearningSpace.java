@@ -31,13 +31,15 @@ public class LearningSpace {
     @Column(name = "invite_code", unique = true, length = 50)
     private String inviteCode;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default
-    private String status = "ACTIVE";
+    private com.example.flippedclass.enums.LearningSpaceStatus status = com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default
-    private String visibility = "PRIVATE";
+    private com.example.flippedclass.enums.VisibilityType visibility = com.example.flippedclass.enums.VisibilityType.PRIVATE;
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default

@@ -16,6 +16,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true, length = 50)
-    private String name;
+    private com.example.flippedclass.enums.RoleName name;
 }

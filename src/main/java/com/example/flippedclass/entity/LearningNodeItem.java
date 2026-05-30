@@ -1,7 +1,7 @@
 package com.example.flippedclass.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import enums.ItemType;
+import com.example.flippedclass.enums.ItemType;
 import jakarta.persistence.*;
 import lombok.*;
 

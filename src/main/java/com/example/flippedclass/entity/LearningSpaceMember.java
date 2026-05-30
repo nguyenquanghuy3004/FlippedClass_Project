@@ -28,13 +28,15 @@ public class LearningSpaceMember {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 30)
     @Builder.Default
-    private String role = "MEMBER";
+    private com.example.flippedclass.enums.MemberRole role = com.example.flippedclass.enums.MemberRole.MEMBER;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 30)
     @Builder.Default
-    private String status = "ACTIVE";
+    private com.example.flippedclass.enums.MemberStatus status = com.example.flippedclass.enums.MemberStatus.ACTIVE;
 
     @Column(name = "joined_at", updatable = false)
     @Builder.Default

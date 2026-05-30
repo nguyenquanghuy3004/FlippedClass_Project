@@ -39,6 +39,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AuthProvider provider;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private StudentProfile studentProfile;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_roles",
