@@ -15,6 +15,6 @@ public class QuizResponse {
     private String title;
     private String description;
     private Integer durationMinutes;
-    private boolean active;
+    private Boolean active;
     private LocalDateTime createdAt;
 }

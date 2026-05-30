@@ -1,18 +1,19 @@
 package com.example.flippedclass.service;
 
-import com.example.flippedclass.dto.response.QuizAttemptResponse;
-import com.example.flippedclass.dto.response.QuizQuestionResponse;
-import com.example.flippedclass.dto.response.QuizResponse;
-import com.example.flippedclass.dto.response.QuizStatisticsResponse;
 import com.example.flippedclass.dto.request.CreateQuizQuestionRequest;
 import com.example.flippedclass.dto.request.CreateQuizRequest;
 import com.example.flippedclass.dto.request.SubmitQuizAttemptRequest;
 import com.example.flippedclass.dto.request.UpdateQuizRequest;
+import com.example.flippedclass.dto.response.QuizAttemptResponse;
+import com.example.flippedclass.dto.response.QuizQuestionResponse;
+import com.example.flippedclass.dto.response.QuizResponse;
+import com.example.flippedclass.dto.response.QuizStatisticsResponse;
 
 import java.util.List;
 
 public interface QuizService {
 
+    public List<QuizResponse> findByLearningNode(Long nodeId);
     QuizResponse create(CreateQuizRequest request);
 
     QuizResponse update(Long id, UpdateQuizRequest request);

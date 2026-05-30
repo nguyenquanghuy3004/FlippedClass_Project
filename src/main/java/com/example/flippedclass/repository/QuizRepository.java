@@ -4,7 +4,9 @@ import com.example.flippedclass.entity.Quiz;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
     List<Quiz> findByLearningNode_IdAndActiveTrue(Long learningNodeId);
+    List<Quiz> findByLearningNode_IdOrderByCreatedAtDesc(Long learningNodeId);
 }
