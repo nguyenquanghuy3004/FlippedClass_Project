@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.example.flippedclass",
         "entity", "controller", "repository", "service", "dto", "exception", "config"
 })
-@EntityScan(basePackages = "entity")
+@EntityScan(basePackages = "com/example/flippedclass/entity")
 @EnableJpaRepositories(basePackages = "repository")
 public class FlippedClassApplication {
 
