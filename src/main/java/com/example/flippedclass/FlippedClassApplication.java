@@ -5,12 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication(scanBasePackages = {
-        "com.example.flippedclass",
-        "entity", "controller", "repository", "service", "dto", "exception", "config"
-})
-@EntityScan(basePackages = "com/example/flippedclass/entity")
-@EnableJpaRepositories(basePackages = "repository")
+@SpringBootApplication
 public class FlippedClassApplication {
 
     public static void main(String[] args) {
