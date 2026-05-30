@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = {
         "com.example.flippedclass",
-        "entity", "controller", "repository", "service", "dto", "exception"
+        "entity", "controller", "repository", "service", "dto", "exception", "config"
 })
 @EntityScan(basePackages = "entity")
 @EnableJpaRepositories(basePackages = "repository")

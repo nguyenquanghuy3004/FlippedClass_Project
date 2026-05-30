@@ -242,9 +242,9 @@ public class QuizServiceImpl implements QuizService {
     private QuizResponse toResponse(Quiz quiz) {
         return QuizResponse.builder()
                 .id(quiz.getId())
-                .learningNodeId(quiz.getLearningNode().getId())
-                .lecturerId(quiz.getLecturer().getId())
-                .lecturerName(quiz.getLecturer().getFullName())
+                .learningNodeId(quiz.getLearningNode() != null ? quiz.getLearningNode().getId() : null)
+                .lecturerId(quiz.getLecturer() != null ? quiz.getLecturer().getId() : null)
+                .lecturerName(quiz.getLecturer() != null ? quiz.getLecturer().getFullName() : null)
                 .title(quiz.getTitle())
                 .description(quiz.getDescription())
                 .durationMinutes(quiz.getDurationMinutes())

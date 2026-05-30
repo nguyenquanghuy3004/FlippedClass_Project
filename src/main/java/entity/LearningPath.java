@@ -40,8 +40,6 @@ public class LearningPath {
     @Builder.Default
     private Integer position = 0;
 
-    @Column(name = "thumbnail_url", length = 1000)
-    private String thumbnailUrl;
 
     @Column(name = "estimated_duration_hours")
     @Builder.Default

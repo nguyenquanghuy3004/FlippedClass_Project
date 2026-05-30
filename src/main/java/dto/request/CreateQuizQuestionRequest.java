@@ -11,14 +11,14 @@ import lombok.Data;
 public class CreateQuizQuestionRequest {
 
     @NotBlank(message = "content is required")
-    @Size(min = 5, max = 500, message = "content must be between 5 and 500 characters")
+    @Size(min = 1, max = 1000, message = "content must be between 1 and 1000 characters")
     private String content;
 
-    @Size(max = 1000, message = "options must not exceed 1000 characters")
+    @Size(max = 4000, message = "options must not exceed 4000 characters")
     private String options;
 
     @NotBlank(message = "correctAnswer is required")
-    @Size(min = 1, max = 10, message = "correctAnswer must be between 1 and 10 characters")
+    @Size(min = 1, max = 500, message = "correctAnswer must be between 1 and 500 characters")
     private String correctAnswer;
 
     @NotNull(message = "points is required")
