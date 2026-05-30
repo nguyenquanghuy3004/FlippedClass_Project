@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 public class LearningPathResponse {
     private Long id;
     private Long learningSpaceId;
+    private Long lecturerId;
+    private String lecturerName;
     private String title;
     private String description;
     private LearningPathStatus status;
@@ -18,6 +20,8 @@ public class LearningPathResponse {
         LearningPathResponse response = new LearningPathResponse();
         response.id = learningPath.getId();
         response.learningSpaceId = learningPath.getLearningSpaceId();
+        response.lecturerId = learningPath.getLecturerId();
+        response.lecturerName = learningPath.getLecturer() == null ? null : learningPath.getLecturer().getFullName();
         response.title = learningPath.getTitle();
         response.description = learningPath.getDescription();
         response.status = learningPath.getStatus();
@@ -33,6 +37,14 @@ public class LearningPathResponse {
 
     public Long getLearningSpaceId() {
         return learningSpaceId;
+    }
+
+    public Long getLecturerId() {
+        return lecturerId;
+    }
+
+    public String getLecturerName() {
+        return lecturerName;
     }
 
     public String getTitle() {

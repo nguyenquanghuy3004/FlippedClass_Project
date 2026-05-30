@@ -31,6 +31,10 @@ public class LearningPath {
     @JoinColumn(name = "learning_space_id", nullable = false)
     private LearningSpace learningSpace;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lecturer_id", nullable = false)
+    private User lecturer;
+
     @Column(nullable = false)
     private String title;
 
@@ -82,6 +86,18 @@ public class LearningPath {
 
     public void setLearningSpace(LearningSpace learningSpace) {
         this.learningSpace = learningSpace;
+    }
+
+    public Long getLecturerId() {
+        return lecturer == null ? null : lecturer.getId();
+    }
+
+    public User getLecturer() {
+        return lecturer;
+    }
+
+    public void setLecturer(User lecturer) {
+        this.lecturer = lecturer;
     }
 
     public String getTitle() {
