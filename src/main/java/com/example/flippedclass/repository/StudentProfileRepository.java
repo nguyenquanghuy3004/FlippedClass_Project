@@ -8,6 +8,11 @@ import java.util.Optional;
 
 @Repository
 public interface StudentProfileRepository extends JpaRepository<StudentProfile, Long> {
-    Optional<StudentProfile> findByStudentCode(String studentCode);
+
+    // Hàm tìm profile theo userId (bạn vừa thêm lúc nãy)
+    Optional<StudentProfile> findByUserId(Long userId);
+
+    // Hàm kiểm tra trùng lặp mã sinh viên (thêm mới dòng này để fix lỗi AuthServiceImpl)
     boolean existsByStudentCode(String studentCode);
+
 }
