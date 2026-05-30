@@ -23,9 +23,7 @@ public class QuizQuestion {
     private String content;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
-    private String options; // Các phương án chọn (thường lưu dạng JSON string)
 
-    @Column(name = "correct_answer", length = 50)
     private String correctAnswer;
 
     @Builder.Default

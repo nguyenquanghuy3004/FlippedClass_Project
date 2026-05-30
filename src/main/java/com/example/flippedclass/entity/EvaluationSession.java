@@ -47,5 +47,5 @@ public class EvaluationSession {
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<GradeEntry> gradeEntries = new ArrayList<>();
+    private List<EvaluationCriterion> criteria = new ArrayList<>();
 }

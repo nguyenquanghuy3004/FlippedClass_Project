@@ -2,7 +2,6 @@ package com.example.flippedclass.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,15 +30,10 @@ public class QuizAttempt {
     @Builder.Default
     private BigDecimal score = BigDecimal.ZERO;
 
-    @Column(name = "total_questions")
     @Builder.Default
     private Integer totalQuestions = 0;
 
-    @Column(name = "correct_answers")
     @Builder.Default
     private Integer correctAnswers = 0;
 
-    @CreationTimestamp
-    @Column(name = "submitted_at", updatable = false)
-    private LocalDateTime submittedAt;
 }

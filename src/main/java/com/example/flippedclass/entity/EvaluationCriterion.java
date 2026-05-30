@@ -3,34 +3,35 @@ package com.example.flippedclass.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
-@Table(name = "quizzes")
+@Table(name = "evaluation_criteria")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Quiz {
+public class EvaluationCriterion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "learning_node_id", nullable = false)
-    private LearningNode learningNode;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lecturer_id", nullable = false)
-    private User lecturer;
+    @JoinColumn(name = "session_id", nullable = false)
+    private EvaluationSession session;
 
     @Column(nullable = false, length = 255)
-    private String title;
+    private String name;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    private Integer durationMinutes;
+    @Column(precision = 5, scale = 2)
+    private BigDecimal maxScore;
 
+    @Column
+    @Builder.Default
+    private Integer sortOrder = 0;
 }
