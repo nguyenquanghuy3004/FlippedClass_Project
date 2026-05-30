@@ -142,7 +142,7 @@ public class LearningPathServiceImpl implements LearningPathService {
                 com.example.flippedclass.dto.response.LearningNodeResponse.builder()
                     .id(node.getId())
                     .title(node.getTitle())
-//                    .description(node.getDescription())
+                    .description(node.getDescription())
                     .learningPathId(path.getId())
                     .status(node.getStatus())
                     .nodeType(node.getNodeType())

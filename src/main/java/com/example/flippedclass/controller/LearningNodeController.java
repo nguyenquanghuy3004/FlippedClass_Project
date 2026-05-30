@@ -41,11 +41,6 @@ public class LearningNodeController {
         ));
     }
 
-    @GetMapping
-    public ResponseEntity<?> getItems(@PathVariable Long nodeId) {
-        return ResponseEntity.ok(learningNodeItemService.getItemByNodeId(nodeId));
-    }
-
 
     @PostMapping("/upload-document")
     public ResponseEntity<Map<String,String>> uploadDocument(@RequestParam("file") MultipartFile file){
@@ -57,6 +52,10 @@ public class LearningNodeController {
         ));
     }
 
+    @GetMapping
+    public ResponseEntity<?> getItems(@PathVariable Long nodeId) {
+        return ResponseEntity.ok(learningNodeItemService.getItemByNodeId(nodeId));
+    }
 
         @DeleteMapping("/item/{itemId}")
     public ResponseEntity<Map<String,String>> deleteItem(@PathVariable Long itemId){
