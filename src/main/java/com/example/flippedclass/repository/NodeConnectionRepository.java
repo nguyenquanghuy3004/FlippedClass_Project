@@ -4,6 +4,7 @@ import com.example.flippedclass.entity.NodeConnection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+// Truy vấn dữ liệu liên kết giữa các node
 public interface NodeConnectionRepository extends JpaRepository<NodeConnection, Long> {
     List<NodeConnection> findByLearningPathId(Long learningPathId);
 

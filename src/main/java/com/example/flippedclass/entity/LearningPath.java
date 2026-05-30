@@ -18,7 +18,14 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+// Thông tin lộ trình học trong một Learning Space
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "learning_paths")
 public class LearningPath {
@@ -72,79 +79,11 @@ public class LearningPath {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public Long getLearningSpaceId() {
         return learningSpace == null ? null : learningSpace.getId();
     }
 
-    public LearningSpace getLearningSpace() {
-        return learningSpace;
-    }
-
-    public void setLearningSpace(LearningSpace learningSpace) {
-        this.learningSpace = learningSpace;
-    }
-
     public Long getLecturerId() {
         return lecturer == null ? null : lecturer.getId();
-    }
-
-    public User getLecturer() {
-        return lecturer;
-    }
-
-    public void setLecturer(User lecturer) {
-        this.lecturer = lecturer;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public LearningPathStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(LearningPathStatus status) {
-        this.status = status;
-    }
-
-    public Integer getPosition() {
-        return position;
-    }
-
-    public void setPosition(Integer position) {
-        this.position = position;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public List<LearningNode> getNodes() {
-        return nodes;
-    }
-
-    public List<NodeConnection> getConnections() {
-        return connections;
     }
 }

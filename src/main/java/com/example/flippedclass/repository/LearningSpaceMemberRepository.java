@@ -4,6 +4,7 @@ import com.example.flippedclass.entity.LearningSpaceMember;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+// Truy vấn dữ liệu thành viên trong Learning Space
 public interface LearningSpaceMemberRepository extends JpaRepository<LearningSpaceMember, Long> {
     List<LearningSpaceMember> findByUser_IdOrderByJoinedAtDesc(Long userId);
 }

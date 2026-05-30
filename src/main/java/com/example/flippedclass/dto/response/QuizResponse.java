@@ -2,7 +2,9 @@ package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.Quiz;
 import java.time.LocalDateTime;
+import lombok.Getter;
 
+@Getter
 public class QuizResponse {
     private Long id;
     private Long learningNodeId;
@@ -24,37 +26,5 @@ public class QuizResponse {
         response.active = quiz.getActive();
         response.createdAt = quiz.getCreatedAt();
         return response;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getLearningNodeId() {
-        return learningNodeId;
-    }
-
-    public Long getLecturerId() {
-        return lecturerId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Integer getDurationMinutes() {
-        return durationMinutes;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 }

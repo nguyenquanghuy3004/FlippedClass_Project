@@ -1,7 +1,9 @@
 package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.StudentProfile;
+import lombok.Getter;
 
+@Getter
 public class StudentProfileResponse {
     private Long id;
     private Long userId;
@@ -19,29 +21,5 @@ public class StudentProfileResponse {
         response.major = profile.getMajor();
         response.enrollmentYear = profile.getEnrollmentYear();
         return response;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public String getStudentCode() {
-        return studentCode;
-    }
-
-    public String getClassName() {
-        return className;
-    }
-
-    public String getMajor() {
-        return major;
-    }
-
-    public Integer getEnrollmentYear() {
-        return enrollmentYear;
     }
 }

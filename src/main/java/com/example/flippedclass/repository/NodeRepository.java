@@ -4,6 +4,7 @@ import com.example.flippedclass.entity.LearningNode;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+// Truy vấn dữ liệu node học tập
 public interface NodeRepository extends JpaRepository<LearningNode, Long> {
     List<LearningNode> findByLearningPathIdOrderByDisplayOrderAsc(Long learningPathId);
 

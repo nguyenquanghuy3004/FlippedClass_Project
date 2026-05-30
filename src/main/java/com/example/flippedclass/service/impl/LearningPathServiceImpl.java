@@ -11,27 +11,22 @@ import com.example.flippedclass.repository.LearningSpaceRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.LearningPathService;
 import java.util.List;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+// Xử lý nghiệp vụ tạo và quản lý Learning Path
 @Service
+@RequiredArgsConstructor
 public class LearningPathServiceImpl implements LearningPathService {
 
     private final LearningPathRepository learningPathRepository;
     private final LearningSpaceRepository learningSpaceRepository;
     private final UserRepository userRepository;
 
-    public LearningPathServiceImpl(
-            LearningPathRepository learningPathRepository,
-            LearningSpaceRepository learningSpaceRepository,
-            UserRepository userRepository
-    ) {
-        this.learningPathRepository = learningPathRepository;
-        this.learningSpaceRepository = learningSpaceRepository;
-        this.userRepository = userRepository;
-    }
-
+    // Lấy danh sách Learning Path theo Learning Space
     @Override
     public List<LearningPathResponse> findByLearningSpace(Long learningSpaceId) {
         return learningPathRepository.findByLearningSpace_IdOrderByPositionAsc(learningSpaceId).stream()
@@ -39,11 +34,13 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .toList();
     }
 
+    // Lấy chi tiết Learning Path theo id
     @Override
-    public LearningPathResponse findById(Long id) {
-        return LearningPathResponse.from(getLearningPath(id));
+    public LearningPathResponse findById(Long learningSpaceId, Long id) {
+        return LearningPathResponse.from(getLearningPathInSpace(learningSpaceId, id));
     }
 
+    // Tạo mới Learning Path và kiểm tra dữ liệu lớp học
     @Override
     public LearningPathResponse create(Long learningSpaceId, LearningPathRequest request) {
         if (request.getLearningSpaceId() == null) {
@@ -65,18 +62,21 @@ public class LearningPathServiceImpl implements LearningPathService {
         return LearningPathResponse.from(learningPathRepository.save(learningPath));
     }
 
+    // Cập nhật thông tin Learning Path
     @Override
-    public LearningPathResponse update(Long id, LearningPathRequest request) {
-        LearningPath learningPath = getLearningPath(id);
+    public LearningPathResponse update(Long learningSpaceId, Long id, LearningPathRequest request) {
+        LearningPath learningPath = getLearningPathInSpace(learningSpaceId, id);
         applyRequest(learningPath, request);
         return LearningPathResponse.from(learningPathRepository.save(learningPath));
     }
 
+    // Xóa Learning Path theo id
     @Override
-    public void delete(Long id) {
-        learningPathRepository.delete(getLearningPath(id));
+    public void delete(Long learningSpaceId, Long id) {
+        learningPathRepository.delete(getLearningPathInSpace(learningSpaceId, id));
     }
 
+    // Kiểm tra và lấy Learning Path trước khi xử lý
     @Override
     public LearningPath getLearningPath(Long id) {
         return learningPathRepository.findById(id)
@@ -93,6 +93,16 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lecturer not found"));
     }
 
+    private LearningPath getLearningPathInSpace(Long learningSpaceId, Long id) {
+        getLearningSpace(learningSpaceId);
+        LearningPath learningPath = getLearningPath(id);
+        if (!Objects.equals(learningPath.getLearningSpaceId(), learningSpaceId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Learning path does not belong to this learning space");
+        }
+        return learningPath;
+    }
+
+    // Kiểm tra dữ liệu trước khi lưu Learning Path
     private void applyRequest(LearningPath learningPath, LearningPathRequest request) {
         if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Learning path title is required");

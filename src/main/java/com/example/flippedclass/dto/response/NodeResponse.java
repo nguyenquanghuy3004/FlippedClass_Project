@@ -4,7 +4,9 @@ import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.enums.NodeStatus;
 import com.example.flippedclass.enums.NodeType;
 import java.time.LocalDateTime;
+import lombok.Getter;
 
+@Getter
 public class NodeResponse {
     private Long id;
     private Long learningPathId;
@@ -32,49 +34,5 @@ public class NodeResponse {
         response.createdAt = node.getCreatedAt();
         response.updatedAt = node.getUpdatedAt();
         return response;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getLearningPathId() {
-        return learningPathId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public NodeType getNodeType() {
-        return nodeType;
-    }
-
-    public NodeStatus getStatus() {
-        return status;
-    }
-
-    public Integer getDisplayOrder() {
-        return displayOrder;
-    }
-
-    public Integer getEstimatedMinutes() {
-        return estimatedMinutes;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 }

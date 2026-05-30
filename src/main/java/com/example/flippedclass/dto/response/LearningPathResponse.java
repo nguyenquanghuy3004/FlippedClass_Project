@@ -3,7 +3,9 @@ package com.example.flippedclass.dto.response;
 import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.enums.LearningPathStatus;
 import java.time.LocalDateTime;
+import lombok.Getter;
 
+@Getter
 public class LearningPathResponse {
     private Long id;
     private Long learningSpaceId;
@@ -29,45 +31,5 @@ public class LearningPathResponse {
         response.createdAt = learningPath.getCreatedAt();
         response.updatedAt = learningPath.getUpdatedAt();
         return response;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getLearningSpaceId() {
-        return learningSpaceId;
-    }
-
-    public Long getLecturerId() {
-        return lecturerId;
-    }
-
-    public String getLecturerName() {
-        return lecturerName;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public LearningPathStatus getStatus() {
-        return status;
-    }
-
-    public Integer getPosition() {
-        return position;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 }

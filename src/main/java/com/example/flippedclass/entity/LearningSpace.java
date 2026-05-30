@@ -10,7 +10,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+// Thông tin lớp học hoặc không gian học tập
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "learning_spaces")
 public class LearningSpace {
@@ -40,40 +47,4 @@ public class LearningSpace {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public User getOwner() {
-        return owner;
-    }
-
-    public String getInviteCode() {
-        return inviteCode;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getVisibility() {
-        return visibility;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
 }

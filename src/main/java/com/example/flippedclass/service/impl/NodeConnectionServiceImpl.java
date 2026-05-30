@@ -11,27 +11,21 @@ import com.example.flippedclass.service.NodeConnectionService;
 import com.example.flippedclass.service.NodeService;
 import java.util.List;
 import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+// Xử lý nghiệp vụ nối các node trong Learning Path
 @Service
+@RequiredArgsConstructor
 public class NodeConnectionServiceImpl implements NodeConnectionService {
 
     private final NodeConnectionRepository connectionRepository;
     private final LearningPathService learningPathService;
     private final NodeService nodeService;
 
-    public NodeConnectionServiceImpl(
-            NodeConnectionRepository connectionRepository,
-            LearningPathService learningPathService,
-            NodeService nodeService
-    ) {
-        this.connectionRepository = connectionRepository;
-        this.learningPathService = learningPathService;
-        this.nodeService = nodeService;
-    }
-
+    // Lấy danh sách liên kết node theo Learning Path
     @Override
     public List<NodeConnectionResponse> findByLearningPath(Long pathId) {
         learningPathService.getLearningPath(pathId);
@@ -40,6 +34,7 @@ public class NodeConnectionServiceImpl implements NodeConnectionService {
                 .toList();
     }
 
+    // Tạo liên kết mới và tránh nối sai Learning Path
     @Override
     public NodeConnectionResponse create(Long pathId, NodeConnectionRequest request) {
         LearningPath learningPath = learningPathService.getLearningPath(pathId);
@@ -70,13 +65,13 @@ public class NodeConnectionServiceImpl implements NodeConnectionService {
         return NodeConnectionResponse.from(connectionRepository.save(connection));
     }
 
+    // Xóa liên kết node theo id
     @Override
-    public void delete(Long id) {
-        NodeConnection connection = connectionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Node connection not found"));
-        connectionRepository.delete(connection);
+    public void delete(Long pathId, Long id) {
+        connectionRepository.delete(getConnectionInPath(pathId, id));
     }
 
+    // Kiểm tra hai node đầu vào trước khi tạo liên kết
     private void validateRequiredNodeIds(NodeConnectionRequest request) {
         if (request.getSourceNodeId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Source node id is required");
@@ -86,9 +81,20 @@ public class NodeConnectionServiceImpl implements NodeConnectionService {
         }
     }
 
+    // Đảm bảo node thuộc đúng Learning Path đang xử lý
     private void validateNodeBelongsToPath(LearningNode node, Long pathId, String message) {
         if (!Objects.equals(node.getLearningPath().getId(), pathId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
         }
+    }
+
+    private NodeConnection getConnectionInPath(Long pathId, Long id) {
+        learningPathService.getLearningPath(pathId);
+        NodeConnection connection = connectionRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Node connection not found"));
+        if (!Objects.equals(connection.getLearningPath().getId(), pathId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Node connection does not belong to this learning path");
+        }
+        return connection;
     }
 }

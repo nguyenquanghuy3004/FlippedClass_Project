@@ -2,7 +2,9 @@ package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.NodeConnection;
 import java.time.LocalDateTime;
+import lombok.Getter;
 
+@Getter
 public class NodeConnectionResponse {
     private Long id;
     private Long learningPathId;
@@ -22,33 +24,5 @@ public class NodeConnectionResponse {
         response.conditionValue = connection.getConditionValue();
         response.createdAt = connection.getCreatedAt();
         return response;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getLearningPathId() {
-        return learningPathId;
-    }
-
-    public Long getSourceNodeId() {
-        return sourceNodeId;
-    }
-
-    public Long getTargetNodeId() {
-        return targetNodeId;
-    }
-
-    public String getConditionType() {
-        return conditionType;
-    }
-
-    public String getConditionValue() {
-        return conditionValue;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 }

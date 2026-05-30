@@ -4,7 +4,9 @@ import com.example.flippedclass.entity.CourseDocument;
 import com.example.flippedclass.enums.DocumentType;
 
 import java.time.LocalDateTime;
+import lombok.Getter;
 
+@Getter
 public class CourseDocumentResponse {
     private Long id;
     private Long learningPathId;
@@ -24,33 +26,5 @@ public class CourseDocumentResponse {
         response.description = document.getDescription();
         response.createdAt = document.getCreatedAt();
         return response;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getLearningPathId() {
-        return learningPathId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public DocumentType getDocumentType() {
-        return documentType;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 }

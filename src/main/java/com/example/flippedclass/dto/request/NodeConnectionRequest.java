@@ -1,40 +1,20 @@
 package com.example.flippedclass.dto.request;
 
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class NodeConnectionRequest {
+    @NotNull(message = "Source node id is required")
     private Long sourceNodeId;
+
+    @NotNull(message = "Target node id is required")
     private Long targetNodeId;
+
     private String conditionType;
     private String conditionValue;
-
-    public Long getSourceNodeId() {
-        return sourceNodeId;
-    }
-
-    public void setSourceNodeId(Long sourceNodeId) {
-        this.sourceNodeId = sourceNodeId;
-    }
-
-    public Long getTargetNodeId() {
-        return targetNodeId;
-    }
-
-    public void setTargetNodeId(Long targetNodeId) {
-        this.targetNodeId = targetNodeId;
-    }
-
-    public String getConditionType() {
-        return conditionType;
-    }
-
-    public void setConditionType(String conditionType) {
-        this.conditionType = conditionType;
-    }
-
-    public String getConditionValue() {
-        return conditionValue;
-    }
-
-    public void setConditionValue(String conditionValue) {
-        this.conditionValue = conditionValue;
-    }
 }

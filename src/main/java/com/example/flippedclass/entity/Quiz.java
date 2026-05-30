@@ -10,7 +10,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+// Thông tin bài quiz gắn với node học tập
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "quizzes")
 public class Quiz {
@@ -49,29 +56,5 @@ public class Quiz {
 
     public Long getLearningNodeId() {
         return learningNode == null ? null : learningNode.getId();
-    }
-
-    public Long getLecturerId() {
-        return lecturerId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Integer getDurationMinutes() {
-        return durationMinutes;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 }

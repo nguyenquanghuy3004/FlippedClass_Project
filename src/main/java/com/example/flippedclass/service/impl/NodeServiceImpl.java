@@ -10,21 +10,21 @@ import com.example.flippedclass.repository.NodeRepository;
 import com.example.flippedclass.service.LearningPathService;
 import com.example.flippedclass.service.NodeService;
 import java.util.List;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+// Xử lý nghiệp vụ tạo và sắp xếp node học tập
 @Service
+@RequiredArgsConstructor
 public class NodeServiceImpl implements NodeService {
 
     private final NodeRepository nodeRepository;
     private final LearningPathService learningPathService;
 
-    public NodeServiceImpl(NodeRepository nodeRepository, LearningPathService learningPathService) {
-        this.nodeRepository = nodeRepository;
-        this.learningPathService = learningPathService;
-    }
-
+    // Lấy danh sách node theo thứ tự hiển thị
     @Override
     public List<NodeResponse> findByLearningPath(Long pathId) {
         learningPathService.getLearningPath(pathId);
@@ -33,11 +33,13 @@ public class NodeServiceImpl implements NodeService {
                 .toList();
     }
 
+    // Lấy chi tiết node học tập theo id
     @Override
-    public NodeResponse findById(Long id) {
-        return NodeResponse.from(getNode(id));
+    public NodeResponse findById(Long pathId, Long id) {
+        return NodeResponse.from(getNodeInPath(pathId, id));
     }
 
+    // Tạo node mới và kiểm tra trùng thứ tự hiển thị
     @Override
     public NodeResponse create(Long pathId, NodeRequest request) {
         LearningPath learningPath = learningPathService.getLearningPath(pathId);
@@ -52,11 +54,11 @@ public class NodeServiceImpl implements NodeService {
         return NodeResponse.from(nodeRepository.save(node));
     }
 
+    // Cập nhật node và giữ thứ tự không bị trùng
     @Override
-    public NodeResponse update(Long id, NodeRequest request) {
-        LearningNode node = getNode(id);
+    public NodeResponse update(Long pathId, Long id, NodeRequest request) {
+        LearningNode node = getNodeInPath(pathId, id);
         validateRequest(request);
-        Long pathId = node.getLearningPath().getId();
         if (nodeRepository.existsByLearningPathIdAndDisplayOrderAndIdNot(pathId, request.getDisplayOrder(), id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Display order already exists in this learning path");
         }
@@ -65,17 +67,29 @@ public class NodeServiceImpl implements NodeService {
         return NodeResponse.from(nodeRepository.save(node));
     }
 
+    // Xóa node học tập theo id
     @Override
-    public void delete(Long id) {
-        nodeRepository.delete(getNode(id));
+    public void delete(Long pathId, Long id) {
+        nodeRepository.delete(getNodeInPath(pathId, id));
     }
 
+    // Kiểm tra và lấy node trước khi xử lý
     @Override
     public LearningNode getNode(Long id) {
         return nodeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Node not found"));
     }
 
+    private LearningNode getNodeInPath(Long pathId, Long id) {
+        learningPathService.getLearningPath(pathId);
+        LearningNode node = getNode(id);
+        if (!Objects.equals(node.getLearningPath().getId(), pathId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Node does not belong to this learning path");
+        }
+        return node;
+    }
+
+    // Kiểm tra dữ liệu node trước khi lưu
     private void validateRequest(NodeRequest request) {
         if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Node title is required");
@@ -88,6 +102,7 @@ public class NodeServiceImpl implements NodeService {
         }
     }
 
+    // Gán dữ liệu từ request vào node học tập
     private void applyRequest(LearningNode node, NodeRequest request) {
         node.setTitle(request.getTitle().trim());
         node.setDescription(request.getDescription());

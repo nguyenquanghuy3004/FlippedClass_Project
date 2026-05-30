@@ -12,7 +12,14 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+// Thông tin liên kết điều hướng giữa các node học tập
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(
         name = "node_connections",
@@ -51,53 +58,5 @@ public class NodeConnection {
     @PrePersist
     void onCreate() {
         createdAt = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LearningPath getLearningPath() {
-        return learningPath;
-    }
-
-    public void setLearningPath(LearningPath learningPath) {
-        this.learningPath = learningPath;
-    }
-
-    public LearningNode getSourceNode() {
-        return sourceNode;
-    }
-
-    public void setSourceNode(LearningNode sourceNode) {
-        this.sourceNode = sourceNode;
-    }
-
-    public LearningNode getTargetNode() {
-        return targetNode;
-    }
-
-    public void setTargetNode(LearningNode targetNode) {
-        this.targetNode = targetNode;
-    }
-
-    public String getConditionType() {
-        return conditionType;
-    }
-
-    public void setConditionType(String conditionType) {
-        this.conditionType = conditionType;
-    }
-
-    public String getConditionValue() {
-        return conditionValue;
-    }
-
-    public void setConditionValue(String conditionValue) {
-        this.conditionValue = conditionValue;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 }

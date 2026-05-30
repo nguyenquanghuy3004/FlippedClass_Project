@@ -9,7 +9,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+// Hồ sơ học tập của sinh viên
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "student_profiles")
 public class StudentProfile {
@@ -32,28 +39,4 @@ public class StudentProfile {
 
     @Column(name = "enrollment_year")
     private Integer enrollmentYear;
-
-    public Long getId() {
-        return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public String getStudentCode() {
-        return studentCode;
-    }
-
-    public String getClassName() {
-        return className;
-    }
-
-    public String getMajor() {
-        return major;
-    }
-
-    public Integer getEnrollmentYear() {
-        return enrollmentYear;
-    }
 }

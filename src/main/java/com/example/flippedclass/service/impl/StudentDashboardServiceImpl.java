@@ -10,28 +10,22 @@ import com.example.flippedclass.repository.StudentProfileRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.StudentDashboardService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+// Xử lý dữ liệu tổng quan cho dashboard sinh viên
 @Service
+@RequiredArgsConstructor
 public class StudentDashboardServiceImpl implements StudentDashboardService {
 
     private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final LearningSpaceMemberRepository learningSpaceMemberRepository;
 
-    public StudentDashboardServiceImpl(
-            UserRepository userRepository,
-            StudentProfileRepository studentProfileRepository,
-            LearningSpaceMemberRepository learningSpaceMemberRepository
-    ) {
-        this.userRepository = userRepository;
-        this.studentProfileRepository = studentProfileRepository;
-        this.learningSpaceMemberRepository = learningSpaceMemberRepository;
-    }
-
+    // Gom thông tin tài khoản, hồ sơ và lớp học của sinh viên
     @Override
     @Transactional(readOnly = true)
     public StudentDashboardResponse getDashboard(Long studentId) {

@@ -10,7 +10,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+// Thông tin thành viên tham gia Learning Space
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "learning_space_members")
 public class LearningSpaceMember {
@@ -33,28 +40,4 @@ public class LearningSpaceMember {
 
     @Column(name = "joined_at")
     private LocalDateTime joinedAt;
-
-    public Long getId() {
-        return id;
-    }
-
-    public LearningSpace getLearningSpace() {
-        return learningSpace;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getJoinedAt() {
-        return joinedAt;
-    }
 }

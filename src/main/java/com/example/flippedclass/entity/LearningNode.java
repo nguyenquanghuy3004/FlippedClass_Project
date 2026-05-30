@@ -17,7 +17,14 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+// Thông tin từng node trong Learning Path
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(
         name = "learning_nodes",
@@ -75,81 +82,5 @@ public class LearningNode {
     @PreUpdate
     void onUpdate() {
         updatedAt = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LearningPath getLearningPath() {
-        return learningPath;
-    }
-
-    public void setLearningPath(LearningPath learningPath) {
-        this.learningPath = learningPath;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public NodeType getNodeType() {
-        return nodeType;
-    }
-
-    public void setNodeType(NodeType nodeType) {
-        this.nodeType = nodeType;
-    }
-
-    public NodeStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(NodeStatus status) {
-        this.status = status;
-    }
-
-    public Integer getDisplayOrder() {
-        return displayOrder;
-    }
-
-    public void setDisplayOrder(Integer displayOrder) {
-        this.displayOrder = displayOrder;
-    }
-
-    public Integer getEstimatedMinutes() {
-        return estimatedMinutes;
-    }
-
-    public void setEstimatedMinutes(Integer estimatedMinutes) {
-        this.estimatedMinutes = estimatedMinutes;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 }
