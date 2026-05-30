@@ -1,7 +1,7 @@
 package com.example.flippedclass.dto.request;
 
 
-import enums.VisibilityType;
+import com.example.flippedclass.enums.VisibilityType;
 import lombok.Getter;
 import lombok.Setter;
 

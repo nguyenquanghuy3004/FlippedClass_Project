@@ -1,7 +1,7 @@
 package com.example.flippedclass.entity;
 
-import enums.LearningPathStatus;
-import enums.VisibilityType;
+import com.example.flippedclass.enums.LearningPathStatus;
+import com.example.flippedclass.enums.VisibilityType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

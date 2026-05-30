@@ -1,7 +1,7 @@
 package com.example.flippedclass.repository;
 
 import com.example.flippedclass.entity.Role;
-import enums.RoleName;
+import com.example.flippedclass.enums.RoleName;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

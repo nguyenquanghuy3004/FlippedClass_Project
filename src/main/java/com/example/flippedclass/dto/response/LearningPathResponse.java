@@ -1,6 +1,6 @@
 package com.example.flippedclass.dto.response;
 
-import enums.LearningPathStatus;
+import com.example.flippedclass.enums.LearningPathStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,11 +1,11 @@
 package com.example.flippedclass.entity;
 
+import com.example.flippedclass.enums.AuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.descriptor.jdbc.NVarcharJdbcType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -43,7 +43,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50)
-    private enums.AuthProvider provider;
+    private AuthProvider provider;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private StudentProfile studentProfile;

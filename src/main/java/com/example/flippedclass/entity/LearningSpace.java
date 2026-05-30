@@ -1,6 +1,6 @@
 package com.example.flippedclass.entity;
 
-import enums.VisibilityType;
+import com.example.flippedclass.enums.VisibilityType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.LearningSpaceStatus;
 
 import java.time.LocalDateTime;
 
