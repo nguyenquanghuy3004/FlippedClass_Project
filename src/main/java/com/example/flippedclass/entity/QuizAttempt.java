@@ -42,4 +42,7 @@ public class QuizAttempt {
     @Column
     @Builder.Default
     private LocalDateTime submittedAt = LocalDateTime.now();
+
+    @Column
+    private LocalDateTime startedAt;
 }

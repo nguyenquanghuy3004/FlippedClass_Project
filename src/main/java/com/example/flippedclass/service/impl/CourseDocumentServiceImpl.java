@@ -26,7 +26,7 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
 
     @Override
     public List<CourseDocumentResponse> findByLearningPath(Long learningPathId) {
-        learningPathService.getLearningPath(learningPathId);
+        learningPathService.getLearningPathEntity(learningPathId);
         return documentRepository.findByLearningPathId(learningPathId).stream()
                 .map(CourseDocumentResponse::from)
                 .toList();
@@ -34,7 +34,7 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
 
     @Override
     public CourseDocumentResponse create(Long learningPathId, CourseDocumentRequest request) {
-        LearningPath learningPath = learningPathService.getLearningPath(learningPathId);
+        LearningPath learningPath = learningPathService.getLearningPathEntity(learningPathId);
         CourseDocument document = new CourseDocument();
         document.setLearningPath(learningPath);
         applyRequest(document, request);
@@ -68,7 +68,7 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
         validateUrl(request.getUrl());
 
         document.setTitle(request.getTitle().trim());
-        document.setDocumentType(request.getDocumentType());
+        document.setDocumentType(request.getDocumentType() != null ? request.getDocumentType().name() : null);
         document.setUrl(request.getUrl().trim());
         document.setDescription(request.getDescription());
     }
@@ -87,3 +87,6 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
         }
     }
 }
+
+
+

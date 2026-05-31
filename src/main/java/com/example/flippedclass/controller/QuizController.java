@@ -51,6 +51,11 @@ public class QuizController {
         return quizService.getAll();
     }
 
+    @GetMapping("/lecturer/{lecturerId}")
+    public List<QuizResponse> getByLecturer(@PathVariable("lecturerId") @Positive(message = "lecturerId must be a positive number") Long lecturerId) {
+        return quizService.getByLecturer(lecturerId);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") @Positive(message = "id must be a positive number") Long id) {
@@ -69,6 +74,12 @@ public class QuizController {
         return quizService.getQuestions(quizId);
     }
 
+    @PutMapping("/questions/{id}")
+    public QuizQuestionResponse updateQuestion(@PathVariable("id") @Positive(message = "id must be a positive number") Long id,
+                                               @Valid @RequestBody CreateQuizQuestionRequest request) {
+        return quizService.updateQuestion(id, request);
+    }
+
     @DeleteMapping("/questions/{questionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteQuestion(@PathVariable("questionId") @Positive(message = "questionId must be a positive number") Long questionId) {
@@ -85,6 +96,16 @@ public class QuizController {
     @GetMapping("/{quizId}/attempts")
     public List<QuizAttemptResponse> getAttempts(@PathVariable("quizId") @Positive(message = "quizId must be a positive number") Long quizId) {
         return quizService.getAttempts(quizId);
+    }
+
+    @GetMapping("/attempts/student/{studentId}")
+    public List<QuizAttemptResponse> getAttemptsByStudent(@PathVariable("studentId") @Positive(message = "studentId must be a positive number") Long studentId) {
+        return quizService.getAttemptsByStudent(studentId);
+    }
+
+    @GetMapping("/attempts/{id}")
+    public QuizAttemptResponse getAttemptById(@PathVariable("id") @Positive(message = "id must be a positive number") Long id) {
+        return quizService.getAttemptById(id);
     }
 
     @GetMapping("/{quizId}/statistics")

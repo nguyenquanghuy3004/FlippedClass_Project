@@ -27,7 +27,7 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public List<NodeResponse> findByLearningPath(Long pathId) {
-        learningPathService.getLearningPath(pathId);
+        learningPathService.getLearningPathEntity(pathId);
         return nodeRepository.findByLearningPathIdOrderByDisplayOrderAsc(pathId).stream()
                 .map(NodeResponse::from)
                 .toList();
@@ -40,7 +40,7 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public NodeResponse create(Long pathId, NodeRequest request) {
-        LearningPath learningPath = learningPathService.getLearningPath(pathId);
+        LearningPath learningPath = learningPathService.getLearningPathEntity(pathId);
         validateRequest(request);
         if (nodeRepository.existsByLearningPathIdAndDisplayOrder(pathId, request.getDisplayOrder())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Display order already exists in this learning path");
@@ -92,9 +92,11 @@ public class NodeServiceImpl implements NodeService {
         node.setTitle(request.getTitle().trim());
         node.setDescription(request.getDescription());
         node.setContent(request.getContent());
-        node.setNodeType(request.getNodeType() == null ? NodeType.LESSON : request.getNodeType());
-        node.setStatus(request.getStatus() == null ? NodeStatus.DRAFT : request.getStatus());
+        node.setNodeType(request.getNodeType() == null ? NodeType.LESSON.name() : request.getNodeType().name());
+        node.setStatus(request.getStatus() == null ? NodeStatus.DRAFT.name() : request.getStatus().name());
         node.setDisplayOrder(request.getDisplayOrder());
         node.setEstimatedMinutes(request.getEstimatedMinutes());
     }
 }
+
+

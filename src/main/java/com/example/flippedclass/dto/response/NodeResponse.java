@@ -1,8 +1,6 @@
 package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.LearningNode;
-import com.example.flippedclass.enums.NodeStatus;
-import com.example.flippedclass.enums.NodeType;
 import java.time.LocalDateTime;
 
 public class NodeResponse {
@@ -11,8 +9,8 @@ public class NodeResponse {
     private String title;
     private String description;
     private String content;
-    private NodeType nodeType;
-    private NodeStatus status;
+    private String nodeType;
+    private String status;
     private Integer displayOrder;
     private Integer estimatedMinutes;
     private LocalDateTime createdAt;
@@ -54,11 +52,11 @@ public class NodeResponse {
         return content;
     }
 
-    public NodeType getNodeType() {
+    public String getNodeType() {
         return nodeType;
     }
 
-    public NodeStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 

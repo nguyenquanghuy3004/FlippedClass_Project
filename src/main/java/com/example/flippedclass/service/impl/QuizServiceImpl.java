@@ -68,6 +68,9 @@ public class QuizServiceImpl implements QuizService {
                 .description(trimToNull(request.getDescription()))
                 .durationMinutes(request.getDurationMinutes() != null ? request.getDurationMinutes() : 30)
                 .active(request.getActive() == null || request.getActive())
+                .passScore(request.getPassScore() != null ? request.getPassScore() : 50)
+                .difficulty(request.getDifficulty())
+                .thumbnailUrl(request.getThumbnailUrl())
                 .build();
         return toResponse(quizRepository.save(quiz));
     }
@@ -87,6 +90,15 @@ public class QuizServiceImpl implements QuizService {
         if (request.getActive() != null) {
             quiz.setActive(request.getActive());
         }
+        if (request.getPassScore() != null) {
+            quiz.setPassScore(request.getPassScore());
+        }
+        if (request.getDifficulty() != null) {
+            quiz.setDifficulty(request.getDifficulty());
+        }
+        if (request.getThumbnailUrl() != null) {
+            quiz.setThumbnailUrl(request.getThumbnailUrl());
+        }
         return toResponse(quizRepository.save(quiz));
     }
 
@@ -98,6 +110,11 @@ public class QuizServiceImpl implements QuizService {
     @Override
     public List<QuizResponse> getAll() {
         return quizRepository.findAll().stream().map(this::toResponse).toList();
+    }
+
+    @Override
+    public List<QuizResponse> getByLecturer(Long lecturerId) {
+        return quizRepository.findByLecturer_Id(lecturerId).stream().map(this::toResponse).toList();
     }
 
     @Override
@@ -116,6 +133,8 @@ public class QuizServiceImpl implements QuizService {
                 .options(request.getOptions() != null ? request.getOptions().trim() : "")
                 .correctAnswer(request.getCorrectAnswer().trim())
                 .points(request.getPoints())
+                .questionType(request.getQuestionType() != null ? request.getQuestionType() : "SINGLE_CHOICE")
+                .sortOrder(request.getSortOrder() != null ? request.getSortOrder() : 0)
                 .build();
         return toQuestionResponse(questionRepository.save(question));
     }
@@ -126,6 +145,19 @@ public class QuizServiceImpl implements QuizService {
         return questionRepository.findByQuizId(quizId).stream()
                 .map(this::toQuestionResponse)
                 .toList();
+    }
+
+    @Override
+    public QuizQuestionResponse updateQuestion(Long questionId, CreateQuizQuestionRequest request) {
+        QuizQuestion question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new NotFoundException("Question not found: " + questionId));
+        if (request.getContent() != null) question.setContent(request.getContent().trim());
+        if (request.getOptions() != null) question.setOptions(request.getOptions().trim());
+        if (request.getCorrectAnswer() != null) question.setCorrectAnswer(request.getCorrectAnswer().trim());
+        if (request.getPoints() != null) question.setPoints(request.getPoints());
+        if (request.getQuestionType() != null) question.setQuestionType(request.getQuestionType());
+        if (request.getSortOrder() != null) question.setSortOrder(request.getSortOrder());
+        return toQuestionResponse(questionRepository.save(question));
     }
 
     @Override
@@ -178,6 +210,7 @@ public class QuizServiceImpl implements QuizService {
                 .score(score)
                 .totalQuestions(questions.size())
                 .correctAnswers(correct)
+                .startedAt(LocalDateTime.now())
                 .submittedAt(LocalDateTime.now())
                 .build();
 
@@ -190,6 +223,20 @@ public class QuizServiceImpl implements QuizService {
         return attemptRepository.findByQuizId(quizId).stream()
                 .map(this::toAttemptResponse)
                 .toList();
+    }
+
+    @Override
+    public List<QuizAttemptResponse> getAttemptsByStudent(Long studentId) {
+        return attemptRepository.findByStudent_Id(studentId).stream()
+                .map(this::toAttemptResponse)
+                .toList();
+    }
+
+    @Override
+    public QuizAttemptResponse getAttemptById(Long attemptId) {
+        QuizAttempt attempt = attemptRepository.findById(attemptId)
+                .orElseThrow(() -> new NotFoundException("Attempt not found: " + attemptId));
+        return toAttemptResponse(attempt);
     }
 
     @Override
@@ -244,9 +291,18 @@ public class QuizServiceImpl implements QuizService {
     }
 
     private QuizResponse toResponse(Quiz quiz) {
+        long totalAttempts = attemptRepository.countByQuizId(quiz.getId());
+        BigDecimal avgScore = attemptRepository.averageScoreByQuizId(quiz.getId());
+        double avg = avgScore != null ? avgScore.doubleValue() : 0.0;
+        
+        long passedCount = attemptRepository.findByQuizId(quiz.getId()).stream()
+                .filter(a -> a.getScore().compareTo(BigDecimal.valueOf(quiz.getPassScore())) >= 0).count();
+        double passRate = totalAttempts > 0 ? (passedCount * 100.0 / totalAttempts) : 0.0;
+
         return QuizResponse.builder()
                 .id(quiz.getId())
                 .learningNodeId(quiz.getLearningNode() != null ? quiz.getLearningNode().getId() : null)
+                .courseName(quiz.getLearningNode() != null ? quiz.getLearningNode().getTitle() : null)
                 .lecturerId(quiz.getLecturer() != null ? quiz.getLecturer().getId() : null)
                 .lecturerName(quiz.getLecturer() != null ? quiz.getLecturer().getFullName() : null)
                 .title(quiz.getTitle())
@@ -254,6 +310,13 @@ public class QuizServiceImpl implements QuizService {
                 .durationMinutes(quiz.getDurationMinutes())
                 .active(quiz.isActive())
                 .createdAt(quiz.getCreatedAt())
+                .passScore(quiz.getPassScore())
+                .difficulty(quiz.getDifficulty())
+                .thumbnailUrl(quiz.getThumbnailUrl())
+                .questionCount(questionRepository.findByQuizId(quiz.getId()).size())
+                .totalAttempts(totalAttempts)
+                .averageScore(avg)
+                .passRate(passRate)
                 .build();
     }
 
@@ -265,6 +328,8 @@ public class QuizServiceImpl implements QuizService {
                 .options(q.getOptions())
                 .correctAnswer(q.getCorrectAnswer())
                 .points(q.getPoints())
+                .questionType(q.getQuestionType())
+                .sortOrder(q.getSortOrder())
                 .build();
     }
 
@@ -277,6 +342,7 @@ public class QuizServiceImpl implements QuizService {
                 .score(a.getScore())
                 .totalQuestions(a.getTotalQuestions())
                 .correctAnswers(a.getCorrectAnswers())
+                .startedAt(a.getStartedAt() != null ? a.getStartedAt() : a.getSubmittedAt())
                 .submittedAt(a.getSubmittedAt())
                 .build();
     }

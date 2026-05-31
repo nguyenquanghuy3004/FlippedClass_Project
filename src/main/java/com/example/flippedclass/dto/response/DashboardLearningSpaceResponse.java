@@ -2,6 +2,10 @@ package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.entity.LearningSpaceMember;
+import com.example.flippedclass.enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.VisibilityType;
+import com.example.flippedclass.enums.MemberRole;
+import com.example.flippedclass.enums.MemberStatus;
 import java.time.LocalDateTime;
 
 public class DashboardLearningSpaceResponse {
@@ -10,10 +14,10 @@ public class DashboardLearningSpaceResponse {
     private String description;
     private Long ownerId;
     private String inviteCode;
-    private String status;
-    private String visibility;
-    private String memberRole;
-    private String memberStatus;
+    private LearningSpaceStatus status;
+    private VisibilityType visibility;
+    private MemberRole memberRole;
+    private MemberStatus memberStatus;
     private LocalDateTime joinedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -56,19 +60,19 @@ public class DashboardLearningSpaceResponse {
         return inviteCode;
     }
 
-    public String getStatus() {
+    public LearningSpaceStatus getStatus() {
         return status;
     }
 
-    public String getVisibility() {
+    public VisibilityType getVisibility() {
         return visibility;
     }
 
-    public String getMemberRole() {
+    public MemberRole getMemberRole() {
         return memberRole;
     }
 
-    public String getMemberStatus() {
+    public MemberStatus getMemberStatus() {
         return memberStatus;
     }
 

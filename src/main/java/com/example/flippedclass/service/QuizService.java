@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface QuizService {
 
-    public List<QuizResponse> findByLearningNode(Long nodeId);
+
     QuizResponse create(CreateQuizRequest request);
 
     QuizResponse update(Long id, UpdateQuizRequest request);
@@ -22,17 +22,25 @@ public interface QuizService {
 
     List<QuizResponse> getAll();
 
+    List<QuizResponse> getByLecturer(Long lecturerId);
+
     void delete(Long id);
 
     QuizQuestionResponse addQuestion(Long quizId, CreateQuizQuestionRequest request);
 
     List<QuizQuestionResponse> getQuestions(Long quizId);
 
+    QuizQuestionResponse updateQuestion(Long questionId, CreateQuizQuestionRequest request);
+
     void deleteQuestion(Long questionId);
 
     QuizAttemptResponse submitAttempt(Long quizId, SubmitQuizAttemptRequest request);
 
     List<QuizAttemptResponse> getAttempts(Long quizId);
+
+    List<QuizAttemptResponse> getAttemptsByStudent(Long studentId);
+
+    QuizAttemptResponse getAttemptById(Long attemptId);
 
     QuizStatisticsResponse getStatistics(Long quizId);
 

@@ -41,4 +41,14 @@ public class Quiz {
     @Column(updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "pass_score")
+    @Builder.Default
+    private Integer passScore = 50;
+
+    @Column(length = 20)
+    private String difficulty;
+
+    @Column(name = "thumbnail_url", length = 1000)
+    private String thumbnailUrl;
 }

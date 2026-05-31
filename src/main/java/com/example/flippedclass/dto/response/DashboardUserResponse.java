@@ -1,6 +1,7 @@
 package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.User;
+import com.example.flippedclass.enums.AuthProvider;
 import java.time.LocalDateTime;
 
 public class DashboardUserResponse {
@@ -9,7 +10,7 @@ public class DashboardUserResponse {
     private String email;
     private String fullName;
     private String avatarUrl;
-    private String provider;
+    private AuthProvider provider;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -46,7 +47,7 @@ public class DashboardUserResponse {
         return avatarUrl;
     }
 
-    public String getProvider() {
+    public AuthProvider getProvider() {
         return provider;
     }
 

@@ -25,4 +25,9 @@ public class CreateQuizQuestionRequest {
     @Min(value = 1, message = "points must be at least 1")
     @Max(value = 100, message = "points must not exceed 100")
     private Integer points;
+
+    @Size(max = 50, message = "questionType must not exceed 50 characters")
+    private String questionType;
+
+    private Integer sortOrder;
 }

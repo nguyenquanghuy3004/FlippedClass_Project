@@ -34,7 +34,7 @@ public class NodeConnectionServiceImpl implements NodeConnectionService {
 
     @Override
     public List<NodeConnectionResponse> findByLearningPath(Long pathId) {
-        learningPathService.getLearningPath(pathId);
+        learningPathService.getLearningPathEntity(pathId);
         return connectionRepository.findByLearningPathId(pathId).stream()
                 .map(NodeConnectionResponse::from)
                 .toList();
@@ -42,7 +42,7 @@ public class NodeConnectionServiceImpl implements NodeConnectionService {
 
     @Override
     public NodeConnectionResponse create(Long pathId, NodeConnectionRequest request) {
-        LearningPath learningPath = learningPathService.getLearningPath(pathId);
+        LearningPath learningPath = learningPathService.getLearningPathEntity(pathId);
         validateRequiredNodeIds(request);
         if (Objects.equals(request.getSourceNodeId(), request.getTargetNodeId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Source node and target node must be different");
@@ -92,3 +92,4 @@ public class NodeConnectionServiceImpl implements NodeConnectionService {
         }
     }
 }
+
