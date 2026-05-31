@@ -1,7 +1,7 @@
 package com.example.flippedclass.entity;
 
-import enums.MemberRole;
-import enums.MemberStatus;
+import com.example.flippedclass.enums.MemberRole;
+import com.example.flippedclass.enums.MemberStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

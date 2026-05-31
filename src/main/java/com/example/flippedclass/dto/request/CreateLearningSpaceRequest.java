@@ -1,6 +1,6 @@
 package com.example.flippedclass.dto.request;
 
-import enums.VisibilityType;
+import com.example.flippedclass.enums.VisibilityType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

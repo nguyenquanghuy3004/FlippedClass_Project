@@ -1,7 +1,7 @@
 package com.example.flippedclass.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import enums.ItemType;
+import com.example.flippedclass.enums.ItemType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +17,7 @@ public class LearningNodeItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false)
     private String title;
 

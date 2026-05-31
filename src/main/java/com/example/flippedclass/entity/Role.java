@@ -1,6 +1,6 @@
 package com.example.flippedclass.entity;
 
-import enums.RoleName;
+import com.example.flippedclass.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

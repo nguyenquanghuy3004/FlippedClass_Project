@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class LearningNodeResponse {
     private Long id;
     private String title;
-//    private String description;
+    private String description;
     private Long learningPathId;
 //    private Double positionX;
 //    private Double positionY;
