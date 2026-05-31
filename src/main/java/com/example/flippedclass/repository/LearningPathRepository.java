@@ -1,7 +1,7 @@
 package com.example.flippedclass.repository;
 
 import com.example.flippedclass.entity.LearningPath;
-import enums.LearningPathStatus;
+import com.example.flippedclass.enums.LearningPathStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

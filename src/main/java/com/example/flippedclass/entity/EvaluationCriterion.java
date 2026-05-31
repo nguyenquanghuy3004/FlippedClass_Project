@@ -12,7 +12,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EvaluationCriteria {
+public class EvaluationCriterion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,10 +28,10 @@ public class EvaluationCriteria {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    @Column(name = "max_score", precision = 5, scale = 2)
+    @Column(precision = 5, scale = 2)
     private BigDecimal maxScore;
 
-    @Column(name = "sort_order")
+    @Column
     @Builder.Default
     private Integer sortOrder = 0;
 }

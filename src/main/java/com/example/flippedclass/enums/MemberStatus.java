@@ -1,4 +1,4 @@
-package enums;
+package com.example.flippedclass.enums;
 
 public enum MemberStatus {
     ACTIVE,

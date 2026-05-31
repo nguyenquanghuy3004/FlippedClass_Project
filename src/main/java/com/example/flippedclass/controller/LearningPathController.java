@@ -17,7 +17,7 @@ import com.example.flippedclass.dto.response.LearningNodeResponse;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(originPatterns = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/learning-spaces/{spaceId}/learning-paths")
 public class LearningPathController {
@@ -31,17 +31,17 @@ public class LearningPathController {
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PostMapping
-    public ResponseEntity<LearningPathResponse> create(@PathVariable Long spaceId, @Valid @RequestBody CreateLearningPathRequest request) {
+    public ResponseEntity<LearningPathResponse> create(@PathVariable Long spaceId,
+                                                       @Valid @RequestBody CreateLearningPathRequest request) {
         return ResponseEntity
                 .ok(learningPathService.createLearningPath(spaceId, request));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PostMapping("/{pathId}/learning-nodes")
-    public ResponseEntity<LearningNodeResponse> createLearningNode(
-            @PathVariable Long spaceId, 
+    public ResponseEntity<LearningNodeResponse> createLearningNode( @PathVariable Long spaceId,
             @PathVariable Long pathId, 
-            @RequestBody CreateLearningNodeRequest request) {
+              @RequestBody CreateLearningNodeRequest request) {
         return ResponseEntity.ok(learningNodeService.createLearningNode(pathId, request));
     }
 
@@ -61,7 +61,8 @@ public class LearningPathController {
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PutMapping("/{pathId}")
-    public ResponseEntity<LearningPathResponse> update(@PathVariable Long spaceId, @PathVariable Long pathId, @Valid @RequestBody UpdateLearningPathRequest request) {
+    public ResponseEntity<LearningPathResponse> update(@PathVariable Long spaceId, @PathVariable Long pathId,
+                                                       @Valid @RequestBody UpdateLearningPathRequest request) {
         return ResponseEntity
                 .ok(learningPathService.updateLearningPath(spaceId, pathId, request));
     }

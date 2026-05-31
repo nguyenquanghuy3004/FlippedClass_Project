@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(originPatterns = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/learning-nodes/{nodeId}/items")
 public class LearningNodeController {
@@ -41,11 +41,6 @@ public class LearningNodeController {
         ));
     }
 
-    @GetMapping
-    public ResponseEntity<?> getItems(@PathVariable Long nodeId) {
-        return ResponseEntity.ok(learningNodeItemService.getItemByNodeId(nodeId));
-    }
-
 
     @PostMapping("/upload-document")
     public ResponseEntity<Map<String,String>> uploadDocument(@RequestParam("file") MultipartFile file){
@@ -57,6 +52,10 @@ public class LearningNodeController {
         ));
     }
 
+    @GetMapping
+    public ResponseEntity<?> getItems(@PathVariable Long nodeId) {
+        return ResponseEntity.ok(learningNodeItemService.getItemByNodeId(nodeId));
+    }
 
         @DeleteMapping("/item/{itemId}")
     public ResponseEntity<Map<String,String>> deleteItem(@PathVariable Long itemId){

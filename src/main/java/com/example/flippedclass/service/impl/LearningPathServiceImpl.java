@@ -10,8 +10,8 @@ import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.repository.LearningPathRepository;
 import com.example.flippedclass.repository.LearningSpaceRepository;
 import com.example.flippedclass.service.LearningPathService;
-import enums.LearningPathStatus;
-import enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.LearningPathStatus;
+import com.example.flippedclass.enums.LearningSpaceStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,7 +142,7 @@ public class LearningPathServiceImpl implements LearningPathService {
                 com.example.flippedclass.dto.response.LearningNodeResponse.builder()
                     .id(node.getId())
                     .title(node.getTitle())
-//                    .description(node.getDescription())
+                    .description(node.getDescription())
                     .learningPathId(path.getId())
                     .status(node.getStatus())
                     .nodeType(node.getNodeType())
