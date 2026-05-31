@@ -33,4 +33,10 @@ public class Quiz {
 
     private Integer durationMinutes;
 
+    @Builder.Default
+    private boolean active = true;
+
+    @Column(name = "created_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

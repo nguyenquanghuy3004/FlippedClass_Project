@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toSet());
         Set<Role> roles = roleRepository.findByNameIn(roleNames);
         if (roles.size() != roleNames.size()) {
-            Set<String> found = roles.stream().map(Role::getName).collect(Collectors.toSet());
+            Set<String> found = roles.stream().map(r -> r.getName().name()).collect(Collectors.toSet());
             Set<String> missing = roleNames.stream().filter(r -> !found.contains(r)).collect(Collectors.toSet());
             throw new BusinessException("Roles not found: " + missing);
         }
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
     static UserResponse toResponse(User user) {
         Set<String> roleNames = user.getRoles().stream()
-                .map(Role::getName)
+                .map(r -> r.getName().name())
                 .collect(Collectors.toSet());
         return UserResponse.builder()
                 .id(user.getId())

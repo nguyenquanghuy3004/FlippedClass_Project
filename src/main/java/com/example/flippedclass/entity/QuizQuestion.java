@@ -26,6 +26,9 @@ public class QuizQuestion {
 
     private String correctAnswer;
 
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String options;
+
     @Builder.Default
     private Integer points = 1;
 }

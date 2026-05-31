@@ -17,7 +17,7 @@ import com.example.flippedclass.dto.response.LearningNodeResponse;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(originPatterns = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/learning-spaces/{spaceId}/learning-paths")
 public class LearningPathController {

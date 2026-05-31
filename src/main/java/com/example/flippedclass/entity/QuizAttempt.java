@@ -36,4 +36,8 @@ public class QuizAttempt {
     @Builder.Default
     private Integer correctAnswers = 0;
 
+    @Column(name = "submitted_at")
+    @Builder.Default
+    private LocalDateTime submittedAt = LocalDateTime.now();
+
 }

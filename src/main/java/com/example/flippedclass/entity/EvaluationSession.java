@@ -39,13 +39,8 @@ public class EvaluationSession {
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<EvaluationCriteria> criteriaList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    private LocalDateTime createdAt; @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<EvaluationCriterion> criteria = new ArrayList<>();
 }
+
