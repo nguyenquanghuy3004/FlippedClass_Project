@@ -7,7 +7,7 @@ import com.example.flippedclass.dto.response.LearningPathResponse;
 import com.example.flippedclass.dto.response.MessageResponse;
 import com.example.flippedclass.service.LearningPathService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +20,11 @@ import java.util.List;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/learning-spaces/{spaceId}/learning-paths")
+@RequiredArgsConstructor
 public class LearningPathController {
 
-    @Autowired
-    private LearningPathService learningPathService;
-
-    @Autowired
-    private LearningNodeService learningNodeService;
-
+    private final LearningPathService learningPathService;
+    private final LearningNodeService learningNodeService;
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PostMapping

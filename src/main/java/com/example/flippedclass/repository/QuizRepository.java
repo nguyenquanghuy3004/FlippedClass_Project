@@ -1,7 +1,6 @@
 package com.example.flippedclass.repository;
 
 import com.example.flippedclass.entity.Quiz;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

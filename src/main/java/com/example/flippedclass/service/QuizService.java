@@ -13,18 +13,31 @@ import java.util.List;
 
 public interface QuizService {
 
-    public List<QuizResponse> findByLearningNode(Long nodeId);
+    List<QuizResponse> findByLearningNode(Long nodeId);
+
+    QuizResponse create(Long nodeId, CreateQuizRequest request);
+
     QuizResponse create(CreateQuizRequest request);
 
+    QuizResponse update(Long nodeId, Long quizId, UpdateQuizRequest request);
+
     QuizResponse update(Long id, UpdateQuizRequest request);
+
+    QuizResponse getById(Long nodeId, Long quizId);
 
     QuizResponse getById(Long id);
 
     List<QuizResponse> getAll();
 
+    void delete(Long nodeId, Long quizId);
+
     void delete(Long id);
 
+    QuizQuestionResponse addQuestion(Long nodeId, Long quizId, CreateQuizQuestionRequest request);
+
     QuizQuestionResponse addQuestion(Long quizId, CreateQuizQuestionRequest request);
+
+    List<QuizQuestionResponse> getQuestions(Long nodeId, Long quizId);
 
     List<QuizQuestionResponse> getQuestions(Long quizId);
 
@@ -34,7 +47,11 @@ public interface QuizService {
 
     List<QuizAttemptResponse> getAttempts(Long quizId);
 
+    List<QuizAttemptResponse> getAttempts(Long nodeId, Long quizId);
+
     QuizStatisticsResponse getStatistics(Long quizId);
+
+    QuizStatisticsResponse getStatistics(Long nodeId, Long quizId);
 
     List<QuizResponse> getActiveQuizzesByLearningNode(Long learningNodeId);
 }

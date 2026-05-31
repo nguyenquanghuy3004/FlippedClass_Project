@@ -11,7 +11,6 @@ import lombok.Data;
 @Data
 public class CreateQuizRequest {
 
-    @NotNull(message = "learningNodeId is required")
     @Positive(message = "learningNodeId must be a positive number")
     private Long learningNodeId;
 

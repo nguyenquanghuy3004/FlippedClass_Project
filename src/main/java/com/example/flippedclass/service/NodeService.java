@@ -7,15 +7,15 @@ import java.util.List;
 
 public interface NodeService {
 
-    public List<NodeResponse> findByLearningPath(Long pathId);
+    List<NodeResponse> findByLearningPath(Long pathId);
 
-    public NodeResponse findById(Long id);
+    NodeResponse findById(Long pathId, Long nodeId);
 
-    public NodeResponse create(Long pathId, NodeRequest request);
+    NodeResponse create(Long pathId, NodeRequest request);
 
-    public NodeResponse update(Long id, NodeRequest request);
+    NodeResponse update(Long pathId, Long nodeId, NodeRequest request);
 
-    public void delete(Long id);
+    void delete(Long pathId, Long nodeId);
 
-    public LearningNode getNode(Long id);
+    LearningNode getNode(Long id);
 }

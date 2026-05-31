@@ -2,7 +2,9 @@ package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.User;
 import java.time.LocalDateTime;
+import lombok.Getter;
 
+@Getter
 public class DashboardUserResponse {
     private Long id;
     private String username;
@@ -20,41 +22,9 @@ public class DashboardUserResponse {
         response.email = user.getEmail();
         response.fullName = user.getFullName();
         response.avatarUrl = user.getAvatarUrl();
-        response.provider = user.getProvider();
+        response.provider = user.getProvider() == null ? null : user.getProvider().name();
         response.createdAt = user.getCreatedAt();
         response.updatedAt = user.getUpdatedAt();
         return response;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 }
