@@ -1,11 +1,7 @@
 package com.example.flippedclass.entity;
 
-import enums.RoleName;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "roles")
@@ -13,12 +9,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Role {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20, unique = true)
-    private RoleName name;
+    @Column(nullable = false, unique = true, length = 50)
+    private com.example.flippedclass.enums.RoleName name;
 }

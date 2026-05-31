@@ -2,8 +2,6 @@ package com.example.flippedclass.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,52 +20,43 @@ public class LearningNode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_path_id", nullable = false)
+    private LearningPath learningPath;
+
     @Column(nullable = false, length = 255)
     private String title;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "content", columnDefinition = "NVARCHAR(MAX)")
     private String content;
 
     @Column(name = "node_type", length = 50)
     private String nodeType;
 
-    @Column(length = 20)
-    private String status = "ACTIVE";
+    @Column(length = 50)
+    private String status;
 
     @Column(name = "display_order")
-    private Integer displayOrder = 0;
+    private Integer displayOrder;
 
     @Column(name = "estimated_minutes")
-    private Integer estimatedMinutes = 0;
+    private Integer estimatedMinutes;
 
-    // Tọa độ phục vụ vẽ sơ đồ Graph/Mindmap
-//    @Column(name = "position_x")
-//    private Double positionX;
-//
-//    @Column(name = "position_y")
-//    private Double positionY;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "learning_path_id", nullable = false)
-    private LearningPath learningPath;
-
-    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    // hoạt động thuộc bài học  (sắp xếp tuần tự)
     @OneToMany(mappedBy = "learningNode", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
     @Builder.Default
     private List<LearningNodeItem> items = new ArrayList<>();
-
 
     @OneToMany(mappedBy = "learningNode", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

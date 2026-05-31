@@ -2,7 +2,6 @@ package com.example.flippedclass.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class EvaluationSession {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,21 +31,15 @@ public class EvaluationSession {
     @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(name = "grading_start_at")
     private LocalDateTime gradingStartAt;
 
-    @Column(name = "grading_deadline_at")
     private LocalDateTime gradingDeadlineAt;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<EvaluationCriteria> criteriaList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<GradeEntry> gradeEntries = new ArrayList<>();
+    private List<EvaluationCriterion> criteria = new ArrayList<>();
 }

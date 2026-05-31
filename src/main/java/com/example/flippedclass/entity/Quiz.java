@@ -2,11 +2,8 @@ package com.example.flippedclass.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "quizzes")
@@ -16,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Quiz {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,21 +32,13 @@ public class Quiz {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    @Column(name = "duration_minutes", nullable = false)
+    @Column(nullable = false)
     private Integer durationMinutes;
 
-    @Builder.Default
-    private Boolean active = true;
+    @Column(nullable = false)
+    private boolean active;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(updatable = false)
     @Builder.Default
-    private List<QuizQuestion> questions = new ArrayList<>();
-
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<QuizAttempt> attempts = new ArrayList<>();
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

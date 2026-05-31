@@ -2,22 +2,21 @@ package com.example.flippedclass.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "grade_entries",
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uq_grade_entries", columnNames = {"session_id", "student_id", "criterion_id"})
-    })
+@Table(name = "grade_entries", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"session_id", "student_id", "criterion_id"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class GradeEntry {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +27,7 @@ public class GradeEntry {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "criterion_id", nullable = false)
-    private EvaluationCriteria criterion;
+    private EvaluationCriterion criterion;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
@@ -44,7 +43,7 @@ public class GradeEntry {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String comment;
 
-    @CreationTimestamp
-    @Column(name = "graded_at", updatable = false)
-    private LocalDateTime gradedAt;
+    @Column
+    @Builder.Default
+    private LocalDateTime gradedAt = LocalDateTime.now();
 }

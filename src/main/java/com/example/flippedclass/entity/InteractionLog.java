@@ -2,7 +2,6 @@ package com.example.flippedclass.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class InteractionLog {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,7 +32,7 @@ public class InteractionLog {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String summary;
 
-    @CreationTimestamp
-    @Column(name = "occurred_at", updatable = false)
-    private LocalDateTime occurredAt;
+    @Column(updatable = false)
+    @Builder.Default
+    private LocalDateTime occurredAt = LocalDateTime.now();
 }

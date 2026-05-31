@@ -4,15 +4,17 @@ import com.example.flippedclass.dto.request.CreateLearningPathRequest;
 import com.example.flippedclass.dto.request.ReorderLearningPathRequest;
 import com.example.flippedclass.dto.request.UpdateLearningPathRequest;
 import com.example.flippedclass.dto.response.LearningPathResponse;
-import org.springframework.stereotype.Service;
+import com.example.flippedclass.entity.LearningPath;
 
 import java.util.List;
 
-@Service
 public interface LearningPathService {
+
     LearningPathResponse createLearningPath(Long spaceId, CreateLearningPathRequest request);
 
     List<LearningPathResponse> getLearningPath(Long spaceId);
+
+    LearningPath getLearningPathEntity(Long id);
 
     LearningPathResponse getLearningPathDetail(Long spaceId, Long pathId);
 

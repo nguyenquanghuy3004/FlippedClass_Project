@@ -1,7 +1,7 @@
 package com.example.flippedclass.dto.response;
 
-import enums.LearningSpaceStatus;
-import enums.VisibilityType;
+import com.example.flippedclass.enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.VisibilityType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

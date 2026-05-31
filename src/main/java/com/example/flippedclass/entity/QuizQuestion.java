@@ -11,6 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class QuizQuestion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,11 +24,12 @@ public class QuizQuestion {
     private String content;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
-    private String options; // Các phương án chọn (thường lưu dạng JSON string)
+    private String options;
 
-    @Column(name = "correct_answer", length = 50)
+    @Column(length = 50)
     private String correctAnswer;
 
+    @Column
     @Builder.Default
     private Integer points = 1;
 }
