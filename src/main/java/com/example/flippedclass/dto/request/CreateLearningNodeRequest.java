@@ -11,6 +11,6 @@ public class  CreateLearningNodeRequest {
     private Long learningPathId;
     private Double positionX;
     private Double positionY;
-    private String noteType;
+    private String nodeType;
 }
 

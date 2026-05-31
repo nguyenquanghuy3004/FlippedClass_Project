@@ -31,8 +31,7 @@ public class LearningPathController {
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PostMapping
-    public ResponseEntity<LearningPathResponse> create(@PathVariable Long spaceId,
-                                                       @Valid @RequestBody CreateLearningPathRequest request) {
+    public ResponseEntity<LearningPathResponse> create(@PathVariable Long spaceId, @Valid @RequestBody CreateLearningPathRequest request) {
         return ResponseEntity
                 .ok(learningPathService.createLearningPath(spaceId, request));
     }
@@ -73,22 +72,29 @@ public class LearningPathController {
     public ResponseEntity<?> archive(@PathVariable Long spaceId, @PathVariable Long pathId) {
         learningPathService.archiveLearningPath(spaceId, pathId);
         return ResponseEntity
-                .ok(new MessageResponse("Lưu trữ roadmap thành công"));
+                .ok(new MessageResponse("Lưu trữ module thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PutMapping("/{pathId}/restore")
     public ResponseEntity<?> restore(@PathVariable Long spaceId, @PathVariable Long pathId) {
         learningPathService.restoreLearningPath(spaceId, pathId);
-        return ResponseEntity.ok(new MessageResponse("Khôi phục roadmap thành công"));
+        return ResponseEntity.ok(new MessageResponse("Khôi phục module thành công"));
     }
 
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER')")
     @DeleteMapping("/{pathId}")
     public ResponseEntity<?> delete(@PathVariable Long spaceId, @PathVariable Long pathId) {
-        learningPathService.deleteLearningPath(spaceId, pathId);
-        return ResponseEntity.ok(new MessageResponse("Xóa roadmap thành công"));
+        learningPathService.deleteLearningPathModul(spaceId, pathId);
+        return ResponseEntity.ok(new MessageResponse("Xóa module thành công"));
+    }
+
+    @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER')")
+    @DeleteMapping
+    public ResponseEntity<?> deleteAll(@PathVariable Long spaceId) {
+        learningPathService.deleteAllLearningPaths(spaceId);
+        return ResponseEntity.ok(new MessageResponse("Xóa toàn bộ roadmap thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")

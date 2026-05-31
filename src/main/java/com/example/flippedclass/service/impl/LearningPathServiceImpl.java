@@ -27,10 +27,17 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Autowired
      LearningPathRepository learningPathRepository;
 
+    @Override
+    public LearningPath getLearningPathEntity(Long id) {
+        return learningPathRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning Path"));
+    }
 
     @Override
     @Transactional
     public LearningPathResponse createLearningPath(Long spaceId, CreateLearningPathRequest request) {
+
+
         LearningSpace space = learningSpaceRepository.findByIdAndStatus(spaceId, LearningSpaceStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning or Space đã bị xóa"));
 
@@ -46,7 +53,7 @@ public class LearningPathServiceImpl implements LearningPathService {
         path.setPosition(nextPosition);
         path.setStatus(LearningPathStatus.ACTIVE);
         path.setLearningSpace(space);
-        path.setLecturer(space.getOwner()); // Fix: Set lecturer to avoid DB constraint violation
+        path.setLecturer(space.getOwner());
 
         return toResponse(learningPathRepository.save(path));
     }
@@ -111,8 +118,17 @@ public class LearningPathServiceImpl implements LearningPathService {
 
     @Override
     @Transactional
-    public void deleteLearningPath(Long spaceId, Long pathId) {
+    public void deleteLearningPathModul(Long spaceId, Long pathId) {
         findPathInSpace(spaceId, pathId).setStatus(LearningPathStatus.DELETED);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllLearningPaths(Long spaceId) {
+        List<LearningPath> paths = learningPathRepository.findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.ACTIVE);
+        for (LearningPath path : paths) {
+            path.setStatus(LearningPathStatus.DELETED);
+        }
     }
 
     //REORDER

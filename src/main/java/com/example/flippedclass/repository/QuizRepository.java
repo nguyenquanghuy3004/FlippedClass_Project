@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
     List<Quiz> findByLearningNode_IdAndActiveTrue(Long learningNodeId);
+    List<Quiz> findByLearningNode_IdOrderByCreatedAtDesc(Long learningNodeId);
 }

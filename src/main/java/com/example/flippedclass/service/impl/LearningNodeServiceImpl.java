@@ -33,8 +33,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 // .positionX(request.getPositionX())
                 // .positionY(request.getPositionY())
                 .status("ACTIVE")
-//                .nodeType("VIDEO") // Mặc định hoặc lấy từ request nếu có
-                .nodeType(request.getNoteType() != null ? request.getNoteType() : "VIDEO")
+                .nodeType(request.getNodeType() != null ? request.getNodeType() : "VIDEO")
                 .build();
 
         LearningNode savedNode = learningNodeRepository.save(node);
@@ -68,8 +67,11 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
         node.setTitle(request.getTitle());
         node.setDescription(request.getDescription());
-        if (request.getNoteType() != null) {
-            node.setNodeType(request.getNoteType());
+
+
+
+        if (request.getNodeType() != null) {
+            node.setNodeType(request.getNodeType());
         }
 
         LearningNode savedNode = learningNodeRepository.save(node);

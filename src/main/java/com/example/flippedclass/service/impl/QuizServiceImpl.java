@@ -32,9 +32,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
@@ -43,23 +47,21 @@ public class QuizServiceImpl implements QuizService {
     private final UserRepository userRepository;
     private final LearningNodeRepository learningNodeRepository;
 
-    public QuizServiceImpl(QuizRepository quizRepository,
-                           QuizQuestionRepository questionRepository,
-                           QuizAttemptRepository attemptRepository,
-                           UserRepository userRepository,
-                           LearningNodeRepository learningNodeRepository) {
-        this.quizRepository = quizRepository;
-        this.questionRepository = questionRepository;
-        this.attemptRepository = attemptRepository;
-        this.userRepository = userRepository;
-        this.learningNodeRepository = learningNodeRepository;
+    @Override
+    public List<QuizResponse> findByLearningNode(Long nodeId) {
+        getLearningNode(nodeId);
+        return quizRepository.findByLearningNode_IdOrderByCreatedAtDesc(nodeId).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
-    public QuizResponse create(CreateQuizRequest request) {
+    public QuizResponse create(Long nodeId, CreateQuizRequest request) {
         User lecturer = UserServiceImpl.findUser(userRepository, request.getLecturerId());
-        LearningNode node = learningNodeRepository.findById(request.getLearningNodeId())
-                .orElseThrow(() -> new NotFoundException("Learning node not found: " + request.getLearningNodeId()));
+        LearningNode node = getLearningNode(nodeId);
+        if (request.getLearningNodeId() != null && !request.getLearningNodeId().equals(nodeId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quiz does not belong to this learning node");
+        }
 
         Quiz quiz = Quiz.builder()
                 .learningNode(node)
@@ -73,8 +75,26 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    public QuizResponse create(CreateQuizRequest request) {
+        if (request.getLearningNodeId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "learningNodeId is required");
+        }
+        return create(request.getLearningNodeId(), request);
+    }
+
+    @Override
+    public QuizResponse update(Long nodeId, Long quizId, UpdateQuizRequest request) {
+        Quiz quiz = findQuizInLearningNode(nodeId, quizId);
+        return updateQuiz(quiz, request);
+    }
+
+    @Override
     public QuizResponse update(Long id, UpdateQuizRequest request) {
         Quiz quiz = findQuiz(id);
+        return updateQuiz(quiz, request);
+    }
+
+    private QuizResponse updateQuiz(Quiz quiz, UpdateQuizRequest request) {
         if (request.getTitle() != null) {
             quiz.setTitle(request.getTitle().trim());
         }
@@ -91,6 +111,11 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    public QuizResponse getById(Long nodeId, Long quizId) {
+        return toResponse(findQuizInLearningNode(nodeId, quizId));
+    }
+
+    @Override
     public QuizResponse getById(Long id) {
         return toResponse(findQuiz(id));
     }
@@ -104,6 +129,19 @@ public class QuizServiceImpl implements QuizService {
     public void delete(Long id) {
         questionRepository.deleteByQuizId(id);
         quizRepository.delete(findQuiz(id));
+    }
+
+    @Override
+    public void delete(Long nodeId, Long quizId) {
+        Quiz quiz = findQuizInLearningNode(nodeId, quizId);
+        questionRepository.deleteByQuizId(quizId);
+        quizRepository.delete(quiz);
+    }
+
+    @Override
+    public QuizQuestionResponse addQuestion(Long nodeId, Long quizId, CreateQuizQuestionRequest request) {
+        findQuizInLearningNode(nodeId, quizId);
+        return addQuestion(quizId, request);
     }
 
     @Override
@@ -126,6 +164,12 @@ public class QuizServiceImpl implements QuizService {
         return questionRepository.findByQuizId(quizId).stream()
                 .map(this::toQuestionResponse)
                 .toList();
+    }
+
+    @Override
+    public List<QuizQuestionResponse> getQuestions(Long nodeId, Long quizId) {
+        findQuizInLearningNode(nodeId, quizId);
+        return getQuestions(quizId);
     }
 
     @Override
@@ -193,6 +237,12 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    public List<QuizAttemptResponse> getAttempts(Long nodeId, Long quizId) {
+        findQuizInLearningNode(nodeId, quizId);
+        return getAttempts(quizId);
+    }
+
+    @Override
     public QuizStatisticsResponse getStatistics(Long quizId) {
         Quiz quiz = findQuiz(quizId);
         List<QuizAttempt> attempts = attemptRepository.findByQuizId(quizId);
@@ -224,15 +274,34 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    public QuizStatisticsResponse getStatistics(Long nodeId, Long quizId) {
+        findQuizInLearningNode(nodeId, quizId);
+        return getStatistics(quizId);
+    }
+
+    @Override
     public List<QuizResponse> getActiveQuizzesByLearningNode(Long learningNodeId) {
         return quizRepository.findByLearningNode_IdAndActiveTrue(learningNodeId).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
+    private LearningNode getLearningNode(Long id) {
+        return learningNodeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Learning node not found: " + id));
+    }
+
     private Quiz findQuiz(Long id) {
         return quizRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Quiz not found: " + id));
+    }
+
+    private Quiz findQuizInLearningNode(Long nodeId, Long quizId) {
+        Quiz quiz = findQuiz(quizId);
+        if (quiz.getLearningNode() == null || !nodeId.equals(quiz.getLearningNode().getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quiz does not belong to this learning node");
+        }
+        return quiz;
     }
 
     private static String trimToNull(String value) {
