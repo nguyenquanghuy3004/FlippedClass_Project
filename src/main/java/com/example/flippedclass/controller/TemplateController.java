@@ -46,8 +46,18 @@ public class TemplateController {
         return "404-error";
     }
 
-    @GetMapping("/quizzes")
+    @GetMapping("/lecturer/quizzes")
     public String quizzes() {
-        return "quizzes";
+        return "lecturer/quizzes";
+    }
+
+    @GetMapping("/student/dashboard")
+    public String studentDashboard() {
+        return "student/student-dashboard";
+    }
+
+    @GetMapping("/student/take-quiz")
+    public String takeQuiz() {
+        return "student/take-quiz";
     }
 }

@@ -59,7 +59,7 @@ public class WebSecurityConfig {
             "/api-docs", "/api-docs/**", "/v3/api-docs/**",
             "/google-test.html", "/error", "/uploads/**",
             "/api/quizzes/**", "/api/question-bank/**",
-            "/assets/**", "/", "/inventory", "/quizzes", "/create-product", "/reports", "/signin", "/signup", "/docs", "/404-error"
+            "/assets/**", "/", "/inventory", "/create-product", "/reports", "/signin", "/signup", "/docs", "/404-error", "/lecturer/**", "/student/**"
     };
 
     @Bean
