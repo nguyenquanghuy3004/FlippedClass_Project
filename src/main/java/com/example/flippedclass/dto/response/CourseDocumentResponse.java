@@ -1,55 +1,39 @@
 package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.CourseDocument;
+import com.example.flippedclass.enums.DocumentType;
 
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
 public class CourseDocumentResponse {
     private Long id;
     private Long learningPathId;
     private String title;
-    private String description;
-    private String type;
+    private DocumentType documentType;
     private String url;
+    private String description;
     private LocalDateTime createdAt;
 
-    public static CourseDocumentResponse from(CourseDocument doc) {
+    public static CourseDocumentResponse from(CourseDocument document) {
         CourseDocumentResponse response = new CourseDocumentResponse();
-        response.id = doc.getId();
-        response.learningPathId = doc.getLearningPath().getId();
-        response.title = doc.getTitle();
-        response.description = doc.getDescription();
-        response.type = doc.getDocumentType();
-        response.url = doc.getUrl();
-        response.createdAt = doc.getCreatedAt();
+        response.id = document.getId();
+        response.learningPathId = document.getLearningPath().getId();
+        response.title = document.getTitle();
+        response.documentType = parseDocumentType(document.getDocumentType());
+        response.url = document.getUrl();
+        response.description = document.getDescription();
+        response.createdAt = document.getCreatedAt();
         return response;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public Long getLearningPathId() {
-        return learningPathId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    private static DocumentType parseDocumentType(String documentType) {
+        if (documentType == null || documentType.isBlank()) {
+            return null;
+        }
+        return DocumentType.valueOf(documentType);
     }
 }

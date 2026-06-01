@@ -6,9 +6,11 @@ import java.util.List;
 
 public interface NodeConnectionService {
 
-    public List<NodeConnectionResponse> findByLearningPath(Long pathId);
+    List<NodeConnectionResponse> findByLearningPath(Long pathId);
 
-    public NodeConnectionResponse create(Long pathId, NodeConnectionRequest request);
+    NodeConnectionResponse create(Long pathId, NodeConnectionRequest request);
 
-    public void delete(Long id);
+    NodeConnectionResponse update(Long pathId, Long connectionId, NodeConnectionRequest request);
+
+    void delete(Long pathId, Long connectionId);
 }

@@ -9,20 +9,17 @@ import com.example.flippedclass.service.CourseDocumentService;
 import com.example.flippedclass.service.LearningPathService;
 import java.net.URI;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@RequiredArgsConstructor
 public class CourseDocumentServiceImpl implements CourseDocumentService {
 
     private final CourseDocumentRepository documentRepository;
     private final LearningPathService learningPathService;
-
-    public CourseDocumentServiceImpl(CourseDocumentRepository documentRepository, LearningPathService learningPathService) {
-        this.documentRepository = documentRepository;
-        this.learningPathService = learningPathService;
-    }
 
     @Override
     public List<CourseDocumentResponse> findByLearningPath(Long learningPathId) {
@@ -42,20 +39,25 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
     }
 
     @Override
-    public CourseDocumentResponse update(Long documentId, CourseDocumentRequest request) {
-        CourseDocument document = getDocument(documentId);
+    public CourseDocumentResponse update(Long learningPathId, Long documentId, CourseDocumentRequest request) {
+        CourseDocument document = getDocumentInLearningPath(learningPathId, documentId);
         applyRequest(document, request);
         return CourseDocumentResponse.from(documentRepository.save(document));
     }
 
     @Override
-    public void delete(Long documentId) {
-        documentRepository.delete(getDocument(documentId));
+    public void delete(Long learningPathId, Long documentId) {
+        documentRepository.delete(getDocumentInLearningPath(learningPathId, documentId));
     }
 
-    private CourseDocument getDocument(Long documentId) {
-        return documentRepository.findById(documentId)
+    private CourseDocument getDocumentInLearningPath(Long learningPathId, Long documentId) {
+        CourseDocument document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course document not found"));
+        Long documentLearningPathId = document.getLearningPath().getId();
+        if (!learningPathId.equals(documentLearningPathId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course document does not belong to this learning path");
+        }
+        return document;
     }
 
     private void applyRequest(CourseDocument document, CourseDocumentRequest request) {
@@ -68,7 +70,7 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
         validateUrl(request.getUrl());
 
         document.setTitle(request.getTitle().trim());
-        document.setDocumentType(request.getDocumentType() != null ? request.getDocumentType().name() : null);
+        document.setDocumentType(request.getDocumentType().name());
         document.setUrl(request.getUrl().trim());
         document.setDescription(request.getDescription());
     }
@@ -87,6 +89,3 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
         }
     }
 }
-
-
-

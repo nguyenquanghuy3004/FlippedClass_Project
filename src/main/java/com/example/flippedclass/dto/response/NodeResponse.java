@@ -1,16 +1,22 @@
 package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.LearningNode;
+import com.example.flippedclass.enums.NodeStatus;
+import com.example.flippedclass.enums.NodeType;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
 public class NodeResponse {
     private Long id;
     private Long learningPathId;
     private String title;
     private String description;
     private String content;
-    private String nodeType;
-    private String status;
+    private NodeType nodeType;
+    private NodeStatus status;
     private Integer displayOrder;
     private Integer estimatedMinutes;
     private LocalDateTime createdAt;
@@ -23,8 +29,8 @@ public class NodeResponse {
         response.title = node.getTitle();
         response.description = node.getDescription();
         response.content = node.getContent();
-        response.nodeType = node.getNodeType();
-        response.status = node.getStatus();
+        response.nodeType = parseNodeType(node.getNodeType());
+        response.status = parseNodeStatus(node.getStatus());
         response.displayOrder = node.getDisplayOrder();
         response.estimatedMinutes = node.getEstimatedMinutes();
         response.createdAt = node.getCreatedAt();
@@ -32,47 +38,17 @@ public class NodeResponse {
         return response;
     }
 
-    public Long getId() {
-        return id;
+    private static NodeType parseNodeType(String nodeType) {
+        if (nodeType == null || nodeType.isBlank()) {
+            return null;
+        }
+        return NodeType.valueOf(nodeType);
     }
 
-    public Long getLearningPathId() {
-        return learningPathId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public String getNodeType() {
-        return nodeType;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public Integer getDisplayOrder() {
-        return displayOrder;
-    }
-
-    public Integer getEstimatedMinutes() {
-        return estimatedMinutes;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    private static NodeStatus parseNodeStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        return NodeStatus.valueOf(status);
     }
 }

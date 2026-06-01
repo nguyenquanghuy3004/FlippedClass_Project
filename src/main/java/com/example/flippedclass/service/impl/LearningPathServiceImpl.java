@@ -29,7 +29,7 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Transactional
     public LearningPathResponse createLearningPath(Long spaceId, CreateLearningPathRequest request) {
         LearningSpace space = learningSpaceRepository.findByIdAndStatus(spaceId, LearningSpaceStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning or Space đã bị xóa"));
+                .orElseThrow(() -> new IllegalArgumentException("Learning Space not found or inactive"));
 
         Integer nextPosition = learningPathRepository
                 .findFirstByLearningSpaceIdAndStatusOrderByPositionDesc(spaceId, LearningPathStatus.ACTIVE)
@@ -73,7 +73,7 @@ public class LearningPathServiceImpl implements LearningPathService {
         LearningPath path = findPathInSpace(spaceId, pathId);
 
         if (path.getStatus() == LearningPathStatus.ARCHIVED) {
-            throw new IllegalArgumentException("Không thể chỉnh sửa roadmap đã lưu trữ. Hãy khôi phục trước.");
+            throw new IllegalArgumentException("Cannot update archived learning path. Restore it first.");
         }
 
         if (request.getTitle() != null && !request.getTitle().trim().isEmpty()) {
@@ -91,7 +91,7 @@ public class LearningPathServiceImpl implements LearningPathService {
     public void archiveLearningPath(Long spaceId, Long pathId) {
         LearningPath path = findPathInSpace(spaceId, pathId);
         if (path.getStatus() != LearningPathStatus.ACTIVE) {
-            throw new IllegalArgumentException("Chỉ có thể lưu trữ roadmap đang hoạt động");
+            throw new IllegalArgumentException("Only active learning paths can be archived");
         }
         path.setStatus(LearningPathStatus.ARCHIVED);
     }
@@ -101,7 +101,7 @@ public class LearningPathServiceImpl implements LearningPathService {
     public void restoreLearningPath(Long spaceId, Long pathId) {
         LearningPath path = findPathInSpace(spaceId, pathId);
         if (path.getStatus() != LearningPathStatus.ARCHIVED) {
-            throw new IllegalArgumentException("Chỉ có thể khôi phục roadmap đã lưu trữ");
+            throw new IllegalArgumentException("Only archived learning paths can be restored");
         }
         path.setStatus(LearningPathStatus.ACTIVE);
     }
@@ -117,7 +117,7 @@ public class LearningPathServiceImpl implements LearningPathService {
     public void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request) {
         List<Long> orderedIds = request.getOrderedIds();
         if (orderedIds == null || orderedIds.isEmpty()) {
-            throw new IllegalArgumentException("Danh sách id sắp xếp không được để trống");
+            throw new IllegalArgumentException("Ordered id list must not be empty");
         }
         for (int i = 0; i < orderedIds.size(); i++) {
             findPathInSpace(spaceId, orderedIds.get(i)).setPosition(i + 1);
@@ -126,22 +126,22 @@ public class LearningPathServiceImpl implements LearningPathService {
 
     private LearningPath findPathInSpace(Long spaceId, Long pathId) {
         return learningPathRepository.findByIdAndLearningSpaceId(pathId, spaceId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning Path trong Learning Space này"));
+                .orElseThrow(() -> new IllegalArgumentException("Learning Path not found in this Learning Space"));
     }
 
     private LearningPathResponse toResponse(LearningPath path) {
         List<LearningNodeResponse> nodeResponses = new java.util.ArrayList<>();
         if (path.getNodes() != null) {
             nodeResponses = path.getNodes().stream().map(node ->
-                com.example.flippedclass.dto.response.LearningNodeResponse.builder()
-                    .id(node.getId())
-                    .title(node.getTitle())
-                    .learningPathId(path.getId())
-                    .status(node.getStatus())
-                    .nodeType(node.getNodeType())
-                    .createdAt(node.getCreatedAt())
-                    .updatedAt(node.getUpdatedAt())
-                    .build()
+                    LearningNodeResponse.builder()
+                            .id(node.getId())
+                            .title(node.getTitle())
+                            .learningPathId(path.getId())
+                            .status(node.getStatus())
+                            .nodeType(node.getNodeType())
+                            .createdAt(node.getCreatedAt())
+                            .updatedAt(node.getUpdatedAt())
+                            .build()
             ).toList();
         }
 

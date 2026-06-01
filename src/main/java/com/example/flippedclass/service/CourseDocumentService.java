@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface CourseDocumentService {
 
-    public List<CourseDocumentResponse> findByLearningPath(Long learningPathId);
+    List<CourseDocumentResponse> findByLearningPath(Long learningPathId);
 
-    public CourseDocumentResponse create(Long learningPathId, CourseDocumentRequest request);
+    CourseDocumentResponse create(Long learningPathId, CourseDocumentRequest request);
 
-    public CourseDocumentResponse update(Long documentId, CourseDocumentRequest request);
+    CourseDocumentResponse update(Long learningPathId, Long documentId, CourseDocumentRequest request);
 
-    public void delete(Long documentId);
+    void delete(Long learningPathId, Long documentId);
 }

@@ -10,20 +10,17 @@ import com.example.flippedclass.repository.NodeRepository;
 import com.example.flippedclass.service.LearningPathService;
 import com.example.flippedclass.service.NodeService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@RequiredArgsConstructor
 public class NodeServiceImpl implements NodeService {
 
     private final NodeRepository nodeRepository;
     private final LearningPathService learningPathService;
-
-    public NodeServiceImpl(NodeRepository nodeRepository, LearningPathService learningPathService) {
-        this.nodeRepository = nodeRepository;
-        this.learningPathService = learningPathService;
-    }
 
     @Override
     public List<NodeResponse> findByLearningPath(Long pathId) {
@@ -34,8 +31,8 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public NodeResponse findById(Long id) {
-        return NodeResponse.from(getNode(id));
+    public NodeResponse findById(Long pathId, Long nodeId) {
+        return NodeResponse.from(getNodeInLearningPath(pathId, nodeId));
     }
 
     @Override
@@ -53,11 +50,10 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public NodeResponse update(Long id, NodeRequest request) {
-        LearningNode node = getNode(id);
+    public NodeResponse update(Long pathId, Long nodeId, NodeRequest request) {
+        LearningNode node = getNodeInLearningPath(pathId, nodeId);
         validateRequest(request);
-        Long pathId = node.getLearningPath().getId();
-        if (nodeRepository.existsByLearningPathIdAndDisplayOrderAndIdNot(pathId, request.getDisplayOrder(), id)) {
+        if (nodeRepository.existsByLearningPathIdAndDisplayOrderAndIdNot(pathId, request.getDisplayOrder(), nodeId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Display order already exists in this learning path");
         }
 
@@ -66,14 +62,22 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public void delete(Long id) {
-        nodeRepository.delete(getNode(id));
+    public void delete(Long pathId, Long nodeId) {
+        nodeRepository.delete(getNodeInLearningPath(pathId, nodeId));
     }
 
     @Override
     public LearningNode getNode(Long id) {
         return nodeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Node not found"));
+    }
+
+    private LearningNode getNodeInLearningPath(Long pathId, Long nodeId) {
+        LearningNode node = getNode(nodeId);
+        if (!pathId.equals(node.getLearningPath().getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Node does not belong to this learning path");
+        }
+        return node;
     }
 
     private void validateRequest(NodeRequest request) {
@@ -92,11 +96,9 @@ public class NodeServiceImpl implements NodeService {
         node.setTitle(request.getTitle().trim());
         node.setDescription(request.getDescription());
         node.setContent(request.getContent());
-        node.setNodeType(request.getNodeType() == null ? NodeType.LESSON.name() : request.getNodeType().name());
-        node.setStatus(request.getStatus() == null ? NodeStatus.DRAFT.name() : request.getStatus().name());
+        node.setNodeType((request.getNodeType() == null ? NodeType.LESSON : request.getNodeType()).name());
+        node.setStatus((request.getStatus() == null ? NodeStatus.DRAFT : request.getStatus()).name());
         node.setDisplayOrder(request.getDisplayOrder());
         node.setEstimatedMinutes(request.getEstimatedMinutes());
     }
 }
-
-

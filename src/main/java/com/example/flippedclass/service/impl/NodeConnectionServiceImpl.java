@@ -11,26 +11,18 @@ import com.example.flippedclass.service.NodeConnectionService;
 import com.example.flippedclass.service.NodeService;
 import java.util.List;
 import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@RequiredArgsConstructor
 public class NodeConnectionServiceImpl implements NodeConnectionService {
 
     private final NodeConnectionRepository connectionRepository;
     private final LearningPathService learningPathService;
     private final NodeService nodeService;
-
-    public NodeConnectionServiceImpl(
-            NodeConnectionRepository connectionRepository,
-            LearningPathService learningPathService,
-            NodeService nodeService
-    ) {
-        this.connectionRepository = connectionRepository;
-        this.learningPathService = learningPathService;
-        this.nodeService = nodeService;
-    }
 
     @Override
     public List<NodeConnectionResponse> findByLearningPath(Long pathId) {
@@ -71,10 +63,47 @@ public class NodeConnectionServiceImpl implements NodeConnectionService {
     }
 
     @Override
-    public void delete(Long id) {
-        NodeConnection connection = connectionRepository.findById(id)
+    public NodeConnectionResponse update(Long pathId, Long connectionId, NodeConnectionRequest request) {
+        NodeConnection connection = getConnectionInLearningPath(pathId, connectionId);
+        validateRequiredNodeIds(request);
+        if (Objects.equals(request.getSourceNodeId(), request.getTargetNodeId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Source node and target node must be different");
+        }
+
+        LearningNode sourceNode = nodeService.getNode(request.getSourceNodeId());
+        LearningNode targetNode = nodeService.getNode(request.getTargetNodeId());
+        validateNodeBelongsToPath(sourceNode, pathId, "Source node does not belong to this learning path");
+        validateNodeBelongsToPath(targetNode, pathId, "Target node does not belong to this learning path");
+
+        boolean sameNodePair = Objects.equals(connection.getSourceNode().getId(), request.getSourceNodeId())
+                && Objects.equals(connection.getTargetNode().getId(), request.getTargetNodeId());
+        if (!sameNodePair && connectionRepository.existsByLearningPathIdAndSourceNodeIdAndTargetNodeId(
+                pathId,
+                request.getSourceNodeId(),
+                request.getTargetNodeId()
+        )) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Node connection already exists");
+        }
+
+        connection.setSourceNode(sourceNode);
+        connection.setTargetNode(targetNode);
+        connection.setConditionType(request.getConditionType());
+        connection.setConditionValue(request.getConditionValue());
+        return NodeConnectionResponse.from(connectionRepository.save(connection));
+    }
+
+    @Override
+    public void delete(Long pathId, Long connectionId) {
+        connectionRepository.delete(getConnectionInLearningPath(pathId, connectionId));
+    }
+
+    private NodeConnection getConnectionInLearningPath(Long pathId, Long connectionId) {
+        NodeConnection connection = connectionRepository.findById(connectionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Node connection not found"));
-        connectionRepository.delete(connection);
+        if (!Objects.equals(connection.getLearningPath().getId(), pathId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Node connection does not belong to this learning path");
+        }
+        return connection;
     }
 
     private void validateRequiredNodeIds(NodeConnectionRequest request) {
