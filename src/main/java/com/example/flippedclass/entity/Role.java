@@ -1,5 +1,6 @@
 package com.example.flippedclass.entity;
 
+import com.example.flippedclass.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,5 +19,5 @@ public class Role {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true, length = 50)
-    private com.example.flippedclass.enums.RoleName name;
+    private RoleName name;
 }

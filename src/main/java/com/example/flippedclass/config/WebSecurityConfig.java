@@ -57,25 +57,14 @@ public class WebSecurityConfig {
 
     private static final String[] PUBLIC_URLS = {"/swagger", "/swagger-ui/**", "/swagger-ui.html",
             "/api-docs", "/api-docs/**", "/v3/api-docs/**",
-            "/google-test.html", "/error", "/uploads/**"
+            "/google-test.html", "/error", "/uploads/**",
+            "/api/quizzes/**", "/api/question-bank/**",
+            "/assets/**", "/", "/inventory", "/quizzes", "/create-product", "/reports", "/signin", "/signup", "/docs", "/404-error"
     };
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000", "http://localhost:5174", "http://127.0.0.1:5174"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()

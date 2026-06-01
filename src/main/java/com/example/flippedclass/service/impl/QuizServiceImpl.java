@@ -119,6 +119,10 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public void delete(Long id) {
+        long attemptsCount = attemptRepository.countByQuizId(id);
+        if (attemptsCount > 0) {
+            throw new BusinessException("Cannot delete quiz because it has already been attempted by students.");
+        }
         questionRepository.deleteByQuizId(id);
         quizRepository.delete(findQuiz(id));
     }
