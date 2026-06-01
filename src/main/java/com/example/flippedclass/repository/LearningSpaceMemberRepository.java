@@ -13,5 +13,6 @@ import java.util.Optional;
 public interface LearningSpaceMemberRepository extends JpaRepository<LearningSpaceMember, Long> {
     Optional<LearningSpaceMember> findByLearningSpaceIdAndUserUsername(Long learningSpaceId, String username);
     boolean existsByLearningSpaceAndUser(LearningSpace learningSpace, User user);
+    int countByLearningSpace_Id(Long learningSpaceId);
     List<LearningSpaceMember> findByUser_IdOrderByJoinedAtDesc(Long userId);
 }

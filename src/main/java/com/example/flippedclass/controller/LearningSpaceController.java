@@ -5,6 +5,7 @@ import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
 import com.example.flippedclass.dto.response.JoinLearningSpaceResponse;
 import com.example.flippedclass.dto.response.LearningSpaceResponse;
 import com.example.flippedclass.dto.response.MessageResponse;
+import com.example.flippedclass.dto.response.SpacePreviewResponse;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.service.LearningSpaceService;
 import jakarta.transaction.Transactional;
@@ -63,6 +64,11 @@ public class LearningSpaceController {
     @PostMapping("/join")
     public ResponseEntity<JoinLearningSpaceResponse>joinLearningSpace(@RequestBody JoinLearningSpaceRequest request){
         return ResponseEntity.ok(learningSpaceService.joinLearningSpace(request));
+    }
+
+    @GetMapping("/invite/{inviteCode}/preview")
+    public ResponseEntity<SpacePreviewResponse> previewLearningSpace(@PathVariable String inviteCode) {
+        return ResponseEntity.ok(learningSpaceService.previewLearningSpace(inviteCode));
     }
 
     @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")

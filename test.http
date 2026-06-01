@@ -1,0 +1,183 @@
+@baseUrl = http://127.0.0.1:8080
+@studentId = 1
+@spaceId = 1
+@pathId = 1
+@nodeId = 1
+@documentId = 1
+@connectionId = 1
+@quizId = 1
+
+GET http://127.0.0.1:8080/api/students/1/dashboard
+Accept: application/json
+###########################################################
+# MODULE 1 — STUDENT DASHBOARD
+###########################################################
+
+### 1. View Student Dashboard
+GET {{baseUrl}}/api/students/{{studentId}}/dashboard
+Accept: application/json
+
+
+###########################################################
+# MODULE 2 — LEARNING PATH / ROADMAP
+###########################################################
+
+### 2. View Roadmap List by Learning Space
+GET {{baseUrl}}/api/learning-spaces/{{spaceId}}/learning-paths
+Accept: application/json
+
+### 3. View Roadmap Detail
+GET {{baseUrl}}/api/learning-spaces/{{spaceId}}/learning-paths/{{pathId}}
+Accept: application/json
+
+### 4. Create Learning Path
+POST {{baseUrl}}/api/learning-spaces/{{spaceId}}/learning-paths
+Content-Type: application/json
+
+{
+  "lecturerId": 2,
+  "title": "Java Core Roadmap",
+  "description": "Lộ trình Java cơ bản để test API",
+  "position": 1,
+  "estimatedDurationHours": 10,
+  "visibility": "PRIVATE",
+  "status": "ACTIVE"
+}
+
+### 5. Update Learning Path
+PUT {{baseUrl}}/api/learning-spaces/{{spaceId}}/learning-paths/{{pathId}}
+Content-Type: application/json
+
+{
+  "lecturerId": 2,
+  "title": "Java Core Roadmap Updated",
+  "description": "Lộ trình đã cập nhật",
+  "position": 1,
+  "estimatedDurationHours": 12,
+  "visibility": "PRIVATE",
+  "status": "ACTIVE"
+}
+
+###########################################################
+# MODULE 3 — LEARNING NODE
+###########################################################
+
+### 6. View Node List by Learning Path
+GET {{baseUrl}}/api/learning-paths/{{pathId}}/nodes
+Accept: application/json
+
+### 7. Create Learning Node
+POST {{baseUrl}}/api/learning-paths/{{pathId}}/nodes
+Content-Type: application/json
+
+{
+  "title": "Java Variables",
+  "description": "Học biến và kiểu dữ liệu",
+  "content": "Sinh viên đọc tài liệu và xem video trước khi lên lớp.",
+  "nodeType": "LESSON",
+  "status": "ACTIVE",
+  "displayOrder": 1,
+  "estimatedMinutes": 30,
+  "positionX": 100,
+  "positionY": 200
+}
+
+### 8. Update Learning Node
+PUT {{baseUrl}}/api/learning-paths/{{pathId}}/nodes/{{nodeId}}
+Content-Type: application/json
+
+{
+  "title": "Java Variables Updated",
+  "description": "Nội dung node đã cập nhật",
+  "content": "Sinh viên đọc tài liệu và thực hành.",
+  "nodeType": "LESSON",
+  "status": "ACTIVE",
+  "displayOrder": 1,
+  "estimatedMinutes": 45,
+  "positionX": 120,
+  "positionY": 220
+}
+
+###########################################################
+# MODULE 4 — COURSE DOCUMENT
+###########################################################
+
+### 9. View Document List by Learning Path
+GET {{baseUrl}}/api/learning-paths/{{pathId}}/documents
+Accept: application/json
+
+### 10. Create Document
+POST {{baseUrl}}/api/learning-paths/{{pathId}}/documents
+Content-Type: application/json
+
+{
+  "title": "Java Variables Video",
+  "description": "Video YouTube để tự học trước",
+  "documentType": "YOUTUBE",
+  "url": "https://www.youtube.com/watch?v=example"
+}
+
+### 11. Update Document
+PUT {{baseUrl}}/api/learning-paths/{{pathId}}/documents/{{documentId}}
+Content-Type: application/json
+
+{
+  "title": "Java Variables Video Updated",
+  "description": "Video đã cập nhật",
+  "documentType": "YOUTUBE",
+  "url": "https://www.youtube.com/watch?v=example-updated"
+}
+
+###########################################################
+# MODULE 5 — NODE CONNECTION
+###########################################################
+
+### 12. View Node Connection List
+GET {{baseUrl}}/api/learning-paths/{{pathId}}/connections
+Accept: application/json
+
+### 13. Create Node Connection
+POST {{baseUrl}}/api/learning-paths/{{pathId}}/connections
+Content-Type: application/json
+
+{
+  "sourceNodeId": 1,
+  "targetNodeId": 2,
+  "conditionType": "DEFAULT",
+  "conditionValue": null
+}
+
+### 14. Update Node Connection
+PUT {{baseUrl}}/api/learning-paths/{{pathId}}/connections/{{connectionId}}
+Content-Type: application/json
+
+{
+  "sourceNodeId": 1,
+  "targetNodeId": 2,
+  "conditionType": "QUIZ_SCORE",
+  "conditionValue": ">= 80"
+}
+
+###########################################################
+# MODULE 6 — QUIZ BASIC
+###########################################################
+
+### 15. View Quiz List by Learning Node
+GET {{baseUrl}}/api/learning-nodes/{{nodeId}}/quizzes
+Accept: application/json
+
+### 16. View Quiz Detail
+GET {{baseUrl}}/api/quizzes/{{quizId}}
+Accept: application/json
+
+### 17. Create Quiz
+POST {{baseUrl}}/api/learning-nodes/{{nodeId}}/quizzes
+Content-Type: application/json
+
+{
+  "lecturerId": 2,
+  "title": "Java Variables Quiz",
+  "description": "Quiz kiểm tra kiến thức biến Java",
+  "durationMinutes": 10,
+  "active": true
+}

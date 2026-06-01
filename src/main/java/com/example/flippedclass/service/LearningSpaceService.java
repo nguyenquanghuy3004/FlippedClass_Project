@@ -4,6 +4,7 @@ import com.example.flippedclass.dto.request.CreateLearningSpaceRequest;
 import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
 import com.example.flippedclass.dto.response.JoinLearningSpaceResponse;
 import com.example.flippedclass.dto.response.LearningSpaceResponse;
+import com.example.flippedclass.dto.response.SpacePreviewResponse;
 import com.example.flippedclass.entity.LearningSpace;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -19,6 +20,8 @@ public interface LearningSpaceService {
     LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail);
 
     JoinLearningSpaceResponse joinLearningSpace(JoinLearningSpaceRequest request);
+
+    SpacePreviewResponse previewLearningSpace(String inviteCode);
 
     void deleteLearningSpace(Long id);
 

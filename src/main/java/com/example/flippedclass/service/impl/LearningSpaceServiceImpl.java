@@ -4,6 +4,7 @@ import com.example.flippedclass.dto.request.CreateLearningSpaceRequest;
 import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
 import com.example.flippedclass.dto.response.JoinLearningSpaceResponse;
 import com.example.flippedclass.dto.response.LearningSpaceResponse;
+import com.example.flippedclass.dto.response.SpacePreviewResponse;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.entity.LearningSpaceMember;
 import com.example.flippedclass.entity.User;
@@ -180,6 +181,29 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         response.setLearningSpaceName(learningSpace.getName());
         response.setRole(MemberRole.MEMBER);
         return response;
+    }
+
+    @Override
+    public SpacePreviewResponse previewLearningSpace(String inviteCode) {
+        String trimmedInviteCode = inviteCode == null ? "" : inviteCode.trim();
+
+        LearningSpace learningSpace = learningSpaceRepository
+                .findByInviteCodeAndStatus(trimmedInviteCode, LearningSpaceStatus.ACTIVE)
+                .orElseThrow(() -> new IllegalArgumentException("Mã mời không tồn tại hoặc lớp học đã bị đóng/xóa"));
+
+        User currentUser = getCurrentUser();
+        boolean joined = memberRepository.existsByLearningSpaceAndUser(learningSpace, currentUser);
+        int totalMembers = memberRepository.countByLearningSpace_Id(learningSpace.getId());
+        User owner = learningSpace.getOwner();
+        String ownerName = owner.getFullName() != null ? owner.getFullName() : owner.getUsername();
+
+        return SpacePreviewResponse.builder()
+                .spaceId(learningSpace.getId())
+                .title(learningSpace.getName())
+                .ownerName(ownerName)
+                .totalMembers(totalMembers)
+                .isJoined(joined)
+                .build();
     }
 
     @Override
