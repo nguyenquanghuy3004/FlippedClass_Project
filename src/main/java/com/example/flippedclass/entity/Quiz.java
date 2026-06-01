@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Quiz {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,12 +32,23 @@ public class Quiz {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
+    @Column(nullable = false)
     private Integer durationMinutes;
 
-    @Builder.Default
-    private boolean active = true;
+    @Column(nullable = false)
+    private boolean active;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "pass_score")
+    @Builder.Default
+    private Integer passScore = 50;
+
+    @Column(length = 20)
+    private String difficulty;
+
+    @Column(name = "thumbnail_url", length = 1000)
+    private String thumbnailUrl;
 }

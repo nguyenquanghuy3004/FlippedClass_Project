@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class QuizAttempt {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,14 +31,18 @@ public class QuizAttempt {
     @Builder.Default
     private BigDecimal score = BigDecimal.ZERO;
 
+    @Column
     @Builder.Default
     private Integer totalQuestions = 0;
 
+    @Column
     @Builder.Default
     private Integer correctAnswers = 0;
 
-    @Column(name = "submitted_at")
+    @Column
     @Builder.Default
     private LocalDateTime submittedAt = LocalDateTime.now();
 
+    @Column
+    private LocalDateTime startedAt;
 }

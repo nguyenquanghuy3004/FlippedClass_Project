@@ -4,31 +4,23 @@ import com.example.flippedclass.enums.LearningPathStatus;
 import com.example.flippedclass.enums.VisibilityType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "learning_path")
+@Table(name = "learning_paths")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class LearningPath {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @org.hibernate.annotations.Nationalized
-    @Column(nullable = false, length = 255)
-    private String title;
-
-    @Column(columnDefinition = "NVARCHAR(MAX)")
-    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "learning_space_id", nullable = false)
@@ -38,26 +30,38 @@ public class LearningPath {
     @JoinColumn(name = "lecturer_id", nullable = false)
     private User lecturer;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
+    private String title;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private LearningPathStatus status = LearningPathStatus.ACTIVE;
+
+    @Column(name = "position")
+    @Builder.Default
     private Integer position = 0;
 
+
     @Column(name = "estimated_duration_hours")
+    @Builder.Default
     private Integer estimatedDurationHours = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
+    @Builder.Default
     private VisibilityType visibility = VisibilityType.PRIVATE;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private LearningPathStatus status = LearningPathStatus.ACTIVE;
-    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "learningPath", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

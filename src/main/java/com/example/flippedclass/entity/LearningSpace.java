@@ -1,17 +1,7 @@
 package com.example.flippedclass.entity;
 
-import com.example.flippedclass.enums.VisibilityType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Nationalized;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-import com.example.flippedclass.enums.LearningSpaceStatus;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -21,17 +11,16 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LearningSpace {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Nationalized
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String name;
 
-    @Nationalized
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
@@ -39,28 +28,24 @@ public class LearningSpace {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @JdbcTypeCode(SqlTypes.VARCHAR)
-    @Column(nullable = false, unique = true)
+    @Column(name = "invite_code", unique = true, length = 50)
     private String inviteCode;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
-
-    @Column(nullable = false, length = 20)
-    private LearningSpaceStatus status = LearningSpaceStatus.ACTIVE;
+    @Column(length = 20)
+    @Builder.Default
+    private com.example.flippedclass.enums.LearningSpaceStatus status = com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
-    @Column(nullable = false)
-    private VisibilityType visibility;
+    @Column(length = 20)
+    @Builder.Default
+    private com.example.flippedclass.enums.VisibilityType visibility = com.example.flippedclass.enums.VisibilityType.PRIVATE;
 
-//    @Column(nullable = false)
-//    private boolean isDeleted = false;
+    @Column(name = "created_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at")
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 }

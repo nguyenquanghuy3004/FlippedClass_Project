@@ -2,10 +2,7 @@ package com.example.flippedclass.entity;
 
 import com.example.flippedclass.enums.RoleName;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "roles")
@@ -18,7 +15,8 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+
     @Enumerated(EnumType.STRING)
-    @Column(length = 20, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private RoleName name;
 }
