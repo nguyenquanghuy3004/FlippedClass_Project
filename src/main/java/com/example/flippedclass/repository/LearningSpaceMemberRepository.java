@@ -3,6 +3,7 @@ package com.example.flippedclass.repository;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.entity.LearningSpaceMember;
 import com.example.flippedclass.entity.User;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

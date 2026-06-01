@@ -11,7 +11,6 @@ import lombok.Data;
 @Data
 public class CreateQuizRequest {
 
-    @NotNull(message = "learningNodeId is required")
     @Positive(message = "learningNodeId must be a positive number")
     private Long learningNodeId;
 
@@ -31,4 +30,14 @@ public class CreateQuizRequest {
     private Integer durationMinutes;
 
     private Boolean active;
+
+    @Min(value = 1, message = "passScore must be at least 1")
+    @Max(value = 100, message = "passScore must not exceed 100")
+    private Integer passScore;
+
+    @Size(max = 20, message = "difficulty must not exceed 20 characters")
+    private String difficulty;
+
+    @Size(max = 1000, message = "thumbnailUrl must not exceed 1000 characters")
+    private String thumbnailUrl;
 }

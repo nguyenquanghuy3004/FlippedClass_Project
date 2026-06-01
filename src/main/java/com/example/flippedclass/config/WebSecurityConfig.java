@@ -58,6 +58,10 @@ public class WebSecurityConfig {
     private static final String[] PUBLIC_URLS = {"/swagger", "/swagger-ui/**", "/swagger-ui.html",
             "/api-docs", "/api-docs/**", "/v3/api-docs/**", "/error", "/uploads/**",
             "/", "/index", "/login", "/register", "/css/**", "/js/**", "/images/**", "/assets/**"
+            "/api-docs", "/api-docs/**", "/v3/api-docs/**",
+            "/google-test.html", "/error", "/uploads/**",
+            "/api/quizzes/**", "/api/question-bank/**",
+            "/assets/**", "/", "/inventory", "/create-product", "/reports", "/signin", "/signup", "/docs", "/404-error", "/lecturer/**", "/student/**"
     };
 
     @Bean
@@ -74,8 +78,7 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()

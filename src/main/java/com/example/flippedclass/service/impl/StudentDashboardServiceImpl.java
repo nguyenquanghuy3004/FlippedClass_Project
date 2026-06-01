@@ -9,13 +9,12 @@ import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.StudentProfileRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.StudentDashboardService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +31,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student user not found"));
 
         StudentProfileResponse profile = studentProfileRepository.findByUser_Id(studentId)
-                .map(StudentProfileResponse::from)
+                .map(this::toStudentProfileResponse)
                 .orElse(null);
 
         List<DashboardLearningSpaceResponse> learningSpaces =
@@ -45,5 +44,17 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 profile,
                 learningSpaces
         );
+    }
+
+    private com.example.flippedclass.dto.response.StudentProfileResponse toStudentProfileResponse(com.example.flippedclass.entity.StudentProfile profile) {
+        if (profile == null) return null;
+        return com.example.flippedclass.dto.response.StudentProfileResponse.builder()
+            .id(profile.getId())
+            .userId(profile.getUser() != null ? profile.getUser().getId() : null)
+            .studentCode(profile.getStudentCode())
+            .major(profile.getMajor())
+            .className(profile.getClassName())
+            .enrollmentYear(profile.getEnrollmentYear())
+            .build();
     }
 }

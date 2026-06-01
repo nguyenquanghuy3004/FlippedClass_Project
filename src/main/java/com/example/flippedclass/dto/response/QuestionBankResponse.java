@@ -1,17 +1,17 @@
 package com.example.flippedclass.dto.response;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class QuizQuestionResponse {
+public class QuestionBankResponse {
     private Long id;
-    private Long quizId;
     private String content;
     private String options;
     private String correctAnswer;
     private Integer points;
     private String questionType;
-    private Integer sortOrder;
+    private String explanation;
 }

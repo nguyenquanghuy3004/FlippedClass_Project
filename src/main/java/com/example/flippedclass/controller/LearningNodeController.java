@@ -6,7 +6,7 @@ import com.example.flippedclass.service.FileStorageService;
 import com.example.flippedclass.service.LearningNodeItemService;
 import com.example.flippedclass.service.LearningNodeService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,15 +16,13 @@ import java.util.Map;
 @CrossOrigin(originPatterns = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/learning-nodes/{nodeId}/items")
+@RequiredArgsConstructor
 public class LearningNodeController {
     @Autowired
     private LearningNodeService learningNodeService;
 
-    @Autowired
-    private FileStorageService fileStorageService;
-
-    @Autowired
-    private LearningNodeItemService learningNodeItemService;
+    private final FileStorageService fileStorageService;
+    private final LearningNodeItemService learningNodeItemService;
 
     @PostMapping
     public ResponseEntity<LearningNodeItemResponse> create(@PathVariable Long nodeId,
