@@ -4,6 +4,7 @@ import com.example.flippedclass.dto.request.CreateUserRequest;
 import com.example.flippedclass.dto.response.UserResponse;
 import com.example.flippedclass.entity.Role;
 import com.example.flippedclass.entity.User;
+import com.example.flippedclass.enums.RoleName;
 import com.example.flippedclass.exception.BusinessException;
 import com.example.flippedclass.exception.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ import com.example.flippedclass.repository.RoleRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.UserService;
 
-import com.example.flippedclass.enums.RoleName;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

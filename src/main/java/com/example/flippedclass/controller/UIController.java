@@ -16,8 +16,4 @@ public class UIController {
         return "signup"; // Trả về template signup.html
     }
 
-    @GetMapping("/")
-    public String indexPage() {
-        return "index"; // Trả về trang chủ index.html của template inapp
-    }
 }
