@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Quizzes - InApp Inventory Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+  <link rel="manifest" th:href="@{/assets/site.webmanifest}">
+  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
+  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  
+  <style>
+    /* Custom Aesthetics for Quiz Cards */
+    .quiz-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 1.25rem;
+      background: #ffffff;
+      position: relative;
+    }
+    .quiz-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.06) !important;
+      border-color: rgba(99, 102, 241, 0.2);
+    }
+    .quiz-header-gradient {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 1.25rem;
+      padding: 2.5rem 2rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 10px 20px rgba(118, 75, 162, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .quiz-header-gradient::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -10%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%;
+    }
+    .quiz-badge {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+    .icon-box {
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-size: 1.1rem;
+    }
+    .icon-box-primary { background: rgba(102, 126, 234, 0.1); color: #667eea; }
+    .icon-box-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .icon-box-success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    
+    .card-footer-actions {
+      border-top: 1px dashed rgba(0,0,0,0.08);
+      background: transparent;
+      padding: 1.25rem;
+    }
+    .quiz-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #2b3445;
+      margin-bottom: 0.25rem;
+      padding-right: 4rem; /* leave space for badge */
+    }
+    .btn-create-quiz {
+      background: white;
+      color: #764ba2;
+      font-weight: 600;
+      border: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+    .btn-create-quiz:hover {
+      background: #f8f9fa;
+      transform: translateY(-2px);
+      color: #667eea;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="overlay" class="overlay"></div>
+  
+  <!-- TOPBAR -->
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    
+    <div>
+      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
+        <li>
+          <a class="position-relative btn-icon btn-sm btn-light btn rounded-circle" data-bs-toggle="dropdown" href="#">
+            <i class="ti ti-bell fs-5"></i>
+          </a>
+        </li>
+        <li class="ms-3 dropdown">
+          <a href="#" role="button" data-bs-toggle="dropdown">
+            <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-sm rounded-circle" />
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+     <div class="logo-area">
+      <a th:href="@{/}" class="d-inline-flex"><img src="data:image/svg+xml,%3csvg%20width='62'%20height='67'%20viewBox='0%200%2062%2067'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M30.604%2066.378L0.00805664%2048.1582V35.7825L30.604%2054.0023V66.378Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2048.1582L30.604%2066.378V54.0023L61.1996%2035.7825V48.1582Z'%20fill='%23E66239'/%3e%3cpath%20d='M30.5955%200L0%2018.2198V30.5955L30.5955%2012.3757V0Z'%20fill='%23657E92'/%3e%3cpath%20d='M61.191%2018.2198L30.5955%200V12.3757L61.191%2030.5955V18.2198Z'%20fill='%23A3B2BE'/%3e%3cpath%20d='M30.604%2048.8457L0.00805664%2030.6259V18.2498L30.604%2036.47V48.8457Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2030.6259L30.604%2048.8457V36.47L61.1996%2018.2498V30.6259Z'%20fill='%23E66239'/%3e%3c/svg%3e" alt="" width="24">
+        <span class="logo-text ms-2"> <img th:src="@{/assets/images/logo.svg}" alt=""></span>
+      </a>
+    </div>
+    <ul class="nav flex-column">
+      <li class="px-4 py-2"><small class="nav-text">Main</small></li>
+      <li><a class="nav-link" th:href="@{/}"><i class="ti ti-home"></i><span class="nav-text">Dashboard</span></a></li>
+      <li><a class="nav-link" th:href="@{/inventory}"><i class="ti ti-box-seam"></i><span class="nav-text">Inventory</span></a></li>
+      <li><a class="nav-link active" th:href="@{/quizzes}"><i class="ti ti-list-check"></i><span class="nav-text">Quizzes</span></a></li>
+      <li><a class="nav-link" th:href="@{/create-product}"><i class="ti ti-plus"></i><span class="nav-text">Add Product</span></a></li>
+      <li><a class="nav-link" th:href="@{/reports}"><i class="ti ti-receipt"></i><span class="nav-text">Reports</span></a></li>
+      <li class="px-4 pt-4 pb-2"><small class="nav-text">Account</small></li>
+      <li><a class="nav-link" th:href="@{/signin}"><i class="ti ti-logout"></i><span class="nav-text">Log in</span></a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main id="content" class="content py-8">
+    <div class="container-fluid">
+      
+      <!-- HERO HEADER -->
+      <div class="row">
+        <div class="col-12">
+          <div class="quiz-header-gradient d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <div class="mb-3 mb-md-0 position-relative" style="z-index: 1;">
+              <h1 class="fs-2 fw-bold mb-2">Quiz Management</h1>
+              <p class="mb-0 text-white-50 fs-6">Design, publish and monitor your course assessments beautifully.</p>
+            </div>
+            <div class="position-relative" style="z-index: 1;">
+              <button class="btn btn-create-quiz px-4 py-2 rounded-pill d-flex align-items-center">
+                <i class="ti ti-plus me-2 fs-5"></i> Create New Quiz
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FILTER & SEARCH -->
+      <div class="row mb-4">
+        <div class="col-12 d-flex flex-wrap gap-3 justify-content-between align-items-center">
+          <div class="input-group shadow-sm rounded-3" style="max-width: 320px; overflow: hidden;">
+            <span class="input-group-text bg-white border-0 text-muted"><i class="ti ti-search"></i></span>
+            <input type="text" class="form-control border-0 ps-0 focus-none" placeholder="Search quizzes by title or course...">
+          </div>
+          <div class="d-flex gap-2">
+            <select class="form-select border-0 shadow-sm rounded-3 text-secondary" style="width: 150px;">
+              <option selected>All Courses</option>
+              <option>Backend Dev</option>
+              <option>Frontend Dev</option>
+            </select>
+            <select class="form-select border-0 shadow-sm rounded-3 text-secondary" style="width: 130px;">
+              <option selected>All Status</option>
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARDS GRID -->
+      <div class="row g-4">
+        
+        <!-- CARD 1 -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="card quiz-card h-100 shadow-sm">
+            <span class="quiz-badge bg-success-subtle text-success">
+              <i class="ti ti-circle-filled fs-9 me-1"></i> Active
+            </span>
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center mb-3">
+                <div class="icon-box icon-box-primary me-3 shadow-sm">
+                  <i class="ti ti-brand-coffee"></i>
+                </div>
+                <div>
+                  <small class="text-muted text-uppercase fw-semibold" style="letter-spacing: 0.5px; font-size: 0.7rem;">Backend Development</small>
+                </div>
+              </div>
+              
+              <h4 class="quiz-title">Java Spring Boot Basics</h4>
+              <p class="text-secondary small mb-4 line-clamp-2">A comprehensive assessment on Spring Core, Beans, and Dependency Injection fundamentals.</p>
+              
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="icon-box icon-box-warning" style="width: 28px; height: 28px; font-size: 1rem;">
+                    <i class="ti ti-help"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">20</h6>
+                    <small class="text-muted" style="font-size: 0.65rem;">QUESTIONS</small>
+                  </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                  <div class="icon-box icon-box-primary" style="width: 28px; height: 28px; font-size: 1rem;">
+                    <i class="ti ti-clock"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">30m</h6>
+                    <small class="text-muted" style="font-size: 0.65rem;">DURATION</small>
+                  </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                  <div class="icon-box icon-box-success" style="width: 28px; height: 28px; font-size: 1rem;">
+                    <i class="ti ti-target"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">15</h6>
+                    <small class="text-muted" style="font-size: 0.65rem;">PASS SCORE</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-footer-actions d-flex justify-content-between align-items-center">
+              <div class="avatar-group">
+                <img th:src="@{/assets/images/avatar-1.jpg}" class="avatar avatar-sm rounded-circle border border-2 border-white shadow-sm" alt="Student">
+                <img th:src="@{/assets/images/avatar-2.jpg}" class="avatar avatar-sm rounded-circle border border-2 border-white shadow-sm ms-n2" alt="Student">
+                <span class="avatar avatar-sm rounded-circle bg-light text-secondary border border-2 border-white shadow-sm ms-n2 fs-6 fw-bold">+42</span>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-light btn-icon btn-sm text-secondary rounded-3 shadow-sm border-0"><i class="ti ti-edit"></i></button>
+                <button class="btn btn-light btn-icon btn-sm text-danger rounded-3 shadow-sm border-0"><i class="ti ti-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="card quiz-card h-100 shadow-sm">
+            <span class="quiz-badge bg-success-subtle text-success">
+              <i class="ti ti-circle-filled fs-9 me-1"></i> Active
+            </span>
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center mb-3">
+                <div class="icon-box icon-box-primary me-3 shadow-sm">
+                  <i class="ti ti-brand-react"></i>
+                </div>
+                <div>
+                  <small class="text-muted text-uppercase fw-semibold" style="letter-spacing: 0.5px; font-size: 0.7rem;">Frontend Development</small>
+                </div>
+              </div>
+              
+              <h4 class="quiz-title">React Masterclass</h4>
+              <p class="text-secondary small mb-4 line-clamp-2">Test your knowledge on React Hooks, Context API, and state management techniques.</p>
+              
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="icon-box icon-box-warning" style="width: 28px; height: 28px; font-size: 1rem;">
+                    <i class="ti ti-help"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">25</h6>
+                    <small class="text-muted" style="font-size: 0.65rem;">QUESTIONS</small>
+                  </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                  <div class="icon-box icon-box-primary" style="width: 28px; height: 28px; font-size: 1rem;">
+                    <i class="ti ti-clock"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">45m</h6>
+                    <small class="text-muted" style="font-size: 0.65rem;">DURATION</small>
+                  </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                  <div class="icon-box icon-box-success" style="width: 28px; height: 28px; font-size: 1rem;">
+                    <i class="ti ti-target"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">18</h6>
+                    <small class="text-muted" style="font-size: 0.65rem;">PASS SCORE</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-footer-actions d-flex justify-content-between align-items-center">
+              <div class="avatar-group">
+                <img th:src="@{/assets/images/avatar-4.jpg}" class="avatar avatar-sm rounded-circle border border-2 border-white shadow-sm" alt="Student">
+                <span class="avatar avatar-sm rounded-circle bg-light text-secondary border border-2 border-white shadow-sm ms-n2 fs-6 fw-bold">+18</span>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-light btn-icon btn-sm text-secondary rounded-3 shadow-sm border-0"><i class="ti ti-edit"></i></button>
+                <button class="btn btn-light btn-icon btn-sm text-danger rounded-3 shadow-sm border-0"><i class="ti ti-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="card quiz-card h-100 shadow-sm" style="background: #fafafa;">
+            <span class="quiz-badge bg-secondary-subtle text-secondary">
+              <i class="ti ti-circle-filled fs-9 me-1"></i> Inactive
+            </span>
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center mb-3">
+                <div class="icon-box icon-box-primary me-3 shadow-sm" style="filter: grayscale(1);">
+                  <i class="ti ti-database"></i>
+                </div>
+                <div>
+                  <small class="text-muted text-uppercase fw-semibold" style="letter-spacing: 0.5px; font-size: 0.7rem;">Database Systems</small>
+                </div>
+              </div>
+              
+              <h4 class="quiz-title text-muted">Advanced SQL Queries</h4>
+              <p class="text-secondary small mb-4 line-clamp-2">Evaluation of complex joins, window functions, and indexing strategies.</p>
+              
+              <div class="d-flex justify-content-between align-items-center mb-1" style="opacity: 0.7;">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="icon-box icon-box-warning" style="width: 28px; height: 28px; font-size: 1rem;">
+                    <i class="ti ti-help"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">15</h6>
+                    <small class="text-muted" style="font-size: 0.65rem;">QUESTIONS</small>
+                  </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                  <div class="icon-box icon-box-primary" style="width: 28px; height: 28px; font-size: 1rem;">
+                    <i class="ti ti-clock"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">20m</h6>
+                    <small class="text-muted" style="font-size: 0.65rem;">DURATION</small>
+                  </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                  <div class="icon-box icon-box-success" style="width: 28px; height: 28px; font-size: 1rem;">
+                    <i class="ti ti-target"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">10</h6>
+                    <small class="text-muted" style="font-size: 0.65rem;">PASS SCORE</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-footer-actions d-flex justify-content-between align-items-center">
+              <div class="avatar-group" style="opacity: 0.5;">
+                <span class="avatar avatar-sm rounded-circle bg-light text-secondary border border-2 border-white shadow-sm fs-6 fw-bold">0</span>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-light btn-icon btn-sm text-secondary rounded-3 shadow-sm border-0"><i class="ti ti-edit"></i></button>
+                <button class="btn btn-light btn-icon btn-sm text-danger rounded-3 shadow-sm border-0"><i class="ti ti-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      
+    </div>
+  </main>
+</body>
+</html>
