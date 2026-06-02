@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{mentor/layout}">
+<head>
+    <title>Space Members</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+          <div class="col-12">
+            <div class="mb-6">
+              <h1 class="fs-3 mb-1">Member Management</h1>
+              <p>Manage roles and participants in your learning space.</p>
+            </div>
+          </div>
+        </div>
+        
+        <input type="hidden" id="spaceId" th:value="${spaceId}">
+        
+        <div class="card">
+            <div class="card-header bg-white px-4 py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Members List</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined At</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="members-table-body">
+                            <!-- Populated via AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            const spaceId = $('#spaceId').val();
+
+            $(document).ready(function() {
+                loadMembers();
+            });
+
+            function loadMembers() {
+                $.ajax({
+                    url: `/api/spaces/${spaceId}/members`,
+                    method: 'GET',
+                    success: function(data) {
+                        renderTable(data.content);
+                    },
+                    error: function() {
+                        alert('Failed to load members.');
+                    }
+                });
+            }
+
+            function renderTable(members) {
+                let html = '';
+                if(members.length === 0) {
+                    html = '<tr><td colspan="5" class="text-center py-4 text-muted">No members found.</td></tr>';
+                } else {
+                    members.forEach(m => {
+                        let badgeClass = 'bg-secondary-subtle text-secondary border border-secondary';
+                        if (m.role === 'OWNER') badgeClass = 'bg-primary-subtle text-primary border border-primary';
+                        if (m.role === 'SUPPORTER') badgeClass = 'bg-success-subtle text-success border border-success';
+
+                        let actionsHtml = '';
+                        if (m.role !== 'OWNER') {
+                            if (m.role === 'MEMBER') {
+                                actionsHtml += `<button class="btn btn-sm btn-outline-success me-2" onclick="promote(${m.memberId})"><i class="ti ti-arrow-up"></i> Promote</button>`;
+                            } else if (m.role === 'SUPPORTER') {
+                                actionsHtml += `<button class="btn btn-sm btn-outline-warning me-2" onclick="demote(${m.memberId})"><i class="ti ti-arrow-down"></i> Demote</button>`;
+                            }
+                            actionsHtml += `<button class="btn btn-sm btn-outline-danger" onclick="removeMember(${m.memberId})"><i class="ti ti-trash"></i> Remove</button>`;
+                        } else {
+                            actionsHtml = '<span class="text-muted fst-italic">No actions</span>';
+                        }
+
+                        html += `
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-semibold text-dark">${m.fullName || 'N/A'}</div>
+                                </td>
+                                <td>${m.email}</td>
+                                <td><span class="badge ${badgeClass}">${m.role}</span></td>
+                                <td>${new Date(m.joinedAt).toLocaleDateString()}</td>
+                                <td class="text-end pe-4">${actionsHtml}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                $('#members-table-body').html(html);
+            }
+
+            function promote(memberId) {
+                if(!confirm('Promote this member to Supporter?')) return;
+                $.ajax({
+                    url: `/api/spaces/${spaceId}/members/${memberId}/promote`,
+                    method: 'POST',
+                    success: function() {
+                        loadMembers();
+                    },
+                    error: function(err) {
+                        alert('Error promoting member');
+                    }
+                });
+            }
+
+            function demote(memberId) {
+                if(!confirm('Demote this supporter to Member?')) return;
+                $.ajax({
+                    url: `/api/spaces/${spaceId}/members/${memberId}/demote`,
+                    method: 'POST',
+                    success: function() {
+                        loadMembers();
+                    },
+                    error: function(err) {
+                        alert('Error demoting member');
+                    }
+                });
+            }
+
+            function removeMember(memberId) {
+                if(!confirm('Are you sure you want to remove this member?')) return;
+                $.ajax({
+                    url: `/api/spaces/${spaceId}/members/${memberId}`,
+                    method: 'DELETE',
+                    success: function() {
+                        loadMembers();
+                    },
+                    error: function(err) {
+                        alert('Error removing member');
+                    }
+                });
+            }
+        </script>
+    </th:block>
+</body>
+</html>

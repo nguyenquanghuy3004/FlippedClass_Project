@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{admin/layout}">
+<head>
+    <title>Space Detail - Admin</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <input type="hidden" id="spaceId" th:value="${spaceId}">
+
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/admin/spaces" class="text-decoration-none">Spaces</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Space Details</li>
+                </ol>
+            </nav>
+            <h1 class="fs-3 mb-1 d-flex align-items-center gap-3">
+                <span id="s-title">Loading...</span>
+                <span id="s-status-badge"></span>
+            </h1>
+            <p class="text-muted" id="s-desc">Loading description...</p>
+        </div>
+        <div class="col-md-4 text-md-end" id="s-actions">
+            <!-- Rendered via JS -->
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white p-4 border-bottom-0">
+                    <h5 class="mb-0 fw-bold">General Information</h5>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted"><i class="ti ti-hash me-2"></i>Space ID</div>
+                        <div class="col-sm-8 fw-bold" id="s-id"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted"><i class="ti ti-mail me-2"></i>Owner Email</div>
+                        <div class="col-sm-8" id="s-owner"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted"><i class="ti ti-link me-2"></i>Invite Code</div>
+                        <div class="col-sm-8 font-monospace" id="s-code"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted"><i class="ti ti-calendar me-2"></i>Created At</div>
+                        <div class="col-sm-8" id="s-created"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm bg-primary bg-opacity-10 h-100">
+                        <div class="card-body p-4 text-center">
+                            <div class="icon-shape icon-lg bg-primary text-white rounded-circle mb-3 mx-auto">
+                                <i class="ti ti-users fs-3"></i>
+                            </div>
+                            <h3 class="fw-bold mb-1" id="s-members">0</h3>
+                            <p class="text-primary mb-0 small">Total Members</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm bg-success bg-opacity-10 h-100">
+                        <div class="card-body p-4 text-center">
+                            <div class="icon-shape icon-lg bg-success text-white rounded-circle mb-3 mx-auto">
+                                <i class="ti ti-map-2 fs-3"></i>
+                            </div>
+                            <h3 class="fw-bold mb-1" id="s-paths">0</h3>
+                            <p class="text-success mb-0 small">Learning Paths</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm bg-info bg-opacity-10 h-100">
+                        <div class="card-body p-4 text-center">
+                            <div class="icon-shape icon-lg bg-info text-white rounded-circle mb-3 mx-auto">
+                                <i class="ti ti-book-2 fs-3"></i>
+                            </div>
+                            <h3 class="fw-bold mb-1" id="s-lessons">0</h3>
+                            <p class="text-info mb-0 small">Total Lessons</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3"><i class="ti ti-info-circle me-2 text-primary"></i>Status Rules</h6>
+                    <ul class="text-muted small ps-3 mb-0" style="line-height: 1.8;">
+                        <li><strong>ACTIVE:</strong> Space is fully operational. Members can join and interact.</li>
+                        <li><strong>ARCHIVED:</strong> Space is hidden and read-only. Owner can still see it.</li>
+                        <li><strong>DELETED:</strong> Soft-deleted. Data is preserved but completely invisible to end-users.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        const spaceId = document.getElementById('spaceId').value;
+
+        function loadSpaceDetail() {
+            $.ajax({
+                url: `/api/admin/spaces/${spaceId}`,
+                type: 'GET',
+                success: function(space) {
+                    $('#s-title').text(space.name);
+                    $('#s-desc').text(space.description || 'No description provided.');
+                    $('#s-id').text('#' + space.id);
+                    $('#s-owner').text(space.ownerEmail);
+                    $('#s-code').text(space.inviteCode);
+                    $('#s-created').text(new Date(space.createdAt).toLocaleString('vi-VN'));
+                    
+                    $('#s-members').text(space.memberCount);
+                    $('#s-paths').text(space.learningPathCount);
+                    $('#s-lessons').text(space.lessonCount);
+
+                    let statusBadge = '';
+                    let actions = '';
+                    
+                    if (space.status === 'ACTIVE') {
+                        statusBadge = '<span class="badge bg-success bg-opacity-10 text-success fs-6 px-3 py-2 rounded-pill"><i class="ti ti-check me-1"></i> ACTIVE</span>';
+                        actions = `
+                            <button class="btn btn-warning me-2" onclick="updateStatus('ARCHIVE')"><i class="ti ti-archive me-1"></i> Archive</button>
+                            <button class="btn btn-danger" onclick="updateStatus('DELETE')"><i class="ti ti-trash me-1"></i> Delete</button>
+                        `;
+                    } else if (space.status === 'ARCHIVE') {
+                        statusBadge = '<span class="badge bg-warning bg-opacity-10 text-warning fs-6 px-3 py-2 rounded-pill"><i class="ti ti-archive me-1"></i> ARCHIVED</span>';
+                        actions = `
+                            <button class="btn btn-success me-2" onclick="updateStatus('ACTIVE')"><i class="ti ti-refresh me-1"></i> Restore</button>
+                            <button class="btn btn-danger" onclick="updateStatus('DELETE')"><i class="ti ti-trash me-1"></i> Delete</button>
+                        `;
+                    } else if (space.status === 'DELETE') {
+                        statusBadge = '<span class="badge bg-danger bg-opacity-10 text-danger fs-6 px-3 py-2 rounded-pill"><i class="ti ti-trash me-1"></i> DELETED</span>';
+                        actions = `
+                            <button class="btn btn-success" onclick="updateStatus('ACTIVE')"><i class="ti ti-refresh me-1"></i> Restore</button>
+                        `;
+                    }
+                    
+                    $('#s-status-badge').html(statusBadge);
+                    $('#s-actions').html(actions);
+                },
+                error: function() {
+                    alert('Failed to load space details');
+                }
+            });
+        }
+
+        function updateStatus(newStatus) {
+            if (!confirm(`Are you sure you want to mark this space as ${newStatus}?`)) return;
+            
+            $.ajax({
+                url: `/api/admin/spaces/${spaceId}/status?status=${newStatus}`,
+                type: 'PUT',
+                success: function() {
+                    loadSpaceDetail();
+                },
+                error: function(err) {
+                    alert('Error updating status');
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadSpaceDetail();
+        });
+    </script>
+</th:block>
+</body>
+</html>

@@ -8,12 +8,12 @@ public class UIController {
 
     @GetMapping("/login")
     public String loginPage() {
-        return "signin"; // Trả về template signin.html
+        return "Authen/signin"; // Trả về template signin.html
     }
 
     @GetMapping("/register")
     public String registerPage() {
-        return "signup"; // Trả về template signup.html
+        return "Authen/signup"; // Trả về template signup.html
     }
 
 }
