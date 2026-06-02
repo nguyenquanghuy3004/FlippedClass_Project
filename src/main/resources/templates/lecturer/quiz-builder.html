@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Quiz Builder - FlippedClass</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
+  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    
+    /* Builder Layout */
+    .builder-container {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+      height: calc(100vh - 120px);
+      margin-top: 1rem;
+    }
+
+    /* Left Sidebar: Questions List */
+    .questions-list-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    .questions-header {
+      padding: 1.25rem 1.5rem;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .questions-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    
+    .q-item {
+      padding: 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .q-item:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+    .q-item.active {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+    .q-item-title {
+      font-weight: 700;
+      color: #1e293b;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+    .q-item-preview {
+      font-size: 0.8rem;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    /* Right Main: Question Editor */
+    .editor-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      padding: 2rem;
+      border: 1px solid rgba(0,0,0,0.04);
+      overflow-y: auto;
+    }
+    
+    .option-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      background: #f8fafc;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      transition: 0.2s;
+    }
+    .option-row:focus-within {
+      border-color: #3b82f6;
+      background: #fff;
+    }
+    
+    .option-radio {
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+    }
+    .option-label {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #475569;
+      width: 24px;
+    }
+    .option-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 1rem;
+      color: #1e293b;
+    }
+    
+    .empty-state {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+    }
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      color: #cbd5e1;
+    }
+
+    /* Page Top Bar */
+    .builder-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(30, 60, 114, 0.15);
+    }
+    .quiz-info-title {
+      font-weight: 800;
+      font-size: 1.5rem;
+      margin-bottom: 0;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="overlay" class="overlay"></div>
+  
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
+    <!-- Same Topbar as always -->
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <div>
+      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
+        <li class="ms-3 dropdown">
+          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-sm rounded-circle" />
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="logo-area">
+      <a th:href="@{/}" class="d-inline-flex"><img src="data:image/svg+xml,%3csvg%20width='62'%20height='67'%20viewBox='0%200%2062%2067'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M30.604%2066.378L0.00805664%2048.1582V35.7825L30.604%2054.0023V66.378Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2048.1582L30.604%2066.378V54.0023L61.1996%2035.7825V48.1582Z'%20fill='%23E66239'/%3e%3cpath%20d='M30.5955%200L0%2018.2198V30.5955L30.5955%2012.3757V0Z'%20fill='%23657E92'/%3e%3cpath%20d='M61.191%2018.2198L30.5955%200V12.3757L61.191%2030.5955V18.2198Z'%20fill='%23A3B2BE'/%3e%3cpath%20d='M30.604%2048.8457L0.00805664%2030.6259V18.2498L30.604%2036.47V48.8457Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2030.6259L30.604%2048.8457V36.47L61.1996%2018.2498V30.6259Z'%20fill='%23E66239'/%3e%3c/svg%3e" alt="" width="24">
+        <span class="logo-text ms-2"> <img th:src="@{/assets/images/logo.svg}" alt=""></span>
+      </a>
+    </div>
+    <ul class="nav flex-column">
+      <li class="px-4 py-2"><small class="nav-text">Main</small></li>
+      <li><a class="nav-link active" th:href="@{/lecturer/quizzes}"><i class="ti ti-brain"></i><span class="nav-text">Quizzes</span></a></li>
+    </ul>
+  </aside>
+
+  <main id="content" class="content py-10">
+    <div class="container-fluid">
+      
+      <!-- Top Bar -->
+      <div class="builder-topbar">
+        <div>
+          <a th:href="@{/lecturer/quizzes}" class="text-white text-decoration-none mb-2 d-inline-block" style="opacity: 0.8;"><i class="ti ti-arrow-left me-1"></i> Back to Quizzes</a>
+          <h1 class="quiz-info-title" id="quizTitleDisplay">Loading Quiz...</h1>
+        </div>
+        <div>
+          <button class="btn btn-light fw-bold px-4 rounded-pill text-primary shadow-sm" onclick="createNewQuestion()">
+            <i class="ti ti-plus me-1"></i> Add Question
+          </button>
+        </div>
+      </div>
+
+      <!-- Alert -->
+      <div id="alertMessage" class="alert d-none mt-3 shadow-sm border-0 fw-bold rounded-3" role="alert"></div>
+
+      <!-- Builder Layout -->
+      <div class="builder-container">
+        
+        <!-- Left Sidebar: List -->
+        <div class="questions-list-card">
+          <div class="questions-header">
+            <h5 class="mb-0 fw-bold"><i class="ti ti-list-details me-2 text-primary"></i>Questions (<span id="qCount">0</span>)</h5>
+          </div>
+          <div class="questions-body" id="questionsList">
+            <!-- Rendered by JS -->
+            <div class="text-center text-muted py-4">Loading questions...</div>
+          </div>
+        </div>
+
+        <!-- Right Main: Editor -->
+        <div class="editor-card" id="editorCard">
+          
+          <div class="empty-state" id="emptyState">
+            <i class="ti ti-click"></i>
+            <h4>No Question Selected</h4>
+            <p>Select a question from the left or create a new one.</p>
+          </div>
+
+          <div id="questionFormContainer" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+              <h3 class="fw-bold mb-0 text-dark" id="formHeader">Edit Question</h3>
+              <button class="btn btn-light text-danger rounded-pill px-3 fw-bold d-none" id="btnDeleteQ" onclick="deleteCurrentQuestion()"><i class="ti ti-trash"></i> Delete</button>
+            </div>
+
+            <form id="qForm">
+              <input type="hidden" id="qId">
+              
+              <div class="mb-4">
+                <label class="form-label fw-bold text-dark">Question Content <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="qContent" rows="3" placeholder="Enter the question here..." required></textarea>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold text-dark d-flex justify-content-between">
+                  <span>Answers & Correct Option <span class="text-danger">*</span></span>
+                  <small class="text-muted fw-normal">Select the radio button for the correct answer</small>
+                </label>
+                
+                <div class="option-row">
+                  <input class="form-check-input option-radio" type="radio" name="correctOpt" value="A" id="radioA" required>
+                  <span class="option-label">A</span>
+                  <input type="text" class="option-input" id="optA" placeholder="Option A text..." required>
+                </div>
+                
+                <div class="option-row">
+                  <input class="form-check-input option-radio" type="radio" name="correctOpt" value="B" id="radioB">
+                  <span class="option-label">B</span>
+                  <input type="text" class="option-input" id="optB" placeholder="Option B text..." required>
+                </div>
+                
+                <div class="option-row">
+                  <input class="form-check-input option-radio" type="radio" name="correctOpt" value="C" id="radioC">
+                  <span class="option-label">C</span>
+                  <input type="text" class="option-input" id="optC" placeholder="Option C text..." required>
+                </div>
+
+                <div class="option-row">
+                  <input class="form-check-input option-radio" type="radio" name="correctOpt" value="D" id="radioD">
+                  <span class="option-label">D</span>
+                  <input type="text" class="option-input" id="optD" placeholder="Option D text..." required>
+                </div>
+              </div>
+
+              <div class="row mb-5">
+                <div class="col-md-4">
+                  <label class="form-label fw-bold text-dark">Points <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" id="qPoints" value="10" required>
+                </div>
+              </div>
+
+              <div class="d-flex gap-3 pt-3 border-top">
+                <button type="button" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm" onclick="saveQuestion()" id="btnSaveQ">Save Question</button>
+                <button type="button" class="btn btn-light btn-lg rounded-pill px-4 fw-bold" onclick="showEmptyState()">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Extract Quiz ID from URL: /lecturer/quizzes/5/builder
+    const pathParts = window.location.pathname.split('/');
+    const quizId = pathParts[3];
+    
+    const API_QUIZ = '/api/quizzes';
+    let currentQuestions = [];
+    let currentSelectedId = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadQuizDetails();
+      fetchQuestions();
+    });
+
+    function showAlert(message, isError = false) {
+      const alertEl = document.getElementById('alertMessage');
+      alertEl.innerText = message;
+      alertEl.classList.remove('d-none', 'alert-success', 'alert-danger');
+      alertEl.classList.add(isError ? 'alert-danger' : 'alert-success');
+      setTimeout(() => alertEl.classList.add('d-none'), 3000);
+    }
+
+    async function loadQuizDetails() {
+      try {
+        const res = await fetch(\`\${API_QUIZ}/\${quizId}\`);
+        if(res.ok) {
+          const quiz = await res.json();
+          document.getElementById('quizTitleDisplay').innerText = quiz.title;
+        } else {
+          document.getElementById('quizTitleDisplay').innerText = "Quiz Not Found";
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function fetchQuestions() {
+      try {
+        const res = await fetch(\`\${API_QUIZ}/\${quizId}/questions\`);
+        if (!res.ok) throw new Error('Failed to load questions');
+        currentQuestions = await res.json();
+        
+        // Sort by id for consistent ordering
+        currentQuestions.sort((a,b) => a.id - b.id);
+        
+        document.getElementById('qCount').innerText = currentQuestions.length;
+        renderQuestionsList();
+      } catch (e) {
+        console.error(e);
+        showAlert('Could not load questions', true);
+      }
+    }
+
+    function renderQuestionsList() {
+      const listEl = document.getElementById('questionsList');
+      listEl.innerHTML = '';
+
+      if (currentQuestions.length === 0) {
+        listEl.innerHTML = '<div class="text-center text-muted py-4 small">No questions yet. Create one!</div>';
+        return;
+      }
+
+      currentQuestions.forEach((q, index) => {
+        const item = document.createElement('div');
+        item.className = 'q-item' + (currentSelectedId === q.id ? ' active' : '');
+        item.onclick = () => selectQuestion(q.id);
+        
+        item.innerHTML = \`
+          <div style="flex:1; overflow:hidden;">
+            <div class="q-item-title">Question \${index + 1} <span class="badge bg-light text-secondary ms-1">\${q.points} pts</span></div>
+            <div class="q-item-preview">\${q.content}</div>
+          </div>
+          <i class="ti ti-chevron-right text-muted"></i>
+        \`;
+        
+        listEl.appendChild(item);
+      });
+    }
+
+    function showEmptyState() {
+      currentSelectedId = null;
+      renderQuestionsList();
+      document.getElementById('emptyState').style.display = 'flex';
+      document.getElementById('questionFormContainer').style.display = 'none';
+    }
+
+    function createNewQuestion() {
+      currentSelectedId = 'NEW';
+      renderQuestionsList();
+      
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('questionFormContainer').style.display = 'block';
+      
+      document.getElementById('formHeader').innerText = 'Create New Question';
+      document.getElementById('btnDeleteQ').classList.add('d-none');
+      
+      document.getElementById('qForm').reset();
+      document.getElementById('qId').value = '';
+      document.getElementById('qPoints').value = 10;
+    }
+
+    function selectQuestion(id) {
+      const q = currentQuestions.find(x => x.id === id);
+      if (!q) return;
+      
+      currentSelectedId = id;
+      renderQuestionsList();
+      
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('questionFormContainer').style.display = 'block';
+      
+      document.getElementById('formHeader').innerText = 'Edit Question';
+      document.getElementById('btnDeleteQ').classList.remove('d-none');
+      
+      document.getElementById('qId').value = q.id;
+      document.getElementById('qContent').value = q.content;
+      document.getElementById('qPoints').value = q.points;
+      
+      // Parse Options
+      let opts = { A: '', B: '', C: '', D: '' };
+      try {
+        opts = JSON.parse(q.options);
+      } catch(e) {}
+      
+      document.getElementById('optA').value = opts.A || '';
+      document.getElementById('optB').value = opts.B || '';
+      document.getElementById('optC').value = opts.C || '';
+      document.getElementById('optD').value = opts.D || '';
+      
+      // Check Correct Radio
+      document.getElementById('radioA').checked = (q.correctAnswer === 'A');
+      document.getElementById('radioB').checked = (q.correctAnswer === 'B');
+      document.getElementById('radioC').checked = (q.correctAnswer === 'C');
+      document.getElementById('radioD').checked = (q.correctAnswer === 'D');
+    }
+
+    async function saveQuestion() {
+      const id = document.getElementById('qId').value;
+      const content = document.getElementById('qContent').value;
+      const points = document.getElementById('qPoints').value;
+      
+      const optA = document.getElementById('optA').value;
+      const optB = document.getElementById('optB').value;
+      const optC = document.getElementById('optC').value;
+      const optD = document.getElementById('optD').value;
+      
+      const correctRadio = document.querySelector('input[name="correctOpt"]:checked');
+      
+      if (!content || !optA || !optB || !optC || !optD || !correctRadio) {
+        showAlert('Please fill all fields and select a correct answer!', true);
+        return;
+      }
+      
+      const optionsJson = JSON.stringify({ A: optA, B: optB, C: optC, D: optD });
+      const correctVal = correctRadio.value; // 'A', 'B', 'C', 'D'
+
+      const payload = {
+        content: content,
+        options: optionsJson,
+        correctAnswer: correctVal,
+        points: parseInt(points),
+        questionType: 'SINGLE_CHOICE',
+        sortOrder: 0
+      };
+
+      const isUpdate = id !== '';
+      const url = isUpdate ? \`/api/quizzes/questions/\${id}\` : \`\${API_QUIZ}/\${quizId}/questions\`;
+      const method = isUpdate ? 'PUT' : 'POST';
+
+      const btn = document.getElementById('btnSaveQ');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) throw new Error('Failed to save question');
+        
+        showAlert('Question saved successfully!');
+        await fetchQuestions();
+        
+        // Find newly saved or keep current
+        const savedData = await res.json();
+        selectQuestion(savedData.id);
+        
+      } catch (e) {
+        console.error(e);
+        showAlert('Error saving question', true);
+      } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+      }
+    }
+
+    async function deleteCurrentQuestion() {
+      const id = document.getElementById('qId').value;
+      if (!id) return;
+      
+      if (!confirm('Are you sure you want to delete this question?')) return;
+      
+      try {
+        const res = await fetch(\`/api/quizzes/questions/\${id}\`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete');
+        
+        showAlert('Question deleted successfully!');
+        showEmptyState();
+        await fetchQuestions();
+      } catch (e) {
+        console.error(e);
+        showAlert('Error deleting question', true);
+      }
+    }
+  </script>
+</body>
+</html>

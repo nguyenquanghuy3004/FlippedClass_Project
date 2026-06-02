@@ -23,6 +23,8 @@ public class QuizResponse {
     private String difficulty;
     private String thumbnailUrl;
     private String courseName;
+    private Long learningSpaceId;
+    private String learningSpaceName;
     
     // Statistical fields
     private Integer questionCount;

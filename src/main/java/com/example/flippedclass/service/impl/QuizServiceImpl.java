@@ -299,9 +299,17 @@ public class QuizServiceImpl implements QuizService {
         BigDecimal avgScore = attemptRepository.averageScoreByQuizId(quiz.getId());
         double avg = avgScore != null ? avgScore.doubleValue() : 0.0;
         
+        Integer passScore = quiz.getPassScore() != null ? quiz.getPassScore() : 50;
         long passedCount = attemptRepository.findByQuizId(quiz.getId()).stream()
-                .filter(a -> a.getScore().compareTo(BigDecimal.valueOf(quiz.getPassScore())) >= 0).count();
+                .filter(a -> a.getScore() != null && a.getScore().compareTo(BigDecimal.valueOf(passScore)) >= 0).count();
         double passRate = totalAttempts > 0 ? (passedCount * 100.0 / totalAttempts) : 0.0;
+
+        Long spaceId = null;
+        String spaceName = "Uncategorized";
+        if (quiz.getLearningNode() != null && quiz.getLearningNode().getLearningPath() != null && quiz.getLearningNode().getLearningPath().getLearningSpace() != null) {
+            spaceId = quiz.getLearningNode().getLearningPath().getLearningSpace().getId();
+            spaceName = quiz.getLearningNode().getLearningPath().getLearningSpace().getName();
+        }
 
         return QuizResponse.builder()
                 .id(quiz.getId())
@@ -309,6 +317,8 @@ public class QuizServiceImpl implements QuizService {
                 .courseName(quiz.getLearningNode() != null ? quiz.getLearningNode().getTitle() : null)
                 .lecturerId(quiz.getLecturer() != null ? quiz.getLecturer().getId() : null)
                 .lecturerName(quiz.getLecturer() != null ? quiz.getLecturer().getFullName() : null)
+                .learningSpaceId(spaceId)
+                .learningSpaceName(spaceName)
                 .title(quiz.getTitle())
                 .description(quiz.getDescription())
                 .durationMinutes(quiz.getDurationMinutes())
