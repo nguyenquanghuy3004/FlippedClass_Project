@@ -15,4 +15,6 @@ public class StudentDetailResponse {
     private String className;
     private String major;
     private Integer enrollmentYear;
+    private String phoneNumber;
+    private String bio;
 }

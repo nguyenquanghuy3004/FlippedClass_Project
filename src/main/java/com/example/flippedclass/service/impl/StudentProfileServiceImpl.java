@@ -27,7 +27,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy User!"));
 
         StudentProfile profile = studentProfileRepository.findByUserId(studentId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Hồ sơ sinh viên!"));
+                .orElse(null); // Không throw lỗi để Frontend vẫn lấy được thông tin User
 
         return mapToResponse(user, profile);
     }
@@ -39,11 +39,33 @@ public class StudentProfileServiceImpl implements StudentProfileService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy User!"));
 
         StudentProfile profile = studentProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Hồ sơ sinh viên!"));
+                .orElse(new StudentProfile()); // Tạo mới nếu chưa có
+        
+        if (profile.getUser() == null) {
+            profile.setUser(user);
+            profile.setStudentCode("TEMP_" + user.getUsername()); // Fix lỗi null studentCode
+        }
+
+        // Cập nhật fullName
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName());
+        }
 
         // Chỉ cập nhật avatarUrl ở bảng User theo đúng chốt hạ của nhóm
-        user.setAvatarUrl(request.getAvatarUrl());
+        if (request.getAvatarUrl() != null) {
+            user.setAvatarUrl(request.getAvatarUrl());
+        }
+        
         userRepository.save(user);
+
+        // Cập nhật phone và bio vào bảng StudentProfile
+        if (request.getPhoneNumber() != null) {
+            profile.setPhoneNumber(request.getPhoneNumber());
+        }
+        if (request.getBio() != null) {
+            profile.setBio(request.getBio());
+        }
+        studentProfileRepository.save(profile);
 
         return mapToResponse(user, profile);
     }
@@ -56,10 +78,14 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         res.setFullName(user.getFullName());
         res.setAvatarUrl(user.getAvatarUrl());
 
-        res.setStudentCode(profile.getStudentCode());
-        res.setClassName(profile.getClassName());
-        res.setMajor(profile.getMajor());
-        res.setEnrollmentYear(profile.getEnrollmentYear());
+        if (profile != null) {
+            res.setStudentCode(profile.getStudentCode());
+            res.setClassName(profile.getClassName());
+            res.setMajor(profile.getMajor());
+            res.setEnrollmentYear(profile.getEnrollmentYear());
+            res.setPhoneNumber(profile.getPhoneNumber());
+            res.setBio(profile.getBio());
+        }
 
         return res;
     }

@@ -30,7 +30,7 @@ public class User {
     @Column(length = 255)
     private String password;
 
-    @Column(length = 255)
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String fullName;
 
     @Column(length = 1000)
