@@ -76,14 +76,14 @@
   </nav>
 
   <!-- SIDEBAR -->
-  <aside id="sidebar" class="sidebar">
+  <aside id="sidebar" class="sidebar d-flex flex-column">
     <div class="logo-area">
       <a href="#" class="d-inline-flex">
         <i class="fa-solid fa-chalkboard-user text-success fs-3"></i>
         <span class="logo-text ms-2 fw-bold text-success fs-4"> FCMS Mentor</span>
       </a>
     </div>
-    <ul class="nav flex-column">
+    <ul class="nav flex-column mb-auto">
       <li class="px-4 py-2"><small class="nav-text">Workspace</small></li>
       <li>
         <a class="nav-link active" href="#">
@@ -91,6 +91,12 @@
         </a>
       </li>
     </ul>
+    
+    <div class="p-3 mt-auto w-100">
+      <button class="btn btn-primary w-100 rounded d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createSpaceModal" style="background-color: #6366f1; border-color: #6366f1; padding: 0.6rem;">
+        <i class="ti ti-plus fs-5"></i> New Space
+      </button>
+    </div>
   </aside>
 
   <!-- MAIN CONTENT -->

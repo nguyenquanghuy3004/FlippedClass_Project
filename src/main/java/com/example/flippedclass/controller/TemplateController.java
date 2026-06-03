@@ -60,4 +60,9 @@ public class TemplateController {
     public String takeQuiz() {
         return "student/take-quiz";
     }
+
+    @GetMapping("/mentor/dashboard")
+    public String mentorDashboard() {
+        return "lecturer/dashboard";
+    }
 }
