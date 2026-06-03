@@ -12,4 +12,6 @@ public class QuizQuestionResponse {
     private String options;
     private String correctAnswer;
     private Integer points;
+    private String questionType;
+    private Integer sortOrder;
 }

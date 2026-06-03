@@ -32,4 +32,12 @@ public class QuizQuestion {
     @Column
     @Builder.Default
     private Integer points = 1;
+
+    @Column(name = "question_type", length = 50)
+    @Builder.Default
+    private String questionType = "SINGLE_CHOICE";
+
+    @Column(name = "sort_order")
+    @Builder.Default
+    private Integer sortOrder = 0;
 }

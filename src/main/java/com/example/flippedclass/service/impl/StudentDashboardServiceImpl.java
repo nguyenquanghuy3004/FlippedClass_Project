@@ -31,7 +31,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student user not found"));
 
         StudentProfileResponse profile = studentProfileRepository.findByUser_Id(studentId)
-                .map(StudentProfileResponse::from)
+                .map(this::toStudentProfileResponse)
                 .orElse(null);
 
         List<DashboardLearningSpaceResponse> learningSpaces =
@@ -44,5 +44,17 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 profile,
                 learningSpaces
         );
+    }
+
+    private com.example.flippedclass.dto.response.StudentProfileResponse toStudentProfileResponse(com.example.flippedclass.entity.StudentProfile profile) {
+        if (profile == null) return null;
+        return com.example.flippedclass.dto.response.StudentProfileResponse.builder()
+            .id(profile.getId())
+            .userId(profile.getUser() != null ? profile.getUser().getId() : null)
+            .studentCode(profile.getStudentCode())
+            .major(profile.getMajor())
+            .className(profile.getClassName())
+            .enrollmentYear(profile.getEnrollmentYear())
+            .build();
     }
 }

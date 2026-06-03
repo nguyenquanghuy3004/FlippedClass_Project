@@ -17,4 +17,18 @@ public class QuizResponse {
     private Integer durationMinutes;
     private Boolean active;
     private LocalDateTime createdAt;
+    
+    // Additional Metadata
+    private Integer passScore;
+    private String difficulty;
+    private String thumbnailUrl;
+    private String courseName;
+    private Long learningSpaceId;
+    private String learningSpaceName;
+    
+    // Statistical fields
+    private Integer questionCount;
+    private Long totalAttempts;
+    private Double averageScore;
+    private Double passRate;
 }
