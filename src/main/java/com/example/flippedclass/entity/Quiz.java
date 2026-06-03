@@ -26,7 +26,7 @@ public class Quiz {
     @JoinColumn(name = "lecturer_id", nullable = false)
     private User lecturer;
 
-    @Column(nullable = false, length = 255)
+    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
     private String title;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")

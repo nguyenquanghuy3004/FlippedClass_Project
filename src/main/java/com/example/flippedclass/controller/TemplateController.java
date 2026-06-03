@@ -28,12 +28,12 @@ public class TemplateController {
 
     @GetMapping("/signin")
     public String signin() {
-        return "signin";
+        return "Authen/signin";
     }
 
     @GetMapping("/signup")
     public String signup() {
-        return "signup";
+        return "Authen/signup";
     }
 
     @GetMapping("/docs")
@@ -64,5 +64,15 @@ public class TemplateController {
     @GetMapping("/student/take-quiz")
     public String takeQuiz() {
         return "student/take-quiz";
+    }
+
+    @GetMapping("/lecturer/grading")
+    public String grading() {
+        return "lecturer/grading";
+    }
+
+    @GetMapping("/lecturer/evaluation-sessions")
+    public String evaluationSessions() {
+        return "lecturer/evaluation-sessions";
     }
 }

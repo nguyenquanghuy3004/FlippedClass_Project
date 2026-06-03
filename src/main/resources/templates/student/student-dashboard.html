@@ -11,6 +11,14 @@
 
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  
+  <!-- AUTHENTICATION GUARD -->
+  <script>
+    if (!localStorage.getItem('jwt_token')) {
+      window.location.href = '/signin';
+    }
+  </script>
+  
   <style>
     /* =========================================
        ULTRA PREMIUM BENTO DASHBOARD STYLES
@@ -187,6 +195,41 @@
     .task-danger { border-left-color: #ff6b6b; }
     .task-warning { border-left-color: #feca57; }
     .task-success { border-left-color: #1dd1a1; }
+
+    /* 6. ACCORDION STYLES */
+    .quiz-accordion .accordion-item {
+      background: #f8f9fa;
+      border: 1px solid rgba(0,0,0,0.03) !important;
+      border-radius: 20px !important;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .quiz-accordion .accordion-item:hover {
+      box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    }
+    .quiz-accordion .accordion-button {
+      border-radius: 20px !important;
+      padding: 1.25rem 1.5rem;
+      box-shadow: none !important;
+    }
+    .quiz-accordion .accordion-button:not(.collapsed) {
+      background: #ffffff;
+      color: #2c3e50;
+    }
+    .quiz-accordion .accordion-body {
+      background: #ffffff;
+      padding: 1.5rem;
+    }
+    .quiz-card-item {
+      border: 1px solid rgba(0,0,0,0.04);
+      transition: all 0.2s ease;
+    }
+    .quiz-card-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+      border-color: rgba(0,0,0,0.08);
+    }
   </style>
 </head>
 
@@ -437,6 +480,24 @@
             </div>
 
           </div>
+
+          <!-- COURSE QUIZZES SECTION -->
+          <hr class="my-5 opacity-10 border-secondary">
+
+          <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+              <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Course Quizzes</h2>
+              <p class="text-muted mb-0 fw-semibold">Quizzes tailored for your enrolled learning spaces</p>
+            </div>
+          </div>
+          
+          <div class="accordion accordion-flush quiz-accordion bento-card p-3" id="quizAccordion">
+             <div class="text-center text-muted py-4" id="quiz-loading">
+               <div class="spinner-border text-primary mb-2" role="status"></div>
+               <p>Loading your courses and quizzes...</p>
+             </div>
+
+          </div>
         </div>
 
         <!-- RIGHT COLUMN: ACTION NEEDED & RECENT DOCS -->
@@ -501,5 +562,99 @@
 
     </div>
   </main>
+  
+  <!-- DYNAMIC DASHBOARD DATA SCRIPT -->
+  <script>
+    const token = localStorage.getItem('jwt_token');
+    const userId = localStorage.getItem('user_id');
+
+    async function loadDashboard() {
+      if (!token || !userId) return;
+
+      try {
+        const res = await fetch(`/api/students/${userId}/dashboard`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+            const errText = await res.text();
+            throw new Error('Failed to load dashboard data: ' + res.status + ' ' + errText);
+        }
+        const data = await res.json();
+        
+        // 1. Update Student Profile Header (Optional: Name/Avatar)
+        if (data.user) {
+          const nameEl = document.querySelector('.dropdown-toggle span');
+          if (nameEl) nameEl.innerText = data.user.fullName || data.user.username;
+        }
+
+        // 2. Render Course Quizzes
+        const quizAccordion = document.getElementById('quizAccordion');
+        quizAccordion.innerHTML = ''; // clear loading
+        
+        if (!data.learningSpaces || data.learningSpaces.length === 0) {
+           quizAccordion.innerHTML = `<div class="text-center text-muted py-4"><p>You are not enrolled in any learning spaces.</p></div>`;
+           return;
+        }
+
+        data.learningSpaces.forEach((space, index) => {
+          const quizzes = space.quizzes || [];
+          const collapseId = 'collapseSpace' + space.id;
+          
+          let bodyHtml = '';
+          if (quizzes.length === 0) {
+            bodyHtml = `
+                <div class="accordion-body border-top border-light text-center py-4">
+                   <div class="text-success mb-2"><i class="ti ti-circle-check fs-1" style="font-size: 3rem;"></i></div>
+                   <h5 class="fw-bold">You're all caught up!</h5>
+                   <p class="text-muted small mb-0">No pending quizzes for this learning space at the moment.</p>
+                </div>
+            `;
+          } else {
+            bodyHtml = `<div class="accordion-body border-top border-light">`;
+            quizzes.forEach(quiz => {
+              bodyHtml += `
+                   <div class="quiz-card-item d-flex align-items-center justify-content-between p-3 bg-white rounded-3 shadow-sm mb-2">
+                     <div>
+                       <h5 class="fw-bold mb-1">${quiz.title}</h5>
+                       <span class="small text-muted fw-semibold"><i class="ti ti-clock me-1"></i>${quiz.durationMinutes} mins</span>
+                     </div>
+                     <div class="text-end">
+                       <a href="/student/take-quiz?quizId=${quiz.id}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">Take Quiz</a>
+                     </div>
+                   </div>
+              `;
+            });
+            bodyHtml += `</div>`;
+          }
+
+          const headerHtml = `
+            <div class="accordion-item border-0">
+              <h2 class="accordion-header">
+                <button class="accordion-button ${index === 0 ? '' : 'collapsed'} bg-transparent fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index === 0 ? 'true' : 'false'}">
+                  <i class="ti ti-book text-primary me-2 fs-4"></i> ${space.name}
+                  ${quizzes.length > 0 ? `<span class="badge bg-danger ms-auto me-3 rounded-pill">${quizzes.length} Pending</span>` : `<span class="badge bg-secondary ms-auto me-3 rounded-pill">All Caught Up</span>`}
+                </button>
+              </h2>
+              <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" data-bs-parent="#quizAccordion">
+                ${bodyHtml}
+              </div>
+            </div>
+          `;
+          
+          quizAccordion.insertAdjacentHTML('beforeend', headerHtml);
+        });
+
+      } catch (err) {
+        console.error(err);
+        const quizAccordion = document.getElementById('quizAccordion');
+        if (quizAccordion) {
+            quizAccordion.innerHTML = `<div class="alert alert-danger m-3">${err.message}</div>`;
+        }
+      }
+    }
+
+    // Call on load
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+  </script>
 </body>
 </html>

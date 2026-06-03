@@ -18,7 +18,7 @@ public class LearningSpace {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
     private String name;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")

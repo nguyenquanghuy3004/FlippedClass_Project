@@ -10,6 +10,7 @@ import com.example.flippedclass.repository.StudentProfileRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.StudentDashboardService;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final LearningSpaceMemberRepository learningSpaceMemberRepository;
+    private final com.example.flippedclass.repository.QuizRepository quizRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -36,7 +38,13 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
         List<DashboardLearningSpaceResponse> learningSpaces =
                 learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId).stream()
-                        .map(DashboardLearningSpaceResponse::from)
+                        .map(member -> {
+                            Long spaceId = member.getLearningSpace().getId();
+                            List<com.example.flippedclass.dto.response.DashboardQuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(spaceId).stream()
+                                    .map(q -> com.example.flippedclass.dto.response.DashboardQuizResponse.from(q, 0))
+                                    .collect(Collectors.toList());
+                            return DashboardLearningSpaceResponse.from(member, quizzes);
+                        })
                         .toList();
 
         return new StudentDashboardResponse(
