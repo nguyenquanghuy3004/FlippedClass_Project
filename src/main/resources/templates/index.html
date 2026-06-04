@@ -1,17 +1,17 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8" />
   <title>InApp Inventory Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png">
-  <link rel="manifest" th:href="@{/assets/site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+  <link rel="manifest" th:href="@{/assets/site.webmanifest}">
 
-  <script type="module" crossorigin th:src="@{/assets/js/main.js"></script>
-  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css">
+  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
+  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
 </head>
 
 <body>
@@ -51,7 +51,7 @@
             <ul class="list-unstyled p-0 m-0">
               <li class="p-3 border-bottom ">
                 <div class="d-flex gap-3">
-                  <img th:src="@{/assets/images/avatar-1.jpg" alt="" class="avatar avatar-sm rounded-circle" />
+                  <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-sm rounded-circle" />
                   <div class="flex-grow-1 small">
                     <p class="mb-0">New order received</p>
                     <p class="mb-1">Order #12345 has been placed</p>
@@ -61,7 +61,7 @@
               </li>
               <li class="p-3 border-bottom ">
                 <div class="d-flex gap-3">
-                  <img th:src="@{/assets/images/avatar-4.jpg" alt="" class="avatar avatar-sm rounded-circle" />
+                  <img th:src="@{/assets/images/avatar-4.jpg}" alt="" class="avatar avatar-sm rounded-circle" />
                   <div class="flex-grow-1 small">
                     <p class="mb-0">New user registered</p>
                     <p class="mb-1">User @john_doe has signed up</p>
@@ -71,7 +71,7 @@
 
               <li class="p-3 border-bottom">
                 <div class="d-flex gap-3">
-                  <img th:src="@{/assets/images/avatar-2.jpg" alt="" class="avatar avatar-sm rounded-circle" />
+                  <img th:src="@{/assets/images/avatar-2.jpg}" alt="" class="avatar avatar-sm rounded-circle" />
                   <div class="flex-grow-1 small">
                     <p class="mb-0">Payment confirmed</p>
                     <p class="mb-1">Payment of $299 has been received</p>
@@ -88,12 +88,12 @@
         <!-- Dropdown -->
         <li class="ms-3 dropdown">
           <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img th:src="@{/assets/images/avatar-1.jpg" alt="" class="avatar avatar-sm rounded-circle" />
+            <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-sm rounded-circle" />
           </a>
           <div class="dropdown-menu dropdown-menu-end p-0" style="min-width: 200px;">
             <div>
               <div class="d-flex gap-3 align-items-center border-dashed border-bottom px-3 py-3">
-                <img th:src="@{/assets/images/avatar-1.jpg" alt="" class="avatar avatar-md rounded-circle" />
+                <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-md rounded-circle" />
                 <div>
                   <h4 class="mb-0 small">Shrina Tesla</h4>
                   <p class="mb-0  small">@imshrina</p>
@@ -134,7 +134,7 @@
   <aside id="sidebar" class="sidebar">
     <div class="logo-area">
      <a th:href="@{/}" class="d-inline-flex"><img src="data:image/svg+xml,%3csvg%20width='62'%20height='67'%20viewBox='0%200%2062%2067'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M30.604%2066.378L0.00805664%2048.1582V35.7825L30.604%2054.0023V66.378Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2048.1582L30.604%2066.378V54.0023L61.1996%2035.7825V48.1582Z'%20fill='%23E66239'/%3e%3cpath%20d='M30.5955%200L0%2018.2198V30.5955L30.5955%2012.3757V0Z'%20fill='%23657E92'/%3e%3cpath%20d='M61.191%2018.2198L30.5955%200V12.3757L61.191%2030.5955V18.2198Z'%20fill='%23A3B2BE'/%3e%3cpath%20d='M30.604%2048.8457L0.00805664%2030.6259V18.2498L30.604%2036.47V48.8457Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2030.6259L30.604%2048.8457V36.47L61.1996%2018.2498V30.6259Z'%20fill='%23E66239'/%3e%3c/svg%3e" alt="" width="24">
-        <span class="logo-text ms-2"> <img th:src="@{/assets/images/logo.svg" alt=""></span>
+        <span class="logo-text ms-2"> <img th:src="@{/assets/images/logo.svg}" alt=""></span>
       </a>
     </div>
     <ul class="nav flex-column">
@@ -168,7 +168,7 @@
         <div class="col-12">
           <div class="mb-6">
             <h1 class="fs-3 mb-1">Dashboard</h1>
-            <p>Your main content goes hereâ€¦</p>
+            <p>Your main content goes here…</p>
           </div>
         </div>
       </div>
@@ -393,7 +393,7 @@
       </div>
       <div class="row g-3">
 
-        <!-- CARD 1 â€” Top Selling Products -->
+        <!-- CARD 1 — Top Selling Products -->
         <div class="col-lg-4">
           <div class="card  h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center px-4 py-3">
@@ -407,12 +407,12 @@
 
               <!-- item -->
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-2.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-2.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">Wireless Earphones</p>
                   <div class="d-flex align-items-center gap-2 text-muted">
                     <small class="fw-semibold">$89 </small>
-                    <small>â€¢</small>
+                    <small>•</small>
                     <small>1,250 Units</small>
                   </div>
                 </div>
@@ -421,12 +421,12 @@
 
               <!-- repeat -->
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-1.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-1.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">Gaming Joy Stick</p>
                   <div class="d-flex align-items-center gap-2 text-muted">
                     <small class="fw-semibold">$49 </small>
-                    <small>â€¢</small>
+                    <small>•</small>
                     <small>5,420 Units</small>
                   </div>
 
@@ -435,12 +435,12 @@
               </li>
 
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-3.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-3.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">Smart Watch Pro</p>
                   <div class="d-flex align-items-center gap-2 text-muted">
                     <small class="fw-semibold">$98 </small>
-                    <small>â€¢</small>
+                    <small>•</small>
                     <small>862 Units</small>
                   </div>
 
@@ -448,12 +448,12 @@
                 <span class="badge bg-info-subtle text-info border border-info">22%</span>
               </li>
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-4.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-4.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">USB-C Fast Charger</p>
                   <div class="d-flex align-items-center gap-2 text-muted">
                     <small class="fw-semibold">$35 </small>
-                    <small>â€¢</small>
+                    <small>•</small>
                     <small>3,200 Units</small>
                   </div>
 
@@ -461,12 +461,12 @@
                 <span class="badge bg-success-subtle text-success border border-success">28%</span>
               </li>
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-5.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-5.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">Portable Bluetooth Speaker</p>
                   <div class="d-flex align-items-center gap-2 text-muted">
                     <small class="fw-semibold">$65 </small>
-                    <small>â€¢</small>
+                    <small>•</small>
                     <small>2,890 Units</small>
                   </div>
 
@@ -477,7 +477,7 @@
           </div>
         </div>
 
-        <!-- CARD 2 â€” Low Stock Products -->
+        <!-- CARD 2 — Low Stock Products -->
         <div class="col-lg-4">
           <div class="card  h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center px-4 py-3">
@@ -491,7 +491,7 @@
             <ul class="list-group list-group-flush">
 
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-8.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-8.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">Wireless Headphones</p>
                   <small>ID: #554433</small>
@@ -503,7 +503,7 @@
               </li>
 
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-4.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-4.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">USB-C Cable Pack</p>
                   <small>ID: #887766</small>
@@ -515,7 +515,7 @@
               </li>
 
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-10.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-10.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">Phone Screen Protector</p>
                   <small>ID: #332211</small>
@@ -526,7 +526,7 @@
                 </div>
               </li>
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-4.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-4.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">Portable Charger 20000mAh</p>
                   <small>ID: #998877</small>
@@ -537,7 +537,7 @@
                 </div>
               </li>
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-6.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-6.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">Mechanical Keyboard RGB</p>
                   <small>ID: #665544</small>
@@ -551,7 +551,7 @@
           </div>
         </div>
 
-        <!-- CARD 3 â€” Recent Sales -->
+        <!-- CARD 3 — Recent Sales -->
         <div class="col-lg-4">
           <div class="card  h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center px-4 py-3">
@@ -564,12 +564,12 @@
             <ul class="list-group list-group-flush">
 
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-7.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-7.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">MacBook Pro 16"</p>
                   <div class="d-flex align-items-center gap-2 text-muted">
                     <small class="fw-semibold">Computers </small>
-                    <small>â€¢</small>
+                    <small>•</small>
                     <small>2,$2,499</small>
                   </div>
 
@@ -578,12 +578,12 @@
               </li>
 
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-9.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-9.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">AirPods Pro Max</p>
                   <div class="d-flex align-items-center gap-2 text-muted">
                     <small class="fw-semibold">Audio </small>
-                    <small>â€¢</small>
+                    <small>•</small>
                     <small>$549</small>
                   </div>
 
@@ -592,12 +592,12 @@
               </li>
 
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-8.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-8.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">iPad Air 11"</p>
                   <div class="d-flex align-items-center gap-2 text-muted">
                     <small class="fw-semibold">Tablets </small>
-                    <small>â€¢</small>
+                    <small>•</small>
                     <small>$799</small>
                   </div>
                 </div>
@@ -605,12 +605,12 @@
               </li>
 
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-3.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-3.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">Apple Watch Ultra</p>
                   <div class="d-flex align-items-center gap-2 text-muted">
                     <small class="fw-semibold">Wearables </small>
-                    <small>â€¢</small>
+                    <small>•</small>
                     <small>$799</small>
                   </div>
                 </div>
@@ -618,12 +618,12 @@
               </li>
 
               <li class="list-group-item d-flex align-items-center gap-3">
-                <img th:src="@{/assets/images/product-6.png" class="rounded" width="48">
+                <img th:src="@{/assets/images/product-6.png}" class="rounded" width="48">
                 <div class="flex-grow-1">
                   <p class="mb-1">Magic Keyboard</p>
                   <div class="d-flex align-items-center gap-2 text-muted">
                     <small class="fw-semibold">Accessories </small>
-                    <small>â€¢</small>
+                    <small>•</small>
                     <small>$299</small>
                   </div>
 
@@ -638,7 +638,7 @@
       <div class="row">
         <div class="col-12">
 <footer class="text-center py-2 mt-6 text-secondary ">
-        <p class="mb-0">Copyright Â© 2026 InApp Inventory Dashboard. Developed by <a href="https://codescandy.com/" target="_blank" class="text-primary">CodesCandy</a> â€¢ Distributed by <a href="https://themewagon.com/" target="_blank" class="text-primary">ThemeWagon</a> </p>
+        <p class="mb-0">Copyright © 2026 InApp Inventory Dashboard. Developed by <a href="https://codescandy.com/" target="_blank" class="text-primary">CodesCandy</a> • Distributed by <a href="https://themewagon.com/" target="_blank" class="text-primary">ThemeWagon</a> </p>
       </footer>
         </div>
 
@@ -654,3 +654,4 @@
 </body>
 
 </html>
+
