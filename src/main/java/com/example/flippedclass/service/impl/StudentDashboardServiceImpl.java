@@ -25,6 +25,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     private final StudentProfileRepository studentProfileRepository;
     private final LearningSpaceMemberRepository learningSpaceMemberRepository;
     private final com.example.flippedclass.repository.QuizRepository quizRepository;
+    private final com.example.flippedclass.repository.QuizAttemptRepository quizAttemptRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -41,7 +42,10 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                         .map(member -> {
                             Long spaceId = member.getLearningSpace().getId();
                             List<com.example.flippedclass.dto.response.DashboardQuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(spaceId).stream()
-                                    .map(q -> com.example.flippedclass.dto.response.DashboardQuizResponse.from(q, 0))
+                                    .map(q -> {
+                                        boolean isCompleted = quizAttemptRepository.existsByQuizIdAndStudent_Id(q.getId(), studentId);
+                                        return com.example.flippedclass.dto.response.DashboardQuizResponse.from(q, 0, isCompleted);
+                                    })
                                     .collect(Collectors.toList());
                             return DashboardLearningSpaceResponse.from(member, quizzes);
                         })

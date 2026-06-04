@@ -10,14 +10,16 @@ public class DashboardQuizResponse {
     private String description;
     private Integer durationMinutes;
     private Integer totalQuestions;
+    private Boolean isCompleted;
 
-    public static DashboardQuizResponse from(Quiz quiz, Integer totalQuestions) {
+    public static DashboardQuizResponse from(Quiz quiz, Integer totalQuestions, Boolean isCompleted) {
         DashboardQuizResponse response = new DashboardQuizResponse();
         response.id = quiz.getId();
         response.title = quiz.getTitle();
         response.description = quiz.getDescription();
         response.durationMinutes = quiz.getDurationMinutes();
         response.totalQuestions = totalQuestions;
+        response.isCompleted = isCompleted;
         return response;
     }
 }

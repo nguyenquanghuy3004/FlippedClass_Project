@@ -42,17 +42,20 @@ public class QuizServiceImpl implements QuizService {
     private final QuizAttemptRepository attemptRepository;
     private final UserRepository userRepository;
     private final LearningNodeRepository learningNodeRepository;
+    private final com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository;
 
     public QuizServiceImpl(QuizRepository quizRepository,
                            QuizQuestionRepository questionRepository,
                            QuizAttemptRepository attemptRepository,
                            UserRepository userRepository,
-                           LearningNodeRepository learningNodeRepository) {
+                           LearningNodeRepository learningNodeRepository,
+                           com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.attemptRepository = attemptRepository;
         this.userRepository = userRepository;
         this.learningNodeRepository = learningNodeRepository;
+        this.interactionLogRepository = interactionLogRepository;
     }
 
     @Override
@@ -197,6 +200,10 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public QuizAttemptResponse submitAttempt(Long quizId, SubmitQuizAttemptRequest request) {
+        if (attemptRepository.existsByQuizIdAndStudent_Id(quizId, request.getStudentId())) {
+            throw new BusinessException("Bạn đã nộp bài rồi, không thể làm lại!");
+        }
+
         Quiz quiz = findQuiz(quizId);
         User student = UserServiceImpl.findUser(userRepository, request.getStudentId());
 
@@ -243,7 +250,20 @@ public class QuizServiceImpl implements QuizService {
                 .submittedAt(LocalDateTime.now())
                 .build();
 
-        return toAttemptResponse(attemptRepository.save(attempt));
+        QuizAttempt savedAttempt = attemptRepository.save(attempt);
+
+        // Create InteractionLog for Lecturer
+        if (quiz.getLearningNode() != null && quiz.getLearningNode().getLearningPath() != null) {
+            com.example.flippedclass.entity.InteractionLog log = com.example.flippedclass.entity.InteractionLog.builder()
+                    .student(student)
+                    .learningPath(quiz.getLearningNode().getLearningPath())
+                    .interactionType("QUIZ_SUBMIT")
+                    .summary("Student " + student.getFullName() + " submitted quiz '" + quiz.getTitle() + "' with score: " + score + "% (" + correct + "/" + questions.size() + ")")
+                    .build();
+            interactionLogRepository.save(log);
+        }
+
+        return toAttemptResponse(savedAttempt);
     }
 
     @Override

@@ -18,4 +18,6 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
     BigDecimal averageScoreByQuizId(@Param("quizId") Long quizId);
 
     List<QuizAttempt> findByStudent_Id(Long studentId);
+
+    boolean existsByQuizIdAndStudent_Id(Long quizId, Long studentId);
 }

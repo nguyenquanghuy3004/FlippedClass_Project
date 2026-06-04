@@ -277,7 +277,7 @@
       <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
       
       <li class="mt-auto pb-4">
-        <a class="nav-link rounded-pill mx-3 px-4 text-danger fw-bold bg-danger-subtle" th:href="@{/}"><i class="ti ti-logout fs-5"></i><span class="nav-text">Sign Out</span></a>
+        <a class="nav-link rounded-pill mx-3 px-4 text-danger fw-bold bg-danger-subtle" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout fs-5"></i><span class="nav-text">Sign Out</span></a>
       </li>
     </ul>
   </aside>
@@ -612,14 +612,18 @@
           } else {
             bodyHtml = `<div class="accordion-body border-top border-light">`;
             quizzes.forEach(quiz => {
+              const actionBtn = quiz.isCompleted
+                ? `<span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i class="ti ti-check me-1"></i> Completed</span>`
+                : `<a href="/student/take-quiz?quizId=${quiz.id}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">Take Quiz</a>`;
+
               bodyHtml += `
-                   <div class="quiz-card-item d-flex align-items-center justify-content-between p-3 bg-white rounded-3 shadow-sm mb-2">
+                   <div class="quiz-card-item d-flex align-items-center justify-content-between p-3 bg-white rounded-3 shadow-sm mb-2 ${quiz.isCompleted ? 'opacity-75' : ''}">
                      <div>
                        <h5 class="fw-bold mb-1">${quiz.title}</h5>
                        <span class="small text-muted fw-semibold"><i class="ti ti-clock me-1"></i>${quiz.durationMinutes} mins</span>
                      </div>
                      <div class="text-end">
-                       <a href="/student/take-quiz?quizId=${quiz.id}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">Take Quiz</a>
+                       ${actionBtn}
                      </div>
                    </div>
               `;
@@ -651,6 +655,13 @@
             quizAccordion.innerHTML = `<div class="alert alert-danger m-3">${err.message}</div>`;
         }
       }
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('user_id');
+      window.location.href = '/signin';
     }
 
     // Call on load

@@ -249,7 +249,7 @@
   </div>
 
   <script>
-    const TOKEN_KEY = 'jwtToken';
+    const TOKEN_KEY = 'jwt_token';
     const USER_KEY = 'currentUser';
 
     function getToken() { return localStorage.getItem(TOKEN_KEY); }
@@ -263,6 +263,7 @@
     function logout() {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
+      localStorage.removeItem('user_id');
       window.location.href = '/signin';
     }
 

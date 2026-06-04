@@ -131,8 +131,13 @@ public class QuizController {
         
         List<QuizQuestionResponse> questions = quizService.getQuestions(quizId);
         
-        // Security Patch: Do not expose correct answers to students taking the quiz
-        if (currentUser.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("STUDENT") || a.getAuthority().equals("ROLE_STUDENT"))) {
+        // Security Patch: Only MENTORs and ADMINs can see the correct answers.
+        // If unauthenticated or STUDENT, strip the correct answers.
+        boolean isMentorOrAdmin = currentUser != null && currentUser.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("MENTOR") || a.getAuthority().equals("ROLE_MENTOR")
+                        || a.getAuthority().equals("ADMIN") || a.getAuthority().equals("ROLE_ADMIN"));
+        
+        if (!isMentorOrAdmin) {
             questions.forEach(q -> q.setCorrectAnswer(null));
         }
         

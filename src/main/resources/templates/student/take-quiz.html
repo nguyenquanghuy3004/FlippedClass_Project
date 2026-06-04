@@ -316,6 +316,8 @@
       }
     }
   </style>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -438,23 +440,43 @@
     // --- Fetch Quiz Data ---
     async function initQuiz() {
       try {
+        // --- 1. Check Previous Attempts ---
+        const attemptsRes = await fetch(`/api/quizzes/attempts/student/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (attemptsRes.ok) {
+          const attempts = await attemptsRes.json();
+          const hasAttempt = attempts.some(a => a.quizId == quizId);
+          if (hasAttempt) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Quiz Already Completed',
+              text: 'You have already submitted this quiz. You cannot take it again.',
+              confirmButtonText: 'Back to Dashboard'
+            }).then(() => {
+              window.location.href = '/student/dashboard';
+            });
+            return;
+          }
+        }
+
         // Fetch Quiz Info
-        const quizRes = await fetch(\`/api/quizzes/\${quizId}\`, {
-          headers: { 'Authorization': \`Bearer \${token}\` }
+        const quizRes = await fetch(`/api/quizzes/${quizId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!quizRes.ok) throw new Error('Failed to load quiz details.');
         const quizData = await quizRes.json();
         
         document.getElementById('quiz-title-display').innerText = quizData.title;
-        document.getElementById('quiz-topic-display').innerText = quizData.courseName ? \`Topic: \${quizData.courseName}\` : 'Topic: General';
+        document.getElementById('quiz-topic-display').innerText = quizData.courseName ? `Topic: ${quizData.courseName}` : 'Topic: General';
         
         // Start Timer
         timeRemaining = (quizData.durationMinutes || 30) * 60;
         startTimer();
 
         // Fetch Questions
-        const qRes = await fetch(\`/api/quizzes/\${quizId}/questions\`, {
-          headers: { 'Authorization': \`Bearer \${token}\` }
+        const qRes = await fetch(`/api/quizzes/${quizId}/questions`, {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!qRes.ok) throw new Error('Failed to load questions.');
         quizQuestions = await qRes.json();
@@ -481,7 +503,7 @@
         timeRemaining--;
         let m = Math.floor(timeRemaining / 60);
         let s = timeRemaining % 60;
-        countdownEl.innerText = \`\${m < 10 ? '0' : ''}\${m}:\${s < 10 ? '0' : ''}\${s}\`;
+        countdownEl.innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
       }, 1000);
     }
 
@@ -491,36 +513,43 @@
       
       quizQuestions.forEach((q, index) => {
         const qNum = index + 1;
-        let optionsArr = [];
+        let optionsMap = {};
         try {
-          optionsArr = JSON.parse(q.options || "[]");
+          const parsed = JSON.parse(q.options || "{}");
+          if (Array.isArray(parsed)) {
+            parsed.forEach((item, idx) => optionsMap[idx.toString()] = item);
+          } else if (typeof parsed === 'object' && parsed !== null) {
+            optionsMap = parsed;
+          } else {
+            optionsMap = { "Ans": q.options };
+          }
         } catch(e) {
-          optionsArr = [q.options];
+          optionsMap = { "Ans": q.options };
         }
 
         let optionsHtml = '';
-        optionsArr.forEach((opt, optIndex) => {
-          optionsHtml += \`
+        Object.entries(optionsMap).forEach(([optKey, optText]) => {
+          optionsHtml += `
             <label class="q-option">
-              <input type="radio" name="q\${q.id}" value="\${opt}" onchange="markAnswered(\${q.id})">
+              <input type="radio" name="q${q.id}" value="${optKey}" onchange="markAnswered(${q.id})">
               <div class="q-radio-custom"></div>
-              <div class="q-option-text">\${opt}</div>
+              <div class="q-option-text">${optText}</div>
             </label>
-          \`;
+          `;
         });
 
-        const qHtml = \`
-          <div class="edu-card q-card" id="q-card-\${q.id}">
+        const qHtml = `
+          <div class="edu-card q-card" id="q-card-${q.id}">
             <div class="q-header">
-              <div class="q-number">Question \${qNum}</div>
-              <div class="q-type">\${q.questionType === 'SINGLE_CHOICE' ? 'Single Choice' : q.questionType} (\${q.points} pts)</div>
+              <div class="q-number">Question ${qNum}</div>
+              <div class="q-type">${q.questionType === 'SINGLE_CHOICE' ? 'Single Choice' : q.questionType} (${q.points} pts)</div>
             </div>
-            <div class="q-text">\${q.content}</div>
+            <div class="q-text">${q.content}</div>
             <div class="q-options">
-              \${optionsHtml}
+              ${optionsHtml}
             </div>
           </div>
-        \`;
+        `;
         questionsContainer.insertAdjacentHTML('beforeend', qHtml);
       });
     }
@@ -546,10 +575,10 @@
 
     function updateProgress() {
       const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
-      document.getElementById('prog-p1').innerText = \`\${answeredCount}/\${totalQuestions}\`;
+      document.getElementById('prog-p1').innerText = `${answeredCount}/${totalQuestions}`;
       const pct = totalQuestions === 0 ? 0 : (answeredCount / totalQuestions) * 100;
-      document.getElementById('prog-pct-p1').innerText = \`\${Math.round(pct)}%\`;
-      document.getElementById('bar-p1').style.width = \`\${pct}%\`;
+      document.getElementById('prog-pct-p1').innerText = `${Math.round(pct)}%`;
+      document.getElementById('bar-p1').style.width = `${pct}%`;
     }
 
     function scrollToQuestion(questionId) {
@@ -564,13 +593,35 @@
     async function submitQuiz(autoSubmit = false) {
       const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
       if (!autoSubmit && answeredCount < totalQuestions) {
-        if (!confirm(\`You have only answered \${answeredCount} out of \${totalQuestions} questions. Are you sure you want to submit?\`)) return;
+        const result = await Swal.fire({
+          title: 'Are you sure?',
+          text: `You have only answered ${answeredCount} out of ${totalQuestions} questions. Do you really want to submit?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, submit it!'
+        });
+        
+        if (!result.isConfirmed) return;
+      } else if (!autoSubmit) {
+        const result = await Swal.fire({
+          title: 'Ready to submit?',
+          text: `You have answered all questions. Submit now?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, submit it!'
+        });
+        
+        if (!result.isConfirmed) return;
       }
 
       // Gather answers
       let answers = {};
       quizQuestions.forEach(q => {
-        const selected = document.querySelector(\`input[name="q\${q.id}"]:checked\`);
+        const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
         if (selected) {
           answers[q.id] = selected.value;
         }
@@ -582,11 +633,11 @@
       };
 
       try {
-        const res = await fetch(\`/api/quizzes/\${quizId}/attempts\`, {
+        const res = await fetch(`/api/quizzes/${quizId}/attempts`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': \`Bearer \${token}\`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(payload)
         });
@@ -597,12 +648,25 @@
         }
 
         const result = await res.json();
-        alert(\`Quiz Submitted Successfully!\\nYour Score: \${result.score}%\nCorrect Answers: \${result.correctAnswers}/\${result.totalQuestions}\`);
-        
         clearInterval(timerInterval);
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Quiz Submitted Successfully!',
+          html: `
+            <div class="text-center mt-3">
+               <h1 class="display-1 text-primary fw-bold mb-0">${result.score}%</h1>
+               <p class="text-muted mt-2">Correct Answers: <strong>${result.correctAnswers} / ${result.totalQuestions}</strong></p>
+            </div>
+          `,
+          confirmButtonText: 'Return to Dashboard',
+          confirmButtonColor: '#3085d6',
+          allowOutsideClick: false
+        });
+        
         window.location.href = '/student/dashboard';
       } catch (err) {
-        alert(err.message);
+        Swal.fire('Error', err.message, 'error');
       }
     }
 
