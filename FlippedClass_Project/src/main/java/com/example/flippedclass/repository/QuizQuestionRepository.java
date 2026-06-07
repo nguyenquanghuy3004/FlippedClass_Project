@@ -1,0 +1,15 @@
+package com.example.flippedclass.repository;
+
+import com.example.flippedclass.entity.QuizQuestion;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface QuizQuestionRepository extends JpaRepository<QuizQuestion, Long> {
+
+    List<QuizQuestion> findByQuizId(Long quizId);
+
+    long countByQuizId(Long quizId);
+
+    void deleteByQuizId(Long quizId);
+}
