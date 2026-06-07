@@ -41,7 +41,7 @@ public class User {
     private AuthProvider provider;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'ACTIVE'")
     @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 

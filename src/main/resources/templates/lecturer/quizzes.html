@@ -12,6 +12,7 @@
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" th:href="@{/assets/css/quizzes.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 
 <body>
@@ -30,12 +31,7 @@
       <ul class="list-unstyled d-flex align-items-center mb-0 gap-2">
         <li id="userInfoDisplay" class="d-flex align-items-center gap-2"
           style="font-size:0.85rem;font-weight:600;color:#374151;"></li>
-        <li class="ms-2">
-          <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="logout()" id="logoutBtn"
-            style="display:none;font-weight:600;">
-            <i class="ti ti-logout me-1"></i>Sign out
-          </button>
-        </li>
+
         <li class="ms-1 dropdown">
           <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-sm rounded-circle" id="userAvatar"
@@ -46,19 +42,25 @@
     </div>
   </nav>
 
-  <aside id="sidebar" class="sidebar">
+  <aside id="sidebar" class="sidebar d-flex flex-column">
     <div class="logo-area">
-      <a th:href="@{/}" class="d-inline-flex">
-        <img
-          src="data:image/svg+xml,%3csvg%20width='62'%20height='67'%20viewBox='0%200%2062%2067'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M30.604%2066.378L0.00805664%2048.1582V35.7825L30.604%2054.0023V66.378Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2048.1582L30.604%2066.378V54.0023L61.1996%2035.7825V48.1582Z'%20fill='%23E66239'/%3e%3cpath%20d='M30.5955%200L0%2018.2198V30.5955L30.5955%2012.3757V0Z'%20fill='%23657E92'/%3e%3cpath%20d='M61.191%2018.2198L30.5955%200V12.3757L61.191%2030.5955V18.2198Z'%20fill='%23A3B2BE'/%3e%3cpath%20d='M30.604%2048.8457L0.00805664%2030.6259V18.2498L30.604%2036.47V48.8457Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2030.6259L30.604%2048.8457V36.47L61.1996%2018.2498V30.6259Z'%20fill='%23E66239'/%3e%3c/svg%3e"
-          alt="" width="24">
-        <span class="logo-text ms-2"><img th:src="@{/assets/images/logo.svg}" alt=""></span>
+      <a href="/lecturer/dashboard" class="d-inline-flex">
+        <i class="fa-solid fa-chalkboard-user text-success fs-3"></i>
+        <span class="logo-text ms-2 fw-bold text-success fs-4"> FCMS Lecture</span>
       </a>
     </div>
-    <ul class="nav flex-column">
-      <li class="px-4 py-2"><small class="nav-text">Lecturer</small></li>
-      <li><a class="nav-link active" th:href="@{/lecturer/quizzes}"><i class="ti ti-brain"></i><span class="nav-text">My
-            Quizzes</span></a></li>
+    <ul class="nav flex-column mb-auto">
+      <li class="px-4 py-2"><small class="nav-text">Workspace</small></li>
+      <li>
+        <a class="nav-link" href="/lecturer/dashboard">
+          <i class="ti ti-box-seam"></i><span class="nav-text">My Spaces</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link active" href="/lecturer/quizzes">
+          <i class="ti ti-checklist"></i><span class="nav-text">My Quizzes</span>
+        </a>
+      </li>
     </ul>
   </aside>
 
@@ -285,7 +287,6 @@
       }
       const user = getUser();
       document.getElementById('mainUI').classList.remove('d-none');
-      document.getElementById('logoutBtn').style.display = 'inline-flex';
       if (user) {
         document.getElementById('userAvatar').style.display = 'inline-block';
         document.getElementById('userInfoDisplay').innerHTML =
