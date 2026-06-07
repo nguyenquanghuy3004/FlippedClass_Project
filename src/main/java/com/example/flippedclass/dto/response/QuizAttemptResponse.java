@@ -17,4 +17,5 @@ public class QuizAttemptResponse {
     private Integer totalQuestions;
     private Integer correctAnswers;
     private LocalDateTime submittedAt;
+    private LocalDateTime startedAt;
 }

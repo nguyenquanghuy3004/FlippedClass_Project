@@ -17,8 +17,7 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-//    @Value("${flippedclass.app.googleClientId}")
-//    private String googleClientId;
+
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {

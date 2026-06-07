@@ -55,9 +55,17 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private static final String[] PUBLIC_URLS = {"/swagger", "/swagger-ui/**", "/swagger-ui.html",
-            "/api-docs", "/api-docs/**", "/v3/api-docs/**",
-            "/google-test.html", "/error", "/uploads/**"
+    private static final String[] PUBLIC_URLS = {
+            // Swagger & API Docs
+            "/swagger", "/swagger-ui/**", "/swagger-ui.html", "/api-docs", "/api-docs/**", "/v3/api-docs/**", "/docs",
+            // Static Resources & Public Files
+            "/css/**", "/js/**", "/images/**", "/assets/**", "/uploads/**", "/error", "/404-error", "/google-test.html", "/favicon.ico",
+            // Public APIs
+            "/api/quizzes/**", "/api/question-bank/**",
+            // Public UI Pages (Authentication, Landing, etc.)
+            "/", "/index", "/login", "/register", "/signin", "/signup", 
+            // Feature UI Routes (Bypass JWT for HTML load)
+            "/inventory", "/create-product", "/reports", "/lecturer/**", "/student/**", "/admin/**", "/mentor/**"
     };
 
     @Bean
@@ -74,8 +82,7 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()

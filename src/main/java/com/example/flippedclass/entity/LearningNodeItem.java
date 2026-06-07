@@ -17,7 +17,6 @@ public class LearningNodeItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @org.hibernate.annotations.Nationalized
     @Column(nullable = false)
     private String title;
 

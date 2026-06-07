@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
+<head>
+    <title>Learning Path Roadmap</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <input type="hidden" id="spaceId" th:value="${spaceId}" />
+        
+        <div class="container-fluid py-4">
+            <!-- Classroom Style Tabs -->
+            <ul class="nav nav-tabs mb-4 border-bottom-0 gap-3 fw-bold" style="font-size: 0.95rem;">
+                <li class="nav-item">
+                    <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/dashboard" style="transition: color 0.2s;"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active text-primary border-0 border-bottom border-primary border-3 pb-3 px-3" href="#" style="color: #1a73e8 !important; border-color: #1a73e8 !important;">Classwork / Roadmap</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/space-members">People</a>
+                </li>
+            </ul>
+
+            <!-- Classroom Banner -->
+            <div class="classroom-banner rounded-4 mb-5 position-relative overflow-hidden shadow-sm" style="background-color: #1a73e8; background: linear-gradient(135deg, #10b981 0%, #047857 100%); height: 240px; display: flex; align-items: flex-end;">
+                <!-- Decorative SVG Pattern -->
+                <div class="position-absolute top-0 end-0 h-100 w-50" style="opacity: 0.15; background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
+                <div class="position-absolute bottom-0 end-0 p-3 opacity-25">
+                    <i class="ti ti-code text-white" style="font-size: 15rem; transform: rotate(-15deg) translateY(30px) translateX(20px);"></i>
+                </div>
+                
+                <div class="p-4 p-md-5 z-1 w-100">
+                    <h1 class="fs-1 fw-bold text-white mb-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Java Backend Mastery</h1>
+                    <p class="fs-5 text-white mb-0" style="opacity: 0.9;">ADVANCED SPECIALIZATION / SPRING BOOT 3</p>
+                </div>
+            </div>
+
+            <!-- Content Layout -->
+            <div class="row g-4">
+                <!-- Left Column (Stats / Upcoming style) -->
+                <div class="col-lg-3">
+                    <div class="card border border-light shadow-sm rounded-4 mb-4">
+                        <div class="card-body p-3">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2"><i class="ti ti-chart-pie text-primary"></i> Course Stats</h6>
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="text-muted small fw-semibold">MODULES</span>
+                                <span class="badge bg-light text-dark border fs-6" id="totalModules">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center py-2">
+                                <span class="text-muted small fw-semibold">LESSONS</span>
+                                <span class="badge bg-light text-dark border fs-6" id="totalLessons">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-0 shadow-sm rounded-4 border-start border-warning border-4" style="background-color: #fdfaf6;">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold mb-2 text-dark d-flex align-items-center gap-2" style="font-size: 0.9rem;">
+                                <i class="ti ti-bulb text-warning fs-5"></i> Mentor Tip
+                            </h6>
+                            <p class="text-muted mb-0" style="font-size: 0.85rem; line-height: 1.5;">
+                                Organize your modules sequentially. Drag and drop to rearrange the syllabus at any time.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column (Roadmap Stream) -->
+                <div class="col-lg-9">
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-wrap gap-2 mb-4 align-items-center bg-white p-3 rounded-4 shadow-sm border border-light">
+                        <button class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-semibold d-flex align-items-center gap-2" style="background-color: #1a73e8; border-color: #1a73e8;" data-bs-toggle="modal" data-bs-target="#createModuleModal">
+                            <i class="ti ti-plus fs-5"></i> New Module
+                        </button>
+                        <button class="btn btn-light rounded-pill px-4 py-2 border shadow-sm fw-semibold text-secondary d-flex align-items-center gap-2" id="btnOpenTrash" data-bs-toggle="modal" data-bs-target="#trashModal">
+                            <i class="ti ti-archive fs-5"></i> Trash
+                        </button>
+                        
+                        <div class="ms-auto d-flex gap-2 align-items-center">
+                            <button class="btn btn-danger-subtle text-danger rounded-pill px-4 py-2 shadow-sm fw-semibold border border-danger-subtle d-flex align-items-center gap-2" id="btnDeleteAll">
+                                <i class="ti ti-trash fs-5"></i> Delete All
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="roadmapContent" class="mb-5">
+                        <div th:if="${paths.empty}" class="text-center py-5 text-muted bg-white rounded-4 shadow-sm border border-light">
+                            <i class="ti ti-map fs-1 d-block mb-3 text-secondary"></i>
+                            <p class="mb-0">No modules created yet.<br>Click "+ New Module" to start building the roadmap.</p>
+                        </div>
+
+                        <div th:each="path, iterStat : ${paths}" class="d-flex mb-4 position-relative">
+                            <!-- Timeline Indicator -->
+                            <div class="timeline-indicator d-flex flex-column align-items-center me-4" 
+                                 style="width: 48px; position: relative;">
+                                <div class="badge rounded-circle d-flex align-items-center justify-content-center" 
+                                     th:style="'width: 48px; height: 48px; '
+                                     + 'border: 2px solid ' + (${path.status == 'PUBLISHED'} ? '#e2e8f0' : '#6366f1') + '; '
+                                     + 'background: ' + (${path.status == 'PUBLISHED'} ? 'white' : '#6366f1') + '; '
+                                     + 'color: ' + (${path.status == 'PUBLISHED'} ? '#475569' : 'white') + '; '
+                                     + 'font-size: 1.1rem; font-weight: bold; z-index: 1;'">
+                                    <span th:text="${iterStat.count < 10 ? '0' + iterStat.count : iterStat.count}"></span>
+                                </div>
+                                <div th:if="${!iterStat.last}" 
+                                     class="timeline-line bg-light position-absolute" 
+                                     style="width: 2px; height: calc(100% + 1.5rem); top: 48px; left: 23px; z-index: 0;"></div>
+                            </div>
+                            
+                            <!-- Card Content -->   
+                            <div th:class="'card flex-fill shadow-sm rounded-4 ' + (${path.status == 'PUBLISHED'} ? 'border' : 'border-primary')" 
+                                 style="background: white;">
+                                <div class="card-header bg-white border-bottom-0 pt-4 pb-3 px-4 d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+                                            <i class="ti ti-grid-dots text-muted cursor-pointer fs-5"></i> 
+                                            <span th:text="${path.title}">Title</span>
+                                        </h5>
+                                        <p class="text-muted mb-0 small ms-4 ps-2" 
+                                           th:text="${path.description} ?: 'base'">description</p>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span th:if="${path.status == 'PUBLISHED'}" 
+                                              class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-bold text-uppercase" 
+                                              style="font-size: 0.7rem; letter-spacing: 0.5px;">Published</span>
+                                        <span th:if="${path.status != 'PUBLISHED'}" 
+                                              class="badge bg-primary text-white rounded-pill px-3 py-1 fw-bold text-uppercase" 
+                                              style="font-size: 0.7rem; letter-spacing: 0.5px;">In Progress</span>
+                                        
+                                        <i class="ti ti-chevron-down text-muted cursor-pointer fs-5"></i>
+                                        <div class="dropdown">
+                                            <button class="btn btn-light btn-sm rounded-circle bg-transparent border-0 p-0" 
+                                                    data-bs-toggle="dropdown">
+                                                <i class="ti ti-dots-vertical text-muted fs-5"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                                                <li>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 edit-path-btn" 
+                                                       href="#" 
+                                                       th:data-id="${path.id}" 
+                                                       th:data-title="${path.title}" 
+                                                       th:data-description="${path.description}">
+                                                        <i class="ti ti-pencil"></i> Edit
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 text-warning archive-path-btn" 
+                                                       href="#" th:data-id="${path.id}">
+                                                        <i class="ti ti-archive"></i> Archive to Trash
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 text-danger delete-path-btn" 
+                                                       href="#" th:data-id="${path.id}">
+                                                        <i class="ti ti-trash"></i> Delete Permanently
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center mb-3">
+                                    <span class="text-muted" style="font-size: 0.85rem;">
+                                        Week <span th:text="${iterStat.count}">1</span> &middot; 
+                                        <span th:text="${path.nodes != null ? path.nodes.size() : 0}">0</span> lessons
+                                    </span>
+                                </div>
+                                
+                                <div class="card-body px-4 pb-4 pt-0">
+                                    <div th:if="${path.nodes != null and !path.nodes.empty}" 
+                                         class="nodes-container px-3 px-md-4">
+                                        <th:block th:each="node : ${path.nodes}">
+                                            <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
+                                        </th:block>
+                                    </div>
+                                    
+                                    <div th:if="${path.nodes == null or path.nodes.empty}" 
+                                         class="border rounded-4 p-5 mb-4 text-center shadow-sm" 
+                                         style="border-style: dashed !important; background-color: #f8fafc; border-color: #cbd5e1 !important;">
+                                        <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-3" style="width: 64px; height: 64px;">
+                                            <i class="ti ti-folder-open text-primary" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-1" style="color: #334155;">This module is empty</h6>
+                                        <p class="text-muted small mb-0">Click the Add button below to create your first lesson.</p>
+                                    </div>
+                                    
+                                    <div class="border rounded-4 p-3 text-center shadow-sm create-node-btn mt-2" 
+                                         th:data-pathid="${path.id}" 
+                                         style="border-style: dashed !important; border-color: #cbd5e1 !important; background-color: white; cursor: pointer; transition: all 0.2s;" 
+                                         onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#94a3b8';" 
+                                         onmouseout="this.style.background='white'; this.style.borderColor='#cbd5e1';">
+                                        <span class="fw-bold text-primary d-flex align-items-center justify-content-center gap-2" style="font-size: 0.95rem;">
+                                            <i class="ti ti-plus fs-5"></i> Add New Lesson
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Module Modal -->
+        <div class="modal fade" id="createModuleModal" tabindex="-1" aria-labelledby="createModuleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title fw-bold" id="createModuleModalLabel">Create New Module</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createModuleForm">
+                            <div class="mb-3">
+                                <label for="moduleTitle" class="form-label fw-bold">Title</label>
+                                <input type="text" class="form-control bg-light border-0" id="moduleTitle" required minlength="1" maxlength="255">
+                            </div>
+                            <div class="mb-3">
+                                <label for="moduleDescription" class="form-label fw-bold">Description</label>
+                                <textarea class="form-control bg-light border-0" id="moduleDescription" rows="3" maxlength="1000"></textarea>
+                            </div>
+                            <div id="createModuleError" class="text-danger mb-3" style="display:none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnSaveModule" style="background-color: #6366f1; border-color: #6366f1;">Create Module</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Module Modal -->
+        <div class="modal fade" id="editModuleModal" tabindex="-1" aria-labelledby="editModuleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title fw-bold" id="editModuleModalLabel">Edit Module</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editModuleForm">
+                            <input type="hidden" id="editModuleId">
+                            <div class="mb-3">
+                                <label for="editModuleTitle" class="form-label fw-bold">Title</label>
+                                <input type="text" class="form-control bg-light border-0" id="editModuleTitle" required minlength="1" maxlength="255">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editModuleDescription" class="form-label fw-bold">Description</label>
+                                <textarea class="form-control bg-light border-0" id="editModuleDescription" rows="3" maxlength="1000"></textarea>
+                            </div>
+                            <div id="editModuleError" class="text-danger mb-3" style="display:none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnUpdateModule" style="background-color: #6366f1; border-color: #6366f1;">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Node Modals Fragment -->
+        <div th:replace="~{lecturer/learningNode :: nodeModals}"></div>
+
+        <!-- Trash Modal -->
+        <div class="modal fade" id="trashModal" tabindex="-1" aria-labelledby="trashModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-bottom-0 bg-light">
+                        <h5 class="modal-title fw-bold text-danger" id="trashModalLabel"><i class="ti ti-trash"></i> Trash Bin (Modules)</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="list-group list-group-flush" id="trashList">
+                            <!-- Trashed modules will be injected here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 bg-light">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/assets/js/lecturer/learning-path.js}"></script>
+        <script th:src="@{/assets/js/lecturer/learning-node.js}"></script>
+    </th:block>
+</body>
+</html>

@@ -30,8 +30,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .learningPath(learningPath)
-                // .positionX(request.getPositionX())
-                // .positionY(request.getPositionY())
                 .status("ACTIVE")
                 .nodeType(request.getNodeType() != null ? request.getNodeType() : "VIDEO")
                 .build();
@@ -67,7 +65,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
         node.setTitle(request.getTitle());
         node.setDescription(request.getDescription());
-
 
 
         if (request.getNodeType() != null) {

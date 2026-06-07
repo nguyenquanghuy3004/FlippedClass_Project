@@ -184,7 +184,7 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Override
     public List<LearningPathResponse> getDeletedLearningPaths(Long spaceId) {
         return learningPathRepository
-                .findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.DELETED)
+                .findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.ARCHIVED)
                 .stream()
                 .map(this::toResponse)
                 .toList();

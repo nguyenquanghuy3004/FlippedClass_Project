@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{admin/layout}">
+<head>
+    <title>System Settings</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="admin-card">
+            <h5 class="fw-bold mb-4">System Configurations</h5>
+            
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th width="25%">Config Key</th>
+                            <th width="35%">Value</th>
+                            <th width="30%">Description</th>
+                            <th width="10%">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="configs-table-body">
+                        <!-- Loaded via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <hr class="my-4 border-secondary opacity-25">
+            <h6 class="fw-bold mb-3">Add / Update Configuration</h6>
+            <form id="config-form" class="row g-3">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="configKey" placeholder="Config Key (e.g. MAX_UPLOAD_SIZE)" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="configValue" placeholder="Config Value" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="configDesc" placeholder="Description">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn-custom w-100">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            $(document).ready(function() {
+                loadConfigs();
+                
+                $('#config-form').submit(function(e) {
+                    e.preventDefault();
+                    saveConfig();
+                });
+            });
+
+            function loadConfigs() {
+                $.ajax({
+                    url: '/api/admin/configs',
+                    method: 'GET',
+                    success: function(configs) {
+                        let html = '';
+                        configs.forEach(config => {
+                            html += `
+                                <tr>
+                                    <td class="fw-bold text-info">${config.configKey}</td>
+                                    <td>${config.configValue}</td>
+                                    <td class="text-muted small">${config.description || ''}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editConfig('${config.configKey}', '${config.configValue}', '${config.description || ''}')">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        $('#configs-table-body').html(html);
+                    }
+                });
+            }
+
+            function editConfig(key, value, desc) {
+                $('#configKey').val(key);
+                $('#configValue').val(value);
+                $('#configDesc').val(desc);
+            }
+
+            function saveConfig() {
+                const key = $('#configKey').val().trim();
+                const dto = {
+                    configValue: $('#configValue').val().trim(),
+                    description: $('#configDesc').val().trim()
+                };
+                
+                if(!key) return;
+                
+                $.ajax({
+                    url: `/api/admin/configs/${key}`,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dto),
+                    success: function() {
+                        alert('Configuration saved successfully');
+                        $('#config-form')[0].reset();
+                        loadConfigs();
+                    },
+                    error: function() {
+                        alert('Failed to save configuration');
+                    }
+                });
+            }
+        </script>
+    </th:block>
+</body>
+</html>

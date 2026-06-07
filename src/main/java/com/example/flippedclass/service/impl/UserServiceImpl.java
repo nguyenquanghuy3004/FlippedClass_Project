@@ -4,6 +4,7 @@ import com.example.flippedclass.dto.request.CreateUserRequest;
 import com.example.flippedclass.dto.response.UserResponse;
 import com.example.flippedclass.entity.Role;
 import com.example.flippedclass.entity.User;
+import com.example.flippedclass.enums.RoleName;
 import com.example.flippedclass.exception.BusinessException;
 import com.example.flippedclass.exception.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.flippedclass.repository.RoleRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.UserService;
+
 
 import java.util.List;
 import java.util.Set;
@@ -43,8 +45,11 @@ public class UserServiceImpl implements UserService {
         Set<String> roleNames = request.getRoles().stream()
                 .map(String::toUpperCase)
                 .collect(Collectors.toSet());
-        Set<Role> roles = roleRepository.findByNameIn(roleNames);
-        if (roles.size() != roleNames.size()) {
+        Set<RoleName> roleEnums = roleNames.stream()
+                .map(RoleName::valueOf)
+                .collect(Collectors.toSet());
+        Set<Role> roles = roleRepository.findByNameIn(roleEnums);
+        if (roles.size() != roleEnums.size()) {
             Set<String> found = roles.stream().map(r -> r.getName().name()).collect(Collectors.toSet());
             Set<String> missing = roleNames.stream().filter(r -> !found.contains(r)).collect(Collectors.toSet());
             throw new BusinessException("Roles not found: " + missing);
@@ -86,7 +91,7 @@ public class UserServiceImpl implements UserService {
 
     static UserResponse toResponse(User user) {
         Set<String> roleNames = user.getRoles().stream()
-                .map(r -> r.getName().name())
+                .map(role -> role.getName().name())
                 .collect(Collectors.toSet());
         return UserResponse.builder()
                 .id(user.getId())

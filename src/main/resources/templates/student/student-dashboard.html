@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Bảng điều khiển sinh viên - FlippedClass</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+
+  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
+  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+
+  <!-- AUTHENTICATION GUARD -->
+  <script>
+    if (!localStorage.getItem('jwt_token')) {
+      window.location.href = '/login';
+    }
+  </script>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&display=swap");
+
+    :root {
+      --fc-primary: #5bc760;
+      --fc-primary-dark: #2f855a;
+      --fc-primary-soft: #e8f8ea;
+      --fc-text: #1f2937;
+      --fc-muted: #6b7280;
+      --fc-background: #f7faf8;
+      --fc-card: #ffffff;
+      --fc-border: #e5e7eb;
+      --fc-shadow-sm: 0 10px 24px rgba(31, 41, 55, 0.08);
+      --fc-shadow-md: 0 22px 55px rgba(31, 41, 55, 0.12);
+      --bs-primary: #2f855a;
+      --bs-primary-rgb: 47, 133, 90;
+      --bs-success: #5bc760;
+      --bs-success-rgb: 91, 199, 96;
+    }
+
+    body {
+      color: var(--fc-text);
+      background:
+              radial-gradient(circle at top left, rgba(91, 199, 96, 0.18), transparent 32rem),
+              linear-gradient(180deg, #ffffff 0%, var(--fc-background) 48%, #ffffff 100%);
+      font-family: "Lexend", "Trebuchet MS", sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .topbar {
+      border-color: rgba(229, 231, 235, 0.85) !important;
+      background: rgba(255, 255, 255, 0.92) !important;
+      backdrop-filter: blur(18px);
+      box-shadow: var(--fc-shadow-sm) !important;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--fc-border);
+      background: rgba(255, 255, 255, 0.96) !important;
+    }
+
+    .sidebar .logo-area {
+      border-color: var(--fc-border) !important;
+    }
+
+    .sidebar .nav {
+      min-height: calc(100vh - 72px - 1.5rem);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar .nav > li.mt-auto {
+      margin-top: auto !important;
+    }
+
+    .sidebar .logo-area .bg-primary {
+      background: linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary)) !important;
+      box-shadow: 0 12px 24px rgba(47, 133, 90, 0.18);
+    }
+
+    .sidebar .logo-text .text-primary,
+    .text-primary {
+      color: var(--fc-primary-dark) !important;
+    }
+
+    .sidebar .nav-link {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--fc-muted) !important;
+      font-weight: 700 !important;
+      transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+    }
+
+    .sidebar .nav-link i,
+    .sidebar .nav-link .nav-text {
+      color: inherit;
+      font-weight: inherit;
+    }
+
+    .sidebar .nav-link:hover {
+      color: var(--fc-primary-dark) !important;
+      background: var(--fc-primary-soft) !important;
+      transform: translateX(2px);
+    }
+
+    .sidebar .nav-link.active {
+      color: var(--fc-primary-dark) !important;
+      background: var(--fc-primary-soft) !important;
+      font-weight: 900 !important;
+      box-shadow: inset 0 0 0 1px rgba(47, 133, 90, 0.12);
+    }
+
+    .sidebar .nav-link.active i,
+    .sidebar .nav-link.active .nav-text {
+      color: var(--fc-primary-dark) !important;
+      font-weight: 900 !important;
+    }
+
+    .sidebar .nav-link.active::before {
+      content: "";
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      width: 4px;
+      height: 46%;
+      border-radius: 999px;
+      background: var(--fc-primary-dark);
+      transform: translateY(-50%);
+    }
+
+    .student-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.35rem 0.75rem 0.35rem 0.4rem;
+      border: 1px solid rgba(229, 231, 235, 0.95);
+      border-radius: 999px;
+      background: #ffffff;
+      box-shadow: 0 8px 18px rgba(31, 41, 55, 0.06);
+      color: var(--fc-text);
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .student-chip img {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      object-fit: cover;
+    }
+
+    .bg-danger,
+    .badge.bg-danger {
+      background-color: var(--fc-primary-dark) !important;
+    }
+
+    .text-danger {
+      color: var(--fc-primary-dark) !important;
+    }
+
+    .bg-danger-subtle,
+    .sidebar .bg-danger-subtle {
+      background: var(--fc-primary-soft) !important;
+    }
+
+    .bento-card {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      padding: 2rem;
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: var(--fc-shadow-sm);
+      transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    }
+
+    .bento-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(91, 199, 96, 0.24);
+      box-shadow: var(--fc-shadow-md);
+    }
+
+    .profile-bento {
+      color: #ffffff;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+              radial-gradient(circle at 16% 12%, rgba(255, 255, 255, 0.24), transparent 16rem),
+              linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary));
+    }
+
+    .profile-avatar-container {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .massive-avatar {
+      width: 160px;
+      height: 160px;
+      border: 6px solid rgba(255, 255, 255, 0.34);
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 18px 36px rgba(31, 41, 55, 0.22);
+      transition: transform 220ms ease, border-color 220ms ease;
+    }
+
+    .massive-avatar:hover {
+      transform: scale(1.04);
+      border-color: rgba(255, 255, 255, 0.64);
+    }
+
+    .status-dot {
+      position: absolute;
+      right: 15px;
+      bottom: 10px;
+      width: 24px;
+      height: 24px;
+      border: 4px solid var(--fc-primary-dark);
+      border-radius: 50%;
+      background-color: #9ef6a2;
+      box-shadow: 0 0 16px rgba(158, 246, 162, 0.7);
+    }
+
+    .profile-name {
+      margin-bottom: 0.25rem;
+      font-size: 1.75rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .profile-major {
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
+
+    .dashboard-hero-grid {
+      --hero-card-radius: 22px;
+    }
+
+    .dashboard-hero-grid .bento-card {
+      padding: 1.25rem;
+      border-radius: var(--hero-card-radius);
+    }
+
+    .dashboard-hero-grid .profile-bento {
+      justify-content: flex-start;
+      min-height: 100%;
+    }
+
+    .dashboard-hero-grid .profile-avatar-container {
+      margin-top: 0 !important;
+      margin-bottom: 0.8rem;
+    }
+
+    .dashboard-hero-grid .massive-avatar {
+      width: 112px;
+      height: 112px;
+      border-width: 5px;
+    }
+
+    .dashboard-hero-grid .status-dot {
+      right: 9px;
+      bottom: 7px;
+      width: 18px;
+      height: 18px;
+      border-width: 3px;
+    }
+
+    .dashboard-hero-grid .profile-name {
+      font-size: 1.45rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .dashboard-hero-grid .profile-major {
+      max-width: 260px;
+      margin-bottom: 0.9rem;
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .dashboard-hero-grid .profile-actions {
+      margin-top: 0.9rem !important;
+    }
+
+    .dashboard-hero-grid .profile-actions .btn {
+      padding: 0.55rem 0.85rem;
+      font-size: 0.86rem;
+    }
+
+    .dashboard-hero-grid .profile-meta-card {
+      margin-top: 1.15rem !important;
+      padding: 0.9rem !important;
+      border-radius: 18px !important;
+    }
+
+    .dashboard-hero-grid .profile-meta-card .fs-4 {
+      font-size: 1.12rem !important;
+    }
+
+    .dashboard-hero-grid .welcome-card {
+      min-height: 150px;
+      padding: 1.5rem 1.7rem !important;
+    }
+
+    .dashboard-hero-grid .welcome-card h1 {
+      font-size: clamp(1.75rem, 3vw, 2.35rem);
+      line-height: 1.08;
+    }
+
+    .dashboard-hero-grid .welcome-card p {
+      font-size: 1rem !important;
+    }
+
+    .dashboard-hero-grid .welcome-icon {
+      font-size: 3rem !important;
+    }
+
+    .dashboard-hero-grid .student-stat-card {
+      min-height: 150px;
+      padding: 1.15rem !important;
+    }
+
+    .dashboard-hero-grid .student-stat-card .stat-icon-bg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 0.65rem !important;
+      border-radius: 16px;
+      font-size: 1.35rem;
+    }
+
+    .dashboard-hero-grid .student-stat-card .stat-value {
+      margin-bottom: 0.25rem;
+      font-size: 2.2rem;
+    }
+
+    .dashboard-hero-grid .student-stat-card .stat-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.07em;
+    }
+
+    .stat-value {
+      margin-bottom: 0.5rem;
+      font-size: 3rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      background: linear-gradient(45deg, var(--fc-primary-dark), var(--fc-primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      color: var(--fc-muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stat-icon-bg,
+    .course-icon-wrapper {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 20px;
+      color: var(--fc-primary-dark) !important;
+      background: var(--fc-primary-soft) !important;
+      font-size: 1.8rem;
+    }
+
+    .course-card {
+      min-height: 100%;
+      padding: 1.5rem;
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      border-radius: 24px;
+      background: #ffffff;
+      box-shadow: var(--fc-shadow-sm);
+      cursor: pointer;
+      transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    }
+
+    .course-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(91, 199, 96, 0.28);
+      box-shadow: var(--fc-shadow-md);
+    }
+
+    .course-title {
+      color: var(--fc-text);
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-track {
+      height: 8px;
+      overflow: hidden;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 10px;
+      background: #edf5ef;
+    }
+
+    .progress-fill {
+      height: 100%;
+      position: relative;
+      border-radius: 10px;
+    }
+
+    .progress-fill.bg-primary,
+    .progress-fill.bg-success,
+    .progress-fill.bg-info,
+    .progress-fill.bg-warning {
+      background: linear-gradient(90deg, var(--fc-primary-dark), var(--fc-primary)) !important;
+    }
+
+    .progress-fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 10px;
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.42), rgba(255,255,255,0));
+      animation: shimmer 2s infinite;
+    }
+
+    .btn-primary,
+    .btn-success,
+    .btn-danger,
+    .btn-warning {
+      color: #ffffff !important;
+      border-color: var(--fc-primary-dark) !important;
+      background: var(--fc-primary-dark) !important;
+      box-shadow: 0 12px 24px rgba(47, 133, 90, 0.22);
+    }
+
+    .btn-primary:hover,
+    .btn-success:hover,
+    .btn-danger:hover,
+    .btn-warning:hover {
+      background: #256c49 !important;
+      border-color: #256c49 !important;
+    }
+
+    .btn-dark {
+      border-color: var(--fc-primary-dark) !important;
+      background: var(--fc-primary-dark) !important;
+    }
+
+    .btn-outline-dark {
+      color: var(--fc-primary-dark) !important;
+      border-color: rgba(47, 133, 90, 0.36) !important;
+    }
+
+    .btn-outline-dark:hover {
+      color: #ffffff !important;
+      background: var(--fc-primary-dark) !important;
+    }
+
+    .bg-primary-subtle,
+    .bg-success-subtle,
+    .bg-info-subtle,
+    .bg-warning-subtle {
+      background: var(--fc-primary-soft) !important;
+    }
+
+    .text-success,
+    .text-info,
+    .text-warning {
+      color: var(--fc-primary-dark) !important;
+    }
+
+    .notification-trigger {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--fc-primary-soft);
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .notification-trigger:hover,
+    .notification-trigger.show {
+      background: #d9f4dc;
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(47, 133, 90, 0.14);
+    }
+
+    .notification-menu {
+      width: min(360px, calc(100vw - 2rem));
+      overflow: hidden;
+      border-radius: 22px;
+      box-shadow: var(--fc-shadow-md) !important;
+    }
+
+    .notification-list {
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .notification-item {
+      display: block;
+      padding: 1rem 1.15rem;
+      color: var(--fc-text);
+      text-decoration: none;
+      border-top: 1px solid var(--fc-border);
+      background: #ffffff;
+      transition: background 160ms ease;
+    }
+
+    .notification-item:hover {
+      color: var(--fc-primary-dark);
+      background: var(--fc-primary-soft);
+    }
+
+    .quiz-accordion .accordion-item {
+      overflow: hidden;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(229, 231, 235, 0.9) !important;
+      border-radius: 20px !important;
+      background: #ffffff;
+      transition: box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .quiz-accordion .accordion-item:hover {
+      border-color: rgba(91, 199, 96, 0.24) !important;
+      box-shadow: var(--fc-shadow-sm);
+    }
+
+    .quiz-accordion .accordion-button {
+      border-radius: 20px !important;
+      padding: 1.25rem 1.5rem;
+      color: var(--fc-text);
+      box-shadow: none !important;
+    }
+
+    .quiz-accordion .accordion-button:not(.collapsed) {
+      color: var(--fc-primary-dark);
+      background: var(--fc-primary-soft) !important;
+    }
+
+    .quiz-accordion .accordion-body {
+      padding: 1.5rem;
+      background: #ffffff;
+    }
+
+    .quiz-card-item {
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .quiz-card-item:hover {
+      transform: translateX(4px);
+      border-color: rgba(91, 199, 96, 0.24);
+      box-shadow: var(--fc-shadow-sm) !important;
+    }
+
+    #myQuizSection {
+      scroll-margin-top: 96px;
+    }
+  </style>
+</head>
+
+<body>
+<div id="overlay" class="overlay"></div>
+
+<!-- TOPBAR -->
+<nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.9) !important;">
+  <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+    <i class="ti ti-layout-sidebar-left-expand"></i>
+  </button>
+  <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+    <i class="ti ti-layout-sidebar-left-expand"></i>
+  </button>
+
+  <div class="d-flex align-items-center w-100 justify-content-between">
+    <div class="d-none d-md-block">
+      <h5 class="mb-0 fw-bold text-dark ms-2" style="letter-spacing: -0.5px;">Cổng sinh viên <span class="badge bg-primary-subtle text-primary ms-2 rounded-pill">Học tập</span></h5>
+    </div>
+    <ul class="list-unstyled d-flex align-items-center mb-0 gap-3">
+      <!-- Notification Bell -->
+      <li class="dropdown">
+        <button class="notification-trigger position-relative text-secondary d-flex align-items-center justify-content-center border-0"
+                type="button"
+                id="notificationDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-label="Thông báo quiz cần làm">
+          <i class="ti ti-bell-ringing fs-5 text-dark"></i>
+          <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm d-none">0</span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end notification-menu p-0 border-0" aria-labelledby="notificationDropdown">
+          <div class="p-3 border-bottom bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <h6 class="fw-900 text-dark mb-1">Thông báo</h6>
+                <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Đang tải thông báo...</p>
+              </div>
+              <i class="ti ti-bell text-primary fs-4"></i>
+            </div>
+          </div>
+          <div id="notificationList" class="notification-list">
+            <div class="text-center text-muted py-4 px-3">
+              <div class="spinner-border text-primary mb-2" role="status"></div>
+              <p class="small fw-semibold mb-0">Đang tải quiz cần làm...</p>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="dropdown">
+        <div class="student-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+          <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh đại diện sinh viên">
+          <span id="studentNameTop">Sinh viên</span>
+        </div>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+          <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>Đăng xuất</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm">
+  <div class="logo-area border-bottom border-light">
+    <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
+      <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2">
+        <i class="ti ti-book-2 fs-3"></i>
+      </div>
+      <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">Flipped<span class="text-primary">Class</span></span>
+    </a>
+  </div>
+  <ul class="nav flex-column mt-4">
+    <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4" th:href="@{/student/dashboard}" data-nav-key="dashboard" aria-current="page"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Tổng quan</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Lớp của tôi</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
+
+  </ul>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main id="content" class="content py-10">
+  <div class="container-fluid px-xl-5">
+
+    <!-- BENTO GRID -->
+    <div class="row g-3 mb-4 dashboard-hero-grid">
+
+      <!-- 1. MASSIVE PROFILE (Left side, takes up 4 columns on large screens) -->
+      <div class="col-xl-4 col-lg-5">
+        <div class="bento-card profile-bento">
+          <div class="profile-avatar-container mt-3">
+            <!-- MASSIVE AVATAR FOR DETAIL VIEW -->
+            <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh đại diện sinh viên" class="massive-avatar" />
+            <div class="status-dot"></div>
+          </div>
+
+          <h2 class="profile-name" id="profileName">Đang tải...</h2>
+          <p class="profile-major" id="profileSummary">Đang tải hồ sơ sinh viên...</p>
+
+          <div class="w-100 mt-4 d-flex gap-2 profile-actions">
+            <a href="#" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm">Chỉnh hồ sơ</a>
+            <a href="#" class="btn btn-outline-light rounded-pill w-100 fw-bold">Xem chi tiết</a>
+          </div>
+
+          <div class="mt-5 w-100 bg-white bg-opacity-10 rounded-4 p-3 d-flex justify-content-around profile-meta-card">
+            <div>
+              <div class="fs-4 fw-bold" id="profileStudentCode">--</div>
+              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Mã SV</div>
+            </div>
+            <div class="border-end border-light opacity-25"></div>
+            <div>
+              <div class="fs-4 fw-bold" id="profileClassName">--</div>
+              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Lớp</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. STATS & INFO (Right side, takes up 8 columns) -->
+      <div class="col-xl-8 col-lg-7">
+        <div class="row g-3 h-100">
+
+          <!-- Welcome Bento -->
+          <div class="col-12">
+            <div class="bento-card welcome-card d-flex align-items-center justify-content-between" style="background: url('data:image/svg+xml;utf8,<svg xmlns=http://www.w3.org/2000/svg viewBox=0 0 100 100><circle cx=90 cy=10 r=40 fill=%23e8f8ea /></svg>') no-repeat right top; background-size: cover; background-color: #fff;">
+              <div>
+                <h1 class="display-6 fw-900 text-dark mb-2" style="letter-spacing: -1px;">Xin chào, <span data-greeting-name>Sinh viên</span>!</h1>
+                <p class="fs-5 text-muted mb-0" id="dashboardSummary">Đang đồng bộ dữ liệu học tập từ hệ thống.</p>
+              </div>
+              <div class="d-none d-md-block text-center me-4">
+                <div class="text-warning welcome-icon" style="font-size: 4rem; line-height: 1;"><i class="ti ti-flame"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mini Stat 1 -->
+          <div class="col-md-4 col-sm-6">
+            <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center">
+              <div class="stat-icon-bg bg-primary-subtle text-primary mb-3">
+                <i class="ti ti-book"></i>
+              </div>
+              <div class="stat-value text-primary" id="learningSpaceCount">0</div>
+              <div class="stat-label">Lớp đang học</div>
+            </div>
+          </div>
+
+          <!-- Mini Stat 2 -->
+          <div class="col-md-4 col-sm-6">
+            <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center">
+              <div class="stat-icon-bg bg-success-subtle text-success mb-3">
+                <i class="ti ti-rosette-discount-check"></i>
+              </div>
+              <div class="stat-value text-success" id="completedQuizCount">0</div>
+              <div class="stat-label">Quiz đã hoàn thành</div>
+            </div>
+          </div>
+
+          <!-- Mini Stat 3 -->
+          <div class="col-md-4 col-sm-12">
+            <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center" style="background: #2f855a; color: #fff;">
+              <div class="stat-icon-bg bg-white bg-opacity-10 text-white mb-3">
+                <i class="ti ti-alert-circle"></i>
+              </div>
+              <div class="stat-value text-white" id="pendingQuizCount" style="background: none; -webkit-text-fill-color: #fff;">0</div>
+              <div class="stat-label text-white-50">Quiz cần làm</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- END BENTO GRID -->
+
+    <div class="row g-5">
+      <!-- MY LEARNING SPACES (APPLE STYLE CARDS) -->
+      <div class="col-xl-8">
+        <div id="myQuizSection" class="d-flex justify-content-between align-items-end mb-4">
+          <div>
+            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Không gian học của tôi</h2>
+          </div>
+          <a th:href="@{/student/learning-spaces}" class="btn btn-dark rounded-pill fw-bold px-4">Xem tất cả</a>
+        </div>
+
+        <div class="row g-4" id="learningSpaceList">
+          <div class="col-12">
+            <div class="bento-card text-center text-muted py-5">
+              <div class="spinner-border text-primary mb-3" role="status"></div>
+              <p class="mb-0 fw-semibold">Đang tải không gian học...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- COURSE QUIZZES SECTION -->
+        <hr class="my-5 opacity-10 border-secondary">
+
+        <div class="d-flex justify-content-between align-items-end mb-4">
+          <div>
+            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Quiz của khóa học</h2>
+            <p class="text-muted mb-0 fw-semibold">Các bài quiz theo từng không gian học bạn đã tham gia</p>
+          </div>
+        </div>
+
+        <div class="accordion accordion-flush quiz-accordion bento-card p-3" id="quizAccordion">
+          <div class="text-center text-muted py-4" id="quiz-loading">
+            <div class="spinner-border text-primary mb-2" role="status"></div>
+            <p>Đang tải khóa học và quiz...</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: RECENT DOCS -->
+      <div class="col-xl-4">
+
+        <h2 class="h3 fw-900 text-dark mb-4" style="letter-spacing: -0.5px;">Tài liệu mới</h2>
+        <div class="bento-card p-4" id="recentDocuments">
+          <div class="text-center text-muted py-4">
+            <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
+            <h5 class="fw-bold text-dark mt-3 mb-2">Chưa có dữ liệu tài liệu</h5>
+            <p class="small fw-semibold mb-0">Dashboard API hiện chưa trả danh sách tài liệu mới.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+<!-- DYNAMIC DASHBOARD DATA SCRIPT -->
+<script>
+  const token = localStorage.getItem('jwt_token');
+  const userId = localStorage.getItem('user_id');
+
+  const iconThemes = [
+    { icon: 'ti-template', color: 'primary' },
+    { icon: 'ti-leaf', color: 'success' },
+    { icon: 'ti-database', color: 'info' },
+    { icon: 'ti-brand-aws', color: 'warning' }
+  ];
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+  }
+
+  function setText(selector, value) {
+    const el = document.querySelector(selector);
+    if (el) el.textContent = value;
+  }
+
+  function statusLabel(status) {
+    const labels = {
+      ACTIVE: 'Đang học',
+      DRAFT: 'Bản nháp',
+      LOCKED: 'Chưa mở',
+      UNLOCKED: 'Đã mở',
+      ARCHIVED: 'Lưu trữ',
+      DELETED: 'Đã xóa'
+    };
+    return labels[status] || status || 'Chưa rõ';
+  }
+
+  function roleLabel(role) {
+    const labels = {
+      MEMBER: 'Sinh viên',
+      OWNER: 'Chủ lớp',
+      SUPPORTER: 'Trợ giảng'
+    };
+    return labels[role] || role || 'Thành viên';
+  }
+
+  function studyYear(enrollmentYear) {
+    const year = Number(enrollmentYear);
+    if (!year) return '';
+    return Math.max(1, new Date().getFullYear() - year + 1);
+  }
+
+  function flattenQuizzes(learningSpaces) {
+    return (learningSpaces || []).flatMap((space) =>
+            (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
+    );
+  }
+
+  function renderProfile(data) {
+    const user = data.user || {};
+    const profile = data.studentProfile || {};
+    const displayName = user.fullName || user.username || 'Sinh viên';
+    const major = profile.major || 'Chưa cập nhật ngành';
+    const yearText = profile.enrollmentYear ? `Năm ${studyYear(profile.enrollmentYear)}` : 'Chưa cập nhật năm học';
+
+    setText('#profileName', displayName);
+    setText('[data-greeting-name]', displayName);
+    setText('#profileSummary', `${major} - ${yearText}`);
+    setText('#profileStudentCode', profile.studentCode || '--');
+    setText('#profileClassName', profile.className || '--');
+
+    const avatar = document.querySelector('.massive-avatar');
+    if (avatar && user.avatarUrl) avatar.src = user.avatarUrl;
+  }
+
+  function renderStats(learningSpaces, quizzes) {
+    const completedCount = quizzes.filter((quiz) => quiz.isCompleted).length;
+    const pendingCount = quizzes.length - completedCount;
+
+    setText('#learningSpaceCount', learningSpaces.length);
+    setText('#completedQuizCount', completedCount);
+    setText('#pendingQuizCount', pendingCount);
+    setText('#dashboardSummary', `Bạn đang tham gia ${learningSpaces.length} lớp, đã hoàn thành ${completedCount}/${quizzes.length} quiz.`);
+  }
+
+  function emptyState(icon, title, message) {
+    return `
+        <div class="bento-card text-center text-muted py-5">
+          <i class="ti ${icon} text-primary" style="font-size: 2.6rem;"></i>
+          <h5 class="fw-bold text-dark mt-3 mb-2">${escapeHtml(title)}</h5>
+          <p class="mb-0 fw-semibold">${escapeHtml(message)}</p>
+        </div>`;
+  }
+
+  function renderLearningSpaces(learningSpaces) {
+    const list = document.getElementById('learningSpaceList');
+    if (!list) return;
+
+    if (!learningSpaces.length) {
+      list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'Chưa có lớp học', 'Nhập mã lớp ở trang Lớp của tôi để tham gia learning space.')}</div>`;
+      return;
+    }
+
+    list.innerHTML = learningSpaces.slice(0, 4).map((space, index) => {
+      const quizzes = space.quizzes || [];
+      const completed = quizzes.filter((quiz) => quiz.isCompleted).length;
+      const percent = quizzes.length ? Math.round((completed / quizzes.length) * 100) : 0;
+      const pending = quizzes.length - completed;
+      const theme = iconThemes[index % iconThemes.length];
+      const roadmapUrl = space.id
+              ? `/student/learning-spaces?spaceId=${encodeURIComponent(space.id)}&focus=roadmap`
+              : '/student/learning-spaces';
+
+      return `
+          <div class="col-md-6">
+            <a class="course-card text-decoration-none d-block" href="${roadmapUrl}" aria-label="Mở roadmap của ${escapeHtml(space.name || 'learning space')}">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="course-icon-wrapper bg-${theme.color}-subtle text-${theme.color}">
+                  <i class="ti ${theme.icon}"></i>
+                </div>
+                <span class="badge bg-light text-dark border px-2 py-1 rounded-pill"><i class="ti ti-circle-check me-1"></i>${escapeHtml(statusLabel(space.status))}</span>
+              </div>
+
+              <h3 class="course-title">${escapeHtml(space.name || 'Learning space chưa đặt tên')}</h3>
+              <p class="text-muted small fw-semibold mb-0">${escapeHtml(space.description || roleLabel(space.memberRole))}</p>
+
+              <div class="progress-track">
+                <div class="progress-fill bg-${theme.color}" style="width: ${percent}%;"></div>
+              </div>
+              <div class="d-flex justify-content-between mt-2">
+                <span class="small fw-bold text-dark">${percent}% hoàn thành quiz</span>
+                <span class="small text-muted fw-semibold">${pending ? `Còn ${pending} quiz` : quizzes.length ? 'Đã xong quiz' : 'Chưa có quiz'}</span>
+              </div>
+            </a>
+          </div>`;
+    }).join('');
+  }
+
+  function quizAction(quiz) {
+    return quiz.isCompleted
+            ? `<span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i class="ti ti-check me-1"></i>Đã hoàn thành</span>`
+            : `<a href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">Làm quiz</a>`;
+  }
+
+  function renderQuizAccordion(learningSpaces) {
+    const quizAccordion = document.getElementById('quizAccordion');
+    if (!quizAccordion) return;
+
+    quizAccordion.innerHTML = '';
+    if (!learningSpaces.length) {
+      quizAccordion.innerHTML = `<div class="text-center text-muted py-4"><p class="mb-0 fw-semibold">Bạn chưa tham gia không gian học nào.</p></div>`;
+      return;
+    }
+
+    learningSpaces.forEach((space, index) => {
+      const quizzes = space.quizzes || [];
+      const pending = quizzes.filter((quiz) => !quiz.isCompleted).length;
+      const collapseId = `collapseSpace${space.id || index}`;
+      const bodyHtml = quizzes.length
+              ? `<div class="accordion-body border-top border-light">${quizzes.map((quiz) => `
+              <div class="quiz-card-item d-flex align-items-center justify-content-between gap-3 p-3 bg-white rounded-3 shadow-sm mb-2 ${quiz.isCompleted ? 'opacity-75' : ''}">
+                <div>
+                  <h5 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Quiz chưa đặt tên')}</h5>
+                  <span class="small text-muted fw-semibold"><i class="ti ti-clock me-1"></i>${escapeHtml(quiz.durationMinutes || 0)} phút</span>
+                  <span class="small text-muted fw-semibold ms-2"><i class="ti ti-list-check me-1"></i>${escapeHtml(quiz.totalQuestions || 0)} câu</span>
+                </div>
+                <div class="text-end">${quizAction(quiz)}</div>
+              </div>`).join('')}</div>`
+              : `<div class="accordion-body border-top border-light text-center py-4">
+              <div class="text-success mb-2"><i class="ti ti-circle-check" style="font-size: 3rem;"></i></div>
+              <h5 class="fw-bold">Lớp này chưa có quiz</h5>
+              <p class="text-muted small mb-0">Khi giảng viên tạo quiz, bài quiz sẽ hiển thị tại đây.</p>
+            </div>`;
+
+      quizAccordion.insertAdjacentHTML('beforeend', `
+          <div class="accordion-item border-0">
+            <h2 class="accordion-header">
+              <button class="accordion-button ${index === 0 ? '' : 'collapsed'} bg-transparent fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index === 0 ? 'true' : 'false'}">
+                <i class="ti ti-book text-primary me-2 fs-4"></i>${escapeHtml(space.name || 'Learning space')}
+                ${pending ? `<span class="badge bg-danger ms-auto me-3 rounded-pill">${pending} quiz cần làm</span>` : `<span class="badge bg-secondary ms-auto me-3 rounded-pill">${quizzes.length ? 'Đã xong' : 'Chưa có quiz'}</span>`}
+              </button>
+            </h2>
+            <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" data-bs-parent="#quizAccordion">
+              ${bodyHtml}
+            </div>
+          </div>`);
+    });
+  }
+
+  function renderNotifications(quizzes) {
+    const badge = document.getElementById('notificationBadge');
+    const summary = document.getElementById('notificationSummary');
+    const list = document.getElementById('notificationList');
+    const pending = quizzes.filter((quiz) => !quiz.isCompleted);
+
+    if (badge) {
+      badge.textContent = pending.length;
+      badge.classList.toggle('d-none', pending.length === 0);
+    }
+
+    if (summary) {
+      summary.textContent = pending.length
+              ? `Bạn có ${pending.length} quiz cần làm.`
+              : 'Không có thông báo mới.';
+    }
+
+    if (!list) return;
+
+    if (!pending.length) {
+      list.innerHTML = `
+          <div class="text-center text-muted py-4 px-3">
+            <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
+            <h6 class="fw-bold text-dark mt-3 mb-1">Không còn quiz cần làm</h6>
+            <p class="small fw-semibold mb-0">Các quiz đang mở đã hoàn thành hoặc chưa có quiz mới.</p>
+          </div>`;
+      return;
+    }
+
+    const items = pending.slice(0, 5).map((quiz) => `
+        <a class="notification-item" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}">
+          <div class="d-flex gap-3 align-items-start">
+            <span class="stat-icon-bg flex-shrink-0" style="width: 42px; height: 42px; border-radius: 14px; font-size: 1.25rem;">
+              <i class="ti ti-file-pencil"></i>
+            </span>
+            <div class="min-w-0">
+              <h6 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Quiz chưa đặt tên')}</h6>
+              <p class="small text-muted fw-semibold mb-1">${escapeHtml(quiz.space?.name || 'Learning space')}</p>
+              <span class="small text-primary fw-bold">Làm quiz ngay</span>
+            </div>
+          </div>
+        </a>`).join('');
+
+    const more = pending.length > 5
+            ? `<a class="notification-item text-center fw-bold text-primary" href="/student/dashboard#myQuizSection">Xem thêm ${pending.length - 5} quiz</a>`
+            : '';
+
+    list.innerHTML = items + more;
+  }
+
+  function renderDashboard(data) {
+    const learningSpaces = data.learningSpaces || [];
+    const quizzes = flattenQuizzes(learningSpaces);
+
+    renderProfile(data);
+    renderStats(learningSpaces, quizzes);
+    renderLearningSpaces(learningSpaces);
+    renderQuizAccordion(learningSpaces);
+    renderNotifications(quizzes);
+  }
+
+  async function loadDashboard() {
+    if (!token || !userId) {
+      window.location.href = '/login';
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/students/${encodeURIComponent(userId)}/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Không tải được dữ liệu dashboard: ${res.status} ${errText}`);
+      }
+      renderDashboard(await res.json());
+    } catch (err) {
+      console.error(err);
+      const message = escapeHtml(err.message || 'Không tải được dữ liệu dashboard.');
+      const quizAccordion = document.getElementById('quizAccordion');
+      const learningSpaceList = document.getElementById('learningSpaceList');
+      const notificationBadge = document.getElementById('notificationBadge');
+      const notificationSummary = document.getElementById('notificationSummary');
+      const notificationList = document.getElementById('notificationList');
+      if (quizAccordion) quizAccordion.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
+      if (learningSpaceList) learningSpaceList.innerHTML = `<div class="col-12"><div class="alert alert-danger">${message}</div></div>`;
+      if (notificationBadge) {
+        notificationBadge.textContent = '!';
+        notificationBadge.classList.remove('d-none');
+      }
+      if (notificationSummary) notificationSummary.textContent = 'Không tải được thông báo.';
+      if (notificationList) notificationList.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
+    }
+  }
+
+  function setActiveSidebarLink(activeKey) {
+    document.querySelectorAll('.sidebar .nav-link[data-nav-key]').forEach(link => {
+      const isActive = link.dataset.navKey === activeKey;
+      link.classList.toggle('active', isActive);
+      link.classList.toggle('fw-bold', isActive);
+      link.classList.toggle('fw-semibold', !isActive);
+
+      if (isActive) {
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  function initSidebarActiveState() {
+    const path = window.location.pathname.replace(/\/+$/, '') || '/';
+    const hash = window.location.hash;
+    let activeKey = null;
+
+    if (path === '/student/dashboard' && hash === '#myQuizSection') {
+      activeKey = 'my-quiz';
+    } else if (path === '/student/dashboard') {
+      activeKey = 'dashboard';
+    } else if (path.startsWith('/student/learning-spaces')) {
+      activeKey = 'learning-spaces';
+    } else if (path.startsWith('/student/my-quizzes')) {
+      activeKey = 'my-quiz';
+    } else if (path.startsWith('/student/take-quiz')) {
+      activeKey = 'my-quiz';
+    } else if (path.startsWith('/student/reports')) {
+      activeKey = 'reports';
+    }
+
+    if (activeKey) {
+      setActiveSidebarLink(activeKey);
+    }
+
+    document.querySelectorAll('.sidebar .nav-link[data-nav-key]').forEach(link => {
+      link.addEventListener('click', () => setActiveSidebarLink(link.dataset.navKey));
+    });
+
+    window.addEventListener('hashchange', () => {
+      const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+      if (currentPath === '/student/dashboard') {
+        setActiveSidebarLink(window.location.hash === '#myQuizSection' ? 'my-quiz' : 'dashboard');
+      }
+    });
+  }
+
+  function logout() {
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('user_id');
+    window.location.href = '/';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const studentNameTop = document.getElementById('studentNameTop');
+    if (studentNameTop) {
+      studentNameTop.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Sinh viên';
+    }
+    initSidebarActiveState();
+    loadDashboard();
+  });
+</script>
+</body>
+</html>
