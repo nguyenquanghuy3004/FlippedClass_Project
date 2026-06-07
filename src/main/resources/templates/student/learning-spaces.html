@@ -135,16 +135,25 @@
       transform: translateY(-50%);
     }
 
-    .sidebar .logout-link {
-      color: var(--fc-muted) !important;
-      background: transparent !important;
-      font-weight: 700 !important;
-      box-shadow: none !important;
+    .student-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.35rem 0.75rem 0.35rem 0.4rem;
+      border: 1px solid rgba(229, 231, 235, 0.95);
+      border-radius: 999px;
+      background: #ffffff;
+      box-shadow: 0 8px 18px rgba(31, 41, 55, 0.06);
+      color: var(--fc-text);
+      font-size: 0.86rem;
+      font-weight: 800;
     }
 
-    .sidebar .logout-link:hover {
-      color: #b42318 !important;
-      background: #fef3f2 !important;
+    .student-chip img {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      object-fit: cover;
     }
 
     .bg-primary-subtle,
@@ -851,6 +860,15 @@
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm">2</span>
         </a>
       </li>
+      <li class="dropdown">
+        <div class="student-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+          <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh đại diện sinh viên">
+          <span id="studentNameTop">Sinh viên</span>
+        </div>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+          <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>Đăng xuất</a></li>
+        </ul>
+      </li>
     </ul>
   </div>
 </nav>
@@ -870,9 +888,6 @@
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
 
-    <li class="mt-auto pb-4">
-      <a class="nav-link logout-link rounded-pill mx-3 px-4" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout fs-5"></i><span class="nav-text">Đăng xuất</span></a>
-    </li>
   </ul>
 </aside>
 
@@ -1347,6 +1362,10 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const studentNameTop = document.getElementById('studentNameTop');
+    if (studentNameTop) {
+      studentNameTop.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Sinh viên';
+    }
     initSidebarActiveState();
     state.focusRoadmapOnce = shouldFocusRoadmap();
     loadSpaces(readInitialSpaceId());

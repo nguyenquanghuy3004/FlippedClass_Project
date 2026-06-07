@@ -642,9 +642,14 @@
   </button>
 
   <div class="topbar-spacer"></div>
-  <div class="student-chip">
-    <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh đại diện sinh viên">
-    <span id="studentName">Sinh viên</span>
+  <div class="dropdown">
+    <div class="student-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+      <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh đại diện sinh viên">
+      <span id="studentName">Sinh viên</span>
+    </div>
+    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+      <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>Đăng xuất</a></li>
+    </ul>
   </div>
 </nav>
 
@@ -660,7 +665,6 @@
     <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Lớp của tôi</span></a></li>
     <li><a class="nav-link active" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz" aria-current="page"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
     <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
-    <li class="logout-link"><a class="nav-link logout-link" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout fs-5"></i><span class="nav-text">Đăng xuất</span></a></li>
   </ul>
 </aside>
 

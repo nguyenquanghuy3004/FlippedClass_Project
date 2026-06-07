@@ -117,6 +117,7 @@
       .then(data => {
           const token = data.token;
           localStorage.setItem('jwt_token', token);
+          localStorage.setItem('user_id', data.id);
           
           try {
               const payload = JSON.parse(atob(token.split('.')[1]));
@@ -163,6 +164,7 @@
       .then(data => {
           const token = data.token;
           localStorage.setItem('jwt_token', token);
+          localStorage.setItem('user_id', data.id);
           
           try {
               const payload = JSON.parse(atob(token.split('.')[1]));

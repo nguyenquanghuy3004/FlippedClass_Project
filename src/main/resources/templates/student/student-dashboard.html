@@ -1,8 +1,8 @@
 <!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8" />
-  <title>Premium Student Dashboard - FlippedClass</title>
   <title>Bảng điều khiển sinh viên - FlippedClass</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
@@ -11,18 +11,15 @@
 
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  
+
   <!-- AUTHENTICATION GUARD -->
   <script>
     if (!localStorage.getItem('jwt_token')) {
-      window.location.href = '/signin';
+      window.location.href = '/login';
     }
   </script>
-  
+
   <style>
-    /* =========================================
-       ULTRA PREMIUM BENTO DASHBOARD STYLES
-       ========================================= */
     @import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&display=swap");
 
     :root {
@@ -43,12 +40,10 @@
     }
 
     body {
-      background-color: #f0f2f5;
-      font-family: 'Inter', sans-serif;
       color: var(--fc-text);
       background:
-        radial-gradient(circle at top left, rgba(91, 199, 96, 0.18), transparent 32rem),
-        linear-gradient(180deg, #ffffff 0%, var(--fc-background) 48%, #ffffff 100%);
+              radial-gradient(circle at top left, rgba(91, 199, 96, 0.18), transparent 32rem),
+              linear-gradient(180deg, #ffffff 0%, var(--fc-background) 48%, #ffffff 100%);
       font-family: "Lexend", "Trebuchet MS", sans-serif;
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
@@ -137,16 +132,25 @@
       transform: translateY(-50%);
     }
 
-    .sidebar .logout-link {
-      color: var(--fc-muted) !important;
-      background: transparent !important;
-      font-weight: 700 !important;
-      box-shadow: none !important;
+    .student-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.35rem 0.75rem 0.35rem 0.4rem;
+      border: 1px solid rgba(229, 231, 235, 0.95);
+      border-radius: 999px;
+      background: #ffffff;
+      box-shadow: 0 8px 18px rgba(31, 41, 55, 0.06);
+      color: var(--fc-text);
+      font-size: 0.86rem;
+      font-weight: 800;
     }
 
-    .sidebar .logout-link:hover {
-      color: #b42318 !important;
-      background: #fef3f2 !important;
+    .student-chip img {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      object-fit: cover;
     }
 
     .bg-danger,
@@ -163,18 +167,10 @@
       background: var(--fc-primary-soft) !important;
     }
 
-    /* BENTO BOX GRID SYSTEM */
     .bento-card {
-      background: #fff;
-      border: none;
-      border-radius: 28px; /* High border radius for Bento feel */
-      padding: 2rem;
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
       height: 100%;
       position: relative;
       overflow: hidden;
-      height: 100%;
       padding: 2rem;
       border: 1px solid rgba(229, 231, 235, 0.9);
       border-radius: 28px;
@@ -184,17 +180,12 @@
     }
 
     .bento-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
       transform: translateY(-4px);
       border-color: rgba(91, 199, 96, 0.24);
       box-shadow: var(--fc-shadow-md);
     }
 
-    /* 1. MASSIVE STUDENT PROFILE BENTO (Gradient Background) */
     .profile-bento {
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-      color: #fff;
       color: #ffffff;
       text-align: center;
       display: flex;
@@ -202,8 +193,8 @@
       align-items: center;
       justify-content: center;
       background:
-        radial-gradient(circle at 16% 12%, rgba(255, 255, 255, 0.24), transparent 16rem),
-        linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary));
+              radial-gradient(circle at 16% 12%, rgba(255, 255, 255, 0.24), transparent 16rem),
+              linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary));
     }
 
     .profile-avatar-container {
@@ -211,24 +202,17 @@
       margin-bottom: 1.5rem;
     }
 
-    /* Huge Avatar */
-
     .massive-avatar {
       width: 160px;
       height: 160px;
       border: 6px solid rgba(255, 255, 255, 0.34);
       border-radius: 50%;
-      border: 6px solid rgba(255, 255, 255, 0.2);
       object-fit: cover;
       box-shadow: 0 18px 36px rgba(31, 41, 55, 0.22);
       transition: transform 220ms ease, border-color 220ms ease;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-      transition: all 0.5s ease;
     }
 
     .massive-avatar:hover {
-      transform: scale(1.05) rotate(3deg);
-      border-color: rgba(255, 255, 255, 0.5);
       transform: scale(1.04);
       border-color: rgba(255, 255, 255, 0.64);
     }
@@ -237,14 +221,10 @@
       position: absolute;
       right: 15px;
       bottom: 10px;
-      right: 15px;
       width: 24px;
       height: 24px;
-      background-color: #4cd137;
-      border: 4px solid #1e3c72;
       border: 4px solid var(--fc-primary-dark);
       border-radius: 50%;
-      box-shadow: 0 0 15px rgba(76, 209, 55, 0.6);
       background-color: #9ef6a2;
       box-shadow: 0 0 16px rgba(158, 246, 162, 0.7);
     }
@@ -254,14 +234,9 @@
       font-size: 1.75rem;
       font-weight: 900;
       letter-spacing: -0.04em;
-      font-weight: 800;
-      margin-bottom: 0.25rem;
-      letter-spacing: -0.5px;
     }
 
     .profile-major {
-      color: rgba(255, 255, 255, 0.7);
-      font-weight: 500;
       color: rgba(255, 255, 255, 0.82);
       font-size: 1rem;
       font-weight: 500;
@@ -373,34 +348,24 @@
       letter-spacing: 0.07em;
     }
 
-    /* 2. STATS BENTO */
     .stat-value {
       margin-bottom: 0.5rem;
       font-size: 3rem;
       font-weight: 900;
       line-height: 1;
-      letter-spacing: -1px;
-      background: linear-gradient(45deg, #2c3e50, #3498db);
       letter-spacing: -0.04em;
       background: linear-gradient(45deg, var(--fc-primary-dark), var(--fc-primary));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 0.5rem;
     }
 
     .stat-label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #95a5a6;
       color: var(--fc-muted);
       font-size: 0.82rem;
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      letter-spacing: 1px;
     }
-    .stat-icon-bg {
-      width: 60px; height: 60px;
 
     .stat-icon-bg,
     .course-icon-wrapper {
@@ -410,35 +375,23 @@
       align-items: center;
       justify-content: center;
       border-radius: 20px;
-      display: flex; align-items: center; justify-content: center;
       color: var(--fc-primary-dark) !important;
       background: var(--fc-primary-soft) !important;
       font-size: 1.8rem;
     }
 
-    /* 3. LEARNING CARDS (Apple Style) */
     .course-card {
-      background: #ffffff;
-      border-radius: 24px;
+      min-height: 100%;
       padding: 1.5rem;
-      border: 1px solid rgba(0,0,0,0.04);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.02);
-      transition: all 0.4s ease;
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      border-radius: 24px;
+      background: #ffffff;
       box-shadow: var(--fc-shadow-sm);
       cursor: pointer;
       transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
     }
 
     .course-card:hover {
-      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-      transform: translateY(-8px);
-    }
-    .course-icon-wrapper {
-      width: 54px; height: 54px;
-      border-radius: 18px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
-      margin-bottom: 1.5rem;
       transform: translateY(-6px);
       border-color: rgba(91, 199, 96, 0.28);
       box-shadow: var(--fc-shadow-md);
@@ -447,21 +400,13 @@
     .course-title {
       color: var(--fc-text);
       font-size: 1.25rem;
-      font-weight: 700;
-      color: #2c3e50;
       font-weight: 800;
       line-height: 1.3;
       margin-bottom: 0.5rem;
-      line-height: 1.3;
     }
-
-    /* 4. SHIMMER PROGRESS BAR */
 
     .progress-track {
       height: 8px;
-      background: #ecf0f1;
-      border-radius: 10px;
-      overflow: visible;
       overflow: hidden;
       margin-top: 1.5rem;
       margin-bottom: 0.5rem;
@@ -473,7 +418,6 @@
       height: 100%;
       position: relative;
       border-radius: 10px;
-      position: relative;
     }
 
     .progress-fill.bg-primary,
@@ -484,12 +428,8 @@
     }
 
     .progress-fill::after {
-      content: '';
       content: "";
       position: absolute;
-      top: 0; right: 0; bottom: 0; left: 0;
-      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
-      animation: shimmer 2s infinite;
       inset: 0;
       border-radius: 10px;
       background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.42), rgba(255,255,255,0));
@@ -550,12 +490,6 @@
       transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
     }
 
-    /* 5. TASKS / TO-DO */
-    .task-list-item {
-      padding: 1.25rem;
-      border-radius: 16px;
-      background: #f8f9fa;
-      border-left: 4px solid transparent;
     .notification-trigger:hover,
     .notification-trigger.show {
       background: #d9f4dc;
@@ -593,32 +527,13 @@
     .quiz-accordion .accordion-item {
       overflow: hidden;
       margin-bottom: 1rem;
-      transition: all 0.3s ease;
-    }
-    .task-list-item:hover {
-      background: #fff;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-      transform: translateX(5px);
-    }
-    .task-danger { border-left-color: #ff6b6b; }
-    .task-warning { border-left-color: #feca57; }
-    .task-success { border-left-color: #1dd1a1; }
-
-    /* 6. ACCORDION STYLES */
-    .quiz-accordion .accordion-item {
-      background: #f8f9fa;
-      border: 1px solid rgba(0,0,0,0.03) !important;
       border: 1px solid rgba(229, 231, 235, 0.9) !important;
       border-radius: 20px !important;
-      margin-bottom: 1rem;
-      overflow: hidden;
-      transition: all 0.3s ease;
       background: #ffffff;
       transition: box-shadow 180ms ease, border-color 180ms ease;
     }
 
     .quiz-accordion .accordion-item:hover {
-      box-shadow: 0 8px 24px rgba(0,0,0,0.04);
       border-color: rgba(91, 199, 96, 0.24) !important;
       box-shadow: var(--fc-shadow-sm);
     }
@@ -631,8 +546,6 @@
     }
 
     .quiz-accordion .accordion-button:not(.collapsed) {
-      background: #ffffff;
-      color: #2c3e50;
       color: var(--fc-primary-dark);
       background: var(--fc-primary-soft) !important;
     }
@@ -640,20 +553,15 @@
     .quiz-accordion .accordion-body {
       padding: 1.5rem;
       background: #ffffff;
-      padding: 1.5rem;
     }
 
     .quiz-card-item {
-      border: 1px solid rgba(0,0,0,0.04);
-      transition: all 0.2s ease;
       border: 1px solid rgba(229, 231, 235, 0.9);
       transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
     }
 
     .quiz-card-item:hover {
       transform: translateX(4px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
-      border-color: rgba(0,0,0,0.08);
       border-color: rgba(91, 199, 96, 0.24);
       box-shadow: var(--fc-shadow-sm) !important;
     }
@@ -665,609 +573,351 @@
 </head>
 
 <body>
-  <div id="overlay" class="overlay"></div>
-  
-  <!-- TOPBAR -->
-  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.9) !important;">
-    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
-      <i class="ti ti-layout-sidebar-left-expand"></i>
-    </button>
-    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
-      <i class="ti ti-layout-sidebar-left-expand"></i>
-    </button>
-    
-    <div class="d-flex align-items-center w-100 justify-content-between">
-      <div class="d-none d-md-block">
-        <h5 class="mb-0 fw-bold text-dark ms-2" style="letter-spacing: -0.5px;">Student Portal <span class="badge bg-primary-subtle text-primary ms-2 rounded-pill">Pro</span></h5>
-        <h5 class="mb-0 fw-bold text-dark ms-2" style="letter-spacing: -0.5px;">Cổng sinh viên <span class="badge bg-primary-subtle text-primary ms-2 rounded-pill">Học tập</span></h5>
-      </div>
-      <ul class="list-unstyled d-flex align-items-center mb-0 gap-3">
-        <!-- Notification Bell -->
-        <li>
-          <a class="position-relative text-secondary d-flex align-items-center justify-content-center" href="#" style="width: 40px; height: 40px; border-radius: 50%; background: #f1f3f5; transition: 0.3s;">
-        <li class="dropdown">
-          <button class="notification-trigger position-relative text-secondary d-flex align-items-center justify-content-center border-0"
-                  type="button"
-                  id="notificationDropdown"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                  aria-label="Thông báo quiz cần làm">
-            <i class="ti ti-bell-ringing fs-5 text-dark"></i>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm">2</span>
-          </a>
-            <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm d-none">0</span>
-          </button>
-          <div class="dropdown-menu dropdown-menu-end notification-menu p-0 border-0" aria-labelledby="notificationDropdown">
-            <div class="p-3 border-bottom bg-white">
-              <div class="d-flex align-items-center justify-content-between">
-                <div>
-                  <h6 class="fw-900 text-dark mb-1">Thông báo</h6>
-                  <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Đang tải thông báo...</p>
-                </div>
-                <i class="ti ti-bell text-primary fs-4"></i>
+<div id="overlay" class="overlay"></div>
+
+<!-- TOPBAR -->
+<nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.9) !important;">
+  <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+    <i class="ti ti-layout-sidebar-left-expand"></i>
+  </button>
+  <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+    <i class="ti ti-layout-sidebar-left-expand"></i>
+  </button>
+
+  <div class="d-flex align-items-center w-100 justify-content-between">
+    <div class="d-none d-md-block">
+      <h5 class="mb-0 fw-bold text-dark ms-2" style="letter-spacing: -0.5px;">Cổng sinh viên <span class="badge bg-primary-subtle text-primary ms-2 rounded-pill">Học tập</span></h5>
+    </div>
+    <ul class="list-unstyled d-flex align-items-center mb-0 gap-3">
+      <!-- Notification Bell -->
+      <li class="dropdown">
+        <button class="notification-trigger position-relative text-secondary d-flex align-items-center justify-content-center border-0"
+                type="button"
+                id="notificationDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-label="Thông báo quiz cần làm">
+          <i class="ti ti-bell-ringing fs-5 text-dark"></i>
+          <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm d-none">0</span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end notification-menu p-0 border-0" aria-labelledby="notificationDropdown">
+          <div class="p-3 border-bottom bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <h6 class="fw-900 text-dark mb-1">Thông báo</h6>
+                <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Đang tải thông báo...</p>
               </div>
-            </div>
-            <div id="notificationList" class="notification-list">
-              <div class="text-center text-muted py-4 px-3">
-                <div class="spinner-border text-primary mb-2" role="status"></div>
-                <p class="small fw-semibold mb-0">Đang tải quiz cần làm...</p>
-              </div>
+              <i class="ti ti-bell text-primary fs-4"></i>
             </div>
           </div>
-        </li>
-      </ul>
-    </div>
-  </nav>
-
-  <!-- SIDEBAR -->
-  <aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm">
-    <div class="logo-area border-bottom border-light">
-      <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
-        <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2">
-          <i class="ti ti-book-2 fs-3"></i>
+          <div id="notificationList" class="notification-list">
+            <div class="text-center text-muted py-4 px-3">
+              <div class="spinner-border text-primary mb-2" role="status"></div>
+              <p class="small fw-semibold mb-0">Đang tải quiz cần làm...</p>
+            </div>
+          </div>
         </div>
-        <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">Flipped<span class="text-primary">Class</span></span>
-      </a>
-    </div>
-    <ul class="nav flex-column mt-4">
-      <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4" th:href="@{/student/dashboard}" style="background: rgba(var(--bs-primary-rgb), 0.1); color: var(--bs-primary); font-weight: 700;"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
-      <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}"><i class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
-      <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
-      <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4" th:href="@{/student/dashboard}" data-nav-key="dashboard" aria-current="page"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Tổng quan</span></a></li>
-      <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Lớp của tôi</span></a></li>
-      <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
-      <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
-
-      <li class="mt-auto pb-4">
-        <a class="nav-link logout-link rounded-pill mx-3 px-4" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout fs-5"></i><span class="nav-text">Đăng xuất</span></a>
-        <a class="nav-link rounded-pill mx-3 px-4 text-danger fw-bold bg-danger-subtle" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout fs-5"></i><span class="nav-text">Sign Out</span></a>
+      </li>
+      <li class="dropdown">
+        <div class="student-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+          <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh đại diện sinh viên">
+          <span id="studentNameTop">Sinh viên</span>
+        </div>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+          <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>Đăng xuất</a></li>
+        </ul>
       </li>
     </ul>
-  </aside>
+  </div>
+</nav>
 
-  <!-- MAIN CONTENT -->
-  <main id="content" class="content py-10">
-    <div class="container-fluid px-xl-5">
-      
-      <!-- BENTO GRID -->
-      <div class="row g-3 mb-4 dashboard-hero-grid">
-      <div class="row g-4 mb-5">
-
-        <!-- 1. MASSIVE PROFILE (Left side, takes up 4 columns on large screens) -->
-        <div class="col-xl-4 col-lg-5">
-          <div class="bento-card profile-bento">
-            <div class="profile-avatar-container mt-3">
-              <!-- MASSIVE AVATAR FOR DETAIL VIEW -->
-              <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh đại diện sinh viên" class="massive-avatar" />
-              <img th:src="@{/assets/images/avatar-1.jpg}" alt="Student Avatar" class="massive-avatar" />
-              <div class="status-dot"></div>
-            </div>
-            
-            <h2 class="profile-name">Alexandre Johnson</h2>
-            <p class="profile-major">Software Engineering Major â€¢ Year 3</p>
-            <h2 class="profile-name" id="profileName">Đang tải...</h2>
-            <p class="profile-major" id="profileSummary">Đang tải hồ sơ sinh viên...</p>
-
-            <div class="w-100 mt-4 d-flex gap-2">
-              <a href="#" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm">Edit Profile</a>
-              <a href="#" class="btn btn-outline-light rounded-pill w-100 fw-bold">View Detail</a>
-            <div class="w-100 mt-4 d-flex gap-2 profile-actions">
-              <a href="#" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm">Chỉnh hồ sơ</a>
-              <a href="#" class="btn btn-outline-light rounded-pill w-100 fw-bold">Xem chi tiết</a>
-            </div>
-            
-            <div class="mt-5 w-100 bg-white bg-opacity-10 rounded-4 p-3 d-flex justify-content-around">
-               <div>
-                 <div class="fs-4 fw-bold">12</div>
-                 <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Badges</div>
-               </div>
-               <div class="border-end border-light opacity-25"></div>
-               <div>
-                 <div class="fs-4 fw-bold">14k</div>
-                 <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Points</div>
-               </div>
-            </div>
-             <div class="mt-5 w-100 bg-white bg-opacity-10 rounded-4 p-3 d-flex justify-content-around profile-meta-card">
-                <div>
-                  <div class="fs-4 fw-bold" id="profileStudentCode">--</div>
-                  <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Mã SV</div>
-                </div>
-                <div class="border-end border-light opacity-25"></div>
-                <div>
-                  <div class="fs-4 fw-bold" id="profileClassName">--</div>
-                  <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Lớp</div>
-                </div>
-             </div>
-          </div>
-        </div>
-
-        <!-- 2. STATS & INFO (Right side, takes up 8 columns) -->
-        <div class="col-xl-8 col-lg-7">
-          <div class="row g-3 h-100">
-          <div class="row g-4 h-100">
-
-            <!-- Welcome Bento -->
-            <div class="col-12">
-              <div class="bento-card welcome-card d-flex align-items-center justify-content-between" style="background: url('data:image/svg+xml;utf8,<svg xmlns=http://www.w3.org/2000/svg viewBox=0 0 100 100><circle cx=90 cy=10 r=40 fill=%23e8f8ea /></svg>') no-repeat right top; background-size: cover; background-color: #fff;">
-              <div class="bento-card d-flex align-items-center justify-content-between" style="background: url('data:image/svg+xml;utf8,<svg xmlns=http://www.w3.org/2000/svg viewBox=0 0 100 100><circle cx=90 cy=10 r=40 fill=%23f0f4f8 /></svg>') no-repeat right top; background-size: cover; background-color: #fff;">
-                <div>
-                  <h1 class="display-6 fw-900 text-dark mb-2" style="letter-spacing: -1px;">Xin chào, <span data-greeting-name>Sinh viên</span>!</h1>
-                  <p class="fs-5 text-muted mb-0" id="dashboardSummary">Đang đồng bộ dữ liệu học tập từ hệ thống.</p>
-                  <h1 class="display-6 fw-900 text-dark mb-2" style="letter-spacing: -1px;">Good Morning, Alex! ☀️</h1>
-                  <p class="fs-5 text-muted mb-0">Your learning streak is <strong>5 days</strong>. Keep the fire burning!</p>
-                </div>
-                <div class="d-none d-md-block text-center me-4">
-                  <div class="text-warning welcome-icon" style="font-size: 4rem; line-height: 1;"><i class="ti ti-flame"></i></div>
-                  <div class="text-warning" style="font-size: 4rem; line-height: 1;"><i class="ti ti-flame"></i></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Mini Stat 1 -->
-            <div class="col-md-4 col-sm-6">
-              <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center">
-              <div class="bento-card text-center d-flex flex-column justify-content-center align-items-center">
-                <div class="stat-icon-bg bg-primary-subtle text-primary mb-3">
-                  <i class="ti ti-book"></i>
-                </div>
-                <div class="stat-value text-primary" id="learningSpaceCount">0</div>
-                <div class="stat-label">Lớp đang học</div>
-                <div class="stat-value text-primary">04</div>
-                <div class="stat-label">Active Classes</div>
-              </div>
-            </div>
-
-            <!-- Mini Stat 2 -->
-            <div class="col-md-4 col-sm-6">
-              <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center">
-              <div class="bento-card text-center d-flex flex-column justify-content-center align-items-center">
-                <div class="stat-icon-bg bg-success-subtle text-success mb-3">
-                  <i class="ti ti-rosette-discount-check"></i>
-                </div>
-                <div class="stat-value text-success" id="completedQuizCount">0</div>
-                <div class="stat-label">Quiz đã hoàn thành</div>
-                <div class="stat-value text-success">18</div>
-                <div class="stat-label">Quizzes Passed</div>
-              </div>
-            </div>
-
-            <!-- Mini Stat 3 -->
-            <div class="col-md-4 col-sm-12">
-              <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center" style="background: #2f855a; color: #fff;">
-              <div class="bento-card text-center d-flex flex-column justify-content-center align-items-center" style="background: #2c3e50; color: #fff;">
-                <div class="stat-icon-bg bg-white bg-opacity-10 text-white mb-3">
-                  <i class="ti ti-alert-circle"></i>
-                  <i class="ti ti-clock-hour-4"></i>
-                </div>
-                <div class="stat-value text-white" style="background: none; -webkit-text-fill-color: #fff;">32<span class="fs-4 text-white-50">h</span></div>
-                <div class="stat-label text-white-50">Time Learned</div>
-                <div class="stat-value text-white" id="pendingQuizCount" style="background: none; -webkit-text-fill-color: #fff;">0</div>
-                <div class="stat-label text-white-50">Quiz cần làm</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
+<!-- SIDEBAR -->
+<aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm">
+  <div class="logo-area border-bottom border-light">
+    <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
+      <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2">
+        <i class="ti ti-book-2 fs-3"></i>
       </div>
-      <!-- END BENTO GRID -->
+      <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">Flipped<span class="text-primary">Class</span></span>
+    </a>
+  </div>
+  <ul class="nav flex-column mt-4">
+    <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4" th:href="@{/student/dashboard}" data-nav-key="dashboard" aria-current="page"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Tổng quan</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Lớp của tôi</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
 
-      <div class="row g-5">
-        <!-- MY LEARNING SPACES (APPLE STYLE CARDS) -->
-        <div class="col-xl-8">
-          <div class="d-flex justify-content-between align-items-end mb-4">
-          <div id="myQuizSection" class="d-flex justify-content-between align-items-end mb-4">
+  </ul>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main id="content" class="content py-10">
+  <div class="container-fluid px-xl-5">
+
+    <!-- BENTO GRID -->
+    <div class="row g-3 mb-4 dashboard-hero-grid">
+
+      <!-- 1. MASSIVE PROFILE (Left side, takes up 4 columns on large screens) -->
+      <div class="col-xl-4 col-lg-5">
+        <div class="bento-card profile-bento">
+          <div class="profile-avatar-container mt-3">
+            <!-- MASSIVE AVATAR FOR DETAIL VIEW -->
+            <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh đại diện sinh viên" class="massive-avatar" />
+            <div class="status-dot"></div>
+          </div>
+
+          <h2 class="profile-name" id="profileName">Đang tải...</h2>
+          <p class="profile-major" id="profileSummary">Đang tải hồ sơ sinh viên...</p>
+
+          <div class="w-100 mt-4 d-flex gap-2 profile-actions">
+            <a href="#" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm">Chỉnh hồ sơ</a>
+            <a href="#" class="btn btn-outline-light rounded-pill w-100 fw-bold">Xem chi tiết</a>
+          </div>
+
+          <div class="mt-5 w-100 bg-white bg-opacity-10 rounded-4 p-3 d-flex justify-content-around profile-meta-card">
             <div>
-              <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">My Learning Spaces</h2>
+              <div class="fs-4 fw-bold" id="profileStudentCode">--</div>
+              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Mã SV</div>
             </div>
-            <a href="#" class="btn btn-dark rounded-pill fw-bold px-4">See All</a>
-          </div>
-
-          <div class="row g-4">
-
-            <!-- Card 1 -->
-            <div class="col-md-6">
-              <div class="course-card">
-                <div class="d-flex justify-content-between align-items-start">
-                  <div class="course-icon-wrapper bg-primary-subtle text-primary">
-                    <i class="ti ti-brand-react"></i>
-                  </div>
-                  <span class="badge bg-light text-dark border px-2 py-1 rounded-pill"><i class="ti ti-users me-1"></i>42 Students</span>
-                </div>
-
-                <h3 class="course-title">Advanced React.js & Redux</h3>
-                <p class="text-muted small fw-semibold mb-0">Lecturer: Dr. Dan Abramov</p>
-
-                <div class="progress-track">
-                  <div class="progress-fill bg-primary" style="width: 75%;"></div>
-                </div>
-                <div class="d-flex justify-content-between mt-2">
-                  <span class="small fw-bold text-dark">75% Completed</span>
-                  <span class="small text-muted fw-semibold">3 Nodes Left</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 2 -->
-            <div class="col-md-6">
-              <div class="course-card">
-                <div class="d-flex justify-content-between align-items-start">
-                  <div class="course-icon-wrapper bg-success-subtle text-success">
-                    <i class="ti ti-leaf"></i>
-                  </div>
-                  <span class="badge bg-light text-dark border px-2 py-1 rounded-pill"><i class="ti ti-users me-1"></i>128 Students</span>
-                </div>
-
-                <h3 class="course-title">Spring Boot Microservices</h3>
-                <p class="text-muted small fw-semibold mb-0">Lecturer: Prof. Josh Long</p>
-
-                <div class="progress-track">
-                  <div class="progress-fill bg-success" style="width: 45%;"></div>
-                </div>
-                <div class="d-flex justify-content-between mt-2">
-                  <span class="small fw-bold text-dark">45% Completed</span>
-                  <span class="small text-muted fw-semibold">5 Nodes Left</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="col-md-6">
-              <div class="course-card">
-                <div class="d-flex justify-content-between align-items-start">
-                  <div class="course-icon-wrapper bg-info-subtle text-info">
-                    <i class="ti ti-database"></i>
-                  </div>
-                  <span class="badge bg-light text-dark border px-2 py-1 rounded-pill"><i class="ti ti-users me-1"></i>86 Students</span>
-                </div>
-
-                <h3 class="course-title">SQL Optimization Secrets</h3>
-                <p class="text-muted small fw-semibold mb-0">Lecturer: Dr. Jane Smith</p>
-
-                <div class="progress-track">
-                  <div class="progress-fill bg-info" style="width: 15%;"></div>
-                </div>
-                <div class="d-flex justify-content-between mt-2">
-                  <span class="small fw-bold text-dark">15% Completed</span>
-                  <span class="small text-muted fw-semibold">12 Nodes Left</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 4 -->
-            <div class="col-md-6">
-              <div class="course-card">
-                <div class="d-flex justify-content-between align-items-start">
-                  <div class="course-icon-wrapper bg-warning-subtle text-warning">
-                    <i class="ti ti-brand-aws"></i>
-                  </div>
-                  <span class="badge bg-light text-dark border px-2 py-1 rounded-pill"><i class="ti ti-users me-1"></i>210 Students</span>
-                </div>
-
-                <h3 class="course-title">AWS Cloud Architect</h3>
-                <p class="text-muted small fw-semibold mb-0">Lecturer: Amazon Academy</p>
-
-                <div class="progress-track">
-                  <div class="progress-fill bg-warning" style="width: 95%;"></div>
-                </div>
-                <div class="d-flex justify-content-between mt-2">
-                  <span class="small fw-bold text-dark">95% Completed</span>
-                  <span class="small text-muted fw-semibold text-warning">Final Exam Ready</span>
-                </div>
-              </div>
-            </div>
-
-              <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Không gian học của tôi</h2>
-            </div>
-            <a th:href="@{/student/learning-spaces}" class="btn btn-dark rounded-pill fw-bold px-4">Xem tất cả</a>
-          </div>
-
-          <div class="row g-4" id="learningSpaceList">
-            <div class="col-12">
-              <div class="bento-card text-center text-muted py-5">
-                <div class="spinner-border text-primary mb-3" role="status"></div>
-                <p class="mb-0 fw-semibold">Đang tải không gian học...</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- COURSE QUIZZES SECTION -->
-          <hr class="my-5 opacity-10 border-secondary">
-
-          <div class="d-flex justify-content-between align-items-end mb-4">
+            <div class="border-end border-light opacity-25"></div>
             <div>
-              <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Quiz của khóa học</h2>
-              <p class="text-muted mb-0 fw-semibold">Các bài quiz theo từng không gian học bạn đã tham gia</p>
-              <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Course Quizzes</h2>
-              <p class="text-muted mb-0 fw-semibold">Quizzes tailored for your enrolled learning spaces</p>
+              <div class="fs-4 fw-bold" id="profileClassName">--</div>
+              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Lớp</div>
             </div>
           </div>
-          
-          <div class="accordion accordion-flush quiz-accordion bento-card p-3" id="quizAccordion">
-             <div class="text-center text-muted py-4" id="quiz-loading">
-               <div class="spinner-border text-primary mb-2" role="status"></div>
-               <p>Đang tải khóa học và quiz...</p>
-               <p>Loading your courses and quizzes...</p>
-             </div>
+        </div>
+      </div>
 
+      <!-- 2. STATS & INFO (Right side, takes up 8 columns) -->
+      <div class="col-xl-8 col-lg-7">
+        <div class="row g-3 h-100">
+
+          <!-- Welcome Bento -->
+          <div class="col-12">
+            <div class="bento-card welcome-card d-flex align-items-center justify-content-between" style="background: url('data:image/svg+xml;utf8,<svg xmlns=http://www.w3.org/2000/svg viewBox=0 0 100 100><circle cx=90 cy=10 r=40 fill=%23e8f8ea /></svg>') no-repeat right top; background-size: cover; background-color: #fff;">
+              <div>
+                <h1 class="display-6 fw-900 text-dark mb-2" style="letter-spacing: -1px;">Xin chào, <span data-greeting-name>Sinh viên</span>!</h1>
+                <p class="fs-5 text-muted mb-0" id="dashboardSummary">Đang đồng bộ dữ liệu học tập từ hệ thống.</p>
+              </div>
+              <div class="d-none d-md-block text-center me-4">
+                <div class="text-warning welcome-icon" style="font-size: 4rem; line-height: 1;"><i class="ti ti-flame"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mini Stat 1 -->
+          <div class="col-md-4 col-sm-6">
+            <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center">
+              <div class="stat-icon-bg bg-primary-subtle text-primary mb-3">
+                <i class="ti ti-book"></i>
+              </div>
+              <div class="stat-value text-primary" id="learningSpaceCount">0</div>
+              <div class="stat-label">Lớp đang học</div>
+            </div>
+          </div>
+
+          <!-- Mini Stat 2 -->
+          <div class="col-md-4 col-sm-6">
+            <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center">
+              <div class="stat-icon-bg bg-success-subtle text-success mb-3">
+                <i class="ti ti-rosette-discount-check"></i>
+              </div>
+              <div class="stat-value text-success" id="completedQuizCount">0</div>
+              <div class="stat-label">Quiz đã hoàn thành</div>
+            </div>
+          </div>
+
+          <!-- Mini Stat 3 -->
+          <div class="col-md-4 col-sm-12">
+            <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center" style="background: #2f855a; color: #fff;">
+              <div class="stat-icon-bg bg-white bg-opacity-10 text-white mb-3">
+                <i class="ti ti-alert-circle"></i>
+              </div>
+              <div class="stat-value text-white" id="pendingQuizCount" style="background: none; -webkit-text-fill-color: #fff;">0</div>
+              <div class="stat-label text-white-50">Quiz cần làm</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- END BENTO GRID -->
+
+    <div class="row g-5">
+      <!-- MY LEARNING SPACES (APPLE STYLE CARDS) -->
+      <div class="col-xl-8">
+        <div id="myQuizSection" class="d-flex justify-content-between align-items-end mb-4">
+          <div>
+            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Không gian học của tôi</h2>
+          </div>
+          <a th:href="@{/student/learning-spaces}" class="btn btn-dark rounded-pill fw-bold px-4">Xem tất cả</a>
+        </div>
+
+        <div class="row g-4" id="learningSpaceList">
+          <div class="col-12">
+            <div class="bento-card text-center text-muted py-5">
+              <div class="spinner-border text-primary mb-3" role="status"></div>
+              <p class="mb-0 fw-semibold">Đang tải không gian học...</p>
+            </div>
           </div>
         </div>
 
-        <!-- RIGHT COLUMN: ACTION NEEDED & RECENT DOCS -->
-        <!-- RIGHT COLUMN: RECENT DOCS -->
-        <div class="col-xl-4">
-          
-          <h2 class="h3 fw-900 text-dark mb-4" style="letter-spacing: -0.5px;">Action Needed</h2>
+        <!-- COURSE QUIZZES SECTION -->
+        <hr class="my-5 opacity-10 border-secondary">
 
-          <div class="bento-card p-4 mb-4">
-            <!-- Urgent Task -->
-            <div class="task-list-item task-danger">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="badge bg-danger-subtle text-danger fw-bold px-2 py-1">Due in 12h</span>
-                <i class="ti ti-alert-circle text-danger fs-5"></i>
-              </div>
-              <h5 class="fw-bold text-dark mb-1">Midterm JS Quiz</h5>
-              <p class="text-muted small fw-semibold mb-3">React.js Advanced Patterns</p>
-              <button class="btn btn-danger w-100 rounded-pill fw-bold shadow-sm">Take Quiz</button>
-            </div>
-
-            <!-- Warning Task -->
-            <div class="task-list-item task-warning mb-0">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="badge bg-warning-subtle text-warning fw-bold px-2 py-1 text-dark">Due Tomorrow</span>
-                <i class="ti ti-file-pencil text-warning fs-5"></i>
-              </div>
-              <h5 class="fw-bold text-dark mb-1">Submit Lesson Summary</h5>
-              <p class="text-muted small fw-semibold mb-3">Spring Boot Microservices</p>
-              <button class="btn btn-warning text-dark w-100 rounded-pill fw-bold shadow-sm">Write Summary</button>
-            </div>
+        <div class="d-flex justify-content-between align-items-end mb-4">
+          <div>
+            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Quiz của khóa học</h2>
+            <p class="text-muted mb-0 fw-semibold">Các bài quiz theo từng không gian học bạn đã tham gia</p>
           </div>
+        </div>
 
-          <h2 class="h3 fw-900 text-dark mb-4 mt-5" style="letter-spacing: -0.5px;">New Resources</h2>
-
-          <div class="bento-card p-4">
-            <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-4 mb-3" style="transition: 0.3s; cursor: pointer;" onmouseover="this.classList.add('shadow-sm')" onmouseout="this.classList.remove('shadow-sm')">
-              <div class="d-flex align-items-center gap-3">
-                <div class="bg-white text-danger p-2 rounded-3 shadow-sm"><i class="ti ti-file-type-pdf fs-4"></i></div>
-                <div>
-                  <h6 class="fw-bold mb-0 text-dark">Redux_Thunk.pdf</h6>
-                  <small class="text-muted fw-semibold">React.js â€¢ 2h ago</small>
-                </div>
-              </div>
-              <i class="ti ti-download text-primary fs-5"></i>
-            </div>
-
-            <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-4 mb-3" style="transition: 0.3s; cursor: pointer;" onmouseover="this.classList.add('shadow-sm')" onmouseout="this.classList.remove('shadow-sm')">
-              <div class="d-flex align-items-center gap-3">
-                <div class="bg-white text-primary p-2 rounded-3 shadow-sm"><i class="ti ti-brand-youtube fs-4"></i></div>
-                <div>
-                  <h6 class="fw-bold mb-0 text-dark">JPA Annotations</h6>
-                  <small class="text-muted fw-semibold">Spring Boot â€¢ Yesterday</small>
-                </div>
-              </div>
-              <i class="ti ti-player-play text-primary fs-5"></i>
-            </div>
-
-            <button class="btn btn-outline-dark w-100 rounded-pill fw-bold mt-2">View Document List</button>
+        <div class="accordion accordion-flush quiz-accordion bento-card p-3" id="quizAccordion">
+          <div class="text-center text-muted py-4" id="quiz-loading">
+            <div class="spinner-border text-primary mb-2" role="status"></div>
+            <p>Đang tải khóa học và quiz...</p>
           </div>
 
         </div>
       </div>
 
-    </div>
+      <!-- RIGHT COLUMN: RECENT DOCS -->
+      <div class="col-xl-4">
 
-          <h2 class="h3 fw-900 text-dark mb-4" style="letter-spacing: -0.5px;">Tài liệu mới</h2>
-          <div class="bento-card p-4" id="recentDocuments">
-            <div class="text-center text-muted py-4">
-              <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
-              <h5 class="fw-bold text-dark mt-3 mb-2">Chưa có dữ liệu tài liệu</h5>
-              <p class="small fw-semibold mb-0">Dashboard API hiện chưa trả danh sách tài liệu mới.</p>
-            </div>
+        <h2 class="h3 fw-900 text-dark mb-4" style="letter-spacing: -0.5px;">Tài liệu mới</h2>
+        <div class="bento-card p-4" id="recentDocuments">
+          <div class="text-center text-muted py-4">
+            <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
+            <h5 class="fw-bold text-dark mt-3 mb-2">Chưa có dữ liệu tài liệu</h5>
+            <p class="small fw-semibold mb-0">Dashboard API hiện chưa trả danh sách tài liệu mới.</p>
           </div>
+        </div>
       </div>
 
     </div>
-    </div>
-  </main>
+  </div>
+</main>
+<!-- DYNAMIC DASHBOARD DATA SCRIPT -->
+<script>
+  const token = localStorage.getItem('jwt_token');
+  const userId = localStorage.getItem('user_id');
 
-  <!-- DYNAMIC DASHBOARD DATA SCRIPT -->
-  <script>
-    const token = localStorage.getItem('jwt_token');
-    const userId = localStorage.getItem('user_id');
+  const iconThemes = [
+    { icon: 'ti-template', color: 'primary' },
+    { icon: 'ti-leaf', color: 'success' },
+    { icon: 'ti-database', color: 'info' },
+    { icon: 'ti-brand-aws', color: 'warning' }
+  ];
 
-    const iconThemes = [
-      { icon: 'ti-template', color: 'primary' },
-      { icon: 'ti-leaf', color: 'success' },
-      { icon: 'ti-database', color: 'info' },
-      { icon: 'ti-brand-aws', color: 'warning' }
-    ];
-    async function loadDashboard() {
-      if (!token || !userId) return;
+  function escapeHtml(value) {
+    return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+  }
 
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
+  function setText(selector, value) {
+    const el = document.querySelector(selector);
+    if (el) el.textContent = value;
+  }
 
-    function setText(selector, value) {
-      const el = document.querySelector(selector);
-      if (el) el.textContent = value;
-    }
-      try {
-        const res = await fetch(`/api/students/${userId}/dashboard`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!res.ok) {
-            const errText = await res.text();
-            throw new Error('Failed to load dashboard data: ' + res.status + ' ' + errText);
-        }
-        const data = await res.json();
+  function statusLabel(status) {
+    const labels = {
+      ACTIVE: 'Đang học',
+      DRAFT: 'Bản nháp',
+      LOCKED: 'Chưa mở',
+      UNLOCKED: 'Đã mở',
+      ARCHIVED: 'Lưu trữ',
+      DELETED: 'Đã xóa'
+    };
+    return labels[status] || status || 'Chưa rõ';
+  }
 
-        // 1. Update Student Profile Header (Optional: Name/Avatar)
-        if (data.user) {
-          const nameEl = document.querySelector('.dropdown-toggle span');
-          if (nameEl) nameEl.innerText = data.user.fullName || data.user.username;
-        }
+  function roleLabel(role) {
+    const labels = {
+      MEMBER: 'Sinh viên',
+      OWNER: 'Chủ lớp',
+      SUPPORTER: 'Trợ giảng'
+    };
+    return labels[role] || role || 'Thành viên';
+  }
 
-    function statusLabel(status) {
-      const labels = {
-        ACTIVE: 'Đang học',
-        DRAFT: 'Bản nháp',
-        LOCKED: 'Chưa mở',
-        UNLOCKED: 'Đã mở',
-        ARCHIVED: 'Lưu trữ',
-        DELETED: 'Đã xóa'
-      };
-      return labels[status] || status || 'Chưa rõ';
-    }
+  function studyYear(enrollmentYear) {
+    const year = Number(enrollmentYear);
+    if (!year) return '';
+    return Math.max(1, new Date().getFullYear() - year + 1);
+  }
 
-    function roleLabel(role) {
-      const labels = {
-        MEMBER: 'Sinh viên',
-        OWNER: 'Chủ lớp',
-        SUPPORTER: 'Trợ giảng'
-      };
-      return labels[role] || role || 'Thành viên';
-    }
+  function flattenQuizzes(learningSpaces) {
+    return (learningSpaces || []).flatMap((space) =>
+            (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
+    );
+  }
 
-    function studyYear(enrollmentYear) {
-      const year = Number(enrollmentYear);
-      if (!year) return '';
-      return Math.max(1, new Date().getFullYear() - year + 1);
-    }
+  function renderProfile(data) {
+    const user = data.user || {};
+    const profile = data.studentProfile || {};
+    const displayName = user.fullName || user.username || 'Sinh viên';
+    const major = profile.major || 'Chưa cập nhật ngành';
+    const yearText = profile.enrollmentYear ? `Năm ${studyYear(profile.enrollmentYear)}` : 'Chưa cập nhật năm học';
 
-    function flattenQuizzes(learningSpaces) {
-      return (learningSpaces || []).flatMap((space) =>
-        (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
-      );
-    }
+    setText('#profileName', displayName);
+    setText('[data-greeting-name]', displayName);
+    setText('#profileSummary', `${major} - ${yearText}`);
+    setText('#profileStudentCode', profile.studentCode || '--');
+    setText('#profileClassName', profile.className || '--');
 
-    function renderProfile(data) {
-      const user = data.user || {};
-      const profile = data.studentProfile || {};
-      const displayName = user.fullName || user.username || 'Sinh viên';
-      const major = profile.major || 'Chưa cập nhật ngành';
-      const yearText = profile.enrollmentYear ? `Năm ${studyYear(profile.enrollmentYear)}` : 'Chưa cập nhật năm học';
+    const avatar = document.querySelector('.massive-avatar');
+    if (avatar && user.avatarUrl) avatar.src = user.avatarUrl;
+  }
 
-      setText('#profileName', displayName);
-      setText('[data-greeting-name]', displayName);
-      setText('#profileSummary', `${major} - ${yearText}`);
-      setText('#profileStudentCode', profile.studentCode || '--');
-      setText('#profileClassName', profile.className || '--');
+  function renderStats(learningSpaces, quizzes) {
+    const completedCount = quizzes.filter((quiz) => quiz.isCompleted).length;
+    const pendingCount = quizzes.length - completedCount;
 
-      const avatar = document.querySelector('.massive-avatar');
-      if (avatar && user.avatarUrl) avatar.src = user.avatarUrl;
-    }
+    setText('#learningSpaceCount', learningSpaces.length);
+    setText('#completedQuizCount', completedCount);
+    setText('#pendingQuizCount', pendingCount);
+    setText('#dashboardSummary', `Bạn đang tham gia ${learningSpaces.length} lớp, đã hoàn thành ${completedCount}/${quizzes.length} quiz.`);
+  }
 
-    function renderStats(learningSpaces, quizzes) {
-      const completedCount = quizzes.filter((quiz) => quiz.isCompleted).length;
-      const pendingCount = quizzes.length - completedCount;
-
-      setText('#learningSpaceCount', learningSpaces.length);
-      setText('#completedQuizCount', completedCount);
-      setText('#pendingQuizCount', pendingCount);
-      setText('#dashboardSummary', `Bạn đang tham gia ${learningSpaces.length} lớp, đã hoàn thành ${completedCount}/${quizzes.length} quiz.`);
-    }
-
-    function emptyState(icon, title, message) {
-      return `
+  function emptyState(icon, title, message) {
+    return `
         <div class="bento-card text-center text-muted py-5">
           <i class="ti ${icon} text-primary" style="font-size: 2.6rem;"></i>
           <h5 class="fw-bold text-dark mt-3 mb-2">${escapeHtml(title)}</h5>
           <p class="mb-0 fw-semibold">${escapeHtml(message)}</p>
         </div>`;
+  }
+
+  function renderLearningSpaces(learningSpaces) {
+    const list = document.getElementById('learningSpaceList');
+    if (!list) return;
+
+    if (!learningSpaces.length) {
+      list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'Chưa có lớp học', 'Nhập mã lớp ở trang Lớp của tôi để tham gia learning space.')}</div>`;
+      return;
     }
 
-    function renderLearningSpaces(learningSpaces) {
-      const list = document.getElementById('learningSpaceList');
-      if (!list) return;
+    list.innerHTML = learningSpaces.slice(0, 4).map((space, index) => {
+      const quizzes = space.quizzes || [];
+      const completed = quizzes.filter((quiz) => quiz.isCompleted).length;
+      const percent = quizzes.length ? Math.round((completed / quizzes.length) * 100) : 0;
+      const pending = quizzes.length - completed;
+      const theme = iconThemes[index % iconThemes.length];
+      const roadmapUrl = space.id
+              ? `/student/learning-spaces?spaceId=${encodeURIComponent(space.id)}&focus=roadmap`
+              : '/student/learning-spaces';
 
-      if (!learningSpaces.length) {
-        list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'Chưa có lớp học', 'Nhập mã lớp ở trang Lớp của tôi để tham gia learning space.')}</div>`;
-        return;
-      }
-        // 2. Render Course Quizzes
-        const quizAccordion = document.getElementById('quizAccordion');
-        quizAccordion.innerHTML = ''; // clear loading
-
-        if (!data.learningSpaces || data.learningSpaces.length === 0) {
-           quizAccordion.innerHTML = `<div class="text-center text-muted py-4"><p>You are not enrolled in any learning spaces.</p></div>`;
-           return;
-        }
-
-        data.learningSpaces.forEach((space, index) => {
-          const quizzes = space.quizzes || [];
-          const collapseId = 'collapseSpace' + space.id;
-
-          let bodyHtml = '';
-          if (quizzes.length === 0) {
-            bodyHtml = `
-                <div class="accordion-body border-top border-light text-center py-4">
-                   <div class="text-success mb-2"><i class="ti ti-circle-check fs-1" style="font-size: 3rem;"></i></div>
-                   <h5 class="fw-bold">You're all caught up!</h5>
-                   <p class="text-muted small mb-0">No pending quizzes for this learning space at the moment.</p>
-      list.innerHTML = learningSpaces.slice(0, 4).map((space, index) => {
-        const quizzes = space.quizzes || [];
-        const completed = quizzes.filter((quiz) => quiz.isCompleted).length;
-        const percent = quizzes.length ? Math.round((completed / quizzes.length) * 100) : 0;
-        const pending = quizzes.length - completed;
-        const theme = iconThemes[index % iconThemes.length];
-        const roadmapUrl = space.id
-          ? `/student/learning-spaces?spaceId=${encodeURIComponent(space.id)}&focus=roadmap`
-          : '/student/learning-spaces';
-
-        return `
+      return `
           <div class="col-md-6">
             <a class="course-card text-decoration-none d-block" href="${roadmapUrl}" aria-label="Mở roadmap của ${escapeHtml(space.name || 'learning space')}">
               <div class="d-flex justify-content-between align-items-start">
                 <div class="course-icon-wrapper bg-${theme.color}-subtle text-${theme.color}">
                   <i class="ti ${theme.icon}"></i>
                 </div>
-            `;
-          } else {
-            bodyHtml = `<div class="accordion-body border-top border-light">`;
-            quizzes.forEach(quiz => {
-              const actionBtn = quiz.isCompleted
-                ? `<span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i class="ti ti-check me-1"></i> Completed</span>`
-                : `<a href="/student/take-quiz?quizId=${quiz.id}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">Take Quiz</a>`;
-
-              bodyHtml += `
-                   <div class="quiz-card-item d-flex align-items-center justify-content-between p-3 bg-white rounded-3 shadow-sm mb-2 ${quiz.isCompleted ? 'opacity-75' : ''}">
-                     <div>
-                       <h5 class="fw-bold mb-1">${quiz.title}</h5>
-                       <span class="small text-muted fw-semibold"><i class="ti ti-clock me-1"></i>${quiz.durationMinutes} mins</span>
-                     </div>
-                     <div class="text-end">
-                       ${actionBtn}
-                     </div>
-                   </div>
-              `;
-            });
-            bodyHtml += `</div>`;
-          }
                 <span class="badge bg-light text-dark border px-2 py-1 rounded-pill"><i class="ti ti-circle-check me-1"></i>${escapeHtml(statusLabel(space.status))}</span>
               </div>
 
@@ -1283,31 +933,31 @@
               </div>
             </a>
           </div>`;
-      }).join('');
+    }).join('');
+  }
+
+  function quizAction(quiz) {
+    return quiz.isCompleted
+            ? `<span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i class="ti ti-check me-1"></i>Đã hoàn thành</span>`
+            : `<a href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">Làm quiz</a>`;
+  }
+
+  function renderQuizAccordion(learningSpaces) {
+    const quizAccordion = document.getElementById('quizAccordion');
+    if (!quizAccordion) return;
+
+    quizAccordion.innerHTML = '';
+    if (!learningSpaces.length) {
+      quizAccordion.innerHTML = `<div class="text-center text-muted py-4"><p class="mb-0 fw-semibold">Bạn chưa tham gia không gian học nào.</p></div>`;
+      return;
     }
 
-    function quizAction(quiz) {
-      return quiz.isCompleted
-        ? `<span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i class="ti ti-check me-1"></i>Đã hoàn thành</span>`
-        : `<a href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">Làm quiz</a>`;
-    }
-
-    function renderQuizAccordion(learningSpaces) {
-      const quizAccordion = document.getElementById('quizAccordion');
-      if (!quizAccordion) return;
-
-      quizAccordion.innerHTML = '';
-      if (!learningSpaces.length) {
-        quizAccordion.innerHTML = `<div class="text-center text-muted py-4"><p class="mb-0 fw-semibold">Bạn chưa tham gia không gian học nào.</p></div>`;
-        return;
-      }
-
-      learningSpaces.forEach((space, index) => {
-        const quizzes = space.quizzes || [];
-        const pending = quizzes.filter((quiz) => !quiz.isCompleted).length;
-        const collapseId = `collapseSpace${space.id || index}`;
-        const bodyHtml = quizzes.length
-          ? `<div class="accordion-body border-top border-light">${quizzes.map((quiz) => `
+    learningSpaces.forEach((space, index) => {
+      const quizzes = space.quizzes || [];
+      const pending = quizzes.filter((quiz) => !quiz.isCompleted).length;
+      const collapseId = `collapseSpace${space.id || index}`;
+      const bodyHtml = quizzes.length
+              ? `<div class="accordion-body border-top border-light">${quizzes.map((quiz) => `
               <div class="quiz-card-item d-flex align-items-center justify-content-between gap-3 p-3 bg-white rounded-3 shadow-sm mb-2 ${quiz.isCompleted ? 'opacity-75' : ''}">
                 <div>
                   <h5 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Quiz chưa đặt tên')}</h5>
@@ -1316,24 +966,13 @@
                 </div>
                 <div class="text-end">${quizAction(quiz)}</div>
               </div>`).join('')}</div>`
-          : `<div class="accordion-body border-top border-light text-center py-4">
+              : `<div class="accordion-body border-top border-light text-center py-4">
               <div class="text-success mb-2"><i class="ti ti-circle-check" style="font-size: 3rem;"></i></div>
               <h5 class="fw-bold">Lớp này chưa có quiz</h5>
               <p class="text-muted small mb-0">Khi giảng viên tạo quiz, bài quiz sẽ hiển thị tại đây.</p>
             </div>`;
 
-          const headerHtml = `
-            <div class="accordion-item border-0">
-              <h2 class="accordion-header">
-                <button class="accordion-button ${index === 0 ? '' : 'collapsed'} bg-transparent fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index === 0 ? 'true' : 'false'}">
-                  <i class="ti ti-book text-primary me-2 fs-4"></i> ${space.name}
-                  ${quizzes.length > 0 ? `<span class="badge bg-danger ms-auto me-3 rounded-pill">${quizzes.length} Pending</span>` : `<span class="badge bg-secondary ms-auto me-3 rounded-pill">All Caught Up</span>`}
-                </button>
-              </h2>
-              <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" data-bs-parent="#quizAccordion">
-                ${bodyHtml}
-              </div>
-        quizAccordion.insertAdjacentHTML('beforeend', `
+      quizAccordion.insertAdjacentHTML('beforeend', `
           <div class="accordion-item border-0">
             <h2 class="accordion-header">
               <button class="accordion-button ${index === 0 ? '' : 'collapsed'} bg-transparent fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index === 0 ? 'true' : 'false'}">
@@ -1345,39 +984,39 @@
               ${bodyHtml}
             </div>
           </div>`);
-      });
+    });
+  }
+
+  function renderNotifications(quizzes) {
+    const badge = document.getElementById('notificationBadge');
+    const summary = document.getElementById('notificationSummary');
+    const list = document.getElementById('notificationList');
+    const pending = quizzes.filter((quiz) => !quiz.isCompleted);
+
+    if (badge) {
+      badge.textContent = pending.length;
+      badge.classList.toggle('d-none', pending.length === 0);
     }
 
-    function renderNotifications(quizzes) {
-      const badge = document.getElementById('notificationBadge');
-      const summary = document.getElementById('notificationSummary');
-      const list = document.getElementById('notificationList');
-      const pending = quizzes.filter((quiz) => !quiz.isCompleted);
+    if (summary) {
+      summary.textContent = pending.length
+              ? `Bạn có ${pending.length} quiz cần làm.`
+              : 'Không có thông báo mới.';
+    }
 
-      if (badge) {
-        badge.textContent = pending.length;
-        badge.classList.toggle('d-none', pending.length === 0);
-      }
+    if (!list) return;
 
-      if (summary) {
-        summary.textContent = pending.length
-          ? `Bạn có ${pending.length} quiz cần làm.`
-          : 'Không có thông báo mới.';
-      }
-
-      if (!list) return;
-
-      if (!pending.length) {
-        list.innerHTML = `
+    if (!pending.length) {
+      list.innerHTML = `
           <div class="text-center text-muted py-4 px-3">
             <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
             <h6 class="fw-bold text-dark mt-3 mb-1">Không còn quiz cần làm</h6>
             <p class="small fw-semibold mb-0">Các quiz đang mở đã hoàn thành hoặc chưa có quiz mới.</p>
           </div>`;
-        return;
-      }
+      return;
+    }
 
-      const items = pending.slice(0, 5).map((quiz) => `
+    const items = pending.slice(0, 5).map((quiz) => `
         <a class="notification-item" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}">
           <div class="d-flex gap-3 align-items-start">
             <span class="stat-icon-bg flex-shrink-0" style="width: 42px; height: 42px; border-radius: 14px; font-size: 1.25rem;">
@@ -1388,131 +1027,125 @@
               <p class="small text-muted fw-semibold mb-1">${escapeHtml(quiz.space?.name || 'Learning space')}</p>
               <span class="small text-primary fw-bold">Làm quiz ngay</span>
             </div>
-          `;
-
-          quizAccordion.insertAdjacentHTML('beforeend', headerHtml);
-        });
           </div>
         </a>`).join('');
 
-      const more = pending.length > 5
-        ? `<a class="notification-item text-center fw-bold text-primary" href="/student/dashboard#myQuizSection">Xem thêm ${pending.length - 5} quiz</a>`
-        : '';
+    const more = pending.length > 5
+            ? `<a class="notification-item text-center fw-bold text-primary" href="/student/dashboard#myQuizSection">Xem thêm ${pending.length - 5} quiz</a>`
+            : '';
 
-      list.innerHTML = items + more;
+    list.innerHTML = items + more;
+  }
+
+  function renderDashboard(data) {
+    const learningSpaces = data.learningSpaces || [];
+    const quizzes = flattenQuizzes(learningSpaces);
+
+    renderProfile(data);
+    renderStats(learningSpaces, quizzes);
+    renderLearningSpaces(learningSpaces);
+    renderQuizAccordion(learningSpaces);
+    renderNotifications(quizzes);
+  }
+
+  async function loadDashboard() {
+    if (!token || !userId) {
+      window.location.href = '/login';
+      return;
     }
 
-    function renderDashboard(data) {
-      const learningSpaces = data.learningSpaces || [];
-      const quizzes = flattenQuizzes(learningSpaces);
-
-      renderProfile(data);
-      renderStats(learningSpaces, quizzes);
-      renderLearningSpaces(learningSpaces);
-      renderQuizAccordion(learningSpaces);
-      renderNotifications(quizzes);
-    }
-
-    async function loadDashboard() {
-      if (!token || !userId) {
-        window.location.href = '/login';
-        return;
-      }
-
-      try {
-        const res = await fetch(`/api/students/${encodeURIComponent(userId)}/dashboard`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`Không tải được dữ liệu dashboard: ${res.status} ${errText}`);
-        }
-        renderDashboard(await res.json());
-      } catch (err) {
-        console.error(err);
-        const message = escapeHtml(err.message || 'Không tải được dữ liệu dashboard.');
-        const quizAccordion = document.getElementById('quizAccordion');
-        if (quizAccordion) {
-            quizAccordion.innerHTML = `<div class="alert alert-danger m-3">${err.message}</div>`;
-        const learningSpaceList = document.getElementById('learningSpaceList');
-        const notificationBadge = document.getElementById('notificationBadge');
-        const notificationSummary = document.getElementById('notificationSummary');
-        const notificationList = document.getElementById('notificationList');
-        if (quizAccordion) quizAccordion.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
-        if (learningSpaceList) learningSpaceList.innerHTML = `<div class="col-12"><div class="alert alert-danger">${message}</div></div>`;
-        if (notificationBadge) {
-          notificationBadge.textContent = '!';
-          notificationBadge.classList.remove('d-none');
-        }
-        if (notificationSummary) notificationSummary.textContent = 'Không tải được thông báo.';
-        if (notificationList) notificationList.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
-      }
-    }
-
-    function setActiveSidebarLink(activeKey) {
-      document.querySelectorAll('.sidebar .nav-link[data-nav-key]').forEach(link => {
-        const isActive = link.dataset.navKey === activeKey;
-        link.classList.toggle('active', isActive);
-        link.classList.toggle('fw-bold', isActive);
-        link.classList.toggle('fw-semibold', !isActive);
-
-        if (isActive) {
-          link.setAttribute('aria-current', 'page');
-        } else {
-          link.removeAttribute('aria-current');
-        }
+    try {
+      const res = await fetch(`/api/students/${encodeURIComponent(userId)}/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-    }
-
-    function initSidebarActiveState() {
-      const path = window.location.pathname.replace(/\/+$/, '') || '/';
-      const hash = window.location.hash;
-      let activeKey = null;
-
-      if (path === '/student/dashboard' && hash === '#myQuizSection') {
-        activeKey = 'my-quiz';
-      } else if (path === '/student/dashboard') {
-        activeKey = 'dashboard';
-      } else if (path.startsWith('/student/learning-spaces')) {
-        activeKey = 'learning-spaces';
-      } else if (path.startsWith('/student/my-quizzes')) {
-        activeKey = 'my-quiz';
-      } else if (path.startsWith('/student/take-quiz')) {
-        activeKey = 'my-quiz';
-      } else if (path.startsWith('/student/reports')) {
-        activeKey = 'reports';
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Không tải được dữ liệu dashboard: ${res.status} ${errText}`);
       }
-
-      if (activeKey) {
-        setActiveSidebarLink(activeKey);
+      renderDashboard(await res.json());
+    } catch (err) {
+      console.error(err);
+      const message = escapeHtml(err.message || 'Không tải được dữ liệu dashboard.');
+      const quizAccordion = document.getElementById('quizAccordion');
+      const learningSpaceList = document.getElementById('learningSpaceList');
+      const notificationBadge = document.getElementById('notificationBadge');
+      const notificationSummary = document.getElementById('notificationSummary');
+      const notificationList = document.getElementById('notificationList');
+      if (quizAccordion) quizAccordion.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
+      if (learningSpaceList) learningSpaceList.innerHTML = `<div class="col-12"><div class="alert alert-danger">${message}</div></div>`;
+      if (notificationBadge) {
+        notificationBadge.textContent = '!';
+        notificationBadge.classList.remove('d-none');
       }
-
-      document.querySelectorAll('.sidebar .nav-link[data-nav-key]').forEach(link => {
-        link.addEventListener('click', () => setActiveSidebarLink(link.dataset.navKey));
-      });
-
-      window.addEventListener('hashchange', () => {
-        const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
-        if (currentPath === '/student/dashboard') {
-          setActiveSidebarLink(window.location.hash === '#myQuizSection' ? 'my-quiz' : 'dashboard');
-        }
-      });
+      if (notificationSummary) notificationSummary.textContent = 'Không tải được thông báo.';
+      if (notificationList) notificationList.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
     }
+  }
 
-    // Logout function
-    function logout() {
-      localStorage.removeItem('jwt_token');
-      localStorage.removeItem('user_id');
-      window.location.href = '/signin';
-      window.location.href = '/';
-    }
+  function setActiveSidebarLink(activeKey) {
+    document.querySelectorAll('.sidebar .nav-link[data-nav-key]').forEach(link => {
+      const isActive = link.dataset.navKey === activeKey;
+      link.classList.toggle('active', isActive);
+      link.classList.toggle('fw-bold', isActive);
+      link.classList.toggle('fw-semibold', !isActive);
 
-    // Call on load
-    document.addEventListener('DOMContentLoaded', loadDashboard);
-    document.addEventListener('DOMContentLoaded', () => {
-      initSidebarActiveState();
-      loadDashboard();
+      if (isActive) {
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.removeAttribute('aria-current');
+      }
     });
-  </script>
+  }
+
+  function initSidebarActiveState() {
+    const path = window.location.pathname.replace(/\/+$/, '') || '/';
+    const hash = window.location.hash;
+    let activeKey = null;
+
+    if (path === '/student/dashboard' && hash === '#myQuizSection') {
+      activeKey = 'my-quiz';
+    } else if (path === '/student/dashboard') {
+      activeKey = 'dashboard';
+    } else if (path.startsWith('/student/learning-spaces')) {
+      activeKey = 'learning-spaces';
+    } else if (path.startsWith('/student/my-quizzes')) {
+      activeKey = 'my-quiz';
+    } else if (path.startsWith('/student/take-quiz')) {
+      activeKey = 'my-quiz';
+    } else if (path.startsWith('/student/reports')) {
+      activeKey = 'reports';
+    }
+
+    if (activeKey) {
+      setActiveSidebarLink(activeKey);
+    }
+
+    document.querySelectorAll('.sidebar .nav-link[data-nav-key]').forEach(link => {
+      link.addEventListener('click', () => setActiveSidebarLink(link.dataset.navKey));
+    });
+
+    window.addEventListener('hashchange', () => {
+      const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+      if (currentPath === '/student/dashboard') {
+        setActiveSidebarLink(window.location.hash === '#myQuizSection' ? 'my-quiz' : 'dashboard');
+      }
+    });
+  }
+
+  function logout() {
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('user_id');
+    window.location.href = '/';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const studentNameTop = document.getElementById('studentNameTop');
+    if (studentNameTop) {
+      studentNameTop.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Sinh viên';
+    }
+    initSidebarActiveState();
+    loadDashboard();
+  });
+</script>
 </body>
 </html>
