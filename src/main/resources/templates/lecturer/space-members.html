@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
+<head>
+    <title>Space Members</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+          <div class="col-12">
+            <div class="mb-6">
+              <h1 class="fs-3 mb-1">Member Management</h1>
+              <p>Manage roles and participants in your learning space.</p>
+            </div>
+          </div>
+        </div>
+        
+        <input type="hidden" id="spaceId" th:value="${spaceId}">
+        
+        <div class="card">
+            <div class="card-header bg-white px-4 py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Members List</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined At</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="members-table-body">
+                            <!-- Populated via AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/assets/js/lecturer/space-members.js}"></script>
+    </th:block>
+</body>
+</html>

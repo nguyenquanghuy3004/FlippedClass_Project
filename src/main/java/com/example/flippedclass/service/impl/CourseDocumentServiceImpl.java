@@ -7,12 +7,13 @@ import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.repository.CourseDocumentRepository;
 import com.example.flippedclass.service.CourseDocumentService;
 import com.example.flippedclass.service.LearningPathService;
-import java.net.URI;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.net.URI;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor

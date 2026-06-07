@@ -1,5 +1,7 @@
 package com.example.flippedclass.entity;
 
+import com.example.flippedclass.enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.VisibilityType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,12 +36,12 @@ public class LearningSpace {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default
-    private com.example.flippedclass.enums.LearningSpaceStatus status = com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE;
+    private LearningSpaceStatus status = LearningSpaceStatus.ACTIVE;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default
-    private com.example.flippedclass.enums.VisibilityType visibility = com.example.flippedclass.enums.VisibilityType.PRIVATE;
+    private VisibilityType visibility = VisibilityType.PRIVATE;
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default

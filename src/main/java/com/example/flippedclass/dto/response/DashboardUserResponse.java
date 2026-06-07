@@ -1,8 +1,9 @@
 package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.User;
-import java.time.LocalDateTime;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 public class DashboardUserResponse {

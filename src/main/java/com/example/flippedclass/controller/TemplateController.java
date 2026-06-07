@@ -1,7 +1,10 @@
 package com.example.flippedclass.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Controller
 public class TemplateController {
@@ -28,12 +31,12 @@ public class TemplateController {
 
     @GetMapping("/signin")
     public String signin() {
-        return "Authen/signin";
+        return "signin";
     }
 
     @GetMapping("/signup")
     public String signup() {
-        return "Authen/signup";
+        return "signup";
     }
 
     @GetMapping("/docs")
@@ -74,5 +77,24 @@ public class TemplateController {
     @GetMapping("/lecturer/evaluation-sessions")
     public String evaluationSessions() {
         return "lecturer/evaluation-sessions";
+    }
+
+    @GetMapping("/mentor/dashboard")
+    public String mentorDashboard() {
+        return "lecturer/dashboard";
+    }
+
+    @Autowired
+    private com.example.flippedclass.service.LearningPathService learningPathService;
+
+    @GetMapping("/lecturer/space/{spaceId}")
+    public String learningPath(@PathVariable Long spaceId, Model model) {
+        model.addAttribute("spaceId", spaceId);
+        try {
+            model.addAttribute("paths", learningPathService.getLearningPath(spaceId));
+        } catch(Exception e) {
+            model.addAttribute("paths", java.util.Collections.emptyList());
+        }
+        return "lecturer/learningPath";
     }
 }
