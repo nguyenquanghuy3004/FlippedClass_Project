@@ -177,10 +177,10 @@
 
         <div id="nodePickerSection" class="mb-4">
           <label class="form-label fw-semibold">Learning Node <span class="text-danger">*</span></label>
-          <div class="d-flex gap-2 flex-wrap" id="nodePicker">
-            <div class="text-muted small">Loading nodes...</div>
-          </div>
-          <input type="hidden" id="selectedNodeId">
+          <select class="form-select" id="nodePicker">
+            <option value="">Loading nodes...</option>
+          </select>
+          <div class="invalid-feedback d-block d-none" id="err-learningNodeId"></div>
         </div>
 
         <div class="row g-3">
@@ -188,19 +188,23 @@
             <label class="form-label fw-semibold">Quiz Title <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="mTitle" placeholder="e.g. Midterm Assessment — Chapter 1"
               maxlength="255">
+            <div class="invalid-feedback d-block d-none" id="err-title"></div>
           </div>
           <div class="col-12">
             <label class="form-label fw-semibold">Description</label>
             <textarea class="form-control" id="mDescription" rows="3" placeholder="Brief description of this quiz..."
               maxlength="500"></textarea>
+            <div class="invalid-feedback d-block d-none" id="err-description"></div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Duration (minutes) <span class="text-danger">*</span></label>
             <input type="number" class="form-control" id="mDuration" value="30" min="1" max="480">
+            <div class="invalid-feedback d-block d-none" id="err-durationMinutes"></div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Pass Score (/100) <span class="text-danger">*</span></label>
             <input type="number" class="form-control" id="mPassScore" value="50" min="1" max="100">
+            <div class="invalid-feedback d-block d-none" id="err-passScore"></div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Difficulty</label>
@@ -209,6 +213,7 @@
               <option value="MEDIUM" selected>Medium</option>
               <option value="HARD">Hard</option>
             </select>
+            <div class="invalid-feedback d-block d-none" id="err-difficulty"></div>
           </div>
           <div class="col-12">
             <div class="form-check form-switch">
@@ -460,8 +465,8 @@
     }
 
     function openCreateModal() {
-      document.getElementById('editQuizId').value = '';
       document.getElementById('modalTitle').innerHTML = '<i class="ti ti-plus me-2 text-primary"></i>Create New Quiz';
+      document.getElementById('editQuizId').value = '';
       document.getElementById('mTitle').value = '';
       document.getElementById('mDescription').value = '';
       document.getElementById('mDuration').value = 30;
@@ -469,23 +474,25 @@
       document.getElementById('mDifficulty').value = 'MEDIUM';
       document.getElementById('mActive').checked = true;
       document.getElementById('nodePickerSection').style.display = 'block';
-      document.getElementById('selectedNodeId').value = '';
       renderNodePicker();
+      document.getElementById('nodePicker').value = '';
+      clearErrors();
       document.getElementById('quizModal').classList.add('show');
     }
 
     function openEditModal(id) {
       const quiz = allQuizzes.find(q => q.id === id);
       if (!quiz) return;
-      document.getElementById('editQuizId').value = id;
       document.getElementById('modalTitle').innerHTML = '<i class="ti ti-pencil me-2 text-primary"></i>Edit Quiz';
-      document.getElementById('mTitle').value = quiz.title;
+      document.getElementById('editQuizId').value = quiz.id;
+      document.getElementById('mTitle').value = quiz.title || '';
       document.getElementById('mDescription').value = quiz.description || '';
-      document.getElementById('mDuration').value = quiz.durationMinutes;
-      document.getElementById('mPassScore').value = quiz.passScore;
+      document.getElementById('mDuration').value = quiz.durationMinutes || 30;
+      document.getElementById('mPassScore').value = quiz.passScore || 50;
       document.getElementById('mDifficulty').value = quiz.difficulty || 'MEDIUM';
       document.getElementById('mActive').checked = quiz.active;
       document.getElementById('nodePickerSection').style.display = 'none';
+      clearErrors();
       document.getElementById('quizModal').classList.add('show');
     }
 
@@ -497,36 +504,73 @@
       const picker = document.getElementById('nodePicker');
       picker.innerHTML = '';
       if (!availableNodes.length) {
-        picker.innerHTML = '<p class="text-muted small">No learning nodes found. Create a learning space first.</p>';
+        picker.innerHTML = '<option value="">No learning nodes found. Create a learning space first.</option>';
+        picker.disabled = true;
         return;
       }
+      picker.disabled = false;
+      picker.innerHTML = '<option value="">-- Select a Learning Node --</option>';
       availableNodes.forEach(node => {
-        const pill = document.createElement('div');
-        pill.className = 'node-pill';
-        pill.textContent = node.title || node.name || `Node #${node.id}`;
-        pill.dataset.nodeId = node.id;
-        pill.onclick = () => {
-          document.getElementById('selectedNodeId').value = node.id;
-          document.querySelectorAll('.node-pill').forEach(p => p.classList.toggle('selected', p.dataset.nodeId == node.id));
-        };
-        picker.appendChild(pill);
+        const opt = document.createElement('option');
+        opt.value = node.id;
+        opt.textContent = node.title || node.name || `Node #${node.id}`;
+        picker.appendChild(opt);
       });
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.invalid-feedback').forEach(el => {
+        el.classList.add('d-none');
+        el.textContent = '';
+      });
+      document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    }
+
+    function showError(fieldId, message) {
+      const errEl = document.getElementById('err-' + fieldId);
+      if (errEl) {
+        errEl.textContent = message;
+        errEl.classList.remove('d-none');
+        const inputIdMap = {
+          'title': 'mTitle',
+          'description': 'mDescription',
+          'durationMinutes': 'mDuration',
+          'passScore': 'mPassScore',
+          'difficulty': 'mDifficulty',
+          'learningNodeId': 'nodePicker'
+        };
+        const inputEl = document.getElementById(inputIdMap[fieldId]);
+        if (inputEl) inputEl.classList.add('is-invalid');
+      }
     }
 
     async function saveQuiz() {
       const id = document.getElementById('editQuizId').value;
       const title = document.getElementById('mTitle').value.trim();
       const description = document.getElementById('mDescription').value.trim();
-      const duration = parseInt(document.getElementById('mDuration').value);
-      const passScore = parseInt(document.getElementById('mPassScore').value);
+      const durationStr = document.getElementById('mDuration').value;
+      const duration = parseInt(durationStr);
+      const passScoreStr = document.getElementById('mPassScore').value;
+      const passScore = parseInt(passScoreStr);
       const difficulty = document.getElementById('mDifficulty').value;
       const active = document.getElementById('mActive').checked;
-      const nodeId = document.getElementById('selectedNodeId').value;
+      const nodeId = document.getElementById('nodePicker').value;
 
-      if (!title) { toast('Title is required!', true); return; }
-      if (!duration || duration < 1) { toast('Duration must be at least 1 minute!', true); return; }
-      if (!passScore || passScore < 1) { toast('Pass score must be at least 1%!', true); return; }
-      if (!id && !nodeId) { toast('Please select a Learning Node!', true); return; }
+      clearErrors();
+      let hasError = false;
+
+      if (!title) { showError('title', 'Title is required'); hasError = true; }
+      else if (title.length < 3 || title.length > 255) { showError('title', 'Title must be between 3 and 255 characters'); hasError = true; }
+
+      if (description && description.length > 500) { showError('description', 'Description must not exceed 500 characters'); hasError = true; }
+      
+      if (!durationStr || duration < 1 || duration > 480) { showError('durationMinutes', 'Duration must be between 1 and 480 minutes'); hasError = true; }
+      
+      if (!passScoreStr || passScore < 1 || passScore > 100) { showError('passScore', 'Pass score must be between 1 and 100'); hasError = true; }
+
+      if (!id && !nodeId) { showError('learningNodeId', 'Please select a Learning Node'); hasError = true; }
+
+      if (hasError) return;
 
       const btn = document.getElementById('btnSaveQuiz');
       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
@@ -547,17 +591,28 @@
             body: JSON.stringify({ learningNodeId: parseInt(nodeId), title, description, durationMinutes: duration, passScore, difficulty, active })
           });
         }
+        
         if (res.status === 401) { toast('Session expired!', true); logout(); return; }
+        
         if (!res.ok) {
           let msg = id ? 'Update failed' : 'Create failed';
-          try { const e = await res.json(); msg = e.message || msg; } catch (e) { }
-          throw new Error(msg);
+          try { 
+            const e = await res.json(); 
+            msg = e.message || msg; 
+            if (res.status === 400 && e.error === 'VALIDATION_FAILED' && e.fieldErrors) {
+               e.fieldErrors.forEach(err => showError(err.field, err.message));
+               throw new Error('Please fix the validation errors.');
+            }
+          } catch (e) { throw e; }
+        } else {
+          toast(id ? 'Quiz updated successfully!' : 'Quiz created successfully!');
+          closeModal();
+          await fetchMyQuizzes();
         }
-        toast(id ? 'Quiz updated successfully!' : 'Quiz created successfully!');
-        closeModal();
-        await fetchMyQuizzes();
       } catch (e) {
-        toast(e.message, true);
+        if (e.message !== 'Please fix the validation errors.') {
+          toast(e.message, true);
+        }
       } finally {
         btn.innerHTML = '<i class="ti ti-check me-1"></i>Save Quiz';
         btn.disabled = false;

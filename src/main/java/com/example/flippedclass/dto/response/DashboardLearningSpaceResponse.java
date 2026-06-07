@@ -20,9 +20,9 @@ public class DashboardLearningSpaceResponse {
     private LocalDateTime joinedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<DashboardQuizResponse> quizzes;
+    private List<QuizResponse> quizzes;
 
-    public static DashboardLearningSpaceResponse from(LearningSpaceMember member, List<DashboardQuizResponse> quizzes) {
+    public static DashboardLearningSpaceResponse from(LearningSpaceMember member, List<QuizResponse> quizzes) {
         LearningSpace space = member.getLearningSpace();
         DashboardLearningSpaceResponse response = new DashboardLearningSpaceResponse();
         response.id = space.getId();

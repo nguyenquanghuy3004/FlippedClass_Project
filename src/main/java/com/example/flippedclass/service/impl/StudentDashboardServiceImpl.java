@@ -4,6 +4,7 @@ import com.example.flippedclass.dto.response.DashboardLearningSpaceResponse;
 import com.example.flippedclass.dto.response.DashboardUserResponse;
 import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.dto.response.StudentProfileResponse;
+import com.example.flippedclass.dto.response.QuizResponse;
 import com.example.flippedclass.entity.User;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.StudentProfileRepository;
@@ -41,11 +42,13 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId).stream()
                         .map(member -> {
                             Long spaceId = member.getLearningSpace().getId();
-                            List<com.example.flippedclass.dto.response.DashboardQuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(spaceId).stream()
-                                    .map(q -> {
-                                        boolean isCompleted = quizAttemptRepository.existsByQuizIdAndStudent_Id(q.getId(), studentId);
-                                        return com.example.flippedclass.dto.response.DashboardQuizResponse.from(q, 0, isCompleted);
-                                    })
+                            List<QuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(spaceId).stream()
+                                    .map(q -> QuizResponse.builder()
+                                            .id(q.getId())
+                                            .title(q.getTitle())
+                                            .durationMinutes(q.getDurationMinutes())
+                                            .isCompleted(quizAttemptRepository.existsByQuizIdAndStudent_Id(q.getId(), studentId))
+                                            .build())
                                     .collect(Collectors.toList());
                             return DashboardLearningSpaceResponse.from(member, quizzes);
                         })
