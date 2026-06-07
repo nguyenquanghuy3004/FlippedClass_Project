@@ -22,8 +22,10 @@ public class LearningNodeController {
     @Autowired
     private LearningNodeService learningNodeService;
 
-    private final FileStorageService fileStorageService;
-    private final LearningNodeItemService learningNodeItemService;
+    @Autowired
+    private  FileStorageService fileStorageService;
+    @Autowired
+    private  LearningNodeItemService learningNodeItemService;
 
     @PostMapping
     public ResponseEntity<LearningNodeItemResponse> create(@PathVariable Long nodeId,

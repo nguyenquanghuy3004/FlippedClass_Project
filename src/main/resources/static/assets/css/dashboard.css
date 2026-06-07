@@ -6,8 +6,29 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: 290px;
+    min-height: 270px;
     transition: box-shadow 0.2s;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.status-ACTIVE {
+    background-color: #10b981;
+    box-shadow: 0 0 4px #10b981;
+}
+.status-ARCHIVE {
+    background-color: #f59e0b;
+    box-shadow: 0 0 4px #f59e0b;
+}
+.status-DELETE {
+    background-color: #ef4444;
+    box-shadow: 0 0 4px #ef4444;
 }
 
 .classroom-card:hover {
@@ -95,9 +116,9 @@
 .card-avatar {
     position: absolute;
     right: 16px;
-    top: 62px;
-    width: 75px;
-    height: 75px;
+    top: 60px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     background-color: #fff;
     display: flex;
@@ -141,7 +162,7 @@
     border-top: 1px solid #e0e0e0;
     padding: 8px 16px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     gap: 8px;
     color: #5f6368;

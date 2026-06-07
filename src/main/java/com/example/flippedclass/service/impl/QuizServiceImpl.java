@@ -15,6 +15,7 @@ import com.example.flippedclass.entity.QuizQuestion;
 import com.example.flippedclass.entity.User;
 import com.example.flippedclass.exception.BusinessException;
 import com.example.flippedclass.exception.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.flippedclass.repository.QuizAttemptRepository;
@@ -22,6 +23,7 @@ import com.example.flippedclass.repository.QuizQuestionRepository;
 import com.example.flippedclass.repository.QuizRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.repository.LearningNodeRepository;
+import com.example.flippedclass.service.ProgressEvaluationService;
 import com.example.flippedclass.service.QuizService;
 
 import java.math.BigDecimal;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
@@ -42,18 +45,7 @@ public class QuizServiceImpl implements QuizService {
     private final QuizAttemptRepository attemptRepository;
     private final UserRepository userRepository;
     private final LearningNodeRepository learningNodeRepository;
-
-    public QuizServiceImpl(QuizRepository quizRepository,
-                           QuizQuestionRepository questionRepository,
-                           QuizAttemptRepository attemptRepository,
-                           UserRepository userRepository,
-                           LearningNodeRepository learningNodeRepository) {
-        this.quizRepository = quizRepository;
-        this.questionRepository = questionRepository;
-        this.attemptRepository = attemptRepository;
-        this.userRepository = userRepository;
-        this.learningNodeRepository = learningNodeRepository;
-    }
+    private final ProgressEvaluationService progressEvaluationService;
 
     @Override
     public QuizResponse create(CreateQuizRequest request) {
@@ -218,7 +210,12 @@ public class QuizServiceImpl implements QuizService {
                 .submittedAt(LocalDateTime.now())
                 .build();
 
-        return toAttemptResponse(attemptRepository.save(attempt));
+        QuizAttempt savedAttempt = attemptRepository.save(attempt);
+
+        // Đánh giá lại trạng thái hoàn thành của bài học (NodeProgress)
+        progressEvaluationService.evaluateNodeCompletion(student.getId(), quiz.getLearningNode().getId());
+
+        return toAttemptResponse(savedAttempt);
     }
 
     @Override

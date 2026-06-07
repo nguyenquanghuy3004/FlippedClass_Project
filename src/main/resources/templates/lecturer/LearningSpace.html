@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <th:block th:fragment="learningSpaceContent">
+        <!-- Grid of Cards -->
+        <div class="row g-4 mb-5" id="spaceGrid">
+            <!-- Dynamic content will be loaded here via JS -->
+        </div>
+    </th:block>
+
+    <th:block th:fragment="learningSpaceScripts">
+        <!-- Create Space Modal -->
+        <div class="modal fade" id="createSpaceModal" tabindex="-1" aria-labelledby="createSpaceModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow">
+                    <div Organize your modules sequentially. Drag and drop to rearrange the syllabus at any time.class="modal-header border-bottom-0">
+                        <h5 class="modal-title fw-bold" id="createSpaceModalLabel">Create New Learning Space</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createSpaceForm">
+                            <div class="mb-3">
+                                <label for="spaceName" class="form-label fw-bold">Name</label>
+                                <input type="text" class="form-control bg-light border-0" id="spaceName" required minlength="3" maxlength="100">
+                            </div>
+                            <div class="mb-3">
+                                <label for="spaceDescription" class="form-label fw-bold">Description</label>
+                                <textarea class="form-control bg-light border-0" id="spaceDescription" rows="3" maxlength="500"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="spaceVisibility" class="form-label fw-bold">Visibility</label>
+                                <select class="form-select bg-light border-0" id="spaceVisibility" required>
+                                    <option value="PUBLIC">Public</option>
+                                    <option value="PRIVATE">Private</option>
+                                </select>
+                            </div>
+                            <div id="createSpaceError" class="text-danger mb-3" style="display:none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnCreateSpace" style="background-color: #6366f1; border-color: #6366f1;">Create Space</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Space Modal -->
+        <div class="modal fade" id="editSpaceModal" tabindex="-1" aria-labelledby="editSpaceModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title fw-bold" id="editSpaceModalLabel">Edit Learning Space</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editSpaceForm">
+                            <input type="hidden" id="editSpaceId">
+                            <div class="mb-3">
+                                <label for="editSpaceName" class="form-label fw-bold">Name</label>
+                                <input type="text" class="form-control bg-light border-0" id="editSpaceName" required minlength="3" maxlength="100">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editSpaceDescription" class="form-label fw-bold">Description</label>
+                                <textarea class="form-control bg-light border-0" id="editSpaceDescription" rows="3" maxlength="500"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editSpaceVisibility" class="form-label fw-bold">Visibility</label>
+                                <select class="form-select bg-light border-0" id="editSpaceVisibility" required>
+                                    <option value="PUBLIC">Public</option>
+                                    <option value="PRIVATE">Private</option>
+                                </select>
+                            </div>
+                            <div id="editSpaceError" class="text-danger mb-3" style="display:none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnUpdateSpace" style="background-color: #6366f1; border-color: #6366f1;">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invite Modal -->
+        <div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-bottom-0 pb-0 position-relative pt-4">
+                        <h4 class="modal-title fw-bold text-dark w-100 text-center" style="font-size: 1.25rem;">
+                            Invite Students
+                        </h4>
+                        <button type="button" class="btn-close position-absolute" style="top: 16px; right: 16px; font-size: 0.8rem;" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center pt-4 pb-4 px-4">
+                        <div class="rounded-4 py-4 px-3 mb-4 d-flex justify-content-center align-items-center" style="background-color: #f8f9fa; border: 1px solid #f1f3f5;">
+                            <h2 id="displayInviteCode" class="fw-bold mb-0 text-dark" style="letter-spacing: 0.6em; margin-right: -0.6em; font-family: 'Inter', sans-serif; font-size: 1.75rem; white-space: nowrap;"></h2>
+                        </div>
+                        
+                        <button id="copyInviteCodeBtn" class="btn btn-primary w-100 rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm border-0" style="background-color: #5a67d8; font-size: 1rem;">
+                            <i class="ti ti-copy fs-5"></i> Copy Code
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trash Modal -->
+        <div class="modal fade" id="trashModal" tabindex="-1" aria-labelledby="trashModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header border-bottom-0 bg-light">
+                        <h5 class="modal-title fw-bold text-danger" id="trashModalLabel"><i class="ti ti-trash"></i> Trash Bin</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="list-group list-group-flush" id="trashList">
+                            <!-- Trashed spaces will be injected here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 bg-light">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template id="spaceCardTemplate">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="classroom-card">
+                    <div class="card-banner">
+                        <div class="banner-pattern"></div>
+                        <a href="#" class="card-title-link">
+                            <h2 class="course-title"></h2>
+                            <div class="course-subtitle"></div>
+                        </a>
+                        
+                        <div class="card-options-top" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="ti ti-dots-vertical"></i>
+                        </div>
+                        <ul class="dropdown-menu shadow-sm border-0 rounded-3">
+                            <li><a class="dropdown-item d-flex align-items-center gap-2 edit-space-btn" href="#"><i class="ti ti-pencil"></i> Edit Space</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2 archive-space-btn" href="#"><i class="ti ti-archive"></i> <span class="archive-text">Archive Space</span></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger delete-space-btn" href="#"><i class="ti ti-trash"></i> Delete Space</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card-avatar"></div>
+                    
+                    <div class="card-body-content">
+                        <!-- Content -->
+                    </div>
+                    
+                    <div class="card-footer">
+                        <div class="d-flex align-items-center gap-1">
+                            <span class="status-indicator" title="Status"></span>
+                            <span class="visibility-text text-muted" style="font-size: 0.75rem; font-weight: 600;"></span>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <div class="footer-icon share-btn" title="Share Invite Code"><i class="ti ti-share"></i></div>
+                            <div class="footer-icon" title="Open in class"><i class="ti ti-id-badge-2"></i></div>
+                            <div class="footer-icon" title="Open folder"><i class="ti ti-folder"></i></div>
+                            <div class="footer-icon" title="More"><i class="ti ti-dots-vertical"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <script th:src="@{/assets/js/lecturer/learning-space.js}"></script>
+        </th:block>
+</body>
+</html>

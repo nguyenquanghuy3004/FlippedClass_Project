@@ -7,6 +7,8 @@ import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.LessonSummary;
 import com.example.flippedclass.entity.User;
 import com.example.flippedclass.enums.SummaryStatus;
+import com.example.flippedclass.service.ProgressEvaluationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.flippedclass.repository.LearningNodeRepository;
@@ -20,19 +22,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class LessonSummaryServiceImpl implements LessonSummaryService {
 
-    private final LessonSummaryRepository lessonSummaryRepository;
-    private final LearningNodeRepository learningNodeRepository;
-    private final UserRepository userRepository;
+    private  LessonSummaryRepository lessonSummaryRepository;
+    private  LearningNodeRepository learningNodeRepository;
+    private  UserRepository userRepository;
+    private  ProgressEvaluationService progressEvaluationService;
 
-    public LessonSummaryServiceImpl(LessonSummaryRepository lessonSummaryRepository,
-                                    LearningNodeRepository learningNodeRepository,
-                                    UserRepository userRepository) {
-        this.lessonSummaryRepository = lessonSummaryRepository;
-        this.learningNodeRepository = learningNodeRepository;
-        this.userRepository = userRepository;
-    }
 
     @Override
     public LessonSummaryResponse submitSummary(SubmitSummaryRequest request) {
@@ -51,6 +48,10 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
                 .build();
 
         summary = lessonSummaryRepository.save(summary);
+
+        // MỚI: Gọi đánh giá tiến độ sau khi lưu
+        progressEvaluationService.evaluateNodeCompletion(student.getId(), learningNode.getId());
+
         return mapToResponse(summary);
     }
 
