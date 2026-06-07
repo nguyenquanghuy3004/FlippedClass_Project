@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Đăng nhập - FlippedClass</title>
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+  <link rel="manifest" th:href="@{/assets/site.webmanifest}">
+  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
+  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/auth.css}">
+
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script> // Google
+
+
+</head>
+
+<body class="bg-light">
+  <div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="card shadow-sm border-0" style="max-width:420px; width:100%;">
+      <div class="card-body p-4 p-sm-5">
+        <div class="text-center mb-4">
+          <a href="/" class="mb-2 d-inline-flex align-items-center text-decoration-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#198754"
+              class="bi bi-mortarboard-fill me-2" viewBox="0 0 16 16">
+              <path
+                d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z" />
+              <path
+                d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z" />
+            </svg>
+            <span class="h4 mb-0 fw-bold text-success">FlippedClass</span>
+          </a>
+          <h1 class="card-title h4 fw-bold mt-3">Đăng nhập</h1>
+          <p class="text-muted small">Chào mừng bạn quay trở lại!</p>
+        </div>
+
+        <form id="loginForm" class="needs-validation" novalidate>
+          <div class="mb-3">
+            <label for="username" class="form-label small fw-bold">Email hoặc Tên đăng nhập <span
+                class="text-danger">*</span></label>
+            <input id="username" type="text" class="form-control" placeholder="Nhập username hoặc email" required
+              autofocus>
+            <div class="invalid-feedback">Vui lòng nhập tài khoản.</div>
+          </div>
+
+          <div class="mb-4">
+            <label for="password" class="form-label d-flex justify-content-between small fw-bold">
+              <span>Mật khẩu <span class="text-danger">*</span></span>
+            </label>
+            <input id="password" type="password" class="form-control" placeholder="Nhập mật khẩu" required
+              minlength="6">
+            <div class="invalid-feedback">Mật khẩu tối thiểu 6 ký tự.</div>
+          </div>
+
+          <div id="errorMsg" class="text-danger small mb-3 text-center fw-bold" style="display: none;"></div>
+
+          <button class="btn btn-success w-100 mb-3 fw-bold" type="submit">Đăng nhập</button>
+
+          <div class="text-center text-muted small mb-3">Hoặc đăng nhập bằng</div>
+
+          <div id="g_id_onload"
+            data-client_id="790885197434-tj8p3el3prc6n6fakj3udbuoqml6dpq1.apps.googleusercontent.com"
+            data-context="signin" data-ux_mode="popup" data-callback="handleGoogleLogin" data-auto_prompt="false">
+          </div>
+
+          <div class="g_id_signin d-flex justify-content-center w-100 mb-3" data-type="standard"
+            data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large"
+            data-logo_alignment="left">
+          </div>
+
+        </form>
+
+        <div class="text-center mt-4 small text-muted">
+          Chưa có tài khoản? <a href="/register" class="text-success fw-bold text-decoration-none">Đăng ký tại đây.</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('errorMsg');
+      const btn = this.querySelector('button[type="submit"]');
+
+      if (!username || !password) {
+        return;
+      }
+
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Đang xử lý...';
+      btn.disabled = true;
+
+      fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Đăng nhập thất bại. Sai tài khoản hoặc mật khẩu.');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const token = data.token;
+          localStorage.setItem('jwt_token', token);
+          localStorage.setItem('user_id', data.id);
+          // ĐÔNG SỬA ĐOẠN NÀY 121-131
+          const userRoles = data.roles || [];
+          if (userRoles.includes('ADMIN') || userRoles.includes('ROLE_ADMIN')) {
+            window.location.href = '/admin/dashboard';
+          } else if (userRoles.includes('MENTOR') || userRoles.includes('ROLE_MENTOR')) {
+            window.location.href = '/lecturer/quizzes';
+          } else if (userRoles.includes('STUDENT') || userRoles.includes('ROLE_STUDENT')) {
+            window.location.href = '/student/dashboard';
+          } else {
+            window.location.href = '/';
+          }
+        })
+
+        .catch(error => {
+          errorMsg.textContent = error.message;
+          errorMsg.style.display = 'block';
+          btn.innerHTML = 'Đăng nhập';
+          btn.disabled = false;
+        });
+    });
+
+    function handleGoogleLogin(response) {
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.style.display = 'none';
+
+      fetch('/api/auth/google', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idToken: response.credential
+        })
+      })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Đăng nhập Google thất bại.');
+          }
+          return res.json();
+        })
+        .then(data => {
+          const token = data.token;
+          localStorage.setItem('jwt_token', token);
+          localStorage.setItem('user_id', data.id);
+
+          const userRoles = data.roles || [];
+          if (userRoles.includes('ADMIN') || userRoles.includes('ROLE_ADMIN')) {
+            window.location.href = '/admin/dashboard';
+          } else if (userRoles.includes('MENTOR') || userRoles.includes('ROLE_MENTOR')) {
+            window.location.href = '/lecturer/quizzes';
+          } else if (userRoles.includes('STUDENT') || userRoles.includes('ROLE_STUDENT')) {
+            window.location.href = '/student/dashboard';
+          } else {
+            window.location.href = '/';
+          }
+        })
+        .catch(error => {
+          errorMsg.textContent = error.message;
+          errorMsg.style.display = 'block';
+        });
+    }
+  </script>
+
+</body>
+
+</html>
