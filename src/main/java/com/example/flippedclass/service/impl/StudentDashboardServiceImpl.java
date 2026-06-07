@@ -7,6 +7,7 @@ import com.example.flippedclass.dto.response.StudentProfileResponse;
 import com.example.flippedclass.dto.response.QuizResponse;
 import com.example.flippedclass.entity.User;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
+import com.example.flippedclass.repository.QuizQuestionRepository;
 import com.example.flippedclass.repository.StudentProfileRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.StudentDashboardService;
@@ -27,6 +28,8 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     private final LearningSpaceMemberRepository learningSpaceMemberRepository;
     private final com.example.flippedclass.repository.QuizRepository quizRepository;
     private final com.example.flippedclass.repository.QuizAttemptRepository quizAttemptRepository;
+
+    private final QuizQuestionRepository quizQuestionRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -52,6 +55,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                                     .collect(Collectors.toList());
                             return DashboardLearningSpaceResponse.from(member, quizzes);
                         })
+
                         .toList();
 
         return new StudentDashboardResponse(

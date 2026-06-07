@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.example.flippedclass.dto.response.LearningNodeResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -32,5 +34,21 @@ public class GlobalLearningNodeController {
                 "name", node.getTitle()
         )).collect(Collectors.toList());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{nodeId}")
+    public ResponseEntity<LearningNodeResponse> getNodeDetail(@PathVariable Long nodeId) {
+        return learningNodeRepository.findById(nodeId)
+                .map(node -> ResponseEntity.ok(LearningNodeResponse.builder()
+                        .id(node.getId())
+                        .title(node.getTitle())
+                        .learningPathId(node.getLearningPath().getId())
+                        .status(node.getStatus())
+                        .nodeType(node.getNodeType())
+                        .content(node.getContent() != null ? node.getContent() : node.getDescription())
+                        .createdAt(node.getCreatedAt())
+                        .updatedAt(node.getUpdatedAt())
+                        .build()))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

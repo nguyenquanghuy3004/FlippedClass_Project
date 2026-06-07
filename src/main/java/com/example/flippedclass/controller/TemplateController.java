@@ -64,6 +64,21 @@ public class TemplateController {
         return "student/student-dashboard";
     }
 
+    @GetMapping("/student/learning-spaces")
+    public String studentLearningSpaces() {
+        return "student/learning-spaces";
+    }
+
+    @GetMapping({"/student/learning-node", "/student/learning-nodes/{nodeId}"})
+    public String studentLearningNode() {
+        return "student/learning-node";
+    }
+
+    @GetMapping("/student/my-quizzes")
+    public String studentMyQuizzes() {
+        return "student/my-quizzes";
+    }
+
     @GetMapping("/student/take-quiz")
     public String takeQuiz() {
         return "student/take-quiz";
