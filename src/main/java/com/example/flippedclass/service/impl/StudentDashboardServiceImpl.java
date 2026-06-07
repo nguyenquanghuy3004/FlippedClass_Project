@@ -2,9 +2,12 @@ package com.example.flippedclass.service.impl;
 
 import com.example.flippedclass.dto.response.DashboardLearningSpaceResponse;
 import com.example.flippedclass.dto.response.DashboardUserResponse;
+import com.example.flippedclass.dto.response.CourseDocumentResponse;
 import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.dto.response.StudentProfileResponse;
+import com.example.flippedclass.entity.LearningSpaceMember;
 import com.example.flippedclass.entity.User;
+import com.example.flippedclass.repository.CourseDocumentRepository;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.QuizQuestionRepository;
 import com.example.flippedclass.repository.StudentProfileRepository;
@@ -28,6 +31,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     private final com.example.flippedclass.repository.QuizRepository quizRepository;
     private final com.example.flippedclass.repository.QuizAttemptRepository quizAttemptRepository;
     private final QuizQuestionRepository quizQuestionRepository;
+    private final CourseDocumentRepository courseDocumentRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -39,8 +43,14 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 .map(this::toStudentProfileResponse)
                 .orElse(null);
 
+        List<LearningSpaceMember> memberships = learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId);
+        List<Long> learningSpaceIds = memberships.stream()
+                .map(member -> member.getLearningSpace().getId())
+                .distinct()
+                .toList();
+
         List<DashboardLearningSpaceResponse> learningSpaces =
-                learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId).stream()
+                memberships.stream()
                         .map(member -> {
                             Long spaceId = member.getLearningSpace().getId();
                             List<com.example.flippedclass.dto.response.DashboardQuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(spaceId).stream()
@@ -54,10 +64,19 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                         })
                         .toList();
 
+        List<CourseDocumentResponse> recentDocuments = learningSpaceIds.isEmpty()
+                ? List.of()
+                : courseDocumentRepository
+                        .findTop8ByLearningPath_LearningSpace_IdInOrderByCreatedAtDesc(learningSpaceIds)
+                        .stream()
+                        .map(CourseDocumentResponse::from)
+                        .toList();
+
         return new StudentDashboardResponse(
                 DashboardUserResponse.from(user),
                 profile,
-                learningSpaces
+                learningSpaces,
+                recentDocuments
         );
     }
 

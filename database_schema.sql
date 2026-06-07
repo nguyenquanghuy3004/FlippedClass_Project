@@ -6,7 +6,7 @@
 --         document_type varchar(50),
 --         url varchar(1000),
 --         description NVARCHAR(MAX),
---         title varchar(255) not null,
+--         title NVARCHAR(255) not null,
 --         primary key (id)
 --     );
 --
@@ -27,7 +27,7 @@
 --         id bigint identity not null,
 --         learning_path_id bigint not null,
 --         lecturer_id bigint not null,
---         title varchar(255) not null,
+--         title NVARCHAR(255) not null,
 --         primary key (id)
 --     );
 --
@@ -60,7 +60,7 @@
 --         learning_node_id bigint not null,
 --         quiz_id bigint,
 --         content NVARCHAR(MAX),
---         title varchar(255) not null,
+--         title NVARCHAR(255) not null,
 --         url NVARCHAR(MAX),
 --         primary key (id)
 --     );
@@ -78,7 +78,7 @@
 --         node_type varchar(50),
 --         content NVARCHAR(MAX),
 --         description NVARCHAR(MAX),
---         title varchar(255) not null,
+--         title NVARCHAR(255) not null,
 --         primary key (id)
 --     );
 --
@@ -93,7 +93,7 @@
 --         status varchar(20) not null check ((status in ('ACTIVE','DELETED','ARCHIVED'))),
 --         visibility varchar(20) check ((visibility in ('PUBLIC','PRIVATE'))),
 --         description NVARCHAR(MAX),
---         title varchar(255) not null,
+--         title NVARCHAR(255) not null,
 --         primary key (id)
 --     );
 --
@@ -160,7 +160,7 @@
 --         learning_node_id bigint not null,
 --         lecturer_id bigint not null,
 --         description NVARCHAR(MAX),
---         title varchar(255) not null,
+--         title NVARCHAR(255) not null,
 --         primary key (id)
 --     );
 --

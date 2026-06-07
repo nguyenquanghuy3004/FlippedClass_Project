@@ -12,6 +12,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -22,6 +23,7 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
     private final LearningPathService learningPathService;
 
     @Override
+    @Transactional(readOnly = true)
     public List<CourseDocumentResponse> findByLearningPath(Long learningPathId) {
         learningPathService.getLearningPathEntity(learningPathId);
         return documentRepository.findByLearningPathId(learningPathId).stream()

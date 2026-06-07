@@ -773,8 +773,8 @@
           <div class="bento-card p-4" id="recentDocuments">
             <div class="text-center text-muted py-4">
               <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
-              <h5 class="fw-bold text-dark mt-3 mb-2">Chưa có dữ liệu tài liệu</h5>
-              <p class="small fw-semibold mb-0">Dashboard API hiện chưa trả danh sách tài liệu mới.</p>
+              <h5 class="fw-bold text-dark mt-3 mb-2">Đang tải tài liệu</h5>
+              <p class="small fw-semibold mb-0">Tài liệu của các learning space sẽ hiển thị tại đây.</p>
             </div>
           </div>
       </div>
@@ -1022,15 +1022,82 @@
       list.innerHTML = items + more;
     }
 
+    function documentTypeLabel(type) {
+      const labels = {
+        VIDEO: 'Video',
+        YOUTUBE: 'YouTube',
+        PDF: 'PDF',
+        GOOGLE_DRIVE: 'Google Drive',
+        GITHUB: 'GitHub',
+        WEBSITE: 'Website',
+        OTHER: 'Tài liệu'
+      };
+      return labels[type] || 'Tài liệu';
+    }
+
+    function documentIcon(type) {
+      const icons = {
+        VIDEO: 'ti-video',
+        YOUTUBE: 'ti-brand-youtube',
+        PDF: 'ti-file-type-pdf',
+        GOOGLE_DRIVE: 'ti-brand-google-drive',
+        GITHUB: 'ti-brand-github',
+        WEBSITE: 'ti-world',
+        OTHER: 'ti-file-description'
+      };
+      return icons[type] || 'ti-file-description';
+    }
+
+    function renderRecentDocuments(documents) {
+      const container = document.getElementById('recentDocuments');
+      if (!container) return;
+
+      if (!documents.length) {
+        container.innerHTML = `
+          <div class="text-center text-muted py-4">
+            <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
+            <h5 class="fw-bold text-dark mt-3 mb-2">Chưa có tài liệu</h5>
+            <p class="small fw-semibold mb-0">Giảng viên chưa thêm tài liệu cho các learning space bạn đang tham gia.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = documents.slice(0, 8).map((doc) => {
+        const type = doc.documentType || 'OTHER';
+        const meta = [doc.learningSpaceName, doc.learningPathTitle]
+          .filter(Boolean)
+          .join(' · ');
+        const href = doc.url || '#';
+        const disabledClass = doc.url ? '' : ' opacity-75 pe-none';
+        const targetAttrs = doc.url ? ' target="_blank" rel="noopener noreferrer"' : '';
+
+        return `
+          <a class="notification-item rounded-4 border mb-2${disabledClass}" href="${escapeHtml(href)}"${targetAttrs}>
+            <div class="d-flex gap-3 align-items-start">
+              <span class="stat-icon-bg flex-shrink-0" style="width: 42px; height: 42px; border-radius: 14px; font-size: 1.25rem;">
+                <i class="ti ${documentIcon(type)}"></i>
+              </span>
+              <div class="min-w-0">
+                <h6 class="fw-bold mb-1">${escapeHtml(doc.title || 'Tài liệu chưa đặt tên')}</h6>
+                <p class="small text-muted fw-semibold mb-1">${escapeHtml(meta || 'Learning space')}</p>
+                <span class="small text-primary fw-bold">${escapeHtml(documentTypeLabel(type))}</span>
+              </div>
+            </div>
+          </a>`;
+      }).join('');
+    }
+
     function renderDashboard(data) {
       const learningSpaces = data.learningSpaces || [];
       const quizzes = flattenQuizzes(learningSpaces);
+      const documents = data.recentDocuments || [];
 
       renderProfile(data);
       renderStats(learningSpaces, quizzes);
       renderLearningSpaces(learningSpaces);
       renderQuizAccordion(learningSpaces);
       renderNotifications(quizzes);
+      renderRecentDocuments(documents);
     }
 
     async function loadDashboard() {
@@ -1056,6 +1123,7 @@
         const notificationBadge = document.getElementById('notificationBadge');
         const notificationSummary = document.getElementById('notificationSummary');
         const notificationList = document.getElementById('notificationList');
+        const recentDocuments = document.getElementById('recentDocuments');
         if (quizAccordion) quizAccordion.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
         if (learningSpaceList) learningSpaceList.innerHTML = `<div class="col-12"><div class="alert alert-danger">${message}</div></div>`;
         if (notificationBadge) {
@@ -1064,6 +1132,7 @@
         }
         if (notificationSummary) notificationSummary.textContent = 'Không tải được thông báo.';
         if (notificationList) notificationList.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
+        if (recentDocuments) recentDocuments.innerHTML = `<div class="alert alert-danger m-0">${message}</div>`;
       }
     }
 
