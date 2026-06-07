@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Evaluation Sessions - FlippedClass</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <!-- Core Scripts -->
+  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
+  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  <style>
+    body {
+      background-color: #fcfcfc;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Page Header */
+    .page-header-purple {
+      background: linear-gradient(135deg, #7b5eea 0%, #5a3ba8 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 2rem 2.5rem;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .page-header-purple h1 { font-weight: 800; font-size: 1.8rem; margin-bottom: 0.25rem; color: #fff; }
+    .page-header-purple p { margin-bottom: 0; opacity: 0.85; font-size: 0.95rem; }
+    .btn-create-white {
+      background: #ffffff; color: #5a3ba8; font-weight: 700; border: none; padding: 0.6rem 1.25rem;
+      border-radius: 50rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-create-white:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+
+    /* Session Card */
+    .session-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+      padding: 1.5rem;
+      transition: all 0.2s;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .session-card:hover {
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      border-color: #cbd5e1;
+      transform: translateY(-3px);
+    }
+    .session-title { font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; }
+    .session-meta { font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; }
+    .session-criteria-count {
+      display: inline-block; padding: 0.25rem 0.75rem; border-radius: 50rem;
+      background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; margin-bottom: 1.5rem;
+    }
+
+    /* Form Styles */
+    .form-card { border: none; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
+    .criteria-row {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .btn-remove-row {
+      position: absolute; top: -10px; right: -10px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #ef4444; color: #fff; border: none;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="overlay" class="overlay"></div>
+  
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <div>
+      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
+        <li class="ms-3 dropdown">
+          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-sm rounded-circle" />
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="logo-area">
+      <a th:href="@{/}" class="d-inline-flex text-decoration-none">
+        <span class="logo-text ms-2 fw-bold fs-4 text-primary"><i class="ti ti-books"></i> FlippedClass</span>
+      </a>
+    </div>
+    <ul class="nav flex-column mt-3">
+      <li class="px-4 py-2"><small class="nav-text">Main</small></li>
+      <li><a class="nav-link" th:href="@{/lecturer/quizzes}"><i class="ti ti-brain"></i><span class="nav-text">Quizzes</span></a></li>
+      <li><a class="nav-link active" href="#"><i class="ti ti-clipboard-list"></i><span class="nav-text">Eval Sessions</span></a></li>
+      <li><a class="nav-link" th:href="@{/lecturer/grading}"><i class="ti ti-pencil-star"></i><span class="nav-text">Grading</span></a></li>
+    </ul>
+  </aside>
+
+  <main id="content" class="content py-10">
+    <div class="container-fluid">
+      
+      <!-- PURPLE BANNER -->
+      <div class="page-header-purple">
+        <div>
+          <h1>Evaluation Sessions</h1>
+          <p>Manage grading sessions and configure assessment criteria.</p>
+        </div>
+        <div>
+          <button class="btn-create-white" onclick="toggleForm(true)">
+            <i class="ti ti-plus"></i> Create Session
+          </button>
+        </div>
+      </div>
+
+      <div id="alertMessage" class="alert d-none mb-4 shadow-sm border-0 fw-bold rounded-3" role="alert"></div>
+
+      <!-- CREATE FORM -->
+      <div class="row" id="formContainer" style="display: none;">
+        <div class="col-12 mb-5">
+          <div class="card form-card">
+            <div class="card-body p-5">
+              <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <h3 class="mb-0 fw-bold text-dark"><i class="ti ti-clipboard-plus me-2 text-primary"></i>Create Evaluation Session</h3>
+                <button type="button" class="btn-close" aria-label="Close" onclick="toggleForm(false)"></button>
+              </div>
+              
+              <form id="sessionForm" onsubmit="saveSession(event)">
+                <div class="row g-4">
+                  <div class="col-md-12">
+                    <label class="form-label fw-bold">Session Title <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control form-control-lg bg-light border-0" id="title" placeholder="e.g. Midterm Presentation" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold">Grading Start Date <span class="text-danger">*</span></label>
+                    <input type="datetime-local" class="form-control" id="gradingStartAt" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold">Grading Deadline <span class="text-danger">*</span></label>
+                    <input type="datetime-local" class="form-control" id="gradingDeadlineAt" required>
+                  </div>
+                  
+                  <div class="col-12 mt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h5 class="fw-bold mb-0"><i class="ti ti-list-check text-primary"></i> Grading Criteria</h5>
+                      <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="addCriterionRow()">
+                        <i class="ti ti-plus"></i> Add Criterion
+                      </button>
+                    </div>
+                    
+                    <div id="criteriaList">
+                      <!-- Criteria rows injected via JS -->
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="d-flex gap-3 mt-5 pt-3 border-top">
+                  <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm" id="saveBtn">Create Session</button>
+                  <button type="button" class="btn btn-light btn-lg rounded-pill px-4 fw-bold" onclick="toggleForm(false)">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SESSIONS GRID -->
+      <div id="loader" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+
+      <div class="row g-4" id="sessionsGrid">
+        <!-- JS populated -->
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Hardcoded lecturerId for demo purposes, in reality fetched from auth context
+    const LECTURER_ID = 1; 
+    let criteriaCount = 0;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchSessions();
+      addCriterionRow(); // Add first row by default
+    });
+
+    function showAlert(message, type = 'success') {
+      const alertEl = document.getElementById('alertMessage');
+      alertEl.innerText = message;
+      alertEl.className = `alert alert-${type} mb-4 fw-bold shadow-sm border-0 rounded-3`;
+      alertEl.classList.remove('d-none');
+      setTimeout(() => alertEl.classList.add('d-none'), 4000);
+    }
+
+    function toggleForm(show = true) {
+      const container = document.getElementById('formContainer');
+      if (show) {
+        container.style.display = 'flex';
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        container.style.display = 'none';
+        document.getElementById('sessionForm').reset();
+      }
+    }
+
+    function addCriterionRow() {
+      criteriaCount++;
+      const id = criteriaCount;
+      const list = document.getElementById('criteriaList');
+      
+      const rowHtml = `
+        <div class="criteria-row" id="row-${id}">
+          ${id > 1 ? `<button type="button" class="btn-remove-row" onclick="removeCriterionRow(${id})"><i class="ti ti-x"></i></button>` : ''}
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label fs-7 fw-bold text-muted">Criterion Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control crit-name" placeholder="e.g. Code Quality" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fs-7 fw-bold text-muted">Max Score <span class="text-danger">*</span></label>
+              <input type="number" step="0.5" min="0.1" class="form-control crit-score" placeholder="10" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label fs-7 fw-bold text-muted">Description (Optional)</label>
+              <input type="text" class="form-control crit-desc" placeholder="Details about this criterion...">
+            </div>
+          </div>
+        </div>
+      `;
+      list.insertAdjacentHTML('beforeend', rowHtml);
+    }
+
+    function removeCriterionRow(id) {
+      const row = document.getElementById(`row-${id}`);
+      if (row) row.remove();
+    }
+
+    async function fetchSessions() {
+      const loader = document.getElementById('loader');
+      const grid = document.getElementById('sessionsGrid');
+      loader.classList.remove('d-none');
+      grid.innerHTML = '';
+
+      try {
+        const response = await fetch(`/api/evaluations/sessions?lecturerId=${LECTURER_ID}`);
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        
+        if (data.length === 0) {
+          grid.innerHTML = '<div class="col-12 text-center text-muted py-5"><i class="ti ti-inbox fs-1 mb-3"></i><h4>No sessions found. Create one above!</h4></div>';
+        } else {
+          data.forEach(session => {
+            const startStr = new Date(session.gradingStartAt).toLocaleDateString();
+            const endStr = new Date(session.gradingDeadlineAt).toLocaleDateString();
+            const criteriaCount = session.criteria ? session.criteria.length : 0;
+            const totalMaxScore = session.criteria ? session.criteria.reduce((sum, c) => sum + c.maxScore, 0) : 0;
+
+            const cardHtml = `
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="session-card">
+                  <h4 class="session-title">${session.title}</h4>
+                  <div class="session-meta">
+                    <div class="mb-1"><i class="ti ti-calendar-event"></i> ${startStr} - ${endStr}</div>
+                  </div>
+                  <div class="session-criteria-count">
+                    <i class="ti ti-list-check text-primary"></i> ${criteriaCount} Criteria (Max ${totalMaxScore} pts)
+                  </div>
+                  
+                  <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+                    <span class="text-muted fs-7">Path ID: ${session.learningPathId}</span>
+                    <a href="/lecturer/grading?sessionId=${session.id}&studentId=1" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">
+                      <i class="ti ti-pencil"></i> Grade Students
+                    </a>
+                  </div>
+                </div>
+              </div>
+            `;
+            grid.insertAdjacentHTML('beforeend', cardHtml);
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        showAlert('Error loading sessions. Make sure backend is running and data is seeded.', 'danger');
+      } finally {
+        loader.classList.add('d-none');
+      }
+    }
+
+    async function saveSession(e) {
+      e.preventDefault();
+      
+      const title = document.getElementById('title').value;
+      const gradingStartAt = document.getElementById('gradingStartAt').value;
+      const gradingDeadlineAt = document.getElementById('gradingDeadlineAt').value;
+      
+      const criteriaNodes = document.querySelectorAll('.criteria-row');
+      const criteria = [];
+      
+      let sortOrder = 1;
+      criteriaNodes.forEach(node => {
+        criteria.push({
+          name: node.querySelector('.crit-name').value,
+          maxScore: parseFloat(node.querySelector('.crit-score').value),
+          description: node.querySelector('.crit-desc').value,
+          sortOrder: sortOrder++
+        });
+      });
+
+      if (new Date(gradingDeadlineAt) <= new Date(gradingStartAt)) {
+        showAlert('Deadline must be after Start Date.', 'danger');
+        return;
+      }
+
+      // Hardcoded LearningPathId for demo purposes since we seeded one
+      const payload = {
+        learningPathId: 1, 
+        lecturerId: LECTURER_ID,
+        title: title,
+        gradingStartAt: gradingStartAt + ":00", // Ensure valid ISO localdatetime
+        gradingDeadlineAt: gradingDeadlineAt + ":00",
+        criteria: criteria
+      };
+
+      const btn = document.getElementById('saveBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('/api/evaluations/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.message || 'Validation Failed');
+        }
+        
+        showAlert('Evaluation Session created successfully!', 'success');
+        toggleForm(false);
+        fetchSessions();
+      } catch (error) {
+        showAlert('Error: ' + error.message, 'danger');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
