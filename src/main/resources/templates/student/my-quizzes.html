@@ -146,48 +146,28 @@
       transition: width 180ms ease, transform 180ms ease;
     }
 
-    .logo-area {
-      height: var(--topbar-height);
-      display: flex;
-      align-items: center;
-      padding: 0 1.4rem;
-      border-bottom: 1px solid var(--fc-border);
-    }
-
-    .logo-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.75rem;
-      color: var(--fc-text);
-      text-decoration: none;
-      font-size: 1.28rem;
-      font-weight: 900;
-      letter-spacing: -0.04em;
-    }
-
-    .logo-mark {
-      width: 42px;
-      height: 42px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 14px;
-      color: #ffffff;
-      background: linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary));
-      box-shadow: 0 12px 24px rgba(47, 133, 90, 0.18);
-    }
-
-    .logo-link span span {
-      color: var(--fc-primary-dark);
+    .sidebar .logo-area {
+      border-color: var(--fc-border) !important;
     }
 
     .sidebar .nav {
-      min-height: calc(100vh - var(--topbar-height));
+      min-height: calc(100vh - 72px - 1.5rem);
       display: flex;
       flex-direction: column;
-      padding: 1.1rem 0 1.4rem;
-      margin: 0;
-      list-style: none;
+    }
+
+    .sidebar .nav > li.mt-auto {
+      margin-top: auto !important;
+    }
+
+    .sidebar .logo-area .bg-primary {
+      background: linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary)) !important;
+      box-shadow: 0 12px 24px rgba(47, 133, 90, 0.18);
+    }
+
+    .sidebar .logo-text .text-primary,
+    .text-primary {
+      color: var(--fc-primary-dark) !important;
     }
 
     .sidebar .nav-link {
@@ -195,12 +175,8 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin: 0 1rem 0.55rem;
-      padding: 0.88rem 1.25rem;
-      border-radius: 999px;
       color: var(--fc-muted) !important;
-      font-weight: 800 !important;
-      text-decoration: none;
+      font-weight: 700 !important;
       transition: background 180ms ease, color 180ms ease, transform 180ms ease;
     }
 
@@ -223,29 +199,22 @@
       box-shadow: inset 0 0 0 1px rgba(47, 133, 90, 0.12);
     }
 
+    .sidebar .nav-link.active i,
+    .sidebar .nav-link.active .nav-text {
+      color: var(--fc-primary-dark) !important;
+      font-weight: 900 !important;
+    }
+
     .sidebar .nav-link.active::before {
       content: "";
       position: absolute;
-      left: 0.72rem;
+      left: 0.75rem;
       top: 50%;
       width: 4px;
       height: 46%;
       border-radius: 999px;
       background: var(--fc-primary-dark);
       transform: translateY(-50%);
-    }
-
-    .sidebar .logout-link {
-      margin-top: auto;
-      color: var(--fc-muted) !important;
-      background: transparent !important;
-      font-weight: 800 !important;
-      box-shadow: none !important;
-    }
-
-    .sidebar .logout-link:hover {
-      color: var(--fc-danger) !important;
-      background: #fef3f2 !important;
     }
 
     .content {
@@ -648,23 +617,26 @@
       <span id="studentName">Sinh viên</span>
     </div>
     <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+      <li><a class="dropdown-item fw-bold py-2" href="javascript:void(0)" onclick="openSettings()" style="color:#2f855a;"><i class="ti ti-settings me-2"></i>Cài đặt</a></li>
       <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>Đăng xuất</a></li>
     </ul>
   </div>
 </nav>
 
-<aside id="sidebar" class="sidebar">
-  <div class="logo-area">
-    <a th:href="@{/}" class="logo-link">
-      <span class="logo-mark"><i class="ti ti-book-2 fs-3"></i></span>
-      <span>Flipped<span>Class</span></span>
+<aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm">
+  <div class="logo-area border-bottom border-light">
+    <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
+      <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2">
+        <i class="ti ti-book-2 fs-3"></i>
+      </div>
+      <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">Flipped<span class="text-primary">Class</span></span>
     </a>
   </div>
-  <ul class="nav">
-    <li><a class="nav-link" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Tổng quan</span></a></li>
-    <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Lớp của tôi</span></a></li>
-    <li><a class="nav-link active" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz" aria-current="page"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
-    <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
+  <ul class="nav flex-column mt-4">
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Tổng quan</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Lớp của tôi</span></a></li>
+    <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz" aria-current="page"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/reports}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
   </ul>
 </aside>
 
@@ -734,6 +706,16 @@
     return { Authorization: `Bearer ${token}` };
   }
 
+  window.logout = function() {
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('user_id');
+    window.location.href = '/login';
+  };
+
+  window.openSettings = function() {
+    window.location.href = '/student/dashboard#settings';
+  };
+
   function escapeHtml(value) {
     return String(value ?? '')
       .replace(/&/g, '&amp;')
@@ -761,8 +743,7 @@
   }
 
   function setStudentName(user) {
-    const name = user?.fullName || user?.username || localStorage.getItem('username') || 'Sinh viên';
-    document.getElementById('studentName').textContent = name;
+    // Left empty because we use the new fetch below
   }
 
   function flattenQuizzes(data) {
@@ -847,42 +828,49 @@
     }
 
     try {
-      const response = await fetch(`/api/students/${userId}/dashboard`, { headers: authHeaders() });
-      if (!response.ok) throw new Error('Không tải được danh sách quiz.');
-      const data = await response.json();
-      setStudentName(data.user);
+      const res = await fetch(`/api/students/${userId}/dashboard`, { headers: authHeaders() });
+      if (!res.ok) throw new Error('Không tải được danh sách');
+      const data = await res.json();
       state.quizzes = flattenQuizzes(data);
-      updateStats((data.learningSpaces || []).length);
+      updateStats(data.learningSpaces ? data.learningSpaces.length : 0);
       renderQuizzes();
-    } catch (error) {
-      quizGrid.innerHTML = `
-        <div class="empty-card" style="grid-column: 1 / -1;">
-          <i class="ti ti-alert-circle"></i>
-          ${escapeHtml(error.message)}
-        </div>
-      `;
+    } catch (e) {
+      quizGrid.innerHTML = `<div class="empty-card" style="grid-column: 1/-1"><i class="ti ti-alert-triangle text-danger"></i><span class="text-danger">${e.message}</span></div>`;
     }
   }
 
-  function logout() {
-    localStorage.removeItem('jwt_token');
-    localStorage.removeItem('user_id');
-    window.location.href = '/';
-  }
-
-  searchInput.addEventListener('input', () => {
-    state.search = searchInput.value;
-    renderQuizzes();
-  });
-
-  statusFilter.addEventListener('change', () => {
-    state.status = statusFilter.value;
-    renderQuizzes();
-  });
-
   document.addEventListener('DOMContentLoaded', () => {
     setupLayoutControls();
+    
+    const studentNameTop = document.getElementById('studentNameTop') || document.getElementById('studentName');
+    const topAvatarImg = document.getElementById('topAvatarImg') || document.querySelector('.student-chip img');
+    if (userId) {
+       fetch(`/api/v1/profiles/${encodeURIComponent(userId)}`, { headers: { Authorization: `Bearer ${token}` } })
+         .then(res => res.ok ? res.json() : null)
+         .then(data => {
+            if (data) {
+                if (studentNameTop) studentNameTop.textContent = data.fullName || data.studentCode || 'Sinh viên';
+                if (topAvatarImg && data.avatarUrl) topAvatarImg.src = data.avatarUrl;
+                localStorage.setItem('full_name', data.fullName || '');
+                localStorage.setItem('avatar_url', data.avatarUrl || '');
+            }
+         }).catch(e => {});
+    } else {
+       if (studentNameTop) studentNameTop.textContent = localStorage.getItem('full_name') || 'Sinh viên';
+       if (topAvatarImg && localStorage.getItem('avatar_url')) topAvatarImg.src = localStorage.getItem('avatar_url');
+    }
+    
     loadMyQuizzes();
+    
+    searchInput?.addEventListener('input', e => {
+      state.search = e.target.value;
+      renderQuizzes();
+    });
+    
+    statusFilter?.addEventListener('change', e => {
+      state.status = e.target.value;
+      renderQuizzes();
+    });
   });
 </script>
 </body>

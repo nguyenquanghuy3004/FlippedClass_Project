@@ -11,7 +11,7 @@ public class TemplateController {
 
     @GetMapping("/")
     public String index() {
-        return "index";
+        return "redirect:/login";
     }
 
     @GetMapping("/inventory")

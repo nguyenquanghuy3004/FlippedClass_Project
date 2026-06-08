@@ -620,10 +620,11 @@
       </li>
       <li class="dropdown">
         <div class="student-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-          <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh đại diện sinh viên">
+          <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh đại diện sinh viên" id="topAvatarImg">
           <span id="studentNameTop">Sinh viên</span>
         </div>
         <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+          <li><a class="dropdown-item fw-bold py-2" href="javascript:void(0)" onclick="openSettings()" style="color:#2f855a;"><i class="ti ti-settings me-2"></i>Cài đặt</a></li>
           <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>Đăng xuất</a></li>
         </ul>
       </li>
@@ -645,7 +646,7 @@
     <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4" th:href="@{/student/dashboard}" data-nav-key="dashboard" aria-current="page"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Tổng quan</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Lớp của tôi</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
-    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/reports}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
 
   </ul>
 </aside>
@@ -670,8 +671,8 @@
           <p class="profile-major" id="profileSummary">Đang tải hồ sơ sinh viên...</p>
 
           <div class="w-100 mt-4 d-flex gap-2 profile-actions">
-            <a href="#" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm">Chỉnh hồ sơ</a>
-            <a href="#" class="btn btn-outline-light rounded-pill w-100 fw-bold">Xem chi tiết</a>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#updateProfileModal" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm">Chỉnh hồ sơ</a>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#profileDetailModal" class="btn btn-outline-light rounded-pill w-100 fw-bold">Xem chi tiết</a>
           </div>
 
           <div class="mt-5 w-100 bg-white bg-opacity-10 rounded-4 p-3 d-flex justify-content-around profile-meta-card">
@@ -797,6 +798,97 @@
     </div>
   </div>
 </main>
+  <!-- Modal Xem chi tiết hồ sơ -->
+  <div class="modal fade" id="profileDetailModal" tabindex="-1" aria-labelledby="profileDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header bg-primary-subtle text-primary border-bottom-0 rounded-top-4">
+          <h5 class="modal-title fw-bold" id="profileDetailModalLabel"><i class="ti ti-id-badge me-2"></i>Chi tiết sinh viên</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 text-dark">
+          <div class="text-center mb-4">
+            <img src="" id="modalDetailAvatar" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #5bc760;" alt="Avatar">
+            <h4 class="fw-bold mt-3 mb-0" id="modalDetailName">--</h4>
+            <p class="text-muted mb-0" id="modalDetailEmail">--</p>
+          </div>
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="small text-muted fw-bold">Mã sinh viên</label>
+              <div class="fw-semibold" id="modalDetailCode">--</div>
+            </div>
+            <div class="col-6">
+              <label class="small text-muted fw-bold">Lớp</label>
+              <div class="fw-semibold" id="modalDetailClass">--</div>
+            </div>
+            <div class="col-6">
+              <label class="small text-muted fw-bold">Ngành học</label>
+              <div class="fw-semibold" id="modalDetailMajor">--</div>
+            </div>
+            <div class="col-6">
+              <label class="small text-muted fw-bold">Khóa</label>
+              <div class="fw-semibold" id="modalDetailYear">--</div>
+            </div>
+            <div class="col-12">
+              <label class="small text-muted fw-bold">Số điện thoại</label>
+              <div class="fw-semibold" id="modalDetailPhone">--</div>
+            </div>
+            <div class="col-12">
+              <label class="small text-muted fw-bold">Tiểu sử</label>
+              <div class="bg-light p-3 rounded-3 fw-semibold text-muted" id="modalDetailBio">--</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top-0">
+          <button type="button" class="btn btn-secondary rounded-pill fw-bold" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Cập nhật hồ sơ -->
+  <div class="modal fade" id="updateProfileModal" tabindex="-1" aria-labelledby="updateProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <form id="updateProfileForm">
+          <div class="modal-header bg-primary text-white border-bottom-0 rounded-top-4">
+            <h5 class="modal-title fw-bold" id="updateProfileModalLabel"><i class="ti ti-user-edit me-2"></i>Cập nhật hồ sơ</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4 text-dark">
+            <div id="updateProfileAlert" class="alert d-none" role="alert"></div>
+            <div class="mb-3">
+              <label for="editFullName" class="form-label fw-bold">Họ và tên</label>
+              <input type="text" class="form-control" id="editFullName" name="fullName" required>
+            </div>
+            <div class="mb-3">
+              <label for="editAvatarFile" class="form-label fw-bold">Ảnh đại diện</label>
+              <div class="d-flex align-items-center gap-3">
+                <img src="" id="editAvatarPreview" class="rounded-circle shadow-sm d-none" style="width: 60px; height: 60px; object-fit: cover; border: 2px solid #5bc760;" alt="Preview">
+                <div class="flex-grow-1">
+                  <input type="file" class="form-control" id="editAvatarFile" name="avatarFile" accept="image/*">
+                  <input type="hidden" id="editAvatarUrl" name="avatarUrl">
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="editPhone" class="form-label fw-bold">Số điện thoại</label>
+              <input type="text" class="form-control" id="editPhone" name="phoneNumber">
+            </div>
+            <div class="mb-3">
+              <label for="editBio" class="form-label fw-bold">Tiểu sử</label>
+              <textarea class="form-control" id="editBio" name="bio" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-top-0">
+            <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary rounded-pill fw-bold" id="btnSaveProfile">Lưu thay đổi</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 <!-- DYNAMIC DASHBOARD DATA SCRIPT -->
 <script>
   const token = localStorage.getItem('jwt_token');
@@ -870,7 +962,8 @@
     setText('#profileClassName', profile.className || '--');
 
     const avatar = document.querySelector('.massive-avatar');
-    if (avatar && user.avatarUrl) avatar.src = user.avatarUrl;
+    const avatarUrl = profile.avatarUrl || user.avatarUrl;
+    if (avatar && avatarUrl) avatar.src = avatarUrl;
   }
 
   function renderStats(learningSpaces, quizzes) {
@@ -1132,16 +1225,184 @@
     });
   }
 
-  function logout() {
+  window.logout = function() {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user_id');
-    window.location.href = '/';
+    window.location.href = '/login';
+  };
+
+  window.openSettings = function() {
+    if (window.location.pathname.includes('/student/dashboard')) {
+      const modal = document.getElementById('updateProfileModal');
+      if (modal && window.bootstrap) {
+        new bootstrap.Modal(modal).show();
+      }
+    } else {
+      window.location.href = '/student/dashboard#settings';
+    }
+  };
+
+  // Lấy chi tiết profile
+  async function fetchProfileDetail() {
+    try {
+      const res = await fetch(`/api/v1/profiles/${encodeURIComponent(userId)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Không thể tải thông tin chi tiết");
+      return await res.json();
+    } catch (e) {
+      console.error(e);
+      alert("Lỗi tải hồ sơ: " + e.message);
+      return null;
+    }
   }
 
+  document.getElementById('profileDetailModal')?.addEventListener('show.bs.modal', async function() {
+    const data = await fetchProfileDetail();
+    if (data) {
+      document.getElementById('modalDetailAvatar').src = data.avatarUrl || '/assets/images/avatar-1.jpg';
+      setText('#modalDetailName', data.fullName || 'Chưa cập nhật');
+      setText('#modalDetailEmail', data.email || '--');
+      setText('#modalDetailCode', data.studentCode || '--');
+      setText('#modalDetailClass', data.className || '--');
+      setText('#modalDetailMajor', data.major || '--');
+      setText('#modalDetailYear', data.enrollmentYear || '--');
+      setText('#modalDetailPhone', data.phoneNumber || '--');
+      setText('#modalDetailBio', data.bio || 'Chưa có thông tin tiểu sử.');
+    }
+  });
+
+  document.getElementById('updateProfileModal')?.addEventListener('show.bs.modal', async function() {
+    const data = await fetchProfileDetail();
+    if (data) {
+      document.getElementById('editFullName').value = data.fullName || '';
+      document.getElementById('editAvatarUrl').value = data.avatarUrl || '';
+      
+      const preview = document.getElementById('editAvatarPreview');
+      if (data.avatarUrl) {
+        preview.src = data.avatarUrl;
+        preview.classList.remove('d-none');
+      } else {
+        preview.src = '';
+        preview.classList.add('d-none');
+      }
+      document.getElementById('editAvatarFile').value = ''; // Reset file input
+      
+      document.getElementById('editPhone').value = data.phoneNumber || '';
+      document.getElementById('editBio').value = data.bio || '';
+      document.getElementById('updateProfileAlert').className = 'alert d-none';
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
+    // Handle image upload
+    const avatarFileInput = document.getElementById('editAvatarFile');
+    if (avatarFileInput) {
+      avatarFileInput.addEventListener('change', async function() {
+        const file = this.files[0];
+        if (!file) return;
+        
+        const btn = document.getElementById('btnSaveProfile');
+        if (btn) btn.disabled = true;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+          const res = await fetch('/api/v1/upload', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+          });
+          if (!res.ok) throw new Error('Upload ảnh thất bại');
+          const data = await res.json();
+          
+          document.getElementById('editAvatarUrl').value = data.url;
+          const preview = document.getElementById('editAvatarPreview');
+          preview.src = data.url;
+          preview.classList.remove('d-none');
+        } catch(err) {
+          alert('Lỗi upload: ' + err.message);
+          this.value = ''; // reset
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      });
+    }
+
+    // init form update profile
+    const updateForm = document.getElementById('updateProfileForm');
+    if (updateForm) {
+      updateForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSaveProfile');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Đang lưu...';
+        
+        const requestData = {
+          fullName: document.getElementById('editFullName').value,
+          avatarUrl: document.getElementById('editAvatarUrl').value,
+          phoneNumber: document.getElementById('editPhone').value,
+          bio: document.getElementById('editBio').value
+        };
+        
+        try {
+          const res = await fetch(`/api/v1/profiles/${encodeURIComponent(userId)}`, {
+            method: 'PUT',
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+          });
+          if (!res.ok) throw new Error("Cập nhật thất bại");
+          
+          const alertBox = document.getElementById('updateProfileAlert');
+          alertBox.textContent = "Cập nhật thành công!";
+          alertBox.className = "alert alert-success";
+          
+          // Reload dashboard data after short delay
+          setTimeout(() => {
+            const closeBtn = document.querySelector('#updateProfileModal .btn-close');
+            if(closeBtn) closeBtn.click();
+            loadDashboard(); // Refresh
+          }, 1000);
+          
+        } catch (error) {
+          const alertBox = document.getElementById('updateProfileAlert');
+          alertBox.textContent = "Lỗi: " + error.message;
+          alertBox.className = "alert alert-danger";
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Lưu thay đổi';
+        }
+      });
+    }
+
     const studentNameTop = document.getElementById('studentNameTop');
-    if (studentNameTop) {
-      studentNameTop.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Sinh viên';
+    const topAvatarImg = document.getElementById('topAvatarImg');
+    if (userId) {
+       fetch(`/api/v1/profiles/${encodeURIComponent(userId)}`, { headers: { Authorization: `Bearer ${token}` } })
+         .then(res => res.ok ? res.json() : null)
+         .then(data => {
+            if (data) {
+                if (studentNameTop) studentNameTop.textContent = data.fullName || data.studentCode || 'Sinh viên';
+                if (topAvatarImg && data.avatarUrl) topAvatarImg.src = data.avatarUrl;
+                localStorage.setItem('full_name', data.fullName || '');
+                localStorage.setItem('avatar_url', data.avatarUrl || '');
+            }
+         }).catch(e => {});
+    } else {
+       if (studentNameTop) studentNameTop.textContent = localStorage.getItem('full_name') || 'Sinh viên';
+       if (topAvatarImg && localStorage.getItem('avatar_url')) topAvatarImg.src = localStorage.getItem('avatar_url');
+    }
+    
+    if (window.location.hash === '#settings') {
+      const modal = document.getElementById('updateProfileModal');
+      if (modal && window.bootstrap) {
+        new bootstrap.Modal(modal).show();
+        window.history.replaceState(null, null, window.location.pathname);
+      }
     }
     initSidebarActiveState();
     loadDashboard();
