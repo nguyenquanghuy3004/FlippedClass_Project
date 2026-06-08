@@ -54,6 +54,59 @@
       background: rgba(255, 255, 255, 0.92) !important;
       backdrop-filter: blur(18px);
       box-shadow: var(--fc-shadow-sm) !important;
+      min-height: 64px;
+      height: 64px;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      gap: 0.75rem;
+      padding-top: 0.55rem !important;
+      padding-bottom: 0.55rem !important;
+    }
+
+    .topbar-main {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .topbar-title {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      margin: 0;
+      line-height: 1;
+      letter-spacing: -0.5px;
+      white-space: nowrap;
+    }
+
+    .topbar-title .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      margin-left: 0.7rem !important;
+      padding: 0 0.78rem;
+      line-height: 1;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+      margin: 0;
+    }
+
+    .topbar .btn-icon {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .sidebar {
@@ -474,11 +527,27 @@
     }
 
     .notification-trigger {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
       background: var(--fc-primary-soft);
+      box-shadow: inset 0 0 0 1px rgba(47, 133, 90, 0.08);
       transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .notification-trigger .badge {
+      top: 4px !important;
+      left: auto !important;
+      right: 4px !important;
+      min-width: 1.28rem;
+      height: 1.28rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.35rem;
+      transform: none !important;
+      font-size: 0.72rem;
+      line-height: 1;
     }
 
     .notification-trigger:hover,
@@ -655,8 +724,8 @@
             <p class="profile-major" id="profileSummary">Đang tải hồ sơ sinh viên...</p>
             
             <div class="w-100 mt-4 d-flex gap-2 profile-actions">
-              <a href="#" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm">Chỉnh hồ sơ</a>
-              <a href="#" class="btn btn-outline-light rounded-pill w-100 fw-bold">Xem chi tiết</a>
+              <button type="button" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm" id="editProfileButton" data-bs-toggle="modal" data-bs-target="#editProfileModal">Chỉnh hồ sơ</button>
+              <button type="button" class="btn btn-outline-light rounded-pill w-100 fw-bold" id="viewProfileButton" data-bs-toggle="modal" data-bs-target="#profileDetailModal">Xem chi tiết</button>
             </div>
             
              <div class="mt-5 w-100 bg-white bg-opacity-10 rounded-4 p-3 d-flex justify-content-around profile-meta-card">
@@ -782,10 +851,92 @@
     </div>
     </div>
   </main>
+
+  <div class="modal fade" id="profileDetailModal" tabindex="-1" aria-labelledby="profileDetailTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow-lg">
+        <div class="modal-header border-0 pb-0">
+          <div>
+            <h5 class="modal-title fw-900 text-dark" id="profileDetailTitle">Chi tiết hồ sơ sinh viên</h5>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <img th:src="@{/assets/images/avatar-1.jpg}" class="rounded-circle border border-3 border-success-subtle" width="76" height="76" alt="Ảnh đại diện" id="detailAvatar">
+            <div>
+              <h5 class="fw-bold mb-1" id="detailFullName">--</h5>
+              <p class="text-muted fw-semibold mb-0" id="detailEmail">--</p>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-sm-6"><div class="bg-light rounded-4 p-3 h-100"><div class="small text-muted fw-bold text-uppercase">Username</div><div class="fw-bold text-dark" id="detailUsername">--</div></div></div>
+            <div class="col-sm-6"><div class="bg-light rounded-4 p-3 h-100"><div class="small text-muted fw-bold text-uppercase">Mã sinh viên</div><div class="fw-bold text-dark" id="detailStudentCode">--</div></div></div>
+            <div class="col-sm-6"><div class="bg-light rounded-4 p-3 h-100"><div class="small text-muted fw-bold text-uppercase">Lớp</div><div class="fw-bold text-dark" id="detailClassName">--</div></div></div>
+            <div class="col-sm-6"><div class="bg-light rounded-4 p-3 h-100"><div class="small text-muted fw-bold text-uppercase">Ngành</div><div class="fw-bold text-dark" id="detailMajor">--</div></div></div>
+            <div class="col-sm-6"><div class="bg-light rounded-4 p-3 h-100"><div class="small text-muted fw-bold text-uppercase">Năm nhập học</div><div class="fw-bold text-dark" id="detailEnrollmentYear">--</div></div></div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary rounded-pill fw-bold" data-bs-target="#editProfileModal" data-bs-toggle="modal">Chỉnh hồ sơ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form class="modal-content border-0 rounded-4 shadow-lg" id="editProfileForm">
+        <div class="modal-header border-0 pb-0">
+          <div>
+            <h5 class="modal-title fw-900 text-dark" id="editProfileTitle">Chỉnh hồ sơ sinh viên</h5>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <div id="editProfileMessage" class="alert d-none rounded-4 fw-semibold" role="alert"></div>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-bold" for="editFullName">Họ và tên</label>
+              <input class="form-control rounded-4" id="editFullName" name="fullName" type="text" maxlength="255">
+            </div>
+<!--            <div class="col-12"> url IMAGE-->
+<!--              <label class="form-label fw-bold" for="editAvatarUrl">Avatar URL</label>-->
+<!--              <input class="form-control rounded-4" id="editAvatarUrl" name="avatarUrl" type="url" maxlength="1000" placeholder="https://...">-->
+<!--            </div>-->
+            <div class="col-sm-6">
+              <label class="form-label fw-bold" for="editStudentCode">Mã sinh viên</label>
+              <input class="form-control rounded-4" id="editStudentCode" name="studentCode" type="text" maxlength="255" required>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-bold" for="editClassName">Lớp</label>
+              <input class="form-control rounded-4" id="editClassName" name="className" type="text" maxlength="255">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-bold" for="editMajor">Ngành</label>
+              <input class="form-control rounded-4" id="editMajor" name="major" type="text" maxlength="255">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-bold" for="editEnrollmentYear">Năm nhập học</label>
+              <input class="form-control rounded-4" id="editEnrollmentYear" name="enrollmentYear" type="number" min="2000" max="2100">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-primary rounded-pill fw-bold" id="saveProfileButton">Lưu hồ sơ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- DYNAMIC DASHBOARD DATA SCRIPT -->
   <script>
     const token = localStorage.getItem('jwt_token');
     const userId = localStorage.getItem('user_id');
+    const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
+    let currentDashboardData = null;
 
     const iconThemes = [
       { icon: 'ti-template', color: 'primary' },
@@ -806,6 +957,33 @@
     function setText(selector, value) {
       const el = document.querySelector(selector);
       if (el) el.textContent = value;
+    }
+
+    function setInputValue(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.value = value ?? '';
+    }
+
+    function getInputValue(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    }
+
+    function authHeaders(json = false) {
+      const headers = { Authorization: `Bearer ${token}` };
+      if (json) headers['Content-Type'] = 'application/json';
+      return headers;
+    }
+
+    async function readApiError(response) {
+      const text = await response.text();
+      if (!text) return `Request failed: ${response.status}`;
+      try {
+        const body = JSON.parse(text);
+        return body.message || body.error || text;
+      } catch (err) {
+        return text;
+      }
     }
 
     function statusLabel(status) {
@@ -855,7 +1033,113 @@
       setText('#profileClassName', profile.className || '--');
 
       const avatar = document.querySelector('.massive-avatar');
-      if (avatar && user.avatarUrl) avatar.src = user.avatarUrl;
+      if (avatar) avatar.src = user.avatarUrl || defaultAvatarUrl;
+    }
+
+    function renderProfileDetail(data) {
+      const user = data?.user || {};
+      const profile = data?.studentProfile || {};
+      const displayName = user.fullName || user.username || 'Sinh viên';
+      const avatar = document.getElementById('detailAvatar');
+
+      if (avatar) avatar.src = user.avatarUrl || defaultAvatarUrl;
+      setText('#detailFullName', displayName);
+      setText('#detailEmail', user.email || '--');
+      setText('#detailUsername', user.username || '--');
+      setText('#detailStudentCode', profile.studentCode || '--');
+      setText('#detailClassName', profile.className || '--');
+      setText('#detailMajor', profile.major || '--');
+      setText('#detailEnrollmentYear', profile.enrollmentYear || '--');
+      setText('#detailProvider', user.provider || '--');
+    }
+
+    function fillProfileForm(data) {
+      const user = data?.user || {};
+      const profile = data?.studentProfile || {};
+
+      setInputValue('editFullName', user.fullName || user.username || '');
+      setInputValue('editAvatarUrl', user.avatarUrl || '');
+      setInputValue('editStudentCode', profile.studentCode || '');
+      setInputValue('editClassName', profile.className || '');
+      setInputValue('editMajor', profile.major || '');
+      setInputValue('editEnrollmentYear', profile.enrollmentYear || '');
+    }
+
+    function showProfileMessage(message, type = 'danger') {
+      const messageEl = document.getElementById('editProfileMessage');
+      if (!messageEl) return;
+      messageEl.className = `alert alert-${type} rounded-4 fw-semibold`;
+      messageEl.textContent = message;
+    }
+
+    function clearProfileMessage() {
+      const messageEl = document.getElementById('editProfileMessage');
+      if (!messageEl) return;
+      messageEl.className = 'alert d-none rounded-4 fw-semibold';
+      messageEl.textContent = '';
+    }
+
+    async function saveProfile(event) {
+      event.preventDefault();
+
+      if (!token || !userId) {
+        window.location.href = '/login';
+        return;
+      }
+
+      const yearValue = getInputValue('editEnrollmentYear');
+      const payload = {
+        fullName: getInputValue('editFullName'),
+        avatarUrl: getInputValue('editAvatarUrl'),
+        studentCode: getInputValue('editStudentCode'),
+        className: getInputValue('editClassName'),
+        major: getInputValue('editMajor'),
+        enrollmentYear: yearValue ? Number(yearValue) : null
+      };
+
+      if (!payload.studentCode) {
+        showProfileMessage('Mã sinh viên không được để trống.');
+        return;
+      }
+
+      const saveButton = document.getElementById('saveProfileButton');
+      if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.textContent = 'Đang lưu...';
+      }
+      clearProfileMessage();
+
+      try {
+        const response = await fetch(`/api/students/${encodeURIComponent(userId)}/profile`, {
+          method: 'PUT',
+          headers: authHeaders(true),
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(await readApiError(response));
+        }
+
+        const updatedData = await response.json();
+        renderDashboard(updatedData);
+        showProfileMessage('Đã cập nhật hồ sơ từ database.', 'success');
+
+        setTimeout(() => {
+          const modalElement = document.getElementById('editProfileModal');
+          if (modalElement && window.bootstrap) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) modal.hide();
+          }
+        }, 700);
+      } catch (err) {
+        console.error(err);
+        showProfileMessage(err.message || 'Không lưu được hồ sơ.');
+      } finally {
+        if (saveButton) {
+          saveButton.disabled = false;
+          saveButton.textContent = 'Lưu hồ sơ';
+        }
+      }
     }
 
     function renderStats(learningSpaces, quizzes) {
@@ -1088,11 +1372,15 @@
     }
 
     function renderDashboard(data) {
-      const learningSpaces = data.learningSpaces || [];
+      const dashboard = data || {};
+      currentDashboardData = dashboard;
+      const learningSpaces = dashboard.learningSpaces || [];
       const quizzes = flattenQuizzes(learningSpaces);
-      const documents = data.recentDocuments || [];
+      const documents = dashboard.recentDocuments || [];
 
-      renderProfile(data);
+      renderProfile(dashboard);
+      renderProfileDetail(dashboard);
+      fillProfileForm(dashboard);
       renderStats(learningSpaces, quizzes);
       renderLearningSpaces(learningSpaces);
       renderQuizAccordion(learningSpaces);
@@ -1108,7 +1396,7 @@
 
       try {
         const res = await fetch(`/api/students/${encodeURIComponent(userId)}/dashboard`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: authHeaders()
         });
         if (!res.ok) {
           const errText = await res.text();
@@ -1186,6 +1474,27 @@
       });
     }
 
+    function initProfileActions() {
+      const detailModal = document.getElementById('profileDetailModal');
+      const editModal = document.getElementById('editProfileModal');
+      const editForm = document.getElementById('editProfileForm');
+
+      if (detailModal) {
+        detailModal.addEventListener('show.bs.modal', () => renderProfileDetail(currentDashboardData));
+      }
+
+      if (editModal) {
+        editModal.addEventListener('show.bs.modal', () => {
+          clearProfileMessage();
+          fillProfileForm(currentDashboardData);
+        });
+      }
+
+      if (editForm) {
+        editForm.addEventListener('submit', saveProfile);
+      }
+    }
+
     function logout() {
       localStorage.removeItem('jwt_token');
       localStorage.removeItem('user_id');
@@ -1194,6 +1503,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       initSidebarActiveState();
+      initProfileActions();
       loadDashboard();
     });
   </script>

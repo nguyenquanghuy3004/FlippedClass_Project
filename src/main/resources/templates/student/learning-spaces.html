@@ -55,6 +55,63 @@
       box-shadow: var(--fc-shadow-sm) !important;
     }
 
+    .notification-trigger {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--fc-primary-soft);
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .notification-trigger:hover,
+    .notification-trigger.show {
+      background: #d9f4dc;
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(47, 133, 90, 0.14);
+    }
+
+    .notification-menu {
+      width: min(360px, calc(100vw - 2rem));
+      overflow: hidden;
+      border-radius: 22px;
+      box-shadow: var(--fc-shadow-md) !important;
+    }
+
+    .notification-list {
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .notification-item {
+      display: block;
+      padding: 1rem 1.15rem;
+      color: var(--fc-text);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(229, 231, 235, 0.72);
+      transition: background 180ms ease, color 180ms ease;
+    }
+
+    .notification-item:last-child {
+      border-bottom: 0;
+    }
+
+    .notification-item:hover {
+      color: var(--fc-primary-dark);
+      background: var(--fc-primary-soft);
+    }
+
+    .notification-icon {
+      width: 42px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      color: var(--fc-primary-dark);
+      background: var(--fc-primary-soft);
+      font-size: 1.25rem;
+    }
+
     .sidebar {
       border-right: 1px solid var(--fc-border);
       background: rgba(255, 255, 255, 0.96) !important;
@@ -845,11 +902,33 @@
       <h5 class="mb-0 fw-bold text-dark ms-2" style="letter-spacing: -0.5px;">Không gian học <span class="badge bg-primary-subtle text-primary ms-2 rounded-pill">Roadmap</span></h5>
     </div>
     <ul class="list-unstyled d-flex align-items-center mb-0 gap-3">
-      <li>
-        <a class="position-relative text-secondary d-flex align-items-center justify-content-center" href="#" style="width: 40px; height: 40px; border-radius: 50%; background: #e8f8ea; transition: 0.3s;">
+      <li class="dropdown">
+        <button class="notification-trigger position-relative text-secondary d-flex align-items-center justify-content-center border-0"
+                type="button"
+                id="notificationDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-label="Thông báo quiz cần làm">
           <i class="ti ti-bell-ringing fs-5 text-dark"></i>
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm">2</span>
-        </a>
+          <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm d-none">0</span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end notification-menu p-0 border-0" aria-labelledby="notificationDropdown">
+          <div class="p-3 border-bottom bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <h6 class="fw-900 text-dark mb-1">Thông báo</h6>
+                <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Đang tải thông báo...</p>
+              </div>
+              <i class="ti ti-bell text-primary fs-4"></i>
+            </div>
+          </div>
+          <div id="notificationList" class="notification-list">
+            <div class="text-center text-muted py-4 px-3">
+              <div class="spinner-border text-primary mb-2" role="status"></div>
+              <p class="small fw-semibold mb-0">Đang tải quiz cần làm...</p>
+            </div>
+          </div>
+        </div>
       </li>
     </ul>
   </div>
@@ -1020,6 +1099,75 @@
     }
   }
 
+  function flattenQuizzes(learningSpaces) {
+    return (learningSpaces || []).flatMap((space) =>
+      (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
+    );
+  }
+
+  function renderNotifications(learningSpaces) {
+    const badge = document.getElementById('notificationBadge');
+    const summary = document.getElementById('notificationSummary');
+    const list = document.getElementById('notificationList');
+    const pending = flattenQuizzes(learningSpaces).filter((quiz) => !quiz.isCompleted);
+
+    if (badge) {
+      badge.textContent = pending.length;
+      badge.classList.toggle('d-none', pending.length === 0);
+    }
+
+    if (summary) {
+      summary.textContent = pending.length
+        ? `Bạn có ${pending.length} quiz cần làm.`
+        : 'Không có thông báo mới.';
+    }
+
+    if (!list) return;
+
+    if (!pending.length) {
+      list.innerHTML = `
+        <div class="text-center text-muted py-4 px-3">
+          <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
+          <h6 class="fw-bold text-dark mt-3 mb-1">Không còn quiz cần làm</h6>
+          <p class="small fw-semibold mb-0">Các quiz đang mở đã hoàn thành hoặc chưa có quiz mới.</p>
+        </div>`;
+      return;
+    }
+
+    const items = pending.slice(0, 5).map((quiz) => `
+      <a class="notification-item" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}">
+        <div class="d-flex gap-3 align-items-start">
+          <span class="notification-icon flex-shrink-0">
+            <i class="ti ti-file-pencil"></i>
+          </span>
+          <div class="min-w-0">
+            <h6 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Quiz chưa đặt tên')}</h6>
+            <p class="small text-muted fw-semibold mb-1">${escapeHtml(quiz.space?.name || 'Learning space')}</p>
+            <span class="small text-primary fw-bold">Làm quiz ngay</span>
+          </div>
+        </div>
+      </a>`).join('');
+
+    const more = pending.length > 5
+      ? `<a class="notification-item text-center fw-bold text-primary" href="/student/my-quizzes">Xem thêm ${pending.length - 5} quiz</a>`
+      : '';
+
+    list.innerHTML = items + more;
+  }
+
+  function renderNotificationError(message) {
+    const badge = document.getElementById('notificationBadge');
+    const summary = document.getElementById('notificationSummary');
+    const list = document.getElementById('notificationList');
+
+    if (badge) {
+      badge.textContent = '!';
+      badge.classList.remove('d-none');
+    }
+    if (summary) summary.textContent = 'Không tải được thông báo.';
+    if (list) list.innerHTML = `<div class="alert alert-danger m-3">${escapeHtml(message || 'Không tải được thông báo.')}</div>`;
+  }
+
   function readInitialSpaceId() {
     const value = new URLSearchParams(window.location.search).get('spaceId');
     const id = Number(value);
@@ -1058,6 +1206,7 @@
 
       const data = await response.json();
       state.spaces = data.learningSpaces || [];
+      renderNotifications(state.spaces);
       renderSpaces();
 
       const preferred = Number(preferredSpaceId);
@@ -1069,6 +1218,7 @@
         renderEmptyDetail();
       }
     } catch (error) {
+      renderNotificationError(error.message);
       spacesList.innerHTML = `<div class="empty-state">${escapeHtml(error.message)}</div>`;
       renderEmptyDetail('Không tải được learning space', 'Vui lòng kiểm tra đăng nhập hoặc thử lại sau.');
     }
