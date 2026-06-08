@@ -25,6 +25,9 @@ public class DataInitializer implements CommandLineRunner {
     private RoleRepository roleRepository;
 
     @Autowired
+    private com.example.flippedclass.repository.StudentRepository studentRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Value("${flippedclass.app.initialPassword}")
@@ -51,6 +54,8 @@ public class DataInitializer implements CommandLineRunner {
         if (userRepository.countByRolesName(RoleName.MENTOR) == 0) {
             seedMentor("giangvien@fpt.edu.vn", "giangvien", "Giangvien", initialPassword);
         }
+
+
     }
 
 

@@ -59,6 +59,11 @@ public class TemplateController {
         return "lecturer/quiz-builder";
     }
 
+    @GetMapping("/lecturer/quizzes/{id}/statistics")
+    public String quizStatistics() {
+        return "lecturer/quiz-statistics";
+    }
+
     @GetMapping("/student/dashboard")
     public String studentDashboard() {
         return "student/student-dashboard";

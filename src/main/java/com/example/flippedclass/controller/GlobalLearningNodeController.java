@@ -28,11 +28,18 @@ public class GlobalLearningNodeController {
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getAllNodesForDropdown() {
         List<LearningNode> nodes = learningNodeRepository.findAll();
-        List<Map<String, Object>> response = nodes.stream().map(node -> Map.<String, Object>of(
+        List<Map<String, Object>> response = nodes.stream().map(node -> {
+            String spaceName = "Uncategorized";
+            if (node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null) {
+                spaceName = node.getLearningPath().getLearningSpace().getName();
+            }
+            return Map.<String, Object>of(
                 "id", node.getId(),
                 "title", node.getTitle(),
-                "name", node.getTitle()
-        )).collect(Collectors.toList());
+                "name", node.getTitle(),
+                "spaceName", spaceName
+            );
+        }).collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
 

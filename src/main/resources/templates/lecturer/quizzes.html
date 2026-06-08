@@ -416,7 +416,7 @@
           const col = document.createElement('div');
           col.className = 'col-12 col-md-6 col-xl-4';
           col.innerHTML = `
-            <div class="quiz-card">
+            <div class="quiz-card" style="cursor: pointer;" onclick="window.location.href='/lecturer/quizzes/${quiz.id}/statistics'">
               <div class="card-top">
                 <span class="course-tag">${quiz.courseName || 'General'}</span>
                 <span class="status-badge ${quiz.active ? 'active' : 'inactive'}">
@@ -447,14 +447,14 @@
                 <div class="pass-fill" style="width:${passRate}%;"></div>
               </div>
               <div class="card-actions mt-3">
-                <button class="btn-build" onclick="window.location.href='/lecturer/quizzes/${quiz.id}/builder'">
+                <button class="btn-build" onclick="event.stopPropagation(); window.location.href='/lecturer/quizzes/${quiz.id}/builder'">
                   <i class="ti ti-tools"></i> Build Questions
                 </button>
                 <div class="d-flex gap-1">
-                  <button class="btn-icon-sm" onclick="openEditModal(${quiz.id})" title="Edit">
+                  <button class="btn-icon-sm" onclick="event.stopPropagation(); openEditModal(${quiz.id})" title="Edit">
                     <i class="ti ti-pencil"></i>
                   </button>
-                  <button class="btn-icon-sm danger" onclick="openDeleteConfirm(${quiz.id})" title="Delete">
+                  <button class="btn-icon-sm danger" onclick="event.stopPropagation(); openDeleteConfirm(${quiz.id})" title="Delete">
                     <i class="ti ti-trash"></i>
                   </button>
                 </div>
@@ -514,7 +514,9 @@
       availableNodes.forEach(node => {
         const opt = document.createElement('option');
         opt.value = node.id;
-        opt.textContent = node.title || node.name || `Node #${node.id}`;
+        const spacePart = node.spaceName && node.spaceName !== 'Uncategorized' ? `[${node.spaceName}] - ` : '';
+        const nodeTitle = node.title || node.name || `Node #${node.id}`;
+        opt.textContent = spacePart + nodeTitle;
         picker.appendChild(opt);
       });
     }
