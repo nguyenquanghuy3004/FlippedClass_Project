@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{admin/layout}">
+<head>
+    <title>Activity Logs</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="admin-card">
+            <h5 class="fw-bold mb-4">System Activity Logs (Last 50 events)</h5>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>User</th>
+                            <th>Action Type</th>
+                            <th>Description</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-table-body">
+                        <!-- Loaded via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            $(document).ready(function() {
+                loadLogs();
+            });
+
+            function loadLogs() {
+                $.ajax({
+                    url: '/api/admin/logs',
+                    method: 'GET',
+                    success: function(logs) {
+                        let html = '';
+                        logs.forEach(log => {
+                            html += `
+                                <tr>
+                                    <td class="text-muted small">${new Date(log.createdAt).toLocaleString()}</td>
+                                    <td class="fw-bold">${log.userEmail}</td>
+                                    <td><span class="badge bg-secondary">${log.activityType}</span></td>
+                                    <td>${log.description || ''}</td>
+                                    <td class="text-muted small">${log.ipAddress || 'Unknown'}</td>
+                                </tr>
+                            `;
+                        });
+                        $('#logs-table-body').html(html);
+                    }
+                });
+            }
+        </script>
+    </th:block>
+</body>
+</html>

@@ -4,12 +4,15 @@ import com.example.flippedclass.dto.response.DashboardLearningSpaceResponse;
 import com.example.flippedclass.dto.response.DashboardUserResponse;
 import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.dto.response.StudentProfileResponse;
+import com.example.flippedclass.dto.response.QuizResponse;
 import com.example.flippedclass.entity.User;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
+import com.example.flippedclass.repository.QuizQuestionRepository;
 import com.example.flippedclass.repository.StudentProfileRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.StudentDashboardService;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,10 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final LearningSpaceMemberRepository learningSpaceMemberRepository;
+    private final com.example.flippedclass.repository.QuizRepository quizRepository;
+    private final com.example.flippedclass.repository.QuizAttemptRepository quizAttemptRepository;
+
+    private final QuizQuestionRepository quizQuestionRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -36,7 +43,19 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
         List<DashboardLearningSpaceResponse> learningSpaces =
                 learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId).stream()
-                        .map(DashboardLearningSpaceResponse::from)
+                        .map(member -> {
+                            Long spaceId = member.getLearningSpace().getId();
+                            List<QuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(spaceId).stream()
+                                    .map(q -> QuizResponse.builder()
+                                            .id(q.getId())
+                                            .title(q.getTitle())
+                                            .durationMinutes(q.getDurationMinutes())
+                                            .isCompleted(quizAttemptRepository.existsByQuizIdAndStudent_Id(q.getId(), studentId))
+                                            .build())
+                                    .collect(Collectors.toList());
+                            return DashboardLearningSpaceResponse.from(member, quizzes);
+                        })
+
                         .toList();
 
         return new StudentDashboardResponse(

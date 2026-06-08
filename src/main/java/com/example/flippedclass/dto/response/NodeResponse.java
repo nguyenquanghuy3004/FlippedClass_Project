@@ -3,9 +3,10 @@ package com.example.flippedclass.dto.response;
 import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.enums.NodeStatus;
 import com.example.flippedclass.enums.NodeType;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor

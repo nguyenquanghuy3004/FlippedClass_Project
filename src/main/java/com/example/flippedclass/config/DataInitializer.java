@@ -2,7 +2,6 @@ package com.example.flippedclass.config;
 
 import com.example.flippedclass.entity.Role;
 import com.example.flippedclass.entity.User;
-
 import com.example.flippedclass.enums.AuthProvider;
 import com.example.flippedclass.enums.RoleName;
 import com.example.flippedclass.repository.RoleRepository;
@@ -44,19 +43,18 @@ public class DataInitializer implements CommandLineRunner {
         }
 
 
-        // Tài khoản ADMIN hệ thống (chỉ có role ADMIN)
+
         if (userRepository.countByRolesName(RoleName.ADMIN) == 0) {
-            seedAdmin("admin@system.vn", "admin", "System Admin", initialPassword);
+            seedAdmin("admin@system.vn", "admin", "Admin", initialPassword);
         }
 
-        // Tài khoản MENTOR mẫu (chỉ có role MENTOR)
         if (userRepository.countByRolesName(RoleName.MENTOR) == 0) {
-            seedMentor("giangvien@fpt.edu.vn", "giangvien", "Thay Nguyen Van A", initialPassword);
+            seedMentor("giangvien@fpt.edu.vn", "giangvien", "Giangvien", initialPassword);
         }
     }
 
 
-    // Tạo tài khoản Admin hệ thống (chỉ có role ADMIN)
+    // Tạo tài khoản Admin hệ thống
     private void seedAdmin(String email, String username, String fullName, String password) {
         if (!userRepository.existsByEmail(email)) {
             User user = buildBaseUser(email, username, fullName, password);
@@ -70,7 +68,7 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    // Tạo tài khoản Mentor mẫu (chỉ có role MENTOR)
+    // Tạo tài khoản Mentor mẫu
     private void seedMentor(String email, String username, String fullName, String password) {
         if (!userRepository.existsByEmail(email)) {
             User user = buildBaseUser(email, username, fullName, password);
@@ -84,7 +82,7 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    // Helper: tạo User cơ bản (chưa có role)
+    // Helper: tạo User cơ bản
     private User buildBaseUser(String email, String username, String fullName, String password) {
         User user = new User();
         user.setEmail(email);

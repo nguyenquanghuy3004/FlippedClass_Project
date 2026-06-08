@@ -7,7 +7,6 @@ import com.example.flippedclass.dto.response.MessageResponse;
 import com.example.flippedclass.entity.Role;
 import com.example.flippedclass.entity.StudentProfile;
 import com.example.flippedclass.entity.User;
-import com.example.flippedclass.enums.AuthProvider;
 import com.example.flippedclass.repository.RoleRepository;
 import com.example.flippedclass.repository.StudentProfileRepository;
 import com.example.flippedclass.repository.UserRepository;
@@ -19,7 +18,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-
+import com.example.flippedclass.enums.AuthProvider;
 import com.example.flippedclass.enums.RoleName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,58 +83,57 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             throw new IllegalArgumentException("Email is already in use!");
         }
-        // Tạo tài khoản mới
+
         User user = new User();
         user.setUsername(signUpRequest.getUsername());
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(encoder.encode(signUpRequest.getPassword()));
         user.setFullName(signUpRequest.getFullName());
         user.setProvider(AuthProvider.LOCAL);
-        Set<String> strRoles = signUpRequest.getRole();
+
+        //  người dùng đăng ký Local đều là STUDENT
         Set<Role> roles = new HashSet<>();
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(RoleName.STUDENT)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role.toLowerCase()) {
-                    case "admin":
-                        throw new IllegalArgumentException("Không thể tự đăng ký vai trò ADMIN");
-                    case "mentor":
-                        Role mentorRole = roleRepository.findByName(RoleName.MENTOR)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(mentorRole);
-                        break;
-                    default:
-                        Role studentRole = roleRepository.findByName(RoleName.STUDENT)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(studentRole);
-                }
-            });
-        }
+
+        Role studentRole = roleRepository.findByName(RoleName.STUDENT)
+                .orElseThrow(() -> new RuntimeException("Role is not found."));
+        roles.add(studentRole);
         user.setRoles(roles);
         userRepository.save(user);
         return new MessageResponse("User registered successfully!");
     }
+
+
+
     @Override
     public GoogleJwtResponse googleLogin(TokenRequest tokenRequest) throws Exception {
+
+
         if (tokenRequest == null || tokenRequest.getIdToken() == null || tokenRequest.getIdToken().trim().isEmpty()) {
+
             throw new IllegalArgumentException("Google Token (idTokenString) must not be blank!");
         }
+
+
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                 .setAudience(Collections.singletonList(googleClientId))
                 .build();
+
         GoogleIdToken idToken = verifier.verify(tokenRequest.getIdToken());
+
+
         if (idToken == null) {
             throw new IllegalArgumentException("Invalid Google Token!");
         }
+
+
         GoogleIdToken.Payload payload = idToken.getPayload();
         String email = payload.getEmail();
         String name = (String) payload.get("name");
         String pictureUrl = (String) payload.get("picture");
         // Tìm hoặc tạo User mới
         User user = userRepository.findByEmail(email).orElse(null);
+
+
         if (user == null) {
             user = new User();
             user.setEmail(email);
@@ -143,12 +141,16 @@ public class AuthServiceImpl implements AuthService {
             user.setFullName(name);
             user.setAvatarUrl(pictureUrl);
             user.setProvider(AuthProvider.GOOGLE);
-            // Mặc định cho đăng ký Google là ROLE_STUDENT
+
+
+            //  đăng ký Google là STUDENT
             Role studentRole = roleRepository.findByName(RoleName.STUDENT)
                     .orElseThrow(() -> new RuntimeException("Role is not found."));
             user.setRoles(new HashSet<>(Collections.singletonList(studentRole)));
             user = userRepository.save(user);
-        } else {
+        }
+
+        else {
             // Cập nhật ảnh đại diện nếu có thay đổi
             if (pictureUrl != null && !pictureUrl.equals(user.getAvatarUrl())) {
                 user.setAvatarUrl(pictureUrl);
@@ -157,6 +159,7 @@ public class AuthServiceImpl implements AuthService {
         }
         // Sinh JWT từ username
         String jwt = jwtUtils.generateJwtTokenFromUsername(user.getUsername());
+
         List<String> roles = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(Collectors.toList());

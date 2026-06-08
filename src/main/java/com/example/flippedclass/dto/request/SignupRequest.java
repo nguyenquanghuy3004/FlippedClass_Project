@@ -20,19 +20,10 @@ public class SignupRequest {
     @Email
     private String email;
 
-    private Set<String> role;
-
     @NotBlank
     @Size(min = 6, max = 40)
     private String password;
 
     private String fullName;
 
-    private String phone;
-
-    private String gender;
-
-    private String dateOfBirth;
-
-    private String address;
 }

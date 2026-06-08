@@ -1,0 +1,30 @@
+/* CSS dành riêng cho trang Đăng nhập và Đăng ký (Authentication Pages) */
+
+/* Tùy chỉnh nút Đăng nhập/Đăng ký bằng Google */
+.btn-google {
+    background-color: #fff;
+    color: #757575;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-google:hover {
+    background-color: #f8f9fa;
+    color: #555;
+}
+
+/* Bo góc cho thẻ Card chứa Form */
+.card {
+    border-radius: 12px;
+}
+
+/* Đổi màu viền (Focus) của các ô Input sang màu Xanh lá của FlippedClass */
+.form-control:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+}

@@ -1,5 +1,7 @@
 package com.example.flippedclass.entity;
 
+import com.example.flippedclass.enums.LearningPathStatus;
+import com.example.flippedclass.enums.VisibilityType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,7 +39,7 @@ public class LearningPath {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default
-    private com.example.flippedclass.enums.LearningPathStatus status = com.example.flippedclass.enums.LearningPathStatus.ACTIVE;
+    private LearningPathStatus status = LearningPathStatus.ACTIVE;
 
     @Column(name = "position")
     @Builder.Default
@@ -51,7 +53,7 @@ public class LearningPath {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default
-    private com.example.flippedclass.enums.VisibilityType visibility = com.example.flippedclass.enums.VisibilityType.PRIVATE;
+    private VisibilityType visibility = VisibilityType.PRIVATE;
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default

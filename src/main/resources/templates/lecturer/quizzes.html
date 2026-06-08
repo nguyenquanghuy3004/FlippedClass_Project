@@ -4,723 +4,679 @@
 <head>
   <meta charset="UTF-8" />
   <title>Quiz Management - FlippedClass</title>
+  <meta name="description" content="Create, edit and monitor your course quizzes">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      background-color: #fcfcfc;
-      font-family: 'Inter', sans-serif;
-    }
-
-    /* 1. Purple Page Header Banner (Like Mockup) */
-    .page-header-purple {
-      background: #6b46c1; /* Modern purple */
-      background: linear-gradient(135deg, #7b5eea 0%, #5a3ba8 100%);
-      color: white;
-      border-radius: 12px;
-      padding: 2rem 2.5rem;
-      margin-top: 1rem;
-      margin-bottom: 2rem;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .page-header-purple h1 {
-      font-weight: 800;
-      font-size: 1.8rem;
-      margin-bottom: 0.25rem;
-      color: #fff;
-    }
-    .page-header-purple p {
-      margin-bottom: 0;
-      opacity: 0.85;
-      font-size: 0.95rem;
-    }
-    .btn-create-white {
-      background: #ffffff;
-      color: #5a3ba8;
-      font-weight: 700;
-      border: none;
-      padding: 0.6rem 1.25rem;
-      border-radius: 50rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .btn-create-white:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    }
-
-    /* 2. Filter Bar */
-    .filter-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      gap: 1rem;
-    }
-    .search-input-wrapper {
-      position: relative;
-      flex: 1;
-      max-width: 400px;
-    }
-    .search-input-wrapper i {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #94a3b8;
-    }
-    .search-input-wrapper input {
-      width: 100%;
-      padding: 0.6rem 1rem 0.6rem 2.5rem;
-      border-radius: 50rem;
-      border: 1px solid #e2e8f0;
-      background: #f8fafc;
-      font-size: 0.9rem;
-      outline: none;
-      transition: 0.2s;
-    }
-    .search-input-wrapper input:focus {
-      background: #fff;
-      border-color: #7b5eea;
-      box-shadow: 0 0 0 3px rgba(123, 94, 234, 0.1);
-    }
-    .filter-dropdowns {
-      display: flex;
-      gap: 1rem;
-    }
-    .filter-select {
-      border: none;
-      background: transparent;
-      font-weight: 600;
-      color: #475569;
-      cursor: pointer;
-      outline: none;
-    }
-
-    /* 3. Learning Space Section */
-    .space-section {
-      margin-bottom: 3rem;
-    }
-    .space-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid #f1f5f9;
-    }
-    .space-title {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #1e293b;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .space-stats-pill {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      padding: 0.4rem 1rem;
-      border-radius: 50rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #64748b;
-      display: flex;
-      gap: 1rem;
-    }
-    .space-stats-pill span {
-      display: flex; align-items: center; gap: 0.25rem;
-    }
-
-    /* 4. Quiz Card (Clean Design) */
-    .quiz-card {
-      background: #ffffff;
-      border-radius: 16px;
-      border: 1px solid #f1f5f9;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-      padding: 1.5rem;
-      transition: all 0.2s;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-    .quiz-card:hover {
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      border-color: #e2e8f0;
-      transform: translateY(-3px);
-    }
-    .card-top-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .course-label {
-      font-size: 0.65rem;
-      font-weight: 800;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .quiz-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 50rem;
-      font-size: 0.7rem;
-      font-weight: 700;
-    }
-    .badge-active { background: #dcfce7; color: #166534; }
-    .badge-inactive { background: #f1f5f9; color: #475569; }
-
-    .quiz-title-text {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin-bottom: 0.5rem;
-      line-height: 1.4;
-    }
-    .quiz-desc {
-      font-size: 0.85rem;
-      color: #64748b;
-      margin-bottom: 1.5rem;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    
-    .quiz-metrics {
-      display: flex;
-      justify-content: space-between;
-      padding: 1rem 0;
-      border-top: 1px dashed #e2e8f0;
-      border-bottom: 1px dashed #e2e8f0;
-      margin-bottom: 1rem;
-    }
-    .metric-item {
-      text-align: center;
-    }
-    .metric-val {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: #1e293b;
-      display: flex; align-items: center; justify-content: center; gap: 0.25rem;
-    }
-    .metric-val i { font-size: 1.2rem; }
-    .metric-label {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: #94a3b8;
-      text-transform: uppercase;
-    }
-
-    .card-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: auto;
-    }
-    .student-avatars {
-      display: flex;
-      align-items: center;
-    }
-    .student-avatars img {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      border: 2px solid #fff;
-      margin-left: -10px;
-    }
-    .student-avatars img:first-child { margin-left: 0; }
-    .attempts-count {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #64748b;
-      margin-left: 0.5rem;
-    }
-
-    .action-btns button {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      border: 1px solid #f1f5f9;
-      background: #fff;
-      color: #64748b;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: 0.2s;
-    }
-    .action-btns button:hover {
-      background: #f8fafc;
-      color: #1e293b;
-    }
-    .action-btns .btn-build {
-      color: #7b5eea; border-color: #ede9fe; background: #f5f3ff; width: auto; padding: 0 0.75rem; font-weight: 600; font-size: 0.85rem;
-    }
-    .action-btns .btn-build:hover { background: #ede9fe; }
-
-    /* Forms */
-    .form-card { border: none; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
-  </style>
+  <link rel="stylesheet" th:href="@{/assets/css/quizzes.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 
 <body>
   <div id="overlay" class="overlay"></div>
-  
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
   <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
-    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
       <i class="ti ti-layout-sidebar-left-expand"></i>
     </button>
     <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
       <i class="ti ti-layout-sidebar-left-expand"></i>
     </button>
     <div>
-      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
-        <li class="ms-3 dropdown">
+      <ul class="list-unstyled d-flex align-items-center mb-0 gap-2">
+        <li id="userInfoDisplay" class="d-flex align-items-center gap-2"
+          style="font-size:0.85rem;font-weight:600;color:#374151;"></li>
+
+        <li class="ms-1 dropdown">
           <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-sm rounded-circle" />
+            <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-sm rounded-circle" id="userAvatar"
+              style="display:none;" />
           </a>
         </li>
       </ul>
     </div>
   </nav>
 
-  <aside id="sidebar" class="sidebar">
+  <aside id="sidebar" class="sidebar d-flex flex-column">
     <div class="logo-area">
-      <a th:href="@{/}" class="d-inline-flex"><img src="data:image/svg+xml,%3csvg%20width='62'%20height='67'%20viewBox='0%200%2062%2067'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M30.604%2066.378L0.00805664%2048.1582V35.7825L30.604%2054.0023V66.378Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2048.1582L30.604%2066.378V54.0023L61.1996%2035.7825V48.1582Z'%20fill='%23E66239'/%3e%3cpath%20d='M30.5955%200L0%2018.2198V30.5955L30.5955%2012.3757V0Z'%20fill='%23657E92'/%3e%3cpath%20d='M61.191%2018.2198L30.5955%200V12.3757L61.191%2030.5955V18.2198Z'%20fill='%23A3B2BE'/%3e%3cpath%20d='M30.604%2048.8457L0.00805664%2030.6259V18.2498L30.604%2036.47V48.8457Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2030.6259L30.604%2048.8457V36.47L61.1996%2018.2498V30.6259Z'%20fill='%23E66239'/%3e%3c/svg%3e" alt="" width="24">
-        <span class="logo-text ms-2"> <img th:src="@{/assets/images/logo.svg}" alt=""></span>
+      <a href="/lecturer/dashboard" class="d-inline-flex">
+        <i class="fa-solid fa-chalkboard-user text-success fs-3"></i>
+        <span class="logo-text ms-2 fw-bold text-success fs-4"> FCMS Lecture</span>
       </a>
     </div>
-    <ul class="nav flex-column">
-      <li class="px-4 py-2"><small class="nav-text">Main</small></li>
-      <li><a class="nav-link active" th:href="@{/lecturer/quizzes}"><i class="ti ti-brain"></i><span class="nav-text">Quizzes</span></a></li>
+    <ul class="nav flex-column mb-auto">
+      <li class="px-4 py-2"><small class="nav-text">Workspace</small></li>
+      <li>
+        <a class="nav-link" href="/lecturer/dashboard">
+          <i class="ti ti-box-seam"></i><span class="nav-text">My Spaces</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link active" href="/lecturer/quizzes">
+          <i class="ti ti-checklist"></i><span class="nav-text">My Quizzes</span>
+        </a>
+      </li>
     </ul>
   </aside>
 
   <main id="content" class="content py-10">
     <div class="container-fluid">
-      
-      <!-- PURPLE BANNER -->
-      <div class="page-header-purple">
-        <div style="z-index: 2;">
-          <h1>Quiz Management</h1>
-          <p>Design, publish and monitor your course assessments beautifully.</p>
-        </div>
-        <div style="z-index: 2;">
-          <button class="btn-create-white" onclick="toggleQuizForm()">
-            <i class="ti ti-plus"></i> Create New Quiz
-          </button>
-        </div>
+
+      <div class="auth-required d-none" id="authRequired">
+        <i class="ti ti-lock"></i>
+        <h3 class="fw-bold">Login Required</h3>
+        <p class="text-muted mb-3">You need to sign in as a lecturer to manage quizzes.</p>
+        <a href="/signin" class="btn btn-primary rounded-pill px-4 fw-bold">
+          <i class="ti ti-login me-1"></i>Sign In
+        </a>
       </div>
 
-      <!-- FILTER BAR -->
-      <div class="filter-bar">
-        <div class="search-input-wrapper">
-          <i class="ti ti-search"></i>
-          <input type="text" id="searchInput" placeholder="Search quizzes by title or course..." oninput="filterQuizzes()">
+      <div id="mainUI" class="d-none">
+
+        <div class="page-banner">
+          <div style="z-index:2;">
+            <h1 class="banner-title"><i class="ti ti-brain me-2"></i>Quiz Management</h1>
+            <p class="banner-sub">Design, publish and monitor your course assessments.</p>
+          </div>
+          <div style="z-index:2;">
+            <button class="btn-banner" onclick="openCreateModal()">
+              <i class="ti ti-plus"></i> Create New Quiz
+            </button>
+          </div>
         </div>
-        <div class="filter-dropdowns">
-          <select class="filter-select" id="spaceFilter" onchange="filterQuizzes()">
-            <option value="ALL">All Spaces</option>
-            <!-- JS populated -->
-          </select>
-          <select class="filter-select" id="statusFilter" onchange="filterQuizzes()">
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon purple"><i class="ti ti-files"></i></div>
+            <div>
+              <div class="stat-val" id="statTotal">—</div>
+              <div class="stat-label">Total Quizzes</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="ti ti-circle-check"></i></div>
+            <div>
+              <div class="stat-val" id="statActive">—</div>
+              <div class="stat-label">Active</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange"><i class="ti ti-users"></i></div>
+            <div>
+              <div class="stat-val" id="statAttempts">—</div>
+              <div class="stat-label">Total Attempts</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="ti ti-help-circle"></i></div>
+            <div>
+              <div class="stat-val" id="statQuestions">—</div>
+              <div class="stat-label">Total Questions</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <i class="ti ti-search"></i>
+            <input type="text" id="searchInput" placeholder="Search quizzes by title or course..."
+              oninput="filterQuizzes()">
+          </div>
+          <select class="filter-pill" id="statusFilter" onchange="filterQuizzes()">
             <option value="ALL">All Status</option>
             <option value="ACTIVE">Active</option>
             <option value="INACTIVE">Inactive</option>
           </select>
+          <select class="filter-pill" id="diffFilter" onchange="filterQuizzes()">
+            <option value="ALL">All Difficulty</option>
+            <option value="EASY">Easy</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HARD">Hard</option>
+          </select>
+          <select class="filter-pill" id="spaceFilter" onchange="filterQuizzes()">
+            <option value="ALL">All Spaces</option>
+          </select>
         </div>
-      </div>
 
-      <!-- ALERT MESSAGE -->
-      <div id="alertMessage" class="alert alert-success d-none mb-4 shadow-sm border-0 fw-bold rounded-3" role="alert"></div>
-
-      <!-- ADD/EDIT FORM CARD -->
-      <div class="row" id="quizFormContainer" style="display: none;">
-        <div class="col-12 mb-5">
-          <div class="card form-card">
-            <div class="card-body p-5">
-              <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                <h3 class="mb-0 fw-bold text-dark" id="formTitle"><i class="ti ti-pencil me-2 text-primary"></i>Create New Quiz</h3>
-                <button type="button" class="btn-close" aria-label="Close" onclick="toggleQuizForm(false)"></button>
+        <div id="quizContainer">
+          <div id="skeletonLoader" class="row g-4">
+            <div class="col-md-6 col-xl-4">
+              <div class="quiz-card">
+                <div class="skeleton" style="height:180px;"></div>
               </div>
-              
-              <form id="quizForm">
-                <input type="hidden" id="quizId">
-                <div class="row g-4">
-                  <div class="col-md-12">
-                    <label for="title" class="form-label">Quiz Title <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control form-control-lg" id="title" placeholder="e.g. Midterm Assessment" required>
-                  </div>
-                  <div class="col-md-4">
-                    <label for="durationMinutes" class="form-label">Duration (Minutes) <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" id="durationMinutes" placeholder="30" required>
-                  </div>
-                  <div class="col-md-4">
-                    <label for="passScore" class="form-label">Pass Score (%) <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" id="passScore" placeholder="50" max="100" required>
-                  </div>
-                  <div class="col-md-4">
-                    <label for="difficulty" class="form-label">Difficulty</label>
-                    <select class="form-select" id="difficulty">
-                      <option value="EASY">Easy</option>
-                      <option value="MEDIUM" selected>Medium</option>
-                      <option value="HARD">Hard</option>
-                    </select>
-                  </div>
-                  <div class="col-md-12">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" rows="3" placeholder="Brief description of the quiz..."></textarea>
-                  </div>
-                  <div class="col-md-12">
-                    <div class="form-check form-switch fs-5 mt-2">
-                      <input type="checkbox" class="form-check-input" id="active" checked>
-                      <label class="form-check-label fw-bold text-dark ms-2" for="active">Publish immediately (Active)</label>
-                    </div>
-                  </div>
-                </div>
-                <div class="d-flex gap-3 mt-5 pt-3 border-top">
-                  <button type="button" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm" onclick="saveQuiz()" id="saveBtn">Save Quiz</button>
-                  <button type="button" class="btn btn-light btn-lg rounded-pill px-4 fw-bold" onclick="toggleQuizForm(false)">Cancel</button>
-                </div>
-              </form>
+            </div>
+            <div class="col-md-6 col-xl-4">
+              <div class="quiz-card">
+                <div class="skeleton" style="height:180px;"></div>
+              </div>
+            </div>
+            <div class="col-md-6 col-xl-4">
+              <div class="quiz-card">
+                <div class="skeleton" style="height:180px;"></div>
+              </div>
             </div>
           </div>
+          <div id="quizContent"></div>
         </div>
-      </div>
 
-      <!-- MAIN QUIZZES CONTAINER -->
-      <div id="loader" class="text-center py-5 d-none">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-          <span class="visually-hidden">Loading...</span>
-        </div>
       </div>
-
-      <div id="learningSpacesContainer">
-        <!-- JS generated Sections grouped by Space -->
-      </div>
-
     </div>
   </main>
 
-  <script>
-    const API_URL = '/api/quizzes';
-    let currentQuizzes = [];
+  <div class="modal-overlay" id="quizModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalTitle"><i class="ti ti-plus me-2 text-primary"></i>Create New Quiz</h3>
+        <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editQuizId">
 
-    document.addEventListener("DOMContentLoaded", () => {
-      fetchQuizzes();
+        <div id="nodePickerSection" class="mb-4">
+          <label class="form-label fw-semibold">Learning Node <span class="text-danger">*</span></label>
+          <select class="form-select" id="nodePicker">
+            <option value="">Loading nodes...</option>
+          </select>
+          <div class="invalid-feedback d-block d-none" id="err-learningNodeId"></div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label fw-semibold">Quiz Title <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="mTitle" placeholder="e.g. Midterm Assessment — Chapter 1"
+              maxlength="255">
+            <div class="invalid-feedback d-block d-none" id="err-title"></div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Description</label>
+            <textarea class="form-control" id="mDescription" rows="3" placeholder="Brief description of this quiz..."
+              maxlength="500"></textarea>
+            <div class="invalid-feedback d-block d-none" id="err-description"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Duration (minutes) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="mDuration" value="30" min="1" max="480">
+            <div class="invalid-feedback d-block d-none" id="err-durationMinutes"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Pass Score (/100) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="mPassScore" value="50" min="1" max="100">
+            <div class="invalid-feedback d-block d-none" id="err-passScore"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Difficulty</label>
+            <select class="form-select" id="mDifficulty">
+              <option value="EASY">Easy</option>
+              <option value="MEDIUM" selected>Medium</option>
+              <option value="HARD">Hard</option>
+            </select>
+            <div class="invalid-feedback d-block d-none" id="err-difficulty"></div>
+          </div>
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="mActive" checked>
+              <label class="form-check-label fw-semibold" for="mActive">Publish immediately (Active)</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4 pt-3" style="border-top:1px solid #f3f4f6;">
+          <button class="btn btn-primary rounded-pill px-4 fw-bold" onclick="saveQuiz()" id="btnSaveQuiz">
+            <i class="ti ti-check me-1"></i>Save Quiz
+          </button>
+          <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="closeModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-box" style="max-width:420px;">
+      <div class="modal-header">
+        <h3 style="color:#dc2626;"><i class="ti ti-alert-triangle me-2"></i>Confirm Delete</h3>
+        <button class="modal-close" onclick="document.getElementById('deleteModal').classList.remove('show')"><i
+            class="ti ti-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteMessage" class="text-muted mb-4"></p>
+        <div class="d-flex gap-2">
+          <button class="btn btn-danger rounded-pill px-4 fw-bold" id="btnConfirmDelete" onclick="confirmDelete()">
+            <i class="ti ti-trash me-1"></i>Confirm
+          </button>
+          <button class="btn btn-light rounded-pill px-4 fw-bold"
+            onclick="document.getElementById('deleteModal').classList.remove('show')">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TOKEN_KEY = 'jwt_token';
+    const USER_KEY = 'currentUser';
+
+    function getToken() { return localStorage.getItem(TOKEN_KEY); }
+    function getUser() { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch (e) { return null; } }
+    function authHeaders() {
+      const t = getToken();
+      return t
+        ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t }
+        : { 'Content-Type': 'application/json' };
+    }
+    function logout() {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem('user_id');
+      window.location.href = '/signin';
+    }
+
+    let allQuizzes = [];
+    let pendingDeleteId = null;
+    let pendingDeleteHasAttempts = false;
+    let availableNodes = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = getToken();
+      if (!token) {
+        document.getElementById('authRequired').classList.remove('d-none');
+        return;
+      }
+      const user = getUser();
+      document.getElementById('mainUI').classList.remove('d-none');
+      if (user) {
+        document.getElementById('userAvatar').style.display = 'inline-block';
+        document.getElementById('userInfoDisplay').innerHTML =
+          `<i class="ti ti-user-circle" style="color:#7c3aed;font-size:1.2rem;"></i><span>${user.fullName || user.email || 'Lecturer'}</span>`;
+      }
+      await loadNodes();
+      await fetchMyQuizzes();
     });
 
-    function showAlert(message, isError = false) {
-      const alertEl = document.getElementById('alertMessage');
-      alertEl.innerText = message;
-      alertEl.classList.remove('d-none', 'alert-success', 'alert-danger');
-      alertEl.classList.add(isError ? 'alert-danger' : 'alert-success');
-      setTimeout(() => alertEl.classList.add('d-none'), 3000);
+    function toast(msg, isError = false) {
+      const wrap = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className = 'toast-item' + (isError ? ' error' : '');
+      el.innerHTML = `
+        <span class="toast-icon" style="color:${isError ? '#dc2626' : '#059669'};">
+          <i class="ti ti-${isError ? 'alert-circle' : 'circle-check'}"></i>
+        </span>
+        <span class="toast-msg">${msg}</span>`;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
     }
 
-    function toggleQuizForm(show = true, quiz = null) {
-      const container = document.getElementById('quizFormContainer');
-      const formTitle = document.getElementById('formTitle');
-      if (show) {
-        container.style.display = 'flex';
-        document.getElementById('quizForm').reset();
-        if (quiz) {
-          formTitle.innerHTML = '<i class="ti ti-pencil me-2 text-primary"></i>Edit Quiz';
-          document.getElementById('quizId').value = quiz.id;
-          document.getElementById('title').value = quiz.title;
-          document.getElementById('description').value = quiz.description;
-          document.getElementById('durationMinutes').value = quiz.durationMinutes;
-          document.getElementById('passScore').value = quiz.passScore;
-          document.getElementById('difficulty').value = quiz.difficulty || 'MEDIUM';
-          document.getElementById('active').checked = quiz.active;
-        } else {
-          formTitle.innerHTML = '<i class="ti ti-plus me-2 text-primary"></i>Create New Quiz';
-          document.getElementById('quizId').value = '';
-          document.getElementById('durationMinutes').value = 30;
-          document.getElementById('passScore').value = 50;
-        }
-        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        container.style.display = 'none';
-      }
-    }
-
-    async function fetchQuizzes() {
-      const loader = document.getElementById('loader');
-      loader.classList.remove('d-none');
-      document.getElementById('learningSpacesContainer').innerHTML = '';
-
+    async function loadNodes() {
       try {
-        const response = await fetch(API_URL);
-        if (!response.ok) throw new Error('Failed to load');
-        currentQuizzes = await response.json();
-        
-        populateSpaceFilter(currentQuizzes);
-        renderGroupedQuizzes(currentQuizzes);
-      } catch (error) {
-        console.error(error);
-        showAlert('Failed to load quizzes', true);
+        const res = await fetch('/api/learning-nodes', { headers: authHeaders() });
+        if (res.ok) availableNodes = await res.json();
+      } catch (e) { }
+    }
+
+    async function fetchMyQuizzes() {
+      document.getElementById('skeletonLoader').style.display = 'flex';
+      document.getElementById('quizContent').innerHTML = '';
+      try {
+        const res = await fetch('/api/quizzes/my', { headers: authHeaders() });
+        if (res.status === 401 || res.status === 403) {
+          document.getElementById('mainUI').classList.add('d-none');
+          document.getElementById('authRequired').classList.remove('d-none');
+          return;
+        }
+        if (!res.ok) throw new Error();
+        allQuizzes = await res.json();
+        updateStats(allQuizzes);
+        populateSpaceFilter(allQuizzes);
+        renderQuizzes(allQuizzes);
+      } catch (e) {
+        toast('Failed to load quizzes', true);
       } finally {
-        loader.classList.add('d-none');
+        document.getElementById('skeletonLoader').style.display = 'none';
       }
+    }
+
+    function updateStats(quizzes) {
+      document.getElementById('statTotal').textContent = quizzes.length;
+      document.getElementById('statActive').textContent = quizzes.filter(q => q.active).length;
+      document.getElementById('statAttempts').textContent = quizzes.reduce((s, q) => s + (q.totalAttempts || 0), 0);
+      document.getElementById('statQuestions').textContent = quizzes.reduce((s, q) => s + (q.questionCount || 0), 0);
     }
 
     function populateSpaceFilter(quizzes) {
-      const select = document.getElementById('spaceFilter');
+      const sel = document.getElementById('spaceFilter');
       const spaces = [...new Set(quizzes.map(q => q.learningSpaceName || 'Uncategorized'))];
-      
-      select.innerHTML = '<option value="ALL">All Spaces</option>';
+      sel.innerHTML = '<option value="ALL">All Spaces</option>';
       spaces.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s;
-        opt.innerText = s;
-        select.appendChild(opt);
+        const o = document.createElement('option');
+        o.value = o.textContent = s;
+        sel.appendChild(o);
       });
     }
 
     function filterQuizzes() {
       const term = document.getElementById('searchInput').value.toLowerCase();
-      const spaceVal = document.getElementById('spaceFilter').value;
-      const statusVal = document.getElementById('statusFilter').value;
-
-      const filtered = currentQuizzes.filter(q => {
-        const matchTitle = q.title.toLowerCase().includes(term) || (q.courseName && q.courseName.toLowerCase().includes(term));
-        const matchSpace = spaceVal === 'ALL' || (q.learningSpaceName || 'Uncategorized') === spaceVal;
-        const matchStatus = statusVal === 'ALL' || (statusVal === 'ACTIVE' ? q.active : !q.active);
-        return matchTitle && matchSpace && matchStatus;
+      const status = document.getElementById('statusFilter').value;
+      const diff = document.getElementById('diffFilter').value;
+      const space = document.getElementById('spaceFilter').value;
+      const filtered = allQuizzes.filter(q => {
+        const matchText = q.title.toLowerCase().includes(term) || (q.courseName || '').toLowerCase().includes(term);
+        const matchStatus = status === 'ALL' || (status === 'ACTIVE' ? q.active : !q.active);
+        const matchDiff = diff === 'ALL' || q.difficulty === diff;
+        const matchSpace = space === 'ALL' || (q.learningSpaceName || 'Uncategorized') === space;
+        return matchText && matchStatus && matchDiff && matchSpace;
       });
-
-      renderGroupedQuizzes(filtered);
+      renderQuizzes(filtered);
     }
 
-    function renderGroupedQuizzes(quizzes) {
-      const container = document.getElementById('learningSpacesContainer');
-      container.innerHTML = '';
+    function diffChip(d) {
+      const cls = { EASY: 'diff-easy', MEDIUM: 'diff-medium', HARD: 'diff-hard' };
+      const label = { EASY: 'Easy', MEDIUM: 'Medium', HARD: 'Hard' };
+      return `<span class="difficulty-chip ${cls[d] || 'diff-medium'}">${label[d] || d || '—'}</span>`;
+    }
 
-      if (quizzes.length === 0) {
-        container.innerHTML = '<div class="text-center text-muted py-5"><i class="ti ti-inbox fs-1 mb-3"></i><h4>No quizzes found</h4></div>';
+    function renderQuizzes(quizzes) {
+      const container = document.getElementById('quizContent');
+      container.innerHTML = '';
+      if (!quizzes.length) {
+        container.innerHTML = `
+          <div class="empty-box">
+            <i class="ti ti-mood-empty"></i>
+            <h4 class="fw-bold">No quizzes found</h4>
+            <p>Click <strong>Create New Quiz</strong> to get started.</p>
+          </div>`;
         return;
       }
-
-      // Group by Learning Space
       const groups = {};
       quizzes.forEach(q => {
-        const spaceName = q.learningSpaceName || 'Uncategorized';
-        if (!groups[spaceName]) groups[spaceName] = [];
-        groups[spaceName].push(q);
+        const key = q.learningSpaceName || 'Uncategorized';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(q);
       });
-
-      // Render each group
-      for (const [spaceName, spaceQuizzes] of Object.entries(groups)) {
-        
-        // Calculate group stats
-        const activeCount = spaceQuizzes.filter(q => q.active).length;
-        const totalAttempts = spaceQuizzes.reduce((sum, q) => sum + (q.totalAttempts || 0), 0);
-        const passRateSum = spaceQuizzes.reduce((sum, q) => sum + (q.passRate || 0), 0);
-        const avgPassRate = spaceQuizzes.length > 0 ? (passRateSum / spaceQuizzes.length).toFixed(0) : 0;
-
+      for (const [spaceName, list] of Object.entries(groups)) {
+        const activeCount = list.filter(q => q.active).length;
         const section = document.createElement('div');
-        section.className = 'space-section';
-        
-        // Header with Space Name and Stats
+        section.className = 'mb-5';
         section.innerHTML = `
-          <div class="space-header">
-            <h2 class="space-title"><i class="ti ti-folder text-primary"></i> ${spaceName}</h2>
-            <div class="space-stats-pill">
-              <span title="Total Quizzes"><i class="ti ti-files"></i> ${spaceQuizzes.length}</span>
-              <span title="Active"><i class="ti ti-check text-success"></i> ${activeCount}</span>
-              <span title="Student Attempts"><i class="ti ti-users text-warning"></i> ${totalAttempts}</span>
-              <span title="Avg Pass Rate"><i class="ti ti-target text-info"></i> ${avgPassRate}%</span>
+          <div class="section-header">
+            <div class="section-title">
+              <i class="ti ti-folder" style="color:#7c3aed;"></i>
+              ${spaceName}
+              <span class="section-badge">${list.length} quiz${list.length !== 1 ? 'zes' : ''}</span>
             </div>
+            <small class="text-muted">${activeCount} active</small>
           </div>
-          <div class="row g-4" id="grid-${spaceName.replace(/\s+/g, '-')}"></div>
-        `;
-        
+          <div class="row g-4"></div>`;
         container.appendChild(section);
         const grid = section.querySelector('.row');
-
-        // Render Cards
-        spaceQuizzes.forEach(quiz => {
-          const badgeClass = quiz.active ? 'badge-active' : 'badge-inactive';
-          const badgeText = quiz.active ? 'Active' : 'Inactive';
-          
-          const cardHtml = `
-            <div class="col-12 col-md-6 col-xl-4">
-              <div class="quiz-card">
-                <div class="card-top-info">
-                  <div class="course-label">${quiz.courseName || 'General'}</div>
-                  <div class="quiz-badge ${badgeClass}">
-                    <i class="${quiz.active ? 'ti ti-circle-filled' : 'ti ti-circle-dashed'} fs-9"></i> ${badgeText}
-                  </div>
+        list.forEach(quiz => {
+          const passRate = (quiz.passRate || 0).toFixed(0);
+          const col = document.createElement('div');
+          col.className = 'col-12 col-md-6 col-xl-4';
+          col.innerHTML = `
+            <div class="quiz-card">
+              <div class="card-top">
+                <span class="course-tag">${quiz.courseName || 'General'}</span>
+                <span class="status-badge ${quiz.active ? 'active' : 'inactive'}">
+                  ${quiz.active ? '● Active' : '○ Inactive'}
+                </span>
+              </div>
+              <h4 class="quiz-title-text">${quiz.title}</h4>
+              <p class="quiz-desc">${quiz.description || 'No description provided.'}</p>
+              <div class="quiz-metrics">
+                <div class="metric">
+                  <div class="metric-val" style="color:#d97706;">${quiz.questionCount || 0}</div>
+                  <div class="metric-lbl">Questions</div>
                 </div>
-                
-                <h4 class="quiz-title-text">${quiz.title}</h4>
-                <p class="quiz-desc">${quiz.description || 'A comprehensive assessment.'}</p>
-                
-                <div class="quiz-metrics">
-                  <div class="metric-item">
-                    <div class="metric-val text-warning"><i class="ti ti-help-circle"></i> ${quiz.questionCount || 0}</div>
-                    <div class="metric-label">Questions</div>
-                  </div>
-                  <div class="metric-item">
-                    <div class="metric-val text-primary"><i class="ti ti-clock"></i> ${quiz.durationMinutes}m</div>
-                    <div class="metric-label">Duration</div>
-                  </div>
-                  <div class="metric-item">
-                    <div class="metric-val text-success"><i class="ti ti-target"></i> ${quiz.passScore}</div>
-                    <div class="metric-label">Pass Score</div>
-                  </div>
+                <div class="metric">
+                  <div class="metric-val" style="color:#2563eb;">${quiz.durationMinutes}m</div>
+                  <div class="metric-lbl">Duration</div>
                 </div>
-                
-                <div class="card-bottom">
-                  <div class="student-avatars">
-                    <img src="/assets/images/avatar-1.jpg" alt="s">
-                    <img src="/assets/images/avatar-2.jpg" alt="s">
-                    <span class="attempts-count">+${quiz.totalAttempts || 0}</span>
-                  </div>
-                  <div class="action-btns d-flex gap-2">
-                    <button class="btn-build" onclick="window.location.href='/lecturer/quizzes/${quiz.id}/builder'" title="Build Questions">
-                      <i class="ti ti-tools"></i> Build
-                    </button>
-                    <button onclick='editQuiz(${quiz.id})' title="Edit Settings"><i class="ti ti-pencil"></i></button>
-                    <button class="text-danger" onclick="deleteQuiz(${quiz.id})" title="Delete"><i class="ti ti-trash"></i></button>
-                  </div>
+                <div class="metric">
+                  <div class="metric-val" style="color:#059669;">${quiz.totalAttempts || 0}</div>
+                  <div class="metric-lbl">Attempts</div>
                 </div>
               </div>
-            </div>
-          `;
-          grid.insertAdjacentHTML('beforeend', cardHtml);
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                ${diffChip(quiz.difficulty)}
+                <small class="text-muted fw-semibold">Pass: ${quiz.passScore}% &nbsp;|&nbsp; Rate: ${passRate}%</small>
+              </div>
+              <div class="pass-bar">
+                <div class="pass-fill" style="width:${passRate}%;"></div>
+              </div>
+              <div class="card-actions mt-3">
+                <button class="btn-build" onclick="window.location.href='/lecturer/quizzes/${quiz.id}/builder'">
+                  <i class="ti ti-tools"></i> Build Questions
+                </button>
+                <div class="d-flex gap-1">
+                  <button class="btn-icon-sm" onclick="openEditModal(${quiz.id})" title="Edit">
+                    <i class="ti ti-pencil"></i>
+                  </button>
+                  <button class="btn-icon-sm danger" onclick="openDeleteConfirm(${quiz.id})" title="Delete">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>`;
+          grid.appendChild(col);
         });
       }
     }
 
-    function editQuiz(id) {
-      const quiz = currentQuizzes.find(q => q.id === id);
-      if (quiz) toggleQuizForm(true, quiz);
+    function openCreateModal() {
+      document.getElementById('modalTitle').innerHTML = '<i class="ti ti-plus me-2 text-primary"></i>Create New Quiz';
+      document.getElementById('editQuizId').value = '';
+      document.getElementById('mTitle').value = '';
+      document.getElementById('mDescription').value = '';
+      document.getElementById('mDuration').value = 30;
+      document.getElementById('mPassScore').value = 50;
+      document.getElementById('mDifficulty').value = 'MEDIUM';
+      document.getElementById('mActive').checked = true;
+      document.getElementById('nodePickerSection').style.display = 'block';
+      renderNodePicker();
+      document.getElementById('nodePicker').value = '';
+      clearErrors();
+      document.getElementById('quizModal').classList.add('show');
+    }
+
+    function openEditModal(id) {
+      const quiz = allQuizzes.find(q => q.id === id);
+      if (!quiz) return;
+      document.getElementById('modalTitle').innerHTML = '<i class="ti ti-pencil me-2 text-primary"></i>Edit Quiz';
+      document.getElementById('editQuizId').value = quiz.id;
+      document.getElementById('mTitle').value = quiz.title || '';
+      document.getElementById('mDescription').value = quiz.description || '';
+      document.getElementById('mDuration').value = quiz.durationMinutes || 30;
+      document.getElementById('mPassScore').value = quiz.passScore || 50;
+      document.getElementById('mDifficulty').value = quiz.difficulty || 'MEDIUM';
+      document.getElementById('mActive').checked = quiz.active;
+      document.getElementById('nodePickerSection').style.display = 'none';
+      clearErrors();
+      document.getElementById('quizModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('quizModal').classList.remove('show');
+    }
+
+    function renderNodePicker() {
+      const picker = document.getElementById('nodePicker');
+      picker.innerHTML = '';
+      if (!availableNodes.length) {
+        picker.innerHTML = '<option value="">No learning nodes found. Create a learning space first.</option>';
+        picker.disabled = true;
+        return;
+      }
+      picker.disabled = false;
+      picker.innerHTML = '<option value="">-- Select a Learning Node --</option>';
+      availableNodes.forEach(node => {
+        const opt = document.createElement('option');
+        opt.value = node.id;
+        opt.textContent = node.title || node.name || `Node #${node.id}`;
+        picker.appendChild(opt);
+      });
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.invalid-feedback').forEach(el => {
+        el.classList.add('d-none');
+        el.textContent = '';
+      });
+      document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    }
+
+    function showError(fieldId, message) {
+      const errEl = document.getElementById('err-' + fieldId);
+      if (errEl) {
+        errEl.textContent = message;
+        errEl.classList.remove('d-none');
+        const inputIdMap = {
+          'title': 'mTitle',
+          'description': 'mDescription',
+          'durationMinutes': 'mDuration',
+          'passScore': 'mPassScore',
+          'difficulty': 'mDifficulty',
+          'learningNodeId': 'nodePicker'
+        };
+        const inputEl = document.getElementById(inputIdMap[fieldId]);
+        if (inputEl) inputEl.classList.add('is-invalid');
+      }
     }
 
     async function saveQuiz() {
-      const id = document.getElementById('quizId').value;
-      const title = document.getElementById('title').value;
-      const description = document.getElementById('description').value;
-      const durationMinutes = document.getElementById('durationMinutes').value;
-      const passScore = document.getElementById('passScore').value;
-      const difficulty = document.getElementById('difficulty').value;
-      const active = document.getElementById('active').checked;
+      const id = document.getElementById('editQuizId').value;
+      const title = document.getElementById('mTitle').value.trim();
+      const description = document.getElementById('mDescription').value.trim();
+      const durationStr = document.getElementById('mDuration').value;
+      const duration = parseInt(durationStr);
+      const passScoreStr = document.getElementById('mPassScore').value;
+      const passScore = parseInt(passScoreStr);
+      const difficulty = document.getElementById('mDifficulty').value;
+      const active = document.getElementById('mActive').checked;
+      const nodeId = document.getElementById('nodePicker').value;
+
+      clearErrors();
+      let hasError = false;
+
+      if (!title) { showError('title', 'Title is required'); hasError = true; }
+      else if (title.length < 3 || title.length > 255) { showError('title', 'Title must be between 3 and 255 characters'); hasError = true; }
+
+      if (description && description.length > 500) { showError('description', 'Description must not exceed 500 characters'); hasError = true; }
       
-      if (!title || !durationMinutes || !passScore) {
-        showAlert('Please fill all required fields!', true);
-        return;
-      }
-
-      let validNodeId = 1;
-      let validLecturerId = 1;
-      if (currentQuizzes && currentQuizzes.length > 0) {
-        validNodeId = currentQuizzes[0].learningNodeId || 1;
-        validLecturerId = currentQuizzes[0].lecturerId || 1;
-      }
-
-      const payload = {
-        learningNodeId: validNodeId, 
-        lecturerId: validLecturerId,     
-        title,
-        description,
-        durationMinutes: parseInt(durationMinutes),
-        passScore: parseInt(passScore),
-        difficulty,
-        active
-      };
-
-      const method = id ? 'PUT' : 'POST';
-      const url = id ? `${API_URL}/${id}` : API_URL;
-      const btn = document.getElementById('saveBtn');
-      const originalText = btn.innerHTML;
+      if (!durationStr || duration < 1 || duration > 480) { showError('durationMinutes', 'Duration must be between 1 and 480 minutes'); hasError = true; }
       
+      if (!passScoreStr || passScore < 1 || passScore > 100) { showError('passScore', 'Pass score must be between 1 and 100'); hasError = true; }
+
+      if (!id && !nodeId) { showError('learningNodeId', 'Please select a Learning Node'); hasError = true; }
+
+      if (hasError) return;
+
+      const btn = document.getElementById('btnSaveQuiz');
       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
       btn.disabled = true;
 
       try {
-        const response = await fetch(url, {
-          method: method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-          let errorMsg = 'Failed to save';
-          try {
-            const errData = await response.json();
-            errorMsg = errData.message || errorMsg;
-          } catch(e) {}
-          throw new Error(errorMsg);
+        let res;
+        if (id) {
+          res = await fetch(`/api/quizzes/${id}`, {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify({ title, description, durationMinutes: duration, passScore, difficulty, active })
+          });
+        } else {
+          res = await fetch('/api/quizzes', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ learningNodeId: parseInt(nodeId), title, description, durationMinutes: duration, passScore, difficulty, active })
+          });
         }
         
-        showAlert(id ? 'Quiz updated successfully' : 'Quiz created successfully');
-        toggleQuizForm(false);
-        fetchQuizzes();
-      } catch (error) {
-        showAlert('Error: ' + error.message, true);
+        if (res.status === 401) { toast('Session expired!', true); logout(); return; }
+        
+        if (!res.ok) {
+          let msg = id ? 'Update failed' : 'Create failed';
+          try { 
+            const e = await res.json(); 
+            msg = e.message || msg; 
+            if (res.status === 400 && e.error === 'VALIDATION_FAILED' && e.fieldErrors) {
+               e.fieldErrors.forEach(err => showError(err.field, err.message));
+               throw new Error('Please fix the validation errors.');
+            }
+          } catch (e) { throw e; }
+        } else {
+          toast(id ? 'Quiz updated successfully!' : 'Quiz created successfully!');
+          closeModal();
+          await fetchMyQuizzes();
+        }
+      } catch (e) {
+        if (e.message !== 'Please fix the validation errors.') {
+          toast(e.message, true);
+        }
       } finally {
-        btn.innerHTML = originalText;
+        btn.innerHTML = '<i class="ti ti-check me-1"></i>Save Quiz';
         btn.disabled = false;
       }
     }
 
-    async function deleteQuiz(id) {
-      const quiz = currentQuizzes.find(q => q.id === id);
+    function openDeleteConfirm(id) {
+      const quiz = allQuizzes.find(q => q.id === id);
       if (!quiz) return;
-
-      if (quiz.totalAttempts > 0) {
-        if (confirm('LƯU Ý: Bài Quiz này đã có sinh viên làm bài nên KHÔNG THỂ xóa vĩnh viễn (để bảo lưu điểm số).\\n\\nBạn có muốn XÓA MỀM bằng cách chuyển sang trạng thái Ngừng Hoạt Động (Draft/Inactive) không?')) {
-          try {
-            const payload = {
-              learningNodeId: quiz.learningNodeId || 1,
-              lecturerId: quiz.lecturerId || 1,
-              title: quiz.title,
-              description: quiz.description,
-              durationMinutes: quiz.durationMinutes,
-              passScore: quiz.passScore,
-              difficulty: quiz.difficulty,
-              active: false // Soft delete
-            };
-            
-            const response = await fetch(`${API_URL}/${id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-            
-            if (!response.ok) throw new Error('Failed to soft delete');
-            showAlert('Đã vô hiệu hóa (Xóa mềm) bài Quiz thành công!');
-            fetchQuizzes();
-          } catch (error) {
-            showAlert('Lỗi khi vô hiệu hóa bài Quiz', true);
-          }
-        }
+      pendingDeleteId = id;
+      pendingDeleteHasAttempts = (quiz.totalAttempts || 0) > 0;
+      const msg = document.getElementById('deleteMessage');
+      const btn = document.getElementById('btnConfirmDelete');
+      if (pendingDeleteHasAttempts) {
+        msg.innerHTML = `<div class="alert alert-warning rounded-3 mb-3"><i class="ti ti-alert-triangle me-2"></i>
+          Quiz <strong>"${quiz.title}"</strong> has <strong>${quiz.totalAttempts} student attempt(s)</strong> and cannot be permanently deleted.
+          </div>Do you want to <strong>deactivate</strong> (soft-delete) this quiz instead?`;
+        btn.innerHTML = '<i class="ti ti-eye-off me-1"></i>Deactivate';
+        btn.className = 'btn btn-warning rounded-pill px-4 fw-bold';
       } else {
-        if (confirm('Bạn có chắc chắn muốn xóa vĩnh viễn bài Quiz này không? Hành động này không thể hoàn tác.')) {
-          try {
-            const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-            if (!response.ok) throw new Error('Failed to delete');
-            
-            showAlert('Đã xóa vĩnh viễn bài Quiz thành công!');
-            fetchQuizzes();
-          } catch (error) {
-            showAlert('Lỗi khi xóa bài Quiz', true);
-          }
+        msg.innerHTML = `Are you sure you want to permanently delete <strong>"${quiz.title}"</strong>? This action cannot be undone.`;
+        btn.innerHTML = '<i class="ti ti-trash me-1"></i>Delete Permanently';
+        btn.className = 'btn btn-danger rounded-pill px-4 fw-bold';
+      }
+      document.getElementById('deleteModal').classList.add('show');
+    }
+
+    async function confirmDelete() {
+      if (!pendingDeleteId) return;
+      const btn = document.getElementById('btnConfirmDelete');
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+      btn.disabled = true;
+      try {
+        let res;
+        if (pendingDeleteHasAttempts) {
+          const quiz = allQuizzes.find(q => q.id === pendingDeleteId);
+          res = await fetch(`/api/quizzes/${pendingDeleteId}`, {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify({ title: quiz.title, active: false })
+          });
+          if (!res.ok) throw new Error('Deactivation failed');
+          toast('Quiz deactivated successfully!');
+        } else {
+          res = await fetch(`/api/quizzes/${pendingDeleteId}`, {
+            method: 'DELETE',
+            headers: authHeaders()
+          });
+          if (!res.ok && res.status !== 204) throw new Error('Delete failed');
+          toast('Quiz deleted successfully!');
         }
+        document.getElementById('deleteModal').classList.remove('show');
+        await fetchMyQuizzes();
+      } catch (e) {
+        toast(e.message, true);
+      } finally {
+        btn.disabled = false;
       }
     }
+
+    document.getElementById('quizModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+    document.getElementById('deleteModal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('show'); });
   </script>
 </body>
+
 </html>

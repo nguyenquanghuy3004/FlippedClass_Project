@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+  <meta charset="UTF-8" />
+  <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">FCMS Mentor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+  <link rel="manifest" th:href="@{/assets/site.webmanifest}">
+
+  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
+  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  <!-- FontAwesome for fallback -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f8f9fc;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="overlay" class="overlay"></div>
+  <!-- TOPBAR -->
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+
+    <!-- MOBILE -->
+    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <div>
+      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
+        <!-- Dropdown -->
+        <li class="ms-3 dropdown">
+          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="avatar avatar-sm rounded-circle" />
+          </a>
+          FCMS Mentor
+          <div class="dropdown-menu dropdown-menu-end p-0" style="min-width: 200px;">
+            <div>
+              <div class="d-flex gap-3 align-items-center border-dashed border-bottom px-3 py-3">
+                <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="avatar avatar-md rounded-circle" />
+                <div>
+                  <h4 class="mb-0 small">Mentor User</h4>
+                  <p class="mb-0 small">@mentor</p>
+                </div>
+              </div>
+              <div class="p-3 d-flex flex-column gap-1 small lh-lg">
+                <a href="#!" class="text-danger" onclick="logout()">
+                  <span><i class="ti ti-logout me-2"></i>Log out</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar d-flex flex-column">
+    <div class="logo-area">
+      <a href="#" class="d-inline-flex">
+        <i class="fa-solid fa-chalkboard-user text-success fs-3"></i>
+        <span class="logo-text ms-2 fw-bold text-success fs-4"> FCMS Lecture</span>
+      </a>
+    </div>
+    <ul class="nav flex-column mb-auto">
+      <li class="px-4 py-2"><small class="nav-text">Workspace</small></li>
+      <li>
+        <a class="nav-link active" href="/lecturer/dashboard">
+          <i class="ti ti-box-seam"></i><span class="nav-text">My Spaces</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="/lecturer/quizzes">
+          <i class="ti ti-checklist"></i><span class="nav-text">My Quizzes</span>
+        </a>
+      </li>
+    </ul>
+    
+    <div class="p-3 mt-auto w-100">
+      <button class="btn btn-primary w-100 rounded d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createSpaceModal" style="background-color: #6366f1; border-color: #6366f1; padding: 0.6rem;">
+        <i class="ti ti-plus fs-5"></i> New Space
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main id="content" class="content py-10">
+    <div class="container-fluid">
+
+      <div layout:fragment="content">
+        <!-- Dynamic Content goes here -->
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <footer class="text-center py-2 mt-6 text-secondary ">
+            <p class="mb-0">FCMS Mentor Workspace. Powered by InApp Theme</p>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script>
+    // Setup AJAX to include JWT token if stored in localStorage
+    $.ajaxSetup({
+      beforeSend: function (xhr) {
+        const token = localStorage.getItem('token');
+        if (token) {
+          xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        }
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+  </script>
+  <th:block layout:fragment="scripts"></th:block>
+</body>
+
+</html>

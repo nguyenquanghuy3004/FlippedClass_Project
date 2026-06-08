@@ -1,6 +1,7 @@
 package com.example.flippedclass.entity;
 
 import com.example.flippedclass.enums.AuthProvider;
+import com.example.flippedclass.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,6 +39,11 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private AuthProvider provider;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'ACTIVE'")
+    @Builder.Default
+    private UserStatus status = UserStatus.ACTIVE;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private StudentProfile studentProfile;

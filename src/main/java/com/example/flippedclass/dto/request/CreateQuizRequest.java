@@ -3,7 +3,6 @@ package com.example.flippedclass.dto.request;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -14,7 +13,6 @@ public class CreateQuizRequest {
     @Positive(message = "learningNodeId must be a positive number")
     private Long learningNodeId;
 
-    @NotNull(message = "lecturerId is required")
     @Positive(message = "lecturerId must be a positive number")
     private Long lecturerId;
 

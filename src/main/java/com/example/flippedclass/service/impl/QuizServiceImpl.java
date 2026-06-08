@@ -23,6 +23,7 @@ import com.example.flippedclass.repository.QuizRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.repository.LearningNodeRepository;
 import com.example.flippedclass.service.QuizService;
+import com.example.flippedclass.validation.QuizValidator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -42,22 +43,28 @@ public class QuizServiceImpl implements QuizService {
     private final QuizAttemptRepository attemptRepository;
     private final UserRepository userRepository;
     private final LearningNodeRepository learningNodeRepository;
+    private final com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository;
+    private final QuizValidator quizValidator;
 
     public QuizServiceImpl(QuizRepository quizRepository,
                            QuizQuestionRepository questionRepository,
                            QuizAttemptRepository attemptRepository,
                            UserRepository userRepository,
-                           LearningNodeRepository learningNodeRepository) {
+                           LearningNodeRepository learningNodeRepository,
+                           com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository,
+                           QuizValidator quizValidator) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.attemptRepository = attemptRepository;
         this.userRepository = userRepository;
         this.learningNodeRepository = learningNodeRepository;
+        this.interactionLogRepository = interactionLogRepository;
+        this.quizValidator = quizValidator;
     }
 
     @Override
-    public QuizResponse create(CreateQuizRequest request) {
-        User lecturer = UserServiceImpl.findUser(userRepository, request.getLecturerId());
+    public QuizResponse createForCurrentUser(Long currentUserId, CreateQuizRequest request) {
+        User lecturer = UserServiceImpl.findUser(userRepository, currentUserId);
         LearningNode node = learningNodeRepository.findById(request.getLearningNodeId())
                 .orElseThrow(() -> new NotFoundException("Learning node not found: " + request.getLearningNodeId()));
 
@@ -76,30 +83,40 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public QuizResponse update(Long id, UpdateQuizRequest request) {
-        Quiz quiz = findQuiz(id);
-        if (request.getTitle() != null) {
-            quiz.setTitle(request.getTitle().trim());
-        }
-        if (request.getDescription() != null) {
-            quiz.setDescription(trimToNull(request.getDescription()));
-        }
-        if (request.getDurationMinutes() != null) {
-            quiz.setDurationMinutes(request.getDurationMinutes());
-        }
-        if (request.getActive() != null) {
-            quiz.setActive(request.getActive());
-        }
-        if (request.getPassScore() != null) {
-            quiz.setPassScore(request.getPassScore());
-        }
-        if (request.getDifficulty() != null) {
-            quiz.setDifficulty(request.getDifficulty());
-        }
-        if (request.getThumbnailUrl() != null) {
-            quiz.setThumbnailUrl(request.getThumbnailUrl());
-        }
-        return toResponse(quizRepository.save(quiz));
+    public QuizResponse updateOwned(Long currentUserId, Long quizId, UpdateQuizRequest request) {
+        Quiz quiz = findQuiz(quizId);
+        quizValidator.validateOwnership(currentUserId, quiz, "update");
+        return applyUpdate(quiz, request);
+    }
+
+    @Override
+    public void deleteOwned(Long currentUserId, Long quizId) {
+        Quiz quiz = findQuiz(quizId);
+        quizValidator.validateOwnership(currentUserId, quiz, "delete");
+        quizValidator.validateDeletable(quizId);
+        questionRepository.deleteByQuizId(quizId);
+        quizRepository.delete(quiz);
+    }
+
+    @Override
+    public QuizQuestionResponse addQuestionOwned(Long currentUserId, Long quizId, CreateQuizQuestionRequest request) {
+        Quiz quiz = findQuiz(quizId);
+        quizValidator.validateOwnership(currentUserId, quiz, "add question to");
+        return buildAndSaveQuestion(quiz, request);
+    }
+
+    @Override
+    public QuizQuestionResponse updateQuestionOwned(Long currentUserId, Long questionId, CreateQuizQuestionRequest request) {
+        QuizQuestion question = findQuestion(questionId);
+        quizValidator.validateOwnership(currentUserId, question.getQuiz(), "update question of");
+        return applyQuestionUpdate(question, request);
+    }
+
+    @Override
+    public void deleteQuestionOwned(Long currentUserId, Long questionId) {
+        QuizQuestion question = findQuestion(questionId);
+        quizValidator.validateOwnership(currentUserId, question.getQuiz(), "delete question of");
+        questionRepository.delete(question);
     }
 
     @Override
@@ -118,32 +135,6 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public void delete(Long id) {
-        long attemptsCount = attemptRepository.countByQuizId(id);
-        if (attemptsCount > 0) {
-            throw new BusinessException("Cannot delete quiz because it has already been attempted by students.");
-        }
-        questionRepository.deleteByQuizId(id);
-        quizRepository.delete(findQuiz(id));
-    }
-
-    @Override
-    public QuizQuestionResponse addQuestion(Long quizId, CreateQuizQuestionRequest request) {
-        Quiz quiz = findQuiz(quizId);
-
-        QuizQuestion question = QuizQuestion.builder()
-                .quiz(quiz)
-                .content(request.getContent().trim())
-                .options(request.getOptions() != null ? request.getOptions().trim() : "")
-                .correctAnswer(request.getCorrectAnswer().trim())
-                .points(request.getPoints())
-                .questionType(request.getQuestionType() != null ? request.getQuestionType() : "SINGLE_CHOICE")
-                .sortOrder(request.getSortOrder() != null ? request.getSortOrder() : 0)
-                .build();
-        return toQuestionResponse(questionRepository.save(question));
-    }
-
-    @Override
     public List<QuizQuestionResponse> getQuestions(Long quizId) {
         findQuiz(quizId);
         return questionRepository.findByQuizId(quizId).stream()
@@ -152,43 +143,16 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public QuizQuestionResponse updateQuestion(Long questionId, CreateQuizQuestionRequest request) {
-        QuizQuestion question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new NotFoundException("Question not found: " + questionId));
-        if (request.getContent() != null) question.setContent(request.getContent().trim());
-        if (request.getOptions() != null) question.setOptions(request.getOptions().trim());
-        if (request.getCorrectAnswer() != null) question.setCorrectAnswer(request.getCorrectAnswer().trim());
-        if (request.getPoints() != null) question.setPoints(request.getPoints());
-        if (request.getQuestionType() != null) question.setQuestionType(request.getQuestionType());
-        if (request.getSortOrder() != null) question.setSortOrder(request.getSortOrder());
-        return toQuestionResponse(questionRepository.save(question));
-    }
-
-    @Override
-    public void deleteQuestion(Long questionId) {
-        questionRepository.delete(questionRepository.findById(questionId)
-                .orElseThrow(() -> new NotFoundException("Question not found: " + questionId)));
-    }
-
-    @Override
     public QuizAttemptResponse submitAttempt(Long quizId, SubmitQuizAttemptRequest request) {
+        if (attemptRepository.existsByQuizIdAndStudent_Id(quizId, request.getStudentId())) {
+            throw new BusinessException("Bạn đã nộp bài rồi, không thể làm lại!");
+        }
+
         Quiz quiz = findQuiz(quizId);
         User student = UserServiceImpl.findUser(userRepository, request.getStudentId());
 
         List<QuizQuestion> questions = questionRepository.findByQuizId(quizId);
-        if (questions.isEmpty()) {
-            throw new BusinessException("Quiz has no questions");
-        }
-
-        Set<Long> validQuestionIds = questions.stream()
-                .map(QuizQuestion::getId)
-                .collect(Collectors.toSet());
-
-        for (Long answerQuestionId : request.getAnswers().keySet()) {
-            if (!validQuestionIds.contains(answerQuestionId)) {
-                throw new BusinessException("Unknown question id in answers: " + answerQuestionId);
-            }
-        }
+        quizValidator.validateAttemptAnswers(questions, request.getAnswers());
 
         Map<Long, String> answers = request.getAnswers();
         int correct = 0;
@@ -218,7 +182,20 @@ public class QuizServiceImpl implements QuizService {
                 .submittedAt(LocalDateTime.now())
                 .build();
 
-        return toAttemptResponse(attemptRepository.save(attempt));
+        QuizAttempt savedAttempt = attemptRepository.save(attempt);
+
+        // Create InteractionLog for Lecturer
+        if (quiz.getLearningNode() != null && quiz.getLearningNode().getLearningPath() != null) {
+            com.example.flippedclass.entity.InteractionLog log = com.example.flippedclass.entity.InteractionLog.builder()
+                    .student(student)
+                    .learningPath(quiz.getLearningNode().getLearningPath())
+                    .interactionType("QUIZ_SUBMIT")
+                    .summary("Student " + student.getFullName() + " submitted quiz '" + quiz.getTitle() + "' with score: " + score + "% (" + correct + "/" + questions.size() + ")")
+                    .build();
+            interactionLogRepository.save(log);
+        }
+
+        return toAttemptResponse(savedAttempt);
     }
 
     @Override
@@ -281,15 +258,52 @@ public class QuizServiceImpl implements QuizService {
                 .toList();
     }
 
+    private QuizResponse applyUpdate(Quiz quiz, UpdateQuizRequest request) {
+        if (request.getTitle() != null) quiz.setTitle(request.getTitle().trim());
+        if (request.getDescription() != null) quiz.setDescription(trimToNull(request.getDescription()));
+        if (request.getDurationMinutes() != null) quiz.setDurationMinutes(request.getDurationMinutes());
+        if (request.getActive() != null) quiz.setActive(request.getActive());
+        if (request.getPassScore() != null) quiz.setPassScore(request.getPassScore());
+        if (request.getDifficulty() != null) quiz.setDifficulty(request.getDifficulty());
+        if (request.getThumbnailUrl() != null) quiz.setThumbnailUrl(request.getThumbnailUrl());
+        return toResponse(quizRepository.save(quiz));
+    }
+
+    private QuizQuestionResponse buildAndSaveQuestion(Quiz quiz, CreateQuizQuestionRequest request) {
+        QuizQuestion question = QuizQuestion.builder()
+                .quiz(quiz)
+                .content(request.getContent().trim())
+                .options(request.getOptions() != null ? request.getOptions().trim() : "")
+                .correctAnswer(request.getCorrectAnswer().trim())
+                .points(request.getPoints())
+                .questionType(request.getQuestionType() != null ? request.getQuestionType() : "SINGLE_CHOICE")
+                .sortOrder(request.getSortOrder() != null ? request.getSortOrder() : 0)
+                .build();
+        return toQuestionResponse(questionRepository.save(question));
+    }
+
+    private QuizQuestionResponse applyQuestionUpdate(QuizQuestion question, CreateQuizQuestionRequest request) {
+        if (request.getContent() != null) question.setContent(request.getContent().trim());
+        if (request.getOptions() != null) question.setOptions(request.getOptions().trim());
+        if (request.getCorrectAnswer() != null) question.setCorrectAnswer(request.getCorrectAnswer().trim());
+        if (request.getPoints() != null) question.setPoints(request.getPoints());
+        if (request.getQuestionType() != null) question.setQuestionType(request.getQuestionType());
+        if (request.getSortOrder() != null) question.setSortOrder(request.getSortOrder());
+        return toQuestionResponse(questionRepository.save(question));
+    }
+
     private Quiz findQuiz(Long id) {
         return quizRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Quiz not found: " + id));
     }
 
+    private QuizQuestion findQuestion(Long id) {
+        return questionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Question not found: " + id));
+    }
+
     private static String trimToNull(String value) {
-        if (value == null) {
-            return null;
-        }
+        if (value == null) return null;
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
     }
@@ -298,7 +312,7 @@ public class QuizServiceImpl implements QuizService {
         long totalAttempts = attemptRepository.countByQuizId(quiz.getId());
         BigDecimal avgScore = attemptRepository.averageScoreByQuizId(quiz.getId());
         double avg = avgScore != null ? avgScore.doubleValue() : 0.0;
-        
+
         Integer passScore = quiz.getPassScore() != null ? quiz.getPassScore() : 50;
         long passedCount = attemptRepository.findByQuizId(quiz.getId()).stream()
                 .filter(a -> a.getScore() != null && a.getScore().compareTo(BigDecimal.valueOf(passScore)) >= 0).count();
@@ -306,7 +320,8 @@ public class QuizServiceImpl implements QuizService {
 
         Long spaceId = null;
         String spaceName = "Uncategorized";
-        if (quiz.getLearningNode() != null && quiz.getLearningNode().getLearningPath() != null && quiz.getLearningNode().getLearningPath().getLearningSpace() != null) {
+        if (quiz.getLearningNode() != null && quiz.getLearningNode().getLearningPath() != null
+                && quiz.getLearningNode().getLearningPath().getLearningSpace() != null) {
             spaceId = quiz.getLearningNode().getLearningPath().getLearningSpace().getId();
             spaceName = quiz.getLearningNode().getLearningPath().getLearningSpace().getName();
         }

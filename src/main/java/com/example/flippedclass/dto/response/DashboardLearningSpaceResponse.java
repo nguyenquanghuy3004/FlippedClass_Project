@@ -3,6 +3,7 @@ package com.example.flippedclass.dto.response;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.entity.LearningSpaceMember;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
@@ -19,8 +20,9 @@ public class DashboardLearningSpaceResponse {
     private LocalDateTime joinedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<QuizResponse> quizzes;
 
-    public static DashboardLearningSpaceResponse from(LearningSpaceMember member) {
+    public static DashboardLearningSpaceResponse from(LearningSpaceMember member, List<QuizResponse> quizzes) {
         LearningSpace space = member.getLearningSpace();
         DashboardLearningSpaceResponse response = new DashboardLearningSpaceResponse();
         response.id = space.getId();
@@ -35,6 +37,7 @@ public class DashboardLearningSpaceResponse {
         response.joinedAt = member.getJoinedAt();
         response.createdAt = space.getCreatedAt();
         response.updatedAt = space.getUpdatedAt();
+        response.quizzes = quizzes;
         return response;
     }
 }

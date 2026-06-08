@@ -17,6 +17,7 @@ public class QuizResponse {
     private Integer durationMinutes;
     private Boolean active;
     private LocalDateTime createdAt;
+    private Boolean isCompleted;
     
     // Additional Metadata
     private Integer passScore;

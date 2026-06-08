@@ -9,4 +9,5 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
     List<Quiz> findByLearningNode_IdAndActiveTrue(Long learningNodeId);
     List<Quiz> findByLearningNode_IdOrderByCreatedAtDesc(Long learningNodeId);
     List<Quiz> findByLecturer_Id(Long lecturerId);
+    List<Quiz> findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(Long spaceId);
 }

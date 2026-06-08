@@ -1,5 +1,7 @@
 package com.example.flippedclass.entity;
 
+import com.example.flippedclass.enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.VisibilityType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +20,7 @@ public class LearningSpace {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
     private String name;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
@@ -28,18 +30,18 @@ public class LearningSpace {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @Column(name = "invite_code", unique = true, length = 50)
+    @Column(name = "invite_code", nullable = false, unique = true, length = 255)
     private String inviteCode;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default
-    private com.example.flippedclass.enums.LearningSpaceStatus status = com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE;
+    private LearningSpaceStatus status = LearningSpaceStatus.ACTIVE;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     @Builder.Default
-    private com.example.flippedclass.enums.VisibilityType visibility = com.example.flippedclass.enums.VisibilityType.PRIVATE;
+    private VisibilityType visibility = VisibilityType.PRIVATE;
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default

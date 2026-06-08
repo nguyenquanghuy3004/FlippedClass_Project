@@ -316,6 +316,8 @@
       }
     }
   </style>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -343,11 +345,11 @@
     <aside>
       <!-- Info Card -->
       <div class="edu-card">
-        <div class="quiz-title">Advanced English Specialization</div>
-        <div class="quiz-meta">Topic: Midterm Test</div>
+        <div class="quiz-title" id="quiz-title-display">Loading Quiz...</div>
+        <div class="quiz-meta" id="quiz-topic-display">Topic: Loading...</div>
         
         <div class="timer-label">Time Remaining</div>
-        <div class="timer-value" id="countdown">24:47</div>
+        <div class="timer-value" id="countdown">--:--</div>
         
         <div class="action-buttons">
           <button class="btn-edu-outline" onclick="window.history.back()">Back</button>
@@ -367,11 +369,11 @@
             <div class="progress-name">Part 1: Grammar and Vocabulary</div>
           </div>
           <div class="d-flex justify-content-between align-items-center">
-            <div class="progress-text">Completed: <span id="prog-p1">5/10</span></div>
-            <div class="progress-text" style="color: #64748b;" id="prog-pct-p1">50%</div>
+            <div class="progress-text">Completed: <span id="prog-p1">0/0</span></div>
+            <div class="progress-text" style="color: #64748b;" id="prog-pct-p1">0%</div>
           </div>
           <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: 50%;" id="bar-p1"></div>
+            <div class="progress-bar-fill" style="width: 0%;" id="bar-p1"></div>
           </div>
         </div>
 
@@ -392,98 +394,9 @@
     </aside>
 
     <!-- Center Column: Questions -->
-    <section>
-      <!-- Question 1 -->
-      <div class="edu-card q-card" id="q1">
-        <div class="q-header">
-          <div class="q-number">Question 1</div>
-          <div class="q-type">Single Choice</div>
-        </div>
-        <div class="q-text">She _____ to the store yesterday.</div>
-        <div class="q-options">
-          <label class="q-option">
-            <input type="radio" name="q1" value="a" onchange="markAnswered(1)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">a. goes</div>
-          </label>
-          <label class="q-option">
-            <input type="radio" name="q1" value="b" onchange="markAnswered(1)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">b. going</div>
-          </label>
-          <label class="q-option">
-            <input type="radio" name="q1" value="c" onchange="markAnswered(1)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">c. went</div>
-          </label>
-          <label class="q-option">
-            <input type="radio" name="q1" value="d" onchange="markAnswered(1)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">d. go</div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Question 2 -->
-      <div class="edu-card q-card" id="q2">
-        <div class="q-header">
-          <div class="q-number">Question 2</div>
-          <div class="q-type">Single Choice</div>
-        </div>
-        <div class="q-text">They _____ very happy about the news.</div>
-        <div class="q-options">
-          <label class="q-option">
-            <input type="radio" name="q2" value="a" onchange="markAnswered(2)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">a. was</div>
-          </label>
-          <label class="q-option">
-            <input type="radio" name="q2" value="b" onchange="markAnswered(2)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">b. were</div>
-          </label>
-          <label class="q-option">
-            <input type="radio" name="q2" value="c" onchange="markAnswered(2)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">c. is</div>
-          </label>
-          <label class="q-option">
-            <input type="radio" name="q2" value="d" onchange="markAnswered(2)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">d. been</div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Question 3 -->
-      <div class="edu-card q-card" id="q3">
-        <div class="q-header">
-          <div class="q-number">Question 3</div>
-          <div class="q-type">Single Choice</div>
-        </div>
-        <div class="q-text">The cat is _____ the table.</div>
-        <div class="q-options">
-          <label class="q-option">
-            <input type="radio" name="q3" value="a" onchange="markAnswered(3)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">a. in</div>
-          </label>
-          <label class="q-option">
-            <input type="radio" name="q3" value="b" onchange="markAnswered(3)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">b. under</div>
-          </label>
-          <label class="q-option">
-            <input type="radio" name="q3" value="c" onchange="markAnswered(3)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">c. at</div>
-          </label>
-          <label class="q-option">
-            <input type="radio" name="q3" value="d" onchange="markAnswered(3)">
-            <div class="q-radio-custom"></div>
-            <div class="q-option-text">d. to</div>
-          </label>
-        </div>
+    <section id="questions-container">
+      <div style="text-align: center; padding: 3rem;">
+        <p style="color: #64748b;">Loading questions...</p>
       </div>
     </section>
 
@@ -500,71 +413,265 @@
   </main>
 
   <script>
-    // --- Timer Logic ---
-    let timeRemaining = 24 * 60 + 47; // 24:47 in seconds
-    const countdownEl = document.getElementById('countdown');
-
-    setInterval(() => {
-      if (timeRemaining <= 0) return;
-      timeRemaining--;
-      let m = Math.floor(timeRemaining / 60);
-      let s = timeRemaining % 60;
-      countdownEl.innerText = \`\${m < 10 ? '0' : ''}\${m}:\${s < 10 ? '0' : ''}\${s}\`;
-    }, 1000);
-
-    // --- Navigation Grid Logic ---
-    const totalQuestions = 10;
-    const navGrid = document.getElementById('navGrid');
-    
-    // Create grid buttons
-    for (let i = 1; i <= totalQuestions; i++) {
-      const btn = document.createElement('div');
-      btn.className = 'nav-btn';
-      btn.id = 'nav-btn-' + i;
-      btn.innerText = i;
-      btn.onclick = () => scrollToQuestion(i);
-      
-      // Simulate question 1 already answered based on mockup (or leave all white initially)
-      // We'll leave all white initially.
-      
-      navGrid.appendChild(btn);
+    // --- Auth Guard & Initialization ---
+    const token = localStorage.getItem('jwt_token');
+    const userId = localStorage.getItem('user_id');
+    if (!token || !userId) {
+      alert('You must be logged in to take a quiz.');
+      window.location.href = '/signin';
     }
 
-    function markAnswered(qNum) {
-      // Mark the grid button orange
-      const btn = document.getElementById('nav-btn-' + qNum);
-      if (btn) btn.classList.add('answered');
+    const urlParams = new URLSearchParams(window.location.search);
+    const quizId = urlParams.get('quizId');
+    if (!quizId) {
+      alert('Quiz ID is missing!');
+      window.location.href = '/student/dashboard';
+    }
 
-      // Update progress bar logically (assuming Q1-Q10 is Part 1 for demo)
+    let timeRemaining = 0;
+    let timerInterval = null;
+    let totalQuestions = 0;
+    let quizQuestions = [];
+
+    const countdownEl = document.getElementById('countdown');
+    const navGrid = document.getElementById('navGrid');
+    const questionsContainer = document.getElementById('questions-container');
+
+    // --- Fetch Quiz Data ---
+    async function initQuiz() {
+      try {
+        // --- 1. Check Previous Attempts ---
+        const attemptsRes = await fetch(`/api/quizzes/attempts/student/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (attemptsRes.ok) {
+          const attempts = await attemptsRes.json();
+          const hasAttempt = attempts.some(a => a.quizId == quizId);
+          if (hasAttempt) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Quiz Already Completed',
+              text: 'You have already submitted this quiz. You cannot take it again.',
+              confirmButtonText: 'Back to Dashboard'
+            }).then(() => {
+              window.location.href = '/student/dashboard';
+            });
+            return;
+          }
+        }
+
+        // Fetch Quiz Info
+        const quizRes = await fetch(`/api/quizzes/${quizId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!quizRes.ok) throw new Error('Failed to load quiz details.');
+        const quizData = await quizRes.json();
+        
+        document.getElementById('quiz-title-display').innerText = quizData.title;
+        document.getElementById('quiz-topic-display').innerText = quizData.courseName ? `Topic: ${quizData.courseName}` : 'Topic: General';
+        
+        // Start Timer
+        timeRemaining = (quizData.durationMinutes || 30) * 60;
+        startTimer();
+
+        // Fetch Questions
+        const qRes = await fetch(`/api/quizzes/${quizId}/questions`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!qRes.ok) throw new Error('Failed to load questions.');
+        quizQuestions = await qRes.json();
+        totalQuestions = quizQuestions.length;
+
+        renderQuestions();
+        renderNavGrid();
+        updateProgress();
+
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // --- Timer Logic ---
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert('Time is up! Submitting automatically...');
+          submitQuiz(true); // auto submit
+          return;
+        }
+        timeRemaining--;
+        let m = Math.floor(timeRemaining / 60);
+        let s = timeRemaining % 60;
+        countdownEl.innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+      }, 1000);
+    }
+
+    // --- Dynamic Rendering ---
+    function renderQuestions() {
+      questionsContainer.innerHTML = ''; // clear loading
+      
+      quizQuestions.forEach((q, index) => {
+        const qNum = index + 1;
+        let optionsMap = {};
+        try {
+          const parsed = JSON.parse(q.options || "{}");
+          if (Array.isArray(parsed)) {
+            parsed.forEach((item, idx) => optionsMap[idx.toString()] = item);
+          } else if (typeof parsed === 'object' && parsed !== null) {
+            optionsMap = parsed;
+          } else {
+            optionsMap = { "Ans": q.options };
+          }
+        } catch(e) {
+          optionsMap = { "Ans": q.options };
+        }
+
+        let optionsHtml = '';
+        Object.entries(optionsMap).forEach(([optKey, optText]) => {
+          optionsHtml += `
+            <label class="q-option">
+              <input type="radio" name="q${q.id}" value="${optKey}" onchange="markAnswered(${q.id})">
+              <div class="q-radio-custom"></div>
+              <div class="q-option-text">${optText}</div>
+            </label>
+          `;
+        });
+
+        const qHtml = `
+          <div class="edu-card q-card" id="q-card-${q.id}">
+            <div class="q-header">
+              <div class="q-number">Question ${qNum}</div>
+              <div class="q-type">${q.questionType === 'SINGLE_CHOICE' ? 'Single Choice' : q.questionType} (${q.points} pts)</div>
+            </div>
+            <div class="q-text">${q.content}</div>
+            <div class="q-options">
+              ${optionsHtml}
+            </div>
+          </div>
+        `;
+        questionsContainer.insertAdjacentHTML('beforeend', qHtml);
+      });
+    }
+
+    function renderNavGrid() {
+      navGrid.innerHTML = '';
+      quizQuestions.forEach((q, index) => {
+        const btn = document.createElement('div');
+        btn.className = 'nav-btn';
+        btn.id = 'nav-btn-' + q.id;
+        btn.innerText = index + 1;
+        btn.onclick = () => scrollToQuestion(q.id);
+        navGrid.appendChild(btn);
+      });
+    }
+
+    // --- User Actions ---
+    function markAnswered(questionId) {
+      const btn = document.getElementById('nav-btn-' + questionId);
+      if (btn) btn.classList.add('answered');
       updateProgress();
     }
 
     function updateProgress() {
-      // Count how many answered
       const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
-      document.getElementById('prog-p1').innerText = \`\${answeredCount}/10\`;
-      const pct = (answeredCount / 10) * 100;
-      document.getElementById('prog-pct-p1').innerText = \`\${pct}%\`;
-      document.getElementById('bar-p1').style.width = \`\${pct}%\`;
+      document.getElementById('prog-p1').innerText = `${answeredCount}/${totalQuestions}`;
+      const pct = totalQuestions === 0 ? 0 : (answeredCount / totalQuestions) * 100;
+      document.getElementById('prog-pct-p1').innerText = `${Math.round(pct)}%`;
+      document.getElementById('bar-p1').style.width = `${pct}%`;
     }
 
-    function scrollToQuestion(qNum) {
-      const qEl = document.getElementById('q' + qNum);
+    function scrollToQuestion(questionId) {
+      const qEl = document.getElementById('q-card-' + questionId);
       if (qEl) {
-        // smooth scroll with offset for sticky navbar
         const y = qEl.getBoundingClientRect().top + window.scrollY - 80;
         window.scrollTo({top: y, behavior: 'smooth'});
       }
     }
 
-    function submitQuiz() {
+    // --- Submit Logic ---
+    async function submitQuiz(autoSubmit = false) {
       const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
-      if (answeredCount < totalQuestions) {
-        if (!confirm(\`You have only answered \${answeredCount} out of \${totalQuestions} questions. Are you sure you want to submit?\`)) return;
+      if (!autoSubmit && answeredCount < totalQuestions) {
+        const result = await Swal.fire({
+          title: 'Are you sure?',
+          text: `You have only answered ${answeredCount} out of ${totalQuestions} questions. Do you really want to submit?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, submit it!'
+        });
+        
+        if (!result.isConfirmed) return;
+      } else if (!autoSubmit) {
+        const result = await Swal.fire({
+          title: 'Ready to submit?',
+          text: `You have answered all questions. Submit now?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, submit it!'
+        });
+        
+        if (!result.isConfirmed) return;
       }
-      alert('Quiz Submitted Successfully!');
-      window.history.back();
+
+      // Gather answers
+      let answers = {};
+      quizQuestions.forEach(q => {
+        const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+        if (selected) {
+          answers[q.id] = selected.value;
+        }
+      });
+
+      const payload = {
+        studentId: parseInt(userId),
+        answers: answers
+      };
+
+      try {
+        const res = await fetch(`/api/quizzes/${quizId}/attempts`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || 'Failed to submit quiz.');
+        }
+
+        const result = await res.json();
+        clearInterval(timerInterval);
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Quiz Submitted Successfully!',
+          html: `
+            <div class="text-center mt-3">
+               <h1 class="display-1 text-primary fw-bold mb-0">${result.score}%</h1>
+               <p class="text-muted mt-2">Correct Answers: <strong>${result.correctAnswers} / ${result.totalQuestions}</strong></p>
+            </div>
+          `,
+          confirmButtonText: 'Return to Dashboard',
+          confirmButtonColor: '#3085d6',
+          allowOutsideClick: false
+        });
+        
+        window.location.href = '/student/dashboard';
+      } catch (err) {
+        Swal.fire('Error', err.message, 'error');
+      }
     }
+
+    // Run on load
+    initQuiz();
   </script>
 </body>
 </html>
