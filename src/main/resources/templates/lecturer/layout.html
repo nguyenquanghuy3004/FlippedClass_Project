@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <head>
@@ -15,6 +15,7 @@
   <!-- FontAwesome for fallback -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" th:href="@{/assets/css/lecturer-layout.css}">
+  <th:block layout:fragment="head"></th:block>
 </head>
 
 <body>
@@ -69,13 +70,23 @@
     <ul class="nav flex-column mb-auto">
       <li class="px-4 py-2"><small class="nav-text">Workspace</small></li>
       <li>
-        <a class="nav-link active" href="/lecturer/dashboard">
+        <a class="nav-link" href="/lecturer/dashboard" data-nav-path="/lecturer/dashboard">
           <i class="ti ti-box-seam"></i><span class="nav-text">My Spaces</span>
         </a>
       </li>
       <li>
-        <a class="nav-link" href="/lecturer/quizzes">
+        <a class="nav-link" href="/lecturer/quizzes" data-nav-path="/lecturer/quizzes">
           <i class="ti ti-checklist"></i><span class="nav-text">My Quizzes</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="/lecturer/evaluation-sessions" data-nav-path="/lecturer/evaluation-sessions">
+          <i class="ti ti-clipboard-list"></i><span class="nav-text">Eval Sessions</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="/lecturer/grading" data-nav-path="/lecturer/grading">
+          <i class="ti ti-pencil-star"></i><span class="nav-text">Grading</span>
         </a>
       </li>
     </ul>
@@ -121,6 +132,25 @@
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
+
+    // Auto-highlight active sidebar menu item
+    $(document).ready(function() {
+      const path = window.location.pathname;
+      $('.sidebar .nav-link').removeClass('active');
+      
+      let matched = false;
+      $('.sidebar .nav-link').each(function() {
+        const navPath = $(this).attr('data-nav-path');
+        if (navPath && path.startsWith(navPath)) {
+          $(this).addClass('active');
+          matched = true;
+        }
+      });
+      // Fallback
+      if (!matched) {
+        $('.sidebar .nav-link[data-nav-path="/lecturer/dashboard"]').addClass('active');
+      }
+    });
   </script>
   <th:block layout:fragment="scripts"></th:block>
 </body>

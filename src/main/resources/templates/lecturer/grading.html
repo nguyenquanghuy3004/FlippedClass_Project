@@ -1,56 +1,18 @@
-﻿<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
 
 <head>
   <meta charset="UTF-8" />
   <title>Student Grading - FlippedClass</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
-  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
-  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
-  <!-- Tabler Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-  <!-- Core Scripts -->
-  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
-  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  <link rel="stylesheet" th:href="@{/assets/css/lecturer-grading.css}">
+  <th:block layout:fragment="head">
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/assets/css/lecturer-grading.css}">
+  </th:block>
 </head>
 
 <body>
-  <div id="overlay" class="overlay"></div>
-  
-  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
-    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
-      <i class="ti ti-layout-sidebar-left-expand"></i>
-    </button>
-    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
-      <i class="ti ti-layout-sidebar-left-expand"></i>
-    </button>
-    <div>
-      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
-        <li class="ms-3 dropdown">
-          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-sm rounded-circle" />
-          </a>
-        </li>
-      </ul>
-    </div>
-  </nav>
-
-  <aside id="sidebar" class="sidebar">
-    <div class="logo-area">
-      <a th:href="@{/}" class="d-inline-flex text-decoration-none">
-        <span class="logo-text ms-2 fw-bold fs-4 text-primary"><i class="ti ti-books"></i> FlippedClass</span>
-      </a>
-    </div>
-    <ul class="nav flex-column mt-3">
-      <li class="px-4 py-2"><small class="nav-text">Main</small></li>
-      <li><a class="nav-link" th:href="@{/lecturer/quizzes}"><i class="ti ti-brain"></i><span class="nav-text">Quizzes</span></a></li>
-      <li><a class="nav-link active" href="#"><i class="ti ti-pencil-star"></i><span class="nav-text">Grading</span></a></li>
-    </ul>
-  </aside>
-
-  <main id="content" class="content py-10">
+  <div layout:fragment="content">
     <div class="container-fluid">
       
       <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
@@ -120,7 +82,7 @@
       </div>
 
     </div>
-  </main>
+    </div>
 
   <!-- PROFILE MODAL -->
   <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
@@ -157,7 +119,7 @@
       </div>
     </div>
   </div>
-
+  <th:block layout:fragment="scripts">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // Utility to get URL params
@@ -437,6 +399,7 @@
       }
     }
   </script>
+  </th:block>
 </body>
 </html>
 
