@@ -83,6 +83,11 @@
       white-space: nowrap;
     }
 
+    .topbar-title-wrap {
+      min-width: 0;
+      overflow: hidden;
+    }
+
     .topbar-title .badge {
       display: inline-flex;
       align-items: center;
@@ -550,6 +555,35 @@
       line-height: 1;
     }
 
+    @media (max-width: 767.98px) {
+      .topbar {
+        min-height: 60px;
+        height: 60px;
+        gap: 0.5rem;
+      }
+
+      .topbar-main {
+        justify-content: flex-end;
+      }
+
+      .topbar .btn-icon,
+      .notification-trigger {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+        border-radius: 14px;
+      }
+
+      .topbar-actions {
+        gap: 0.5rem;
+      }
+
+      .notification-trigger .badge {
+        top: 2px !important;
+        right: 2px !important;
+      }
+    }
+
     .notification-trigger:hover,
     .notification-trigger.show {
       background: #d9f4dc;
@@ -636,19 +670,19 @@
   <div id="overlay" class="overlay"></div>
   
   <!-- TOPBAR -->
-  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.9) !important;">
-    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
       <i class="ti ti-layout-sidebar-left-expand"></i>
     </button>
     <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
       <i class="ti ti-layout-sidebar-left-expand"></i>
     </button>
     
-    <div class="d-flex align-items-center w-100 justify-content-between">
-      <div class="d-none d-md-block">
-        <h5 class="mb-0 fw-bold text-dark ms-2" style="letter-spacing: -0.5px;">Cổng sinh viên <span class="badge bg-primary-subtle text-primary ms-2 rounded-pill">Học tập</span></h5>
+    <div class="topbar-main">
+      <div class="topbar-title-wrap d-none d-md-block">
+        <h5 class="topbar-title fw-bold text-dark ms-1">Cổng sinh viên <span class="badge bg-primary-subtle text-primary rounded-pill">Học tập</span></h5>
       </div>
-      <ul class="list-unstyled d-flex align-items-center mb-0 gap-3">
+      <ul class="topbar-actions list-unstyled">
         <!-- Notification Bell -->
         <li class="dropdown">
           <button class="notification-trigger position-relative text-secondary d-flex align-items-center justify-content-center border-0"
