@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="FlippedClass - he thong quan ly lop hoc dao nguoc cho sinh vien va giang vien.">
-  <title>FlippedClass | Flipped Classroom Management System</title>
+  <meta name="description" content="FlippedClass helps lecturers organize learning spaces, course roadmaps, resources, quizzes, and student preparation in one focused platform.">
+  <title>FlippedClass | Modern Flipped Classroom Platform</title>
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
@@ -13,8 +13,8 @@
 </head>
 <body>
 <header class="site-header" id="top">
-  <nav class="site-nav" aria-label="Dieu huong chinh">
-    <a class="brand" th:href="@{/}" aria-label="Trang chu FlippedClass">
+  <nav class="site-nav" aria-label="Main navigation">
+    <a class="brand" th:href="@{/}" aria-label="FlippedClass home">
       <span class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 32 32" role="img">
           <path d="M16 5 3 11l13 6 13-6-13-6Z"></path>
@@ -27,48 +27,48 @@
     </a>
 
     <div class="nav-links">
-      <a href="#top" data-scroll-top>Trang chủ</a>
-      <a href="#how-it-works">Quy Trình</a>
-      <a href="#features">Tính Năng</a>
-      <a href="#roles">Vai Trò</a>
-      <a href="#resources">Tài Nguyên</a>
+      <a href="#top" data-scroll-top>Home</a>
+      <a href="#how-it-works">About</a>
+      <a href="#features">Course</a>
+      <a href="#roles">Pages</a>
+      <a href="#resources">Resources</a>
     </div>
 
     <div class="nav-actions">
-      <a class="btn btn-text" th:href="@{/login}">Đăng Nhập</a>
-      <a class="btn btn-primary" th:href="@{/register}">Bắt đầu ĐĂNG KÍ</a>
+      <a class="btn btn-text" th:href="@{/login}">Sign In</a>
+      <a class="btn btn-primary" th:href="@{/register}">Sign Up</a>
     </div>
   </nav>
 </header>
 
 <main>
   <section class="hero-section">
+    <div class="hero-orb hero-orb-left" aria-hidden="true"></div>
+    <div class="hero-orb hero-orb-right" aria-hidden="true"></div>
     <div class="container hero-grid">
       <div class="hero-copy">
-        <span class="eyebrow">Học thông minh</span>
-        <h1>LÀ PHẢI CHỦ ĐỘNG</h1>
-        <p class="hero-text">
-          FlippedClass giúp sinh viên chuẩn bị trước, theo dõi tiến độ học tập và tham gia tích cực hơn trong mỗi buổi học</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary btn-large" th:href="@{/register}">Tạo tài khoản</a>
-          <a class="btn btn-secondary btn-large" th:href="@{/login}">Đăng nhập</a>
+        <span class="eyebrow">SMART FLIPPED LEARNING</span>
+        <h1>Prepare before class</h1>
+          <div class="hero-actions">
+          <a class="btn btn-primary btn-large" th:href="@{/register}">Create Account</a>
+          <a class="btn btn-secondary btn-large" th:href="@{/login}">Explore Dashboard</a>
         </div>
-        <p class="trust-text">Tiến bộ cần học Chủ Động, học có Cấu Trúc và vui vẻ</p>
+        <p class="trust-text">Built for structured learning, active preparation, and measurable progress.</p>
       </div>
 
-      <aside class="roadmap-preview" aria-label="Xem truoc lo trinh hoc tap">
+      <aside class="roadmap-preview" aria-label="Learning roadmap preview">
         <div class="roadmap-preview-header">
           <div>
-            <span class="preview-label">Lộ trình học như thế nào</span>
-            <h2>Lập Trình C Cơ Bản</h2>
+            <span class="preview-label">Course roadmap</span>
+            <h2>Programming Fundamentals</h2>
           </div>
           <span class="roadmap-status">58%</span>
         </div>
 
         <div class="progress-block">
           <div class="progress-row">
-            <span>Tiến độ chuẩn bị</span>
-            <span>Đang học</span>
+            <span>Preparation progress</span>
+            <span>In progress</span>
           </div>
           <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="58">
             <span></span>
@@ -80,8 +80,8 @@
             <span class="node-index">1</span>
             <div class="node-body">
               <div class="node-title-row">
-                <h3>Giới thiệu về C</h3>
-                <span class="node-state">Đã mở</span>
+                <h3>Introduction to Programming</h3>
+                <span class="node-state">Open</span>
               </div>
               <div class="resource-chip-row">
                 <span class="resource-chip">VIDEO</span>
@@ -93,8 +93,8 @@
             <span class="node-index">2</span>
             <div class="node-body">
               <div class="node-title-row">
-                <h3>Biến và kiểu dữ liệu</h3>
-                <span class="node-state">Đã mở</span>
+                <h3>Variables and Data Types</h3>
+                <span class="node-state">Open</span>
               </div>
               <div class="resource-chip-row">
                 <span class="resource-chip">VIDEO</span>
@@ -106,8 +106,8 @@
             <span class="node-index">3</span>
             <div class="node-body">
               <div class="node-title-row">
-                <h3>Điều kiện và vòng lặp</h3>
-                <span class="node-state">Đang học</span>
+                <h3>Conditions and Loops</h3>
+                <span class="node-state">Current</span>
               </div>
               <div class="resource-chip-row">
                 <span class="resource-chip">PDF</span>
@@ -119,8 +119,8 @@
             <span class="node-index">4</span>
             <div class="node-body">
               <div class="node-title-row">
-                <h3>Thử thách thực hành</h3>
-                <span class="node-state">Khóa</span>
+                <h3>Practice Challenge</h3>
+                <span class="node-state">Locked</span>
               </div>
               <div class="resource-chip-row">
                 <span class="resource-chip">CODE</span>
@@ -136,29 +136,29 @@
   <section class="section" id="how-it-works" aria-labelledby="flow-heading">
     <div class="container">
       <div class="section-heading">
-        <span class="section-kicker">Cách hoạt động</span>
-        <h2 id="flow-heading">Một luồng học tập rõ ràng</h2>
+        <span class="section-kicker">How it works</span>
+        <h2 id="flow-heading">A clear learning flow from preparation to performance.</h2>
       </div>
       <div class="steps-grid">
         <article class="step-card">
           <span class="step-number">01</span>
-          <h3> GIẢNG VIÊN TẠO LEARNING SPACE</h3>
-          <p>Tổ chức lớp học, thành viên, learning node và tài liệu theo từng chủ đề.</p>
+          <h3>Lecturers create learning spaces</h3>
+          <p>Organize classes, members, roadmaps, learning nodes, and resources by topic.</p>
         </article>
         <article class="step-card">
           <span class="step-number">02</span>
-          <h3>SINH VIÊN THAM GIA BẰNG MÃ MỜI</h3>
-          <p>Gia nhập không gian học tập năng động và thấy rõ những nội dung thú vị.</p>
+          <h3>Students join with invite codes</h3>
+          <p>Students enter the correct learning space and immediately see what to prepare.</p>
         </article>
         <article class="step-card">
           <span class="step-number">03</span>
-          <h3>HỌC TRƯỚC TẠI NHÀ</h3>
-          <p>Xem vide, đọc PDF, xem source code và làm quiz ngắn trước giờ học.</p>
+          <h3>Students prepare at home</h3>
+          <p>Watch videos, read documents, review code examples, and complete short quizzes before class.</p>
         </article>
         <article class="step-card">
           <span class="step-number">04</span>
-          <h3>THỤC HÀNH TRẢI NGHIỆM HOẠT ĐỘNG TẠI LỚP HỌC</h3>
-          <p>Những kiến thúc đã chuẩn bị tại nhà sẽ là nền tảng cho những hoạt động thú vị trên lớp</p>
+          <h3>Class time becomes active</h3>
+          <p>Prepared students use class time for discussion, practice, feedback, and deeper problem solving.</p>
         </article>
       </div>
     </div>
@@ -167,29 +167,29 @@
   <section class="section section-soft" id="features" aria-labelledby="features-heading">
     <div class="container">
       <div class="section-heading">
-        <span class="section-kicker">Tính năng</span>
-        <h2 id="features-heading">Những tính năng thú vị của Flipped Classroom.</h2>
+        <span class="section-kicker">Platform features</span>
+        <h2 id="features-heading">Everything needed to run a flipped classroom in one place.</h2>
       </div>
       <div class="card-grid four-columns">
         <article class="feature-card">
           <span class="feature-icon">LS</span>
-          <h3>LEARNING SPACE</h3>
-          <p>Quản lý lớp học, mentor, sinh viên và trạng thái tham gia.</p>
+          <h3>Learning Spaces</h3>
+          <p>Manage classes, mentors, students, roles, and participation status.</p>
         </article>
         <article class="feature-card">
           <span class="feature-icon">RM</span>
-          <h3>ROADMAP</h3>
-          <p>Thiết kế lộ trình học logic bằng các node có thứ tự và phân chia câu hỏi từng node.</p>
+          <h3>Roadmaps</h3>
+          <p>Design ordered learning paths with nodes, resources, and checkpoints.</p>
         </article>
         <article class="feature-card">
           <span class="feature-icon">DOC</span>
-          <h3>TÀI LIỆU HỌC TẬP</h3>
-          <p>Chia sẻ video, PDF và source code cho từng learning node.</p>
+          <h3>Course Materials</h3>
+          <p>Attach videos, PDFs, websites, GitHub links, and reference material to each node.</p>
         </article>
         <article class="feature-card">
           <span class="feature-icon">QZ</span>
-          <h3>QUIZ</h3>
-          <p>Tạo bài kiểm tra, cẩu hỏi và theo dõi kết quả nộp bài của sinh viên.</p>
+          <h3>Quizzes</h3>
+          <p>Create assessments, track attempts, and understand student readiness before class.</p>
         </article>
       </div>
     </div>
@@ -198,30 +198,30 @@
   <section class="section" id="roles" aria-labelledby="roles-heading">
     <div class="container">
       <div class="section-heading">
-        <span class="section-kicker">Vài trò</span>
-        <h2 id="roles-heading">Thiết kế riêng cho Lecture và Student.</h2>
+        <span class="section-kicker">Roles</span>
+        <h2 id="roles-heading">Designed for both lecturers and students.</h2>
       </div>
       <div class="role-grid">
         <article class="role-card">
           <div class="role-card-header">
-            <span class="role-card-icon">GV</span>
-            <h3>GIẢNG VIÊN</h3>
+            <span class="role-card-icon">LC</span>
+            <h3>Lecturer</h3>
           </div>
           <ul>
-            <li>Quản lý learning space và roadmap một cách logic</li>
-            <li>Tạo quiz đon giản</li>
-            <li>Đánh giá tiến độ và phản hổi học tập</li>
+            <li>Create structured learning spaces and course roadmaps.</li>
+            <li>Publish resources and quizzes for preparation.</li>
+            <li>Review progress and identify students who need support.</li>
           </ul>
         </article>
         <article class="role-card role-card-student">
           <div class="role-card-header">
-            <span class="role-card-icon">SV</span>
-            <h3>SINH VIÊN</h3>
+            <span class="role-card-icon">ST</span>
+            <h3>Student</h3>
           </div>
           <ul>
-            <li>Tham gia lớp học bằng mã mời</li>
-            <li>Dễ dàng theo dõi bài học thông qua roadmap và tài liệu cần học</li>
-            <li>Hoàn thành quiz, nhận thông báo dễ dàng từ giảng viên.</li>
+            <li>Join courses quickly using invite codes.</li>
+            <li>Follow roadmap nodes and access all learning materials.</li>
+            <li>Complete quizzes and receive reminders for pending work.</li>
           </ul>
         </article>
       </div>
@@ -231,25 +231,25 @@
   <section class="section section-soft" id="resources" aria-labelledby="resources-heading">
     <div class="container">
       <div class="section-heading">
-        <span class="section-kicker">Tài nguyên</span>
-        <h2 id="resources-heading">Tài nguyên phong phú</h2>
+        <span class="section-kicker">Learning resources</span>
+        <h2 id="resources-heading">Rich resources for meaningful preparation.</h2>
       </div>
       <div class="resource-grid">
         <article class="resource-card">
           <span>VIDEO</span>
-          <p>Bài học ngắn để sinh viên chuẩn bị trước giờ học</p>
+          <p>Short lessons help students preview key concepts before class.</p>
         </article>
         <article class="resource-card">
           <span>PDF</span>
-          <p>Slide, ghi chú và tài liệu tham khảo cần đọc.</p>
+          <p>Slides, notes, and required reading are grouped by roadmap node.</p>
         </article>
         <article class="resource-card">
           <span>CODE</span>
-          <p>Ví dụ và file khởi đầu cho phân thực hành.</p>
+          <p>Examples and starter files support practice-based learning.</p>
         </article>
         <article class="resource-card">
           <span>QUIZ</span>
-          <p>Cầu hỏi nhanh dễ kiểm tra mức độ làm bài.</p>
+          <p>Quick checks measure preparation and help lecturers plan class activities.</p>
         </article>
       </div>
     </div>
@@ -259,12 +259,12 @@
     <div class="container">
       <div class="cta-banner">
         <div>
-          <h2 id="cta-heading">Học theo cách khác biệt?</h2>
-          <p>Đăng kí và tham gia không gian học - mã mời đang chờ bạn</p>
+          <h2 id="cta-heading">Ready to flip your classroom?</h2>
+          <p>Sign up, create a learning space, and turn every class into an active learning session.</p>
         </div>
         <div class="cta-actions">
-          <a class="btn btn-inverse" th:href="@{/login}">Đăng nhập</a>
-          <a class="btn btn-light" th:href="@{/register}">Đăng kí</a>
+          <a class="btn btn-inverse" th:href="@{/login}">Sign In</a>
+          <a class="btn btn-light" th:href="@{/register}">Start Free</a>
         </div>
       </div>
     </div>
@@ -273,7 +273,7 @@
 
 <footer class="site-footer">
   <div class="container footer-grid">
-    <a class="brand" th:href="@{/}" aria-label="Trang chu FlippedClass">
+    <a class="brand" th:href="@{/}" aria-label="FlippedClass home">
       <span class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 32 32" role="img">
           <path d="M16 5 3 11l13 6 13-6-13-6Z"></path>
@@ -284,22 +284,17 @@
       </span>
       <span>FlippedClass</span>
     </a>
+    <div class="footer-links">
+      <a href="#top" data-scroll-top>Back to top</a>
+      <a href="#features">Features</a>
+      <a href="#roles">Roles</a>
+      <a th:href="@{/login}">Sign In</a>
+    </div>
   </div>
   <div class="container footer-bottom">
-    <p>SWP391 FPT University - FlippedClass</p>
+    <p>SWP391 FPT University - FlippedClass.</p>
   </div>
 </footer>
-<script>
-  document.querySelectorAll('[data-scroll-top]').forEach((link) => {
-    link.addEventListener('click', (event) => {
-      event.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      if (window.location.hash) {
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-      }
-    });
-  });
-</script>
+<script th:src="@{/assets/js/home.js}"></script>
 </body>
 </html>

@@ -1,8 +1,8 @@
-�<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>My quiz - FlippedClass</title>
+  <title>My Quizzes - FlippedClass</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
@@ -17,6 +17,131 @@
   </script>
 
   <link rel="stylesheet" th:href="@{/assets/css/student-my-quizzes.css}">
+/* --- Inlined from student-auth.js --- */
+if (!localStorage.getItem('jwt_token')) {
+  window.location.href = '/login';
+}
+
+</script>
+  <link rel="stylesheet" th:href="@{/assets/css/student-my-quizzes.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <script>
+/* --- Inlined from student-user-menu.js --- */
+(function () {
+  const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
+
+  function storedUser() {
+    return {
+      fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
+      username: localStorage.getItem('username') || '',
+      avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
+    };
+  }
+
+  function normalizeUser(user = {}) {
+    const stored = storedUser();
+    return {
+      name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
+      username: user.username || stored.username || '',
+      avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
+    };
+  }
+
+  function setStudentMenuUser(user = {}) {
+    const normalized = normalizeUser(user);
+
+    if (normalized.name && normalized.name !== 'Student') {
+      localStorage.setItem('full_name', normalized.name);
+    }
+    if (normalized.username) {
+      localStorage.setItem('username', normalized.username);
+    }
+    if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
+      localStorage.setItem('avatar_url', normalized.avatarUrl);
+    }
+
+    document.querySelectorAll('[data-user-name]').forEach((element) => {
+      element.textContent = normalized.name;
+    });
+    document.querySelectorAll('[data-user-avatar]').forEach((image) => {
+      image.src = normalized.avatarUrl;
+      image.onerror = () => {
+        image.onerror = null;
+        image.src = defaultAvatarUrl;
+      };
+    });
+
+    const topbarName = document.getElementById('studentName');
+    if (topbarName) topbarName.textContent = normalized.name;
+  }
+
+  function studentLogout() {
+    ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
+      localStorage.removeItem(key);
+    });
+    window.location.href = '/';
+  }
+
+  async function refreshStudentMenuUser() {
+    const token = localStorage.getItem('jwt_token');
+    const userId = localStorage.getItem('user_id');
+    if (!token || !userId) return;
+
+    try {
+      const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) return;
+      const user = await response.json();
+      setStudentMenuUser(user);
+    } catch (error) {
+      console.warn('Could not load user menu profile.', error);
+    }
+  }
+
+  function closeAllMenus(exceptMenu = null) {
+    document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
+      if (menu !== exceptMenu) {
+        menu.classList.remove('is-open');
+        menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  function initStudentUserMenus() {
+    setStudentMenuUser();
+    refreshStudentMenuUser();
+
+    document.querySelectorAll('[data-user-menu]').forEach((menu) => {
+      const toggle = menu.querySelector('[data-user-menu-toggle]');
+      const logoutButton = menu.querySelector('[data-user-logout]');
+
+      toggle?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const shouldOpen = !menu.classList.contains('is-open');
+        closeAllMenus(menu);
+        menu.classList.toggle('is-open', shouldOpen);
+        toggle.setAttribute('aria-expanded', String(shouldOpen));
+      });
+
+      logoutButton?.addEventListener('click', studentLogout);
+    });
+
+    document.addEventListener('click', () => closeAllMenus());
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAllMenus();
+    });
+  }
+
+  window.setStudentMenuUser = setStudentMenuUser;
+  window.studentLogout = studentLogout;
+  if (!window.logout) window.logout = studentLogout;
+
+  document.addEventListener('DOMContentLoaded', initStudentUserMenus);
+})();
+
+</script>
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
 </head>
 <body>
 <div id="overlay" class="overlay"></div>
@@ -46,10 +171,26 @@
     </a>
   </div>
   <ul class="nav">
-    <li><a class="nav-link" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">T�"ng quan</span></a></li>
-    <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">L�:p của tôi</span></a></li>
-    <li><a class="nav-link active" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz" aria-current="page"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
-    <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
+    <li><a class="nav-link" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
+    <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
+    <li><a class="nav-link active" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz" aria-current="page"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
+    <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
+    <li class="sidebar-user-slot">
+  <div class="student-user-menu" data-user-menu>
+    <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+      <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
+      <span class="student-menu-info">
+        <span class="student-menu-name" data-user-name>Student</span>
+        <span class="student-menu-role">Student</span>
+      </span>
+      <i class="ti ti-chevron-up student-menu-chevron"></i>
+    </button>
+    <div class="student-menu-panel" role="menu">
+      <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+      <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
+    </div>
+  </div>
+</li>
   </ul>
 </aside>
 
@@ -57,53 +198,54 @@
   <div class="page-shell">
     <section class="hero">
       <div>
-        <div class="eyebrow"><i class="ti ti-list-check"></i> My quiz</div>
+        <div class="eyebrow"><i class="ti ti-list-check"></i> My Quizzes</div>
       </div>
       <div class="hero-actions">
-        <a class="hero-link" th:href="@{/student/dashboard}"><i class="ti ti-layout-dashboard"></i> Về t�"ng quan</a>
-        <a class="hero-link" th:href="@{/student/learning-spaces}"><i class="ti ti-books"></i> L�:p của tôi</a>
+        <a class="hero-link" th:href="@{/student/dashboard}"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a class="hero-link" th:href="@{/student/learning-spaces}"><i class="ti ti-books"></i> My Classes</a>
       </div>
     </section>
 
     <section class="stats-grid">
       <div class="stat-card">
-        <span>T�"ng quiz</span>
+        <span>Total Quizzes</span>
         <strong id="statTotal">0</strong>
       </div>
       <div class="stat-card">
-        <span>Cần làm</span>
+        <span>Pending</span>
         <strong id="statPending">0</strong>
       </div>
       <div class="stat-card">
-        <span>Đã hoàn thành</span>
+        <span>Completed</span>
         <strong id="statCompleted">0</strong>
       </div>
       <div class="stat-card">
-        <span>Learning space</span>
+        <span>Learning Space</span>
         <strong id="statSpaces">0</strong>
       </div>
     </section>
 
     <section class="filter-card">
-      <input id="searchInput" class="search-box" type="search" placeholder="Tìm quiz theo tên, môn học hoặc learning space...">
+      <input id="searchInput" class="search-box" type="search" placeholder="Search quizzes by name, subject, or learning space...">
       <select id="statusFilter" class="filter-select">
-        <option value="all">Tất cả trạng thái</option>
-        <option value="pending">Cần làm</option>
-        <option value="completed">Đã hoàn thành</option>
+        <option value="all">All statuses</option>
+        <option value="pending">Pending</option>
+        <option value="completed">Completed</option>
       </select>
     </section>
 
     <section id="quizGrid" class="quiz-grid">
       <div class="empty-card">
         <i class="ti ti-loader-2"></i>
-        Đang tải danh sách quiz...
+        Loading quiz list...
       </div>
     </section>
   </div>
 </main>
 
 <script>
-  const token = localStorage.getItem('jwt_token');
+/* --- Inlined from student-my-quizzes.js --- */
+const token = localStorage.getItem('jwt_token');
   const userId = localStorage.getItem('user_id');
   const state = {
     quizzes: [],
@@ -114,6 +256,7 @@
   const quizGrid = document.getElementById('quizGrid');
   const searchInput = document.getElementById('searchInput');
   const statusFilter = document.getElementById('statusFilter');
+  const questionLogoUrl = '/uploads/anh/quétionlogo.webp';
 
   function authHeaders() {
     return { Authorization: `Bearer ${token}` };
@@ -146,8 +289,10 @@
   }
 
   function setStudentName(user) {
-    const name = user?.fullName || user?.username || localStorage.getItem('username') || 'Sinh viên';
-    document.getElementById('studentName').textContent = name;
+    const name = user?.fullName || user?.username || localStorage.getItem('username') || 'Student';
+    const studentName = document.getElementById('studentName');
+    if (studentName) studentName.textContent = name;
+    window.setStudentMenuUser?.(user);
   }
 
   function flattenQuizzes(data) {
@@ -192,7 +337,7 @@
       quizGrid.innerHTML = `
         <div class="empty-card" style="grid-column: 1 / -1;">
           <i class="ti ti-notes-off"></i>
-          Không tìm thấy quiz phù hợp.
+          No matching quizzes found.
         </div>
       `;
       return;
@@ -200,23 +345,23 @@
 
     quizGrid.innerHTML = quizzes.map(quiz => {
       const isCompleted = Boolean(quiz.isCompleted);
-      const statusText = isCompleted ? 'Đã hoàn thành' : 'Cần làm';
+      const statusText = isCompleted ? 'Completed' : 'To Do';
       const statusIcon = isCompleted ? 'ti-circle-check' : 'ti-alert-circle';
-      const duration = quiz.durationMinutes ? `${quiz.durationMinutes} phút` : 'Chưa �ặt thời lượng';
+      const duration = quiz.durationMinutes ? `${quiz.durationMinutes} min` : 'Duration not set';
       const action = isCompleted
-        ? `<span class="btn-quiz disabled"><i class="ti ti-lock-check"></i> Đã n�"p bài</span>`
-        : `<a class="btn-quiz" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}"><i class="ti ti-player-play"></i> Làm quiz</a>`;
+        ? `<span class="btn-quiz disabled"><i class="ti ti-lock-check"></i> Submitted</span>`
+        : `<a class="btn-quiz" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}"><i class="ti ti-player-play"></i> Take Quiz</a>`;
 
       return `
         <article class="quiz-card ${isCompleted ? 'completed' : ''}">
           <div class="quiz-top">
-            <div class="quiz-icon"><i class="ti ti-brain"></i></div>
+            <div class="quiz-icon quiz-icon-image"><img src="${questionLogoUrl}" alt="Question logo" loading="lazy"></div>
             <span class="status-pill ${isCompleted ? '' : 'pending'}"><i class="ti ${statusIcon}"></i>${statusText}</span>
           </div>
-          <h2>${escapeHtml(quiz.title || 'Quiz chưa �ặt tên')}</h2>
+          <h2>${escapeHtml(quiz.title || 'Untitled Quiz')}</h2>
           <div class="quiz-meta">
             <span><i class="ti ti-books"></i>${escapeHtml(quiz.learningSpaceName)}</span>
-            <span><i class="ti ti-template"></i>${escapeHtml(quiz.courseName)}</span>
+            ${quiz.courseName && quiz.courseName !== quiz.learningSpaceName ? `<span><i class="ti ti-template"></i>${escapeHtml(quiz.courseName)}</span>` : ''}
             <span><i class="ti ti-clock"></i>${escapeHtml(duration)}</span>
           </div>
           <div class="quiz-action">${action}</div>
@@ -233,7 +378,7 @@
 
     try {
       const response = await fetch(`/api/students/${userId}/dashboard`, { headers: authHeaders() });
-      if (!response.ok) throw new Error('Không tải �ược danh sách quiz.');
+      if (!response.ok) throw new Error('Could not load quiz list.');
       const data = await response.json();
       setStudentName(data.user);
       state.quizzes = flattenQuizzes(data);
@@ -269,6 +414,7 @@
     setupLayoutControls();
     loadMyQuizzes();
   });
+
 </script>
 </body>
 </html>

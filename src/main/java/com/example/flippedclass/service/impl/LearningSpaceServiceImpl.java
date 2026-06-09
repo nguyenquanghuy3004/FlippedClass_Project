@@ -157,7 +157,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         validateJoinLearningSpace.validate(request);
 
         LearningSpace learningSpace = learningSpaceRepository.findByInviteCodeAndStatus(request.getInviteCode(), LearningSpaceStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lớp học với mã mời này hoặc lớp đã bị xóa"));
+                .orElseThrow(() -> new IllegalArgumentException("Could not find a class with this invite code or the class has been deleted"));
 
 
         User currentUser = getCurrentUser();

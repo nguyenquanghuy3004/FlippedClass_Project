@@ -1,5 +1,77 @@
 /* CSS dành riêng cho trang Đăng nhập và Đăng ký (Authentication Pages) */
 
+:root {
+    --auth-purple-950: #2e1065;
+    --auth-purple-800: #5b21b6;
+    --auth-purple-600: #7c3aed;
+    --auth-purple-400: #c084fc;
+    --auth-pink-500: #e879f9;
+    --auth-cyan-300: #67e8f9;
+    --auth-card-shadow: 0 28px 70px rgba(46, 16, 101, 0.28);
+}
+
+html {
+    min-height: 100%;
+}
+
+body.bg-light {
+    min-height: 100vh;
+    color: #241633;
+    background:
+        radial-gradient(circle at 12% 88%, rgba(103, 232, 249, 0.72) 0, rgba(103, 232, 249, 0.28) 22%, transparent 43%),
+        radial-gradient(circle at 88% 12%, rgba(232, 121, 249, 0.78) 0, rgba(232, 121, 249, 0.32) 26%, transparent 48%),
+        linear-gradient(132deg, #55d9e8 0%, #6878ea 38%, #9f45f4 68%, #e12ce7 100%) !important;
+    background-attachment: fixed;
+    overflow-x: hidden;
+}
+
+body.bg-light::before,
+body.bg-light::after {
+    content: "";
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+}
+
+body.bg-light::before {
+    width: clamp(260px, 34vw, 520px);
+    height: clamp(380px, 58vw, 780px);
+    left: -9vw;
+    top: -12vh;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04));
+    clip-path: polygon(0 0, 62% 0, 100% 55%, 48% 100%, 0 82%);
+    transform: rotate(-18deg);
+}
+
+body.bg-light::after {
+    width: clamp(300px, 38vw, 560px);
+    height: clamp(420px, 62vw, 820px);
+    right: -12vw;
+    top: 12vh;
+    background: linear-gradient(155deg, rgba(76, 29, 149, 0.24), rgba(255, 255, 255, 0.06));
+    clip-path: polygon(24% 0, 100% 0, 84% 100%, 0 64%);
+    transform: rotate(-12deg);
+}
+
+body.bg-light .container {
+    position: relative;
+    z-index: 1;
+}
+
+body.bg-light .container::before {
+    content: "";
+    position: fixed;
+    left: 19%;
+    bottom: -24vh;
+    width: clamp(260px, 38vw, 620px);
+    height: clamp(260px, 38vw, 620px);
+    background: rgba(255, 255, 255, 0.12);
+    clip-path: polygon(12% 0, 100% 18%, 78% 100%, 0 78%);
+    transform: rotate(20deg);
+    pointer-events: none;
+    z-index: -1;
+}
+
 /* Tùy chỉnh nút Đăng nhập/Đăng ký bằng Google */
 .btn-google {
     background-color: #fff;
@@ -20,11 +92,94 @@
 
 /* Bo góc cho thẻ Card chứa Form */
 .card {
-    border-radius: 12px;
+    position: relative;
+    z-index: 2;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.58) !important;
+    box-shadow: var(--auth-card-shadow) !important;
+    overflow: hidden;
 }
 
-/* Đổi màu viền (Focus) của các ô Input sang màu Xanh lá của FlippedClass */
+.card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 5px;
+    background: linear-gradient(90deg, var(--auth-cyan-300), var(--auth-purple-600), var(--auth-pink-500));
+}
+
+.card a svg {
+    fill: var(--auth-purple-600) !important;
+}
+
+.card a .text-success,
+.card a.text-success {
+    color: var(--auth-purple-600) !important;
+}
+
+.card a.text-success:hover {
+    color: var(--auth-purple-800) !important;
+}
+
+.form-label {
+    color: #1f1430;
+}
+
+.form-control {
+    min-height: 48px;
+    border: 1px solid rgba(124, 58, 237, 0.16);
+    border-radius: 11px;
+    background-color: #f7f3ff;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
 .form-control:focus {
-    border-color: #198754;
-    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+    border-color: var(--auth-purple-600);
+    background-color: #fff;
+    box-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.2);
+}
+
+.btn-success {
+    border: 0 !important;
+    color: #fff !important;
+    background: linear-gradient(90deg, var(--auth-cyan-300), var(--auth-purple-600), var(--auth-pink-500)) !important;
+    background-size: 180% 100% !important;
+    box-shadow: 0 14px 28px rgba(124, 58, 237, 0.3);
+    min-height: 48px;
+    border-radius: 11px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-position 0.18s ease;
+}
+
+.btn-success:hover,
+.btn-success:focus {
+    background-position: 100% 0 !important;
+    box-shadow: 0 18px 34px rgba(124, 58, 237, 0.36);
+    transform: translateY(-1px);
+}
+
+.btn-success:disabled {
+    opacity: 0.72;
+    transform: none;
+    box-shadow: 0 10px 20px rgba(124, 58, 237, 0.22);
+}
+
+@media (max-width: 576px) {
+    body.bg-light {
+        background-attachment: scroll;
+    }
+
+    body.bg-light::before {
+        left: -42vw;
+        top: -18vh;
+    }
+
+    body.bg-light::after {
+        right: -48vw;
+        top: 18vh;
+    }
+
+    .card {
+        border-radius: 18px;
+    }
 }

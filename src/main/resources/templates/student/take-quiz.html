@@ -1,375 +1,611 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>EduQuiz - Take Assessment</title>
+  <title>Take Quiz - FlippedClass</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Favicon -->
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
-  
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  <!-- Tabler Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <script>
+/* --- Inlined from student-auth.js --- */
+if (!localStorage.getItem('jwt_token')) {
+  window.location.href = '/login';
+}
+
+</script>
   <link rel="stylesheet" th:href="@{/assets/css/student-take-quiz.css}">
-  <!-- SweetAlert2 -->
+  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+  <script>
+/* --- Inlined from student-user-menu.js --- */
+(function () {
+  const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
+
+  function storedUser() {
+    return {
+      fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
+      username: localStorage.getItem('username') || '',
+      avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
+    };
+  }
+
+  function normalizeUser(user = {}) {
+    const stored = storedUser();
+    return {
+      name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
+      username: user.username || stored.username || '',
+      avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
+    };
+  }
+
+  function setStudentMenuUser(user = {}) {
+    const normalized = normalizeUser(user);
+
+    if (normalized.name && normalized.name !== 'Student') {
+      localStorage.setItem('full_name', normalized.name);
+    }
+    if (normalized.username) {
+      localStorage.setItem('username', normalized.username);
+    }
+    if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
+      localStorage.setItem('avatar_url', normalized.avatarUrl);
+    }
+
+    document.querySelectorAll('[data-user-name]').forEach((element) => {
+      element.textContent = normalized.name;
+    });
+    document.querySelectorAll('[data-user-avatar]').forEach((image) => {
+      image.src = normalized.avatarUrl;
+      image.onerror = () => {
+        image.onerror = null;
+        image.src = defaultAvatarUrl;
+      };
+    });
+
+    const topbarName = document.getElementById('studentName');
+    if (topbarName) topbarName.textContent = normalized.name;
+  }
+
+  function studentLogout() {
+    ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
+      localStorage.removeItem(key);
+    });
+    window.location.href = '/';
+  }
+
+  async function refreshStudentMenuUser() {
+    const token = localStorage.getItem('jwt_token');
+    const userId = localStorage.getItem('user_id');
+    if (!token || !userId) return;
+
+    try {
+      const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) return;
+      const user = await response.json();
+      setStudentMenuUser(user);
+    } catch (error) {
+      console.warn('Could not load user menu profile.', error);
+    }
+  }
+
+  function closeAllMenus(exceptMenu = null) {
+    document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
+      if (menu !== exceptMenu) {
+        menu.classList.remove('is-open');
+        menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  function initStudentUserMenus() {
+    setStudentMenuUser();
+    refreshStudentMenuUser();
+
+    document.querySelectorAll('[data-user-menu]').forEach((menu) => {
+      const toggle = menu.querySelector('[data-user-menu-toggle]');
+      const logoutButton = menu.querySelector('[data-user-logout]');
+
+      toggle?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const shouldOpen = !menu.classList.contains('is-open');
+        closeAllMenus(menu);
+        menu.classList.toggle('is-open', shouldOpen);
+        toggle.setAttribute('aria-expanded', String(shouldOpen));
+      });
+
+      logoutButton?.addEventListener('click', studentLogout);
+    });
+
+    document.addEventListener('click', () => closeAllMenus());
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAllMenus();
+    });
+  }
+
+  window.setStudentMenuUser = setStudentMenuUser;
+  window.studentLogout = studentLogout;
+  if (!window.logout) window.logout = studentLogout;
+
+  document.addEventListener('DOMContentLoaded', initStudentUserMenus);
+})();
+
+</script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+<div id="overlay" class="overlay"></div>
 
-  <!-- Top Navbar -->
-  <nav class="edu-navbar">
-    <a href="#" class="edu-logo">
-      <i class="ti ti-school"></i> EduQuiz
+
+<aside id="sidebar" class="sidebar">
+  <div class="logo-area">
+    <a th:href="@{/}" class="logo-link">
+      <span class="logo-mark"><i class="ti ti-book-2 fs-3"></i></span>
+      <span>Flipped<span>Class</span></span>
     </a>
-    <div class="edu-user">
-      <div class="edu-user-tools">
-        <i class="ti ti-maximize"></i>
-        <i class="ti ti-moon"></i>
-      </div>
-      <div class="d-flex align-items-center gap-2">
-        <img th:src="@{/assets/images/avatar-1.jpg}" alt="User Avatar" style="width: 32px; height: 32px; border-radius: 50%;">
-        <span style="font-weight: 600; font-size: 0.9rem; color: #1e293b;">Student Name</span>
-      </div>
+  </div>
+  <ul class="nav">
+    <li><a class="nav-link" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
+    <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
+    <li><a class="nav-link active" href="/student/my-quizzes" data-nav-key="my-quiz" aria-current="page"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
+    <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
+    <li class="sidebar-user-slot">
+  <div class="student-user-menu" data-user-menu>
+    <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+      <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
+      <span class="student-menu-info">
+        <span class="student-menu-name" data-user-name>Student</span>
+        <span class="student-menu-role">Student</span>
+      </span>
+      <i class="ti ti-chevron-up student-menu-chevron"></i>
+    </button>
+    <div class="student-menu-panel" role="menu">
+      <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+      <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
     </div>
-  </nav>
+  </div>
+</li>
+  </ul>
+</aside>
 
-  <!-- Main Container -->
-  <main class="edu-container">
-    
-    <!-- Left Column: Info & Progress -->
-    <aside>
-      <!-- Info Card -->
-      <div class="edu-card">
-        <div class="quiz-title" id="quiz-title-display">Loading Quiz...</div>
-        <div class="quiz-meta" id="quiz-topic-display">Topic: Loading...</div>
-        
-        <div class="timer-label">Time Remaining</div>
-        <div class="timer-value" id="countdown">--:--</div>
-        
-        <div class="action-buttons">
-          <button class="btn-edu-outline" onclick="window.history.back()">Back</button>
-          <button class="btn-edu-primary" onclick="submitQuiz()">
-            <i class="ti ti-device-floppy"></i> Submit
-          </button>
+<main id="content" class="content">
+  <div class="page-wrap">
+    <section class="quiz-hero">
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span>Subject</span>
+          <strong id="hero-course">Loading</strong>
         </div>
-      </div>
-
-      <!-- Progress Card -->
-      <div class="edu-card">
-        <div class="section-title">Section Progress (2)</div>
-        
-        <div class="progress-item">
-          <div class="progress-header">
-            <div class="progress-icon" style="color: #ec4899; background: #fdf2f8;"><i class="ti ti-book"></i></div>
-            <div class="progress-name">Part 1: Grammar and Vocabulary</div>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="progress-text">Completed: <span id="prog-p1">0/0</span></div>
-            <div class="progress-text" style="color: #64748b;" id="prog-pct-p1">0%</div>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: 0%;" id="bar-p1"></div>
-          </div>
+        <div class="hero-stat">
+          <span>Duration</span>
+          <strong id="hero-duration">-- min</strong>
         </div>
-
-        <div class="progress-item">
-          <div class="progress-header">
-            <div class="progress-icon" style="color: #64748b; background: #f1f5f9;"><i class="ti ti-align-left"></i></div>
-            <div class="progress-name">Part 2: Reading Comprehension</div>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="progress-text">Completed: <span id="prog-p2">0/10</span></div>
-            <div class="progress-text" style="color: #64748b;" id="prog-pct-p2">0%</div>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: 0%;" id="bar-p2"></div>
-          </div>
+        <div class="hero-stat">
+          <span>Questions</span>
+          <strong id="hero-total">-- questions</strong>
         </div>
-      </div>
-    </aside>
-
-    <!-- Center Column: Questions -->
-    <section id="questions-container">
-      <div style="text-align: center; padding: 3rem;">
-        <p style="color: #64748b;">Loading questions...</p>
       </div>
     </section>
 
-    <!-- Right Column: Navigation Grid -->
-    <aside class="nav-grid-container">
-      <div class="edu-card">
-        <div class="nav-grid-title">Question Index</div>
-        <div class="nav-grid" id="navGrid">
-          <!-- JS generated buttons -->
+    <div class="quiz-shell">
+      <aside class="sticky-panel">
+        <section class="quiz-card">
+          <div class="panel-title"><i class="ti ti-clipboard-text"></i> Attempt Info</div>
+
+          <div class="timer-box">
+            <div class="timer-label">Time Left</div>
+            <div class="timer-value" id="countdown">--:--</div>
+          </div>
+
+          <div class="action-buttons">
+            <a class="btn-quiz btn-quiz-outline" href="/student/my-quizzes">
+              <i class="ti ti-arrow-left"></i> Back
+            </a>
+            <button class="btn-quiz btn-quiz-primary" type="button" onclick="submitQuiz()">
+              <i class="ti ti-send"></i> Submit
+            </button>
+          </div>
+        </section>
+
+        <section class="quiz-card">
+          <div class="panel-title"><i class="ti ti-progress-check"></i> Progress</div>
+          <div class="progress-row">
+            <span>Answered</span>
+            <strong><span id="answered-count">0</span>/<span id="total-count">0</span></strong>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-bar"></div>
+          </div>
+          <div class="progress-row" style="margin-top: 0.65rem; margin-bottom: 0;">
+            <span>Complete</span>
+            <strong id="progress-percent">0%</strong>
+          </div>
+        </section>
+      </aside>
+
+      <section class="questions-column" id="questions-container">
+        <div class="quiz-card loading-state">
+          <i class="ti ti-loader-2"></i>
+          Loading questions...
         </div>
-      </div>
-    </aside>
+      </section>
 
-  </main>
+      <aside class="sticky-panel nav-panel">
+        <section class="quiz-card">
+          <div class="panel-title"><i class="ti ti-grid-dots"></i> Question List</div>
+          <div class="nav-grid" id="navGrid"></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</main>
 
-  <script>
-    // --- Auth Guard & Initialization ---
-    const token = localStorage.getItem('jwt_token');
-    const userId = localStorage.getItem('user_id');
-    if (!token || !userId) {
-      alert('You must be logged in to take a quiz.');
-      window.location.href = '/signin';
+<script>
+
+const token = localStorage.getItem('jwt_token');
+  const userId = localStorage.getItem('user_id');
+  const urlParams = new URLSearchParams(window.location.search);
+  const quizId = urlParams.get('quizId');
+
+  let timeRemaining = 0;
+  let timerInterval = null;
+  let totalQuestions = 0;
+  let quizQuestions = [];
+  let isSubmitting = false;
+
+  const countdownEl = document.getElementById('countdown');
+  const navGrid = document.getElementById('navGrid');
+  const questionsContainer = document.getElementById('questions-container');
+  const swalColors = { confirmButtonColor: '#5b5ce2', cancelButtonColor: '#b42318' };
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function authHeaders(json = false) {
+    const headers = { Authorization: `Bearer ${token}` };
+    if (json) headers['Content-Type'] = 'application/json';
+    return headers;
+  }
+
+  function questionTypeLabel(type) {
+    const labels = {
+      SINGLE_CHOICE: 'Single Choice',
+      MULTIPLE_CHOICE: 'Multiple Choice',
+      TRUE_FALSE: 'True/False',
+      ESSAY: 'Essay'
+    };
+    return labels[type] || type || 'Question';
+  }
+
+  function normalizeOptionKey(key, index) {
+    if (/^\d+$/.test(String(key))) return String.fromCharCode(65 + Number(key));
+    return String(key || String.fromCharCode(65 + index));
+  }
+
+  function parseOptions(rawOptions) {
+    if (!rawOptions) return [];
+    try {
+      const parsed = JSON.parse(rawOptions);
+      if (Array.isArray(parsed)) return parsed.map((value, index) => [String(index), value]);
+      if (typeof parsed === 'object' && parsed !== null) return Object.entries(parsed);
+    } catch (error) {
+      return [ ['Ans', rawOptions] ];
     }
+    return [ ['Ans', rawOptions] ];
+  }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const quizId = urlParams.get('quizId');
-    if (!quizId) {
-      alert('Quiz ID is missing!');
-      window.location.href = '/student/dashboard';
-    }
+  function setStudentName(name) {
+    const studentName = document.getElementById('studentName');
+    if (studentName && name) studentName.textContent = name;
+  }
 
-    let timeRemaining = 0;
-    let timerInterval = null;
-    let totalQuestions = 0;
-    let quizQuestions = [];
+  function setupLayoutControls() {
+    const toggleBtn = document.getElementById('toggleBtn');
+    const mobileBtn = document.getElementById('mobileBtn');
+    const overlay = document.getElementById('overlay');
 
-    const countdownEl = document.getElementById('countdown');
-    const navGrid = document.getElementById('navGrid');
-    const questionsContainer = document.getElementById('questions-container');
-
-    // --- Fetch Quiz Data ---
-    async function initQuiz() {
-      try {
-        // --- 1. Check Previous Attempts ---
-        const attemptsRes = await fetch(`/api/quizzes/attempts/student/${userId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (attemptsRes.ok) {
-          const attempts = await attemptsRes.json();
-          const hasAttempt = attempts.some(a => a.quizId == quizId);
-          if (hasAttempt) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Quiz Already Completed',
-              text: 'You have already submitted this quiz. You cannot take it again.',
-              confirmButtonText: 'Back to Dashboard'
-            }).then(() => {
-              window.location.href = '/student/dashboard';
-            });
-            return;
-          }
-        }
-
-        // Fetch Quiz Info
-        const quizRes = await fetch(`/api/quizzes/${quizId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!quizRes.ok) throw new Error('Failed to load quiz details.');
-        const quizData = await quizRes.json();
-        
-        document.getElementById('quiz-title-display').innerText = quizData.title;
-        document.getElementById('quiz-topic-display').innerText = quizData.courseName ? `Topic: ${quizData.courseName}` : 'Topic: General';
-        
-        // Start Timer
-        timeRemaining = (quizData.durationMinutes || 30) * 60;
-        startTimer();
-
-        // Fetch Questions
-        const qRes = await fetch(`/api/quizzes/${quizId}/questions`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!qRes.ok) throw new Error('Failed to load questions.');
-        quizQuestions = await qRes.json();
-        totalQuestions = quizQuestions.length;
-
-        renderQuestions();
-        renderNavGrid();
-        updateProgress();
-
-      } catch (err) {
-        alert(err.message);
+    toggleBtn?.addEventListener('click', () => {
+      if (window.innerWidth >= 992) {
+        document.body.classList.toggle('sidebar-collapsed');
+      } else {
+        document.body.classList.toggle('sidebar-open');
       }
+    });
+
+    mobileBtn?.addEventListener('click', () => document.body.classList.add('sidebar-open'));
+    overlay?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+  }
+
+  async function readError(response) {
+    try {
+      const data = await response.json();
+      return data.message || data.error || 'Something went wrong.';
+    } catch (error) {
+      const text = await response.text();
+      return text || 'Something went wrong.';
+    }
+  }
+
+  function requireQuizId() {
+    if (quizId) return true;
+    Swal.fire({
+      icon: 'warning',
+      title: 'Missing quiz ID',
+      text: 'Please choose a quiz from the dashboard before starting.',
+      confirmButtonText: 'Back to My Quizzes',
+      confirmButtonColor: swalColors.confirmButtonColor
+    }).then(() => {
+      window.location.href = '/student/my-quizzes';
+    });
+    return false;
+  }
+
+  async function initQuiz() {
+    if (!token || !userId) {
+      window.location.href = '/login';
+      return;
     }
 
-    // --- Timer Logic ---
-    function startTimer() {
-      timerInterval = setInterval(() => {
-        if (timeRemaining <= 0) {
-          clearInterval(timerInterval);
-          alert('Time is up! Submitting automatically...');
-          submitQuiz(true); // auto submit
+    if (!requireQuizId()) return;
+    setStudentName(localStorage.getItem('username') || localStorage.getItem('full_name'));
+
+    try {
+      const attemptsRes = await fetch(`/api/quizzes/attempts/student/${userId}`, { headers: authHeaders() });
+      if (attemptsRes.ok) {
+        const attempts = await attemptsRes.json();
+        const hasAttempt = attempts.some(attempt => String(attempt.quizId) === String(quizId));
+        if (hasAttempt) {
+          await Swal.fire({
+            icon: 'warning',
+            title: 'You already completed this quiz',
+            text: 'This quiz was already submitted, so you cannot retake it.',
+            confirmButtonText: 'Back to My Quizzes',
+            confirmButtonColor: swalColors.confirmButtonColor
+          });
+          window.location.href = '/student/my-quizzes';
           return;
         }
-        timeRemaining--;
-        let m = Math.floor(timeRemaining / 60);
-        let s = timeRemaining % 60;
-        countdownEl.innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
-      }, 1000);
-    }
+      }
 
-    // --- Dynamic Rendering ---
-    function renderQuestions() {
-      questionsContainer.innerHTML = ''; // clear loading
-      
-      quizQuestions.forEach((q, index) => {
-        const qNum = index + 1;
-        let optionsMap = {};
-        try {
-          const parsed = JSON.parse(q.options || "{}");
-          if (Array.isArray(parsed)) {
-            parsed.forEach((item, idx) => optionsMap[idx.toString()] = item);
-          } else if (typeof parsed === 'object' && parsed !== null) {
-            optionsMap = parsed;
-          } else {
-            optionsMap = { "Ans": q.options };
-          }
-        } catch(e) {
-          optionsMap = { "Ans": q.options };
-        }
+      const quizRes = await fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() });
+      if (!quizRes.ok) throw new Error('Could not load quiz information.');
+      const quizData = await quizRes.json();
 
-        let optionsHtml = '';
-        Object.entries(optionsMap).forEach(([optKey, optText]) => {
-          optionsHtml += `
-            <label class="q-option">
-              <input type="radio" name="q${q.id}" value="${optKey}" onchange="markAnswered(${q.id})">
-              <div class="q-radio-custom"></div>
-              <div class="q-option-text">${optText}</div>
-            </label>
-          `;
-        });
+      const title = quizData.title || `Quiz #${quizId}`;
+      const courseName = quizData.courseName || quizData.learningSpaceName || 'Chung';
+      const duration = quizData.durationMinutes || 30;
 
-        const qHtml = `
-          <div class="edu-card q-card" id="q-card-${q.id}">
-            <div class="q-header">
-              <div class="q-number">Question ${qNum}</div>
-              <div class="q-type">${q.questionType === 'SINGLE_CHOICE' ? 'Single Choice' : q.questionType} (${q.points} pts)</div>
-            </div>
-            <div class="q-text">${q.content}</div>
-            <div class="q-options">
-              ${optionsHtml}
-            </div>
-          </div>
-        `;
-        questionsContainer.insertAdjacentHTML('beforeend', qHtml);
-      });
-    }
+      document.title = `${title} - FlippedClass`;
+      document.getElementById('hero-course').textContent = courseName;
+      document.getElementById('hero-duration').textContent = `${duration} min`;
 
-    function renderNavGrid() {
-      navGrid.innerHTML = '';
-      quizQuestions.forEach((q, index) => {
-        const btn = document.createElement('div');
-        btn.className = 'nav-btn';
-        btn.id = 'nav-btn-' + q.id;
-        btn.innerText = index + 1;
-        btn.onclick = () => scrollToQuestion(q.id);
-        navGrid.appendChild(btn);
-      });
-    }
+      timeRemaining = duration * 60;
+      renderTimer();
+      startTimer();
 
-    // --- User Actions ---
-    function markAnswered(questionId) {
-      const btn = document.getElementById('nav-btn-' + questionId);
-      if (btn) btn.classList.add('answered');
+      const questionsRes = await fetch(`/api/quizzes/${quizId}/questions`, { headers: authHeaders() });
+      if (!questionsRes.ok) throw new Error('Could not load question list.');
+      quizQuestions = await questionsRes.json();
+      totalQuestions = quizQuestions.length;
+
+      document.getElementById('hero-total').textContent = `${totalQuestions} questions`;
+      document.getElementById('total-count').textContent = totalQuestions;
+
+      renderQuestions();
+      renderNavGrid();
       updateProgress();
+    } catch (error) {
+      questionsContainer.innerHTML = `
+        <div class="quiz-card empty-state">
+          <i class="ti ti-alert-circle"></i>
+          ${escapeHtml(error.message)}
+        </div>
+      `;
     }
+  }
 
-    function updateProgress() {
-      const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
-      document.getElementById('prog-p1').innerText = `${answeredCount}/${totalQuestions}`;
-      const pct = totalQuestions === 0 ? 0 : (answeredCount / totalQuestions) * 100;
-      document.getElementById('prog-pct-p1').innerText = `${Math.round(pct)}%`;
-      document.getElementById('bar-p1').style.width = `${pct}%`;
-    }
+  function renderTimer() {
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    countdownEl.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    countdownEl.classList.toggle('is-warning', timeRemaining <= 300);
+  }
 
-    function scrollToQuestion(questionId) {
-      const qEl = document.getElementById('q-card-' + questionId);
-      if (qEl) {
-        const y = qEl.getBoundingClientRect().top + window.scrollY - 80;
-        window.scrollTo({top: y, behavior: 'smooth'});
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      if (timeRemaining <= 0) {
+        clearInterval(timerInterval);
+        Swal.fire({
+          icon: 'info',
+          title: 'Time is up',
+          text: 'The system will automatically submit your quiz.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: swalColors.confirmButtonColor
+        }).then(() => submitQuiz(true));
+        return;
       }
+      timeRemaining -= 1;
+      renderTimer();
+    }, 1000);
+  }
+
+  function renderQuestions() {
+    if (!quizQuestions.length) {
+      questionsContainer.innerHTML = `
+        <div class="quiz-card empty-state">
+          <i class="ti ti-notes-off"></i>
+          This quiz has no questions yet.
+        </div>
+      `;
+      return;
     }
 
-    // --- Submit Logic ---
-    async function submitQuiz(autoSubmit = false) {
-      const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
-      if (!autoSubmit && answeredCount < totalQuestions) {
-        const result = await Swal.fire({
-          title: 'Are you sure?',
-          text: `You have only answered ${answeredCount} out of ${totalQuestions} questions. Do you really want to submit?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, submit it!'
-        });
-        
-        if (!result.isConfirmed) return;
-      } else if (!autoSubmit) {
-        const result = await Swal.fire({
-          title: 'Ready to submit?',
-          text: `You have answered all questions. Submit now?`,
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, submit it!'
-        });
-        
-        if (!result.isConfirmed) return;
-      }
+    questionsContainer.innerHTML = '';
+    quizQuestions.forEach((question, index) => {
+      const questionNumber = index + 1;
+      const options = parseOptions(question.options);
+      const optionsHtml = options.map(([optionKey, optionText], optionIndex) => {
+        const labelKey = normalizeOptionKey(optionKey, optionIndex);
+        return `
+          <label class="answer-option">
+            <input type="radio" name="q${question.id}" value="${escapeHtml(optionKey)}" onchange="markAnswered(${question.id})">
+            <span class="radio-mark"></span>
+            <span class="answer-content">
+              <span class="answer-key">${escapeHtml(labelKey)}.</span>
+              <span>${escapeHtml(optionText)}</span>
+            </span>
+          </label>
+        `;
+      }).join('');
 
-      // Gather answers
-      let answers = {};
-      quizQuestions.forEach(q => {
-        const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
-        if (selected) {
-          answers[q.id] = selected.value;
-        }
+      const questionHtml = `
+        <article class="question-card" id="q-card-${question.id}">
+          <div class="q-header">
+            <div class="q-number"><i class="ti ti-circle-number-${Math.min(questionNumber, 9)}"></i> Question ${questionNumber}</div>
+            <div class="q-type">${escapeHtml(questionTypeLabel(question.questionType))} - ${escapeHtml(question.points || 0)} points</div>
+          </div>
+          <div class="q-text">${escapeHtml(question.content)}</div>
+          <div class="q-options">${optionsHtml}</div>
+        </article>
+      `;
+      questionsContainer.insertAdjacentHTML('beforeend', questionHtml);
+    });
+  }
+
+  function renderNavGrid() {
+    navGrid.innerHTML = '';
+    quizQuestions.forEach((question, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'nav-btn';
+      button.id = `nav-btn-${question.id}`;
+      button.textContent = index + 1;
+      button.setAttribute('aria-label', `Go to question ${index + 1}`);
+      button.addEventListener('click', () => scrollToQuestion(question.id));
+      navGrid.appendChild(button);
+    });
+  }
+
+  function markAnswered(questionId) {
+    const navButton = document.getElementById(`nav-btn-${questionId}`);
+    const questionCard = document.getElementById(`q-card-${questionId}`);
+    navButton?.classList.add('answered');
+    questionCard?.classList.add('is-answered');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
+    const percent = totalQuestions === 0 ? 0 : Math.round((answeredCount / totalQuestions) * 100);
+    document.getElementById('answered-count').textContent = answeredCount;
+    document.getElementById('total-count').textContent = totalQuestions;
+    document.getElementById('progress-percent').textContent = `${percent}%`;
+    document.getElementById('progress-bar').style.width = `${percent}%`;
+  }
+
+  function scrollToQuestion(questionId) {
+    const questionEl = document.getElementById(`q-card-${questionId}`);
+    if (!questionEl) return;
+    const y = questionEl.getBoundingClientRect().top + window.scrollY - 96;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+
+  async function confirmSubmit(autoSubmit, answeredCount) {
+    if (autoSubmit) return true;
+    const isIncomplete = answeredCount < totalQuestions;
+    const result = await Swal.fire({
+      title: isIncomplete ? 'You have unanswered questions' : 'Ready to submit?',
+      text: isIncomplete
+        ? `You answered ${answeredCount}/${totalQuestions} questions. Do you still want to submit?`
+        : 'You answered all questions. Submit now?',
+      icon: isIncomplete ? 'warning' : 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Submit',
+      cancelButtonText: 'Keep Working',
+      confirmButtonColor: swalColors.confirmButtonColor,
+      cancelButtonColor: swalColors.cancelButtonColor
+    });
+    return result.isConfirmed;
+  }
+
+  async function submitQuiz(autoSubmit = false) {
+    if (isSubmitting) return;
+    const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
+    const shouldSubmit = await confirmSubmit(autoSubmit, answeredCount);
+    if (!shouldSubmit) return;
+
+    const answers = {};
+    quizQuestions.forEach(question => {
+      const selected = document.querySelector(`input[name="q${question.id}"]:checked`);
+      if (selected) answers[question.id] = selected.value;
+    });
+
+    isSubmitting = true;
+    try {
+      const response = await fetch(`/api/quizzes/${quizId}/attempts`, {
+        method: 'POST',
+        headers: authHeaders(true),
+        body: JSON.stringify({
+          studentId: Number(userId),
+          answers
+        })
       });
 
-      const payload = {
-        studentId: parseInt(userId),
-        answers: answers
-      };
+      if (!response.ok) throw new Error(await readError(response));
+      const result = await response.json();
+      clearInterval(timerInterval);
 
-      try {
-        const res = await fetch(`/api/quizzes/${quizId}/attempts`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
+      await Swal.fire({
+        icon: 'success',
+        title: 'Submitted Successfully',
+        html: `
+          <div style="text-align:center; margin-top: 1rem;">
+            <div style="font-size: 3.4rem; font-weight: 900; color: #5b5ce2; line-height: 1;">${escapeHtml(result.score ?? 0)}%</div>
+            <p style="color: #6b7280; margin-top: 0.75rem; font-weight: 700;">Correct Answers: <strong>${escapeHtml(result.correctAnswers ?? 0)} / ${escapeHtml(result.totalQuestions ?? totalQuestions)}</strong></p>
+          </div>
+        `,
+        confirmButtonText: 'Back to My Quizzes',
+        confirmButtonColor: swalColors.confirmButtonColor,
+        allowOutsideClick: false
+      });
 
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.message || 'Failed to submit quiz.');
-        }
-
-        const result = await res.json();
-        clearInterval(timerInterval);
-
-        await Swal.fire({
-          icon: 'success',
-          title: 'Quiz Submitted Successfully!',
-          html: `
-            <div class="text-center mt-3">
-               <h1 class="display-1 text-primary fw-bold mb-0">${result.score}%</h1>
-               <p class="text-muted mt-2">Correct Answers: <strong>${result.correctAnswers} / ${result.totalQuestions}</strong></p>
-            </div>
-          `,
-          confirmButtonText: 'Return to Dashboard',
-          confirmButtonColor: '#3085d6',
-          allowOutsideClick: false
-        });
-        
-        window.location.href = '/student/dashboard';
-      } catch (err) {
-        Swal.fire('Error', err.message, 'error');
-      }
+      window.location.href = '/student/my-quizzes';
+    } catch (error) {
+      isSubmitting = false;
+      Swal.fire({
+        icon: 'error',
+        title: 'Could not submit quiz',
+        text: error.message,
+        confirmButtonText: 'Close',
+        confirmButtonColor: swalColors.confirmButtonColor
+      });
     }
+  }
 
-    // Run on load
+  function logout() {
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('user_id');
+    window.location.href = '/';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setupLayoutControls();
     initQuiz();
-  </script>
+  });
+
+</script>
 </body>
 </html>
 
