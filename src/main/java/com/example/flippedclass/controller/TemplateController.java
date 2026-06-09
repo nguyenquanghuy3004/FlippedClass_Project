@@ -99,6 +99,12 @@ public class TemplateController {
         return "lecturer/evaluation-sessions";
     }
 
+    @GetMapping("/lecturer/evaluation-sessions/{sessionId}/students")
+    public String evaluationStudents(@PathVariable Long sessionId, Model model) {
+        model.addAttribute("sessionId", sessionId);
+        return "lecturer/evaluation-students";
+    }
+
     @GetMapping("/lecturer/dashboard")
     public String lecturerDashboard() {
         return "lecturer/dashboard";

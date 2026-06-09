@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+�<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8" />
-  <title>Báº£ng Ä‘iá»u khiá»ƒn sinh viÃªn - FlippedClass</title>
+  <title>Bảng �iều khiỒn sinh viên - FlippedClass</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
@@ -36,7 +36,7 @@
 
   <div class="d-flex align-items-center w-100 justify-content-between">
     <div class="d-none d-md-block">
-      <h5 class="mb-0 fw-bold text-dark ms-2" style="letter-spacing: -0.5px;">Cá»•ng sinh viÃªn <span class="badge bg-primary-subtle text-primary ms-2 rounded-pill">Há»c táº­p</span></h5>
+      <h5 class="mb-0 fw-bold text-dark ms-2" style="letter-spacing: -0.5px;">C�"ng sinh viên <span class="badge bg-primary-subtle text-primary ms-2 rounded-pill">Học tập</span></h5>
     </div>
     <ul class="list-unstyled d-flex align-items-center mb-0 gap-3">
       <!-- Notification Bell -->
@@ -46,7 +46,7 @@
                 id="notificationDropdown"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
-                aria-label="ThÃ´ng bÃ¡o quiz cáº§n lÃ m">
+                aria-label="Thông báo quiz cần làm">
           <i class="ti ti-bell-ringing fs-5 text-dark"></i>
           <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm d-none">0</span>
         </button>
@@ -54,8 +54,8 @@
           <div class="p-3 border-bottom bg-white">
             <div class="d-flex align-items-center justify-content-between">
               <div>
-                <h6 class="fw-900 text-dark mb-1">ThÃ´ng bÃ¡o</h6>
-                <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Äang táº£i thÃ´ng bÃ¡o...</p>
+                <h6 class="fw-900 text-dark mb-1">Thông báo</h6>
+                <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Đang tải thông báo...</p>
               </div>
               <i class="ti ti-bell text-primary fs-4"></i>
             </div>
@@ -63,18 +63,18 @@
           <div id="notificationList" class="notification-list">
             <div class="text-center text-muted py-4 px-3">
               <div class="spinner-border text-primary mb-2" role="status"></div>
-              <p class="small fw-semibold mb-0">Äang táº£i quiz cáº§n lÃ m...</p>
+              <p class="small fw-semibold mb-0">Đang tải quiz cần làm...</p>
             </div>
           </div>
         </div>
       </li>
       <li class="dropdown">
         <div class="student-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-          <img th:src="@{/assets/images/avatar-1.jpg}" alt="áº¢nh Ä‘áº¡i diá»‡n sinh viÃªn">
-          <span id="studentNameTop">Sinh viÃªn</span>
+          <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh �ại di�!n sinh viên">
+          <span id="studentNameTop">Sinh viên</span>
         </div>
         <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
-          <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>ÄÄƒng xuáº¥t</a></li>
+          <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>ĐĒng xuất</a></li>
         </ul>
       </li>
     </ul>
@@ -92,10 +92,10 @@
     </a>
   </div>
   <ul class="nav flex-column mt-4">
-    <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4" th:href="@{/student/dashboard}" data-nav-key="dashboard" aria-current="page"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Tá»•ng quan</span></a></li>
-    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Lá»›p cá»§a tÃ´i</span></a></li>
+    <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4" th:href="@{/student/dashboard}" data-nav-key="dashboard" aria-current="page"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">T�"ng quan</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">L�:p của tôi</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
-    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">BÃ¡o cÃ¡o</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
 
   </ul>
 </aside>
@@ -112,27 +112,27 @@
         <div class="bento-card profile-bento">
           <div class="profile-avatar-container mt-3">
             <!-- MASSIVE AVATAR FOR DETAIL VIEW -->
-            <img th:src="@{/assets/images/avatar-1.jpg}" alt="áº¢nh Ä‘áº¡i diá»‡n sinh viÃªn" class="massive-avatar" />
+            <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh �ại di�!n sinh viên" class="massive-avatar" />
             <div class="status-dot"></div>
           </div>
 
-          <h2 class="profile-name" id="profileName">Äang táº£i...</h2>
-          <p class="profile-major" id="profileSummary">Äang táº£i há»“ sÆ¡ sinh viÃªn...</p>
+          <h2 class="profile-name" id="profileName">Đang tải...</h2>
+          <p class="profile-major" id="profileSummary">Đang tải h� sơ sinh viên...</p>
 
           <div class="w-100 mt-4 d-flex gap-2 profile-actions">
-            <a href="#" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm">Chá»‰nh há»“ sÆ¡</a>
-            <a href="#" class="btn btn-outline-light rounded-pill w-100 fw-bold">Xem chi tiáº¿t</a>
+            <a href="#" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm">Ch�0nh h� sơ</a>
+            <a href="#" class="btn btn-outline-light rounded-pill w-100 fw-bold">Xem chi tiết</a>
           </div>
 
           <div class="mt-5 w-100 bg-white bg-opacity-10 rounded-4 p-3 d-flex justify-content-around profile-meta-card">
             <div>
               <div class="fs-4 fw-bold" id="profileStudentCode">--</div>
-              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">MÃ£ SV</div>
+              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Mã SV</div>
             </div>
             <div class="border-end border-light opacity-25"></div>
             <div>
               <div class="fs-4 fw-bold" id="profileClassName">--</div>
-              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Lá»›p</div>
+              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">L�:p</div>
             </div>
           </div>
         </div>
@@ -146,8 +146,8 @@
           <div class="col-12">
             <div class="bento-card welcome-card d-flex align-items-center justify-content-between" style="background: url('data:image/svg+xml;utf8,<svg xmlns=http://www.w3.org/2000/svg viewBox=0 0 100 100><circle cx=90 cy=10 r=40 fill=%23e8f8ea /></svg>') no-repeat right top; background-size: cover; background-color: #fff;">
               <div>
-                <h1 class="display-6 fw-900 text-dark mb-2" style="letter-spacing: -1px;">Xin chÃ o, <span data-greeting-name>Sinh viÃªn</span>!</h1>
-                <p class="fs-5 text-muted mb-0" id="dashboardSummary">Äang Ä‘á»“ng bá»™ dá»¯ liá»‡u há»c táº­p tá»« há»‡ thá»‘ng.</p>
+                <h1 class="display-6 fw-900 text-dark mb-2" style="letter-spacing: -1px;">Xin chào, <span data-greeting-name>Sinh viên</span>!</h1>
+                <p class="fs-5 text-muted mb-0" id="dashboardSummary">Đang ��ng b�" dữ li�!u học tập từ h�! th�ng.</p>
               </div>
               <div class="d-none d-md-block text-center me-4">
                 <div class="text-warning welcome-icon" style="font-size: 4rem; line-height: 1;"><i class="ti ti-flame"></i></div>
@@ -162,7 +162,7 @@
                 <i class="ti ti-book"></i>
               </div>
               <div class="stat-value text-primary" id="learningSpaceCount">0</div>
-              <div class="stat-label">Lá»›p Ä‘ang há»c</div>
+              <div class="stat-label">L�:p �ang học</div>
             </div>
           </div>
 
@@ -173,7 +173,7 @@
                 <i class="ti ti-rosette-discount-check"></i>
               </div>
               <div class="stat-value text-success" id="completedQuizCount">0</div>
-              <div class="stat-label">Quiz Ä‘Ã£ hoÃ n thÃ nh</div>
+              <div class="stat-label">Quiz �ã hoàn thành</div>
             </div>
           </div>
 
@@ -184,7 +184,7 @@
                 <i class="ti ti-alert-circle"></i>
               </div>
               <div class="stat-value text-white" id="pendingQuizCount" style="background: none; -webkit-text-fill-color: #fff;">0</div>
-              <div class="stat-label text-white-50">Quiz cáº§n lÃ m</div>
+              <div class="stat-label text-white-50">Quiz cần làm</div>
             </div>
           </div>
 
@@ -198,16 +198,16 @@
       <div class="col-xl-8">
         <div id="myQuizSection" class="d-flex justify-content-between align-items-end mb-4">
           <div>
-            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">KhÃ´ng gian há»c cá»§a tÃ´i</h2>
+            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Không gian học của tôi</h2>
           </div>
-          <a th:href="@{/student/learning-spaces}" class="btn btn-dark rounded-pill fw-bold px-4">Xem táº¥t cáº£</a>
+          <a th:href="@{/student/learning-spaces}" class="btn btn-dark rounded-pill fw-bold px-4">Xem tất cả</a>
         </div>
 
         <div class="row g-4" id="learningSpaceList">
           <div class="col-12">
             <div class="bento-card text-center text-muted py-5">
               <div class="spinner-border text-primary mb-3" role="status"></div>
-              <p class="mb-0 fw-semibold">Äang táº£i khÃ´ng gian há»c...</p>
+              <p class="mb-0 fw-semibold">Đang tải không gian học...</p>
             </div>
           </div>
         </div>
@@ -217,15 +217,15 @@
 
         <div class="d-flex justify-content-between align-items-end mb-4">
           <div>
-            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Quiz cá»§a khÃ³a há»c</h2>
-            <p class="text-muted mb-0 fw-semibold">CÃ¡c bÃ i quiz theo tá»«ng khÃ´ng gian há»c báº¡n Ä‘Ã£ tham gia</p>
+            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Quiz của khóa học</h2>
+            <p class="text-muted mb-0 fw-semibold">Các bài quiz theo từng không gian học bạn �ã tham gia</p>
           </div>
         </div>
 
         <div class="accordion accordion-flush quiz-accordion bento-card p-3" id="quizAccordion">
           <div class="text-center text-muted py-4" id="quiz-loading">
             <div class="spinner-border text-primary mb-2" role="status"></div>
-            <p>Äang táº£i khÃ³a há»c vÃ  quiz...</p>
+            <p>Đang tải khóa học và quiz...</p>
           </div>
 
         </div>
@@ -234,12 +234,12 @@
       <!-- RIGHT COLUMN: RECENT DOCS -->
       <div class="col-xl-4">
 
-        <h2 class="h3 fw-900 text-dark mb-4" style="letter-spacing: -0.5px;">TÃ i liá»‡u má»›i</h2>
+        <h2 class="h3 fw-900 text-dark mb-4" style="letter-spacing: -0.5px;">Tài li�!u m�:i</h2>
         <div class="bento-card p-4" id="recentDocuments">
           <div class="text-center text-muted py-4">
             <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
-            <h5 class="fw-bold text-dark mt-3 mb-2">ChÆ°a cÃ³ dá»¯ liá»‡u tÃ i liá»‡u</h5>
-            <p class="small fw-semibold mb-0">Dashboard API hiá»‡n chÆ°a tráº£ danh sÃ¡ch tÃ i liá»‡u má»›i.</p>
+            <h5 class="fw-bold text-dark mt-3 mb-2">Chưa có dữ li�!u tài li�!u</h5>
+            <p class="small fw-semibold mb-0">Dashboard API hi�!n chưa trả danh sách tài li�!u m�:i.</p>
           </div>
         </div>
       </div>
@@ -275,23 +275,23 @@
 
   function statusLabel(status) {
     const labels = {
-      ACTIVE: 'Äang há»c',
-      DRAFT: 'Báº£n nhÃ¡p',
-      LOCKED: 'ChÆ°a má»Ÿ',
-      UNLOCKED: 'ÄÃ£ má»Ÿ',
-      ARCHIVED: 'LÆ°u trá»¯',
-      DELETED: 'ÄÃ£ xÃ³a'
+      ACTIVE: 'Đang học',
+      DRAFT: 'Bản nháp',
+      LOCKED: 'Chưa m�x',
+      UNLOCKED: 'Đã m�x',
+      ARCHIVED: 'Lưu trữ',
+      DELETED: 'Đã xóa'
     };
-    return labels[status] || status || 'ChÆ°a rÃµ';
+    return labels[status] || status || 'Chưa rõ';
   }
 
   function roleLabel(role) {
     const labels = {
-      MEMBER: 'Sinh viÃªn',
-      OWNER: 'Chá»§ lá»›p',
-      SUPPORTER: 'Trá»£ giáº£ng'
+      MEMBER: 'Sinh viên',
+      OWNER: 'Chủ l�:p',
+      SUPPORTER: 'Trợ giảng'
     };
-    return labels[role] || role || 'ThÃ nh viÃªn';
+    return labels[role] || role || 'Thành viên';
   }
 
   function studyYear(enrollmentYear) {
@@ -309,9 +309,9 @@
   function renderProfile(data) {
     const user = data.user || {};
     const profile = data.studentProfile || {};
-    const displayName = user.fullName || user.username || 'Sinh viÃªn';
-    const major = profile.major || 'ChÆ°a cáº­p nháº­t ngÃ nh';
-    const yearText = profile.enrollmentYear ? `NÄƒm ${studyYear(profile.enrollmentYear)}` : 'ChÆ°a cáº­p nháº­t nÄƒm há»c';
+    const displayName = user.fullName || user.username || 'Sinh viên';
+    const major = profile.major || 'Chưa cập nhật ngành';
+    const yearText = profile.enrollmentYear ? `NĒm ${studyYear(profile.enrollmentYear)}` : 'Chưa cập nhật nĒm học';
 
     setText('#profileName', displayName);
     setText('[data-greeting-name]', displayName);
@@ -330,7 +330,7 @@
     setText('#learningSpaceCount', learningSpaces.length);
     setText('#completedQuizCount', completedCount);
     setText('#pendingQuizCount', pendingCount);
-    setText('#dashboardSummary', `Báº¡n Ä‘ang tham gia ${learningSpaces.length} lá»›p, Ä‘Ã£ hoÃ n thÃ nh ${completedCount}/${quizzes.length} quiz.`);
+    setText('#dashboardSummary', `Bạn �ang tham gia ${learningSpaces.length} l�:p, �ã hoàn thành ${completedCount}/${quizzes.length} quiz.`);
   }
 
   function emptyState(icon, title, message) {
@@ -347,7 +347,7 @@
     if (!list) return;
 
     if (!learningSpaces.length) {
-      list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'ChÆ°a cÃ³ lá»›p há»c', 'Nháº­p mÃ£ lá»›p á»Ÿ trang Lá»›p cá»§a tÃ´i Ä‘á»ƒ tham gia learning space.')}</div>`;
+      list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'Chưa có l�:p học', 'Nhập mã l�:p �x trang L�:p của tôi �Ồ tham gia learning space.')}</div>`;
       return;
     }
 
@@ -363,7 +363,7 @@
 
       return `
           <div class="col-md-6">
-            <a class="course-card text-decoration-none d-block" href="${roadmapUrl}" aria-label="Má»Ÿ roadmap cá»§a ${escapeHtml(space.name || 'learning space')}">
+            <a class="course-card text-decoration-none d-block" href="${roadmapUrl}" aria-label="M�x roadmap của ${escapeHtml(space.name || 'learning space')}">
               <div class="d-flex justify-content-between align-items-start">
                 <div class="course-icon-wrapper bg-${theme.color}-subtle text-${theme.color}">
                   <i class="ti ${theme.icon}"></i>
@@ -371,15 +371,15 @@
                 <span class="badge bg-light text-dark border px-2 py-1 rounded-pill"><i class="ti ti-circle-check me-1"></i>${escapeHtml(statusLabel(space.status))}</span>
               </div>
 
-              <h3 class="course-title">${escapeHtml(space.name || 'Learning space chÆ°a Ä‘áº·t tÃªn')}</h3>
+              <h3 class="course-title">${escapeHtml(space.name || 'Learning space chưa �ặt tên')}</h3>
               <p class="text-muted small fw-semibold mb-0">${escapeHtml(space.description || roleLabel(space.memberRole))}</p>
 
               <div class="progress-track">
                 <div class="progress-fill bg-${theme.color}" style="width: ${percent}%;"></div>
               </div>
               <div class="d-flex justify-content-between mt-2">
-                <span class="small fw-bold text-dark">${percent}% hoÃ n thÃ nh quiz</span>
-                <span class="small text-muted fw-semibold">${pending ? `CÃ²n ${pending} quiz` : quizzes.length ? 'ÄÃ£ xong quiz' : 'ChÆ°a cÃ³ quiz'}</span>
+                <span class="small fw-bold text-dark">${percent}% hoàn thành quiz</span>
+                <span class="small text-muted fw-semibold">${pending ? `Còn ${pending} quiz` : quizzes.length ? 'Đã xong quiz' : 'Chưa có quiz'}</span>
               </div>
             </a>
           </div>`;
@@ -388,8 +388,8 @@
 
   function quizAction(quiz) {
     return quiz.isCompleted
-            ? `<span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i class="ti ti-check me-1"></i>ÄÃ£ hoÃ n thÃ nh</span>`
-            : `<a href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">LÃ m quiz</a>`;
+            ? `<span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i class="ti ti-check me-1"></i>Đã hoàn thành</span>`
+            : `<a href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">Làm quiz</a>`;
   }
 
   function renderQuizAccordion(learningSpaces) {
@@ -398,7 +398,7 @@
 
     quizAccordion.innerHTML = '';
     if (!learningSpaces.length) {
-      quizAccordion.innerHTML = `<div class="text-center text-muted py-4"><p class="mb-0 fw-semibold">Báº¡n chÆ°a tham gia khÃ´ng gian há»c nÃ o.</p></div>`;
+      quizAccordion.innerHTML = `<div class="text-center text-muted py-4"><p class="mb-0 fw-semibold">Bạn chưa tham gia không gian học nào.</p></div>`;
       return;
     }
 
@@ -410,16 +410,16 @@
               ? `<div class="accordion-body border-top border-light">${quizzes.map((quiz) => `
               <div class="quiz-card-item d-flex align-items-center justify-content-between gap-3 p-3 bg-white rounded-3 shadow-sm mb-2 ${quiz.isCompleted ? 'opacity-75' : ''}">
                 <div>
-                  <h5 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Quiz chÆ°a Ä‘áº·t tÃªn')}</h5>
-                  <span class="small text-muted fw-semibold"><i class="ti ti-clock me-1"></i>${escapeHtml(quiz.durationMinutes || 0)} phÃºt</span>
-                  <span class="small text-muted fw-semibold ms-2"><i class="ti ti-list-check me-1"></i>${escapeHtml(quiz.totalQuestions || 0)} cÃ¢u</span>
+                  <h5 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Quiz chưa �ặt tên')}</h5>
+                  <span class="small text-muted fw-semibold"><i class="ti ti-clock me-1"></i>${escapeHtml(quiz.durationMinutes || 0)} phút</span>
+                  <span class="small text-muted fw-semibold ms-2"><i class="ti ti-list-check me-1"></i>${escapeHtml(quiz.totalQuestions || 0)} câu</span>
                 </div>
                 <div class="text-end">${quizAction(quiz)}</div>
               </div>`).join('')}</div>`
               : `<div class="accordion-body border-top border-light text-center py-4">
               <div class="text-success mb-2"><i class="ti ti-circle-check" style="font-size: 3rem;"></i></div>
-              <h5 class="fw-bold">Lá»›p nÃ y chÆ°a cÃ³ quiz</h5>
-              <p class="text-muted small mb-0">Khi giáº£ng viÃªn táº¡o quiz, bÃ i quiz sáº½ hiá»ƒn thá»‹ táº¡i Ä‘Ã¢y.</p>
+              <h5 class="fw-bold">L�:p này chưa có quiz</h5>
+              <p class="text-muted small mb-0">Khi giảng viên tạo quiz, bài quiz sẽ hiỒn th�9 tại �ây.</p>
             </div>`;
 
       quizAccordion.insertAdjacentHTML('beforeend', `
@@ -427,7 +427,7 @@
             <h2 class="accordion-header">
               <button class="accordion-button ${index === 0 ? '' : 'collapsed'} bg-transparent fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index === 0 ? 'true' : 'false'}">
                 <i class="ti ti-book text-primary me-2 fs-4"></i>${escapeHtml(space.name || 'Learning space')}
-                ${pending ? `<span class="badge bg-danger ms-auto me-3 rounded-pill">${pending} quiz cáº§n lÃ m</span>` : `<span class="badge bg-secondary ms-auto me-3 rounded-pill">${quizzes.length ? 'ÄÃ£ xong' : 'ChÆ°a cÃ³ quiz'}</span>`}
+                ${pending ? `<span class="badge bg-danger ms-auto me-3 rounded-pill">${pending} quiz cần làm</span>` : `<span class="badge bg-secondary ms-auto me-3 rounded-pill">${quizzes.length ? 'Đã xong' : 'Chưa có quiz'}</span>`}
               </button>
             </h2>
             <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" data-bs-parent="#quizAccordion">
@@ -450,8 +450,8 @@
 
     if (summary) {
       summary.textContent = pending.length
-              ? `Báº¡n cÃ³ ${pending.length} quiz cáº§n lÃ m.`
-              : 'KhÃ´ng cÃ³ thÃ´ng bÃ¡o má»›i.';
+              ? `Bạn có ${pending.length} quiz cần làm.`
+              : 'Không có thông báo m�:i.';
     }
 
     if (!list) return;
@@ -460,8 +460,8 @@
       list.innerHTML = `
           <div class="text-center text-muted py-4 px-3">
             <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
-            <h6 class="fw-bold text-dark mt-3 mb-1">KhÃ´ng cÃ²n quiz cáº§n lÃ m</h6>
-            <p class="small fw-semibold mb-0">CÃ¡c quiz Ä‘ang má»Ÿ Ä‘Ã£ hoÃ n thÃ nh hoáº·c chÆ°a cÃ³ quiz má»›i.</p>
+            <h6 class="fw-bold text-dark mt-3 mb-1">Không còn quiz cần làm</h6>
+            <p class="small fw-semibold mb-0">Các quiz �ang m�x �ã hoàn thành hoặc chưa có quiz m�:i.</p>
           </div>`;
       return;
     }
@@ -473,15 +473,15 @@
               <i class="ti ti-file-pencil"></i>
             </span>
             <div class="min-w-0">
-              <h6 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Quiz chÆ°a Ä‘áº·t tÃªn')}</h6>
+              <h6 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Quiz chưa �ặt tên')}</h6>
               <p class="small text-muted fw-semibold mb-1">${escapeHtml(quiz.space?.name || 'Learning space')}</p>
-              <span class="small text-primary fw-bold">LÃ m quiz ngay</span>
+              <span class="small text-primary fw-bold">Làm quiz ngay</span>
             </div>
           </div>
         </a>`).join('');
 
     const more = pending.length > 5
-            ? `<a class="notification-item text-center fw-bold text-primary" href="/student/dashboard#myQuizSection">Xem thÃªm ${pending.length - 5} quiz</a>`
+            ? `<a class="notification-item text-center fw-bold text-primary" href="/student/dashboard#myQuizSection">Xem thêm ${pending.length - 5} quiz</a>`
             : '';
 
     list.innerHTML = items + more;
@@ -510,12 +510,12 @@
       });
       if (!res.ok) {
         const errText = await res.text();
-        throw new Error(`KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u dashboard: ${res.status} ${errText}`);
+        throw new Error(`Không tải �ược dữ li�!u dashboard: ${res.status} ${errText}`);
       }
       renderDashboard(await res.json());
     } catch (err) {
       console.error(err);
-      const message = escapeHtml(err.message || 'KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u dashboard.');
+      const message = escapeHtml(err.message || 'Không tải �ược dữ li�!u dashboard.');
       const quizAccordion = document.getElementById('quizAccordion');
       const learningSpaceList = document.getElementById('learningSpaceList');
       const notificationBadge = document.getElementById('notificationBadge');
@@ -527,7 +527,7 @@
         notificationBadge.textContent = '!';
         notificationBadge.classList.remove('d-none');
       }
-      if (notificationSummary) notificationSummary.textContent = 'KhÃ´ng táº£i Ä‘Æ°á»£c thÃ´ng bÃ¡o.';
+      if (notificationSummary) notificationSummary.textContent = 'Không tải �ược thông báo.';
       if (notificationList) notificationList.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
     }
   }
@@ -591,7 +591,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     const studentNameTop = document.getElementById('studentNameTop');
     if (studentNameTop) {
-      studentNameTop.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Sinh viÃªn';
+      studentNameTop.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Sinh viên';
     }
     initSidebarActiveState();
     loadDashboard();

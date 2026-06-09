@@ -41,6 +41,18 @@ public class EvaluationController {
         return evaluationService.getSessionsByLecturer(lecturerId);
     }
 
+    @GetMapping("/learning-paths")
+    public List<LearningPathResponse> getLearningPathsForLecturer(
+            @RequestParam @Positive(message = "lecturerId must be a positive number") Long lecturerId) {
+        return evaluationService.getLearningPathsForLecturer(lecturerId);
+    }
+
+    @GetMapping("/sessions/{sessionId}/students")
+    public List<UserResponse> getStudentsForSession(
+            @PathVariable @Positive(message = "sessionId must be a positive number") Long sessionId) {
+        return evaluationService.getStudentsForSession(sessionId);
+    }
+
     @GetMapping("/sessions/{sessionId}/grading-context")
     public GradingContextResponse getGradingContext(
             @PathVariable @Positive(message = "sessionId must be a positive number") Long sessionId,

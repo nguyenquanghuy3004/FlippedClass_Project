@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+�<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
@@ -22,18 +22,18 @@
 <div id="overlay" class="overlay"></div>
 
 <nav id="topbar" class="topbar">
-  <button id="toggleBtn" class="icon-button" type="button" aria-label="Thu gá»n menu">
+  <button id="toggleBtn" class="icon-button" type="button" aria-label="Thu gọn menu">
     <i class="ti ti-layout-sidebar-left-expand"></i>
   </button>
 
   <div class="topbar-spacer"></div>
   <div class="dropdown">
     <div class="student-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-      <img th:src="@{/assets/images/avatar-1.jpg}" alt="áº¢nh Ä‘áº¡i diá»‡n sinh viÃªn">
-      <span id="studentName">Sinh viÃªn</span>
+      <img th:src="@{/assets/images/avatar-1.jpg}" alt="Ảnh �ại di�!n sinh viên">
+      <span id="studentName">Sinh viên</span>
     </div>
     <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
-      <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>ÄÄƒng xuáº¥t</a></li>
+      <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>ĐĒng xuất</a></li>
     </ul>
   </div>
 </nav>
@@ -46,10 +46,10 @@
     </a>
   </div>
   <ul class="nav">
-    <li><a class="nav-link" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Tá»•ng quan</span></a></li>
-    <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Lá»›p cá»§a tÃ´i</span></a></li>
+    <li><a class="nav-link" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">T�"ng quan</span></a></li>
+    <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">L�:p của tôi</span></a></li>
     <li><a class="nav-link active" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz" aria-current="page"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
-    <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">BÃ¡o cÃ¡o</span></a></li>
+    <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Báo cáo</span></a></li>
   </ul>
 </aside>
 
@@ -60,22 +60,22 @@
         <div class="eyebrow"><i class="ti ti-list-check"></i> My quiz</div>
       </div>
       <div class="hero-actions">
-        <a class="hero-link" th:href="@{/student/dashboard}"><i class="ti ti-layout-dashboard"></i> Vá» tá»•ng quan</a>
-        <a class="hero-link" th:href="@{/student/learning-spaces}"><i class="ti ti-books"></i> Lá»›p cá»§a tÃ´i</a>
+        <a class="hero-link" th:href="@{/student/dashboard}"><i class="ti ti-layout-dashboard"></i> Về t�"ng quan</a>
+        <a class="hero-link" th:href="@{/student/learning-spaces}"><i class="ti ti-books"></i> L�:p của tôi</a>
       </div>
     </section>
 
     <section class="stats-grid">
       <div class="stat-card">
-        <span>Tá»•ng quiz</span>
+        <span>T�"ng quiz</span>
         <strong id="statTotal">0</strong>
       </div>
       <div class="stat-card">
-        <span>Cáº§n lÃ m</span>
+        <span>Cần làm</span>
         <strong id="statPending">0</strong>
       </div>
       <div class="stat-card">
-        <span>ÄÃ£ hoÃ n thÃ nh</span>
+        <span>Đã hoàn thành</span>
         <strong id="statCompleted">0</strong>
       </div>
       <div class="stat-card">
@@ -85,18 +85,18 @@
     </section>
 
     <section class="filter-card">
-      <input id="searchInput" class="search-box" type="search" placeholder="TÃ¬m quiz theo tÃªn, mÃ´n há»c hoáº·c learning space...">
+      <input id="searchInput" class="search-box" type="search" placeholder="Tìm quiz theo tên, môn học hoặc learning space...">
       <select id="statusFilter" class="filter-select">
-        <option value="all">Táº¥t cáº£ tráº¡ng thÃ¡i</option>
-        <option value="pending">Cáº§n lÃ m</option>
-        <option value="completed">ÄÃ£ hoÃ n thÃ nh</option>
+        <option value="all">Tất cả trạng thái</option>
+        <option value="pending">Cần làm</option>
+        <option value="completed">Đã hoàn thành</option>
       </select>
     </section>
 
     <section id="quizGrid" class="quiz-grid">
       <div class="empty-card">
         <i class="ti ti-loader-2"></i>
-        Äang táº£i danh sÃ¡ch quiz...
+        Đang tải danh sách quiz...
       </div>
     </section>
   </div>
@@ -146,7 +146,7 @@
   }
 
   function setStudentName(user) {
-    const name = user?.fullName || user?.username || localStorage.getItem('username') || 'Sinh viÃªn';
+    const name = user?.fullName || user?.username || localStorage.getItem('username') || 'Sinh viên';
     document.getElementById('studentName').textContent = name;
   }
 
@@ -192,7 +192,7 @@
       quizGrid.innerHTML = `
         <div class="empty-card" style="grid-column: 1 / -1;">
           <i class="ti ti-notes-off"></i>
-          KhÃ´ng tÃ¬m tháº¥y quiz phÃ¹ há»£p.
+          Không tìm thấy quiz phù hợp.
         </div>
       `;
       return;
@@ -200,12 +200,12 @@
 
     quizGrid.innerHTML = quizzes.map(quiz => {
       const isCompleted = Boolean(quiz.isCompleted);
-      const statusText = isCompleted ? 'ÄÃ£ hoÃ n thÃ nh' : 'Cáº§n lÃ m';
+      const statusText = isCompleted ? 'Đã hoàn thành' : 'Cần làm';
       const statusIcon = isCompleted ? 'ti-circle-check' : 'ti-alert-circle';
-      const duration = quiz.durationMinutes ? `${quiz.durationMinutes} phÃºt` : 'ChÆ°a Ä‘áº·t thá»i lÆ°á»£ng';
+      const duration = quiz.durationMinutes ? `${quiz.durationMinutes} phút` : 'Chưa �ặt thời lượng';
       const action = isCompleted
-        ? `<span class="btn-quiz disabled"><i class="ti ti-lock-check"></i> ÄÃ£ ná»™p bÃ i</span>`
-        : `<a class="btn-quiz" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}"><i class="ti ti-player-play"></i> LÃ m quiz</a>`;
+        ? `<span class="btn-quiz disabled"><i class="ti ti-lock-check"></i> Đã n�"p bài</span>`
+        : `<a class="btn-quiz" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}"><i class="ti ti-player-play"></i> Làm quiz</a>`;
 
       return `
         <article class="quiz-card ${isCompleted ? 'completed' : ''}">
@@ -213,7 +213,7 @@
             <div class="quiz-icon"><i class="ti ti-brain"></i></div>
             <span class="status-pill ${isCompleted ? '' : 'pending'}"><i class="ti ${statusIcon}"></i>${statusText}</span>
           </div>
-          <h2>${escapeHtml(quiz.title || 'Quiz chÆ°a Ä‘áº·t tÃªn')}</h2>
+          <h2>${escapeHtml(quiz.title || 'Quiz chưa �ặt tên')}</h2>
           <div class="quiz-meta">
             <span><i class="ti ti-books"></i>${escapeHtml(quiz.learningSpaceName)}</span>
             <span><i class="ti ti-template"></i>${escapeHtml(quiz.courseName)}</span>
@@ -233,7 +233,7 @@
 
     try {
       const response = await fetch(`/api/students/${userId}/dashboard`, { headers: authHeaders() });
-      if (!response.ok) throw new Error('KhÃ´ng táº£i Ä‘Æ°á»£c danh sÃ¡ch quiz.');
+      if (!response.ok) throw new Error('Không tải �ược danh sách quiz.');
       const data = await response.json();
       setStudentName(data.user);
       state.quizzes = flattenQuizzes(data);
