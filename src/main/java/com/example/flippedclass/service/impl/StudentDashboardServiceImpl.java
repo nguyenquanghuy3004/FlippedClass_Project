@@ -5,6 +5,7 @@ import com.example.flippedclass.dto.response.DashboardUserResponse;
 import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.dto.response.StudentProfileResponse;
 import com.example.flippedclass.dto.response.QuizResponse;
+import com.example.flippedclass.entity.StudentProfile;
 import com.example.flippedclass.entity.User;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.QuizQuestionRepository;
@@ -65,7 +66,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
         );
     }
 
-    private com.example.flippedclass.dto.response.StudentProfileResponse toStudentProfileResponse(com.example.flippedclass.entity.StudentProfile profile) {
+    private StudentProfileResponse toStudentProfileResponse(StudentProfile profile) {
         if (profile == null) return null;
         return com.example.flippedclass.dto.response.StudentProfileResponse.builder()
             .id(profile.getId())

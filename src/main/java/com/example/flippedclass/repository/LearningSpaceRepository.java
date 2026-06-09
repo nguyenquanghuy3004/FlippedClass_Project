@@ -2,6 +2,7 @@ package com.example.flippedclass.repository;
 
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.VisibilityType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,6 +35,8 @@ public interface LearningSpaceRepository extends JpaRepository<LearningSpace, Lo
     Page<LearningSpace> findByStatus(LearningSpaceStatus status, Pageable pageable);
     
     int countByOwnerId(Long ownerId);
+
+    List<LearningSpace> findByVisibilityAndStatus(VisibilityType visibility, LearningSpaceStatus status);
 
 
 

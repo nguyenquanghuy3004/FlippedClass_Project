@@ -14,6 +14,8 @@ public interface LearningSpaceService {
 
     List<LearningSpaceResponse> getMySpaces();
 
+    List<LearningSpaceResponse> getPublicSpaces();
+
 
     @Transactional
     LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail);
