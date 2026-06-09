@@ -1,21 +1,22 @@
-﻿@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&display=swap");
 
     :root {
-      --fc-primary: #5bc760;
-      --fc-primary-dark: #2f855a;
-      --fc-primary-soft: #e8f8ea;
-      --fc-primary-pale: #f4fbf5;
-      --fc-text: #1f2937;
-      --fc-muted: #6b7280;
-      --fc-background: #f7faf8;
-      --fc-border: #e5e7eb;
+      --fc-primary: #5b5ce2;
+      --fc-accent: #ff5fa8;
+      --fc-primary-dark: #090b4f;
+      --fc-primary-soft: #ececff;
+      --fc-primary-pale: #fff8fc;
+      --fc-text: #090b33;
+      --fc-muted: #67708a;
+      --fc-background: #fffafe;
+      --fc-border: #e9e7f4;
       --fc-danger: #b42318;
       --fc-shadow-sm: 0 10px 24px rgba(31, 41, 55, 0.08);
       --fc-shadow-md: 0 22px 55px rgba(31, 41, 55, 0.14);
-      --bs-primary: #2f855a;
-      --bs-primary-rgb: 47, 133, 90;
-      --bs-success: #5bc760;
-      --bs-success-rgb: 91, 199, 96;
+      --bs-primary: #5b5ce2;
+      --bs-primary-rgb: 91, 92, 226;
+      --bs-success: #ff5fa8;
+      --bs-success-rgb: 255, 95, 168;
     }
 
     * {
@@ -27,8 +28,8 @@
       margin: 0;
       color: var(--fc-text);
       background:
-        radial-gradient(circle at top left, rgba(91, 199, 96, 0.18), transparent 30rem),
-        radial-gradient(circle at bottom right, rgba(47, 133, 90, 0.12), transparent 28rem),
+        radial-gradient(circle at top left, rgba(91, 92, 226, 0.18), transparent 30rem),
+        radial-gradient(circle at bottom right, rgba(9, 11, 79, 0.12), transparent 28rem),
         linear-gradient(180deg, #ffffff 0%, var(--fc-background) 48%, #ffffff 100%);
       font-family: "Lexend", "Trebuchet MS", sans-serif;
       text-rendering: optimizeLegibility;
@@ -76,8 +77,8 @@
       place-items: center;
       border-radius: 14px;
       color: #ffffff;
-      background: linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary));
-      box-shadow: 0 12px 24px rgba(47, 133, 90, 0.18);
+      background: linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary) 58%, var(--fc-accent));
+      box-shadow: 0 12px 24px rgba(9, 11, 79, 0.18);
     }
 
     .brand-link span span {
@@ -155,7 +156,7 @@
       padding: 1rem 1.15rem;
       border-radius: 28px;
       background:
-        radial-gradient(circle at 15% 20%, rgba(91, 199, 96, 0.14), transparent 16rem),
+        radial-gradient(circle at 15% 20%, rgba(91, 92, 226, 0.14), transparent 16rem),
         #ffffff;
     }
 
@@ -211,7 +212,7 @@
     .video-shell {
       overflow: hidden;
       border-radius: 30px;
-      background: #101820;
+      background: #14103a;
       box-shadow: var(--fc-shadow-md);
     }
 
@@ -219,8 +220,8 @@
       overflow: hidden;
       aspect-ratio: 16 / 9;
       background:
-        radial-gradient(circle at 25% 20%, rgba(91, 199, 96, 0.34), transparent 13rem),
-        linear-gradient(135deg, #13251d, #0f172a);
+        radial-gradient(circle at 25% 20%, rgba(91, 92, 226, 0.34), transparent 13rem),
+        linear-gradient(135deg, #171144, #090b33);
     }
 
     .video-frame video,
@@ -265,14 +266,14 @@
       border-radius: 14px;
       padding: 0.58rem 1rem;
       color: var(--fc-muted);
-      background: #eef5f0;
+      background: #f7f4ff;
       font-size: 0.84rem;
       font-weight: 850;
     }
 
     .server-pill.active {
       color: var(--fc-primary-dark);
-      background: rgba(91, 199, 96, 0.24);
+      background: rgba(91, 92, 226, 0.24);
     }
 
     .content-card {
@@ -350,7 +351,7 @@
 
     .resource-item:hover {
       transform: translateX(2px);
-      border-color: rgba(91, 199, 96, 0.34);
+      border-color: rgba(91, 92, 226, 0.34);
       background: var(--fc-primary-soft);
     }
 
@@ -363,6 +364,21 @@
       color: var(--fc-primary-dark);
       background: var(--fc-primary-soft);
       font-size: 1.2rem;
+    }
+
+    .resource-icon-image {
+      border: 1px solid rgba(91, 92, 226, 0.16);
+      background: #ffffff;
+      box-shadow: 0 10px 22px rgba(48, 37, 112, 0.08);
+      overflow: hidden;
+    }
+
+    .resource-logo-img {
+      width: 30px;
+      height: 30px;
+      display: block;
+      object-fit: contain;
+      border-radius: 8px;
     }
 
     .resource-title,
@@ -412,8 +428,8 @@
     }
 
     .comment-compose textarea:focus {
-      border-color: rgba(91, 199, 96, 0.45);
-      box-shadow: 0 0 0 4px rgba(91, 199, 96, 0.12);
+      border-color: rgba(91, 92, 226, 0.45);
+      box-shadow: 0 0 0 4px rgba(91, 92, 226, 0.12);
     }
 
     .comment-compose button {
@@ -438,10 +454,10 @@
       min-height: 160px;
       margin: 1rem;
       padding: 1rem;
-      border: 1px dashed rgba(47, 133, 90, 0.24);
+      border: 1px dashed rgba(9, 11, 79, 0.24);
       border-radius: 20px;
       color: var(--fc-muted);
-      background: rgba(232, 248, 234, 0.48);
+      background: rgba(236, 236, 255, 0.48);
       text-align: center;
       font-size: 0.84rem;
       font-weight: 800;
