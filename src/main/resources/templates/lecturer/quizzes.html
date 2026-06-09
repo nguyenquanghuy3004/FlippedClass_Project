@@ -204,9 +204,13 @@
 
   <th:block layout:fragment="scripts">
   <script>
+    // ==============================================================
+    // QUIZZES JS (Logic quản lý danh sách và tạo mới Bài kiểm tra)
+    // ==============================================================
     const TOKEN_KEY = 'jwt_token';
     const USER_KEY = 'currentUser';
 
+    // Các hàm tiện ích xử lý token và đăng xuất
     function getToken() { return localStorage.getItem(TOKEN_KEY); }
     function getUser() { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch (e) { return null; } }
     function authHeaders() {
@@ -227,6 +231,7 @@
     let pendingDeleteHasAttempts = false;
     let availableNodes = [];
 
+    // --- Khởi tạo: Tải danh sách quiz và node khi trang tải xong ---
     document.addEventListener('DOMContentLoaded', async () => {
       const token = getToken();
       if (!token) {
@@ -244,8 +249,10 @@
       await fetchMyQuizzes();
     });
 
+    // Hiển thị thông báo (Toast)
     function toast(msg, isError = false) {
       const wrap = document.getElementById('toastWrap');
+      if (!wrap) return; // Bảo vệ nếu không có phần tử toastWrap
       const el = document.createElement('div');
       el.className = 'toast-item' + (isError ? ' error' : '');
       el.innerHTML = `
@@ -257,6 +264,7 @@
       setTimeout(() => el.remove(), 3500);
     }
 
+    // Hàm tải danh sách các Learning Node để có thể gán Quiz vào
     async function loadNodes() {
       try {
         const res = await fetch('/api/learning-nodes', { headers: authHeaders() });
@@ -264,6 +272,7 @@
       } catch (e) { }
     }
 
+    // Hàm gọi API lấy danh sách Quiz của giảng viên
     async function fetchMyQuizzes() {
       document.getElementById('skeletonLoader').style.display = 'flex';
       document.getElementById('quizContent').innerHTML = '';
@@ -286,6 +295,7 @@
       }
     }
 
+    // Cập nhật thống kê trên đầu trang (tổng số, số quiz active, lượt làm bài...)
     function updateStats(quizzes) {
       document.getElementById('statTotal').textContent = quizzes.length;
       document.getElementById('statActive').textContent = quizzes.filter(q => q.active).length;
@@ -293,6 +303,7 @@
       document.getElementById('statQuestions').textContent = quizzes.reduce((s, q) => s + (q.questionCount || 0), 0);
     }
 
+    // Đổ dữ liệu vào bộ lọc theo Không gian học tập (Space Filter)
     function populateSpaceFilter(quizzes) {
       const sel = document.getElementById('spaceFilter');
       const spaces = [...new Set(quizzes.map(q => q.learningSpaceName || 'Uncategorized'))];
@@ -304,6 +315,7 @@
       });
     }
 
+    // Lọc danh sách Quiz theo từ khóa, trạng thái, độ khó, hoặc space
     function filterQuizzes() {
       const term = document.getElementById('searchInput').value.toLowerCase();
       const status = document.getElementById('statusFilter').value;
@@ -325,6 +337,7 @@
       return `<span class="difficulty-chip ${cls[d] || 'diff-medium'}">${label[d] || d || '—'}</span>`;
     }
 
+    // Hàm render danh sách Quiz ra giao diện người dùng
     function renderQuizzes(quizzes) {
       const container = document.getElementById('quizContent');
       container.innerHTML = '';
@@ -413,6 +426,7 @@
       }
     }
 
+    // Mở modal tạo mới Quiz
     function openCreateModal() {
       document.getElementById('modalTitle').innerHTML = '<i class="ti ti-plus me-2 text-primary"></i>Create New Quiz';
       document.getElementById('editQuizId').value = '';
@@ -429,6 +443,7 @@
       document.getElementById('quizModal').classList.add('show');
     }
 
+    // Mở modal chỉnh sửa thông tin Quiz đã có
     function openEditModal(id) {
       const quiz = allQuizzes.find(q => q.id === id);
       if (!quiz) return;
@@ -449,6 +464,7 @@
       document.getElementById('quizModal').classList.remove('show');
     }
 
+    // Render danh sách dropdown Learning Node để chọn
     function renderNodePicker() {
       const picker = document.getElementById('nodePicker');
       picker.innerHTML = '';
@@ -495,6 +511,7 @@
       }
     }
 
+    // Lưu (Tạo mới hoặc Cập nhật) Quiz vào CSDL
     async function saveQuiz() {
       const id = document.getElementById('editQuizId').value;
       const title = document.getElementById('mTitle').value.trim();
@@ -570,6 +587,7 @@
       }
     }
 
+    // Hiển thị modal xác nhận Xóa hoặc Vô hiệu hóa (Deactivate) Quiz
     function openDeleteConfirm(id) {
       const quiz = allQuizzes.find(q => q.id === id);
       if (!quiz) return;
@@ -591,6 +609,7 @@
       document.getElementById('deleteModal').classList.add('show');
     }
 
+    // Xử lý Xóa vĩnh viễn (DELETE) hoặc Vô hiệu hóa (PUT -> active:false) Quiz
     async function confirmDelete() {
       if (!pendingDeleteId) return;
       const btn = document.getElementById('btnConfirmDelete');
