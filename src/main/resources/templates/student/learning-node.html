@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
@@ -10,13 +10,11 @@
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 
-  <script>
-/* --- Inlined from student-auth.js --- */
-if (!localStorage.getItem('jwt_token')) {
-  window.location.href = '/login';
-}
-
-</script>
+  <script type="text/javascript">
+    if (!localStorage.getItem('jwt_token')) {
+      window.location.href = '/login';
+    }
+  </script>
   <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <script>

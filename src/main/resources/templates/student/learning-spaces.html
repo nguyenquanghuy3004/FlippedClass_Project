@@ -12,13 +12,11 @@
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
 
-  <script>
-/* --- Inlined from student-auth.js --- */
-if (!localStorage.getItem('jwt_token')) {
-  window.location.href = '/login';
-}
-
-</script>
+  <script type="text/javascript">
+    if (!localStorage.getItem('jwt_token')) {
+      window.location.href = '/login';
+    }
+  </script>
   <script>
 /* --- Inlined from student-user-menu.js --- */
 (function () {
