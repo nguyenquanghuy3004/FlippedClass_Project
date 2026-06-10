@@ -12,7 +12,7 @@
   <link rel="manifest" th:href="@{/assets/site.webmanifest}">
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  <link rel="stylesheet" th:href="@{/css/auth.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/auth.css}">
 
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -25,14 +25,13 @@
   <div class="auth-glass-card">
     <div class="text-center mb-4">
       <a href="/" class="mb-2 d-inline-flex align-items-center text-decoration-none">
-        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#fff" class="bi bi-mortarboard-fill me-2" viewBox="0 0 16 16">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-mortarboard-fill me-2" viewBox="0 0 16 16">
           <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z"/>
           <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z"/>
         </svg>
         <span class="auth-glass-logo">FlippedClass</span>
       </a>
-      <h1 class="auth-glass-title">Sign In</h1>
-      <p class="auth-glass-sub">Welcome back!</p>
+      <p class="auth-glass-sub text-center mb-4">Welcome back!</p>
     </div>
 
     <form id="loginForm" class="needs-validation" novalidate>
@@ -47,7 +46,7 @@
         <div class="position-relative">
           <input id="password" type="password" class="auth-glass-input" placeholder="Enter your password" required minlength="6" style="padding-right: 45px;">
           <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none text-muted" tabindex="-1" onclick="togglePassword('password', this)" style="padding: 0 12px; z-index: 5;">
-            <i class="ti ti-eye fs-5" style="color: rgba(255,255,255,0.7);"></i>
+            <i class="ti ti-eye fs-5" style="color: rgba(100,100,100,0.5);"></i>
           </button>
         </div>
         <div class="invalid-feedback">Password must be at least 6 characters.</div>
@@ -68,12 +67,12 @@
       </div>
       <div class="g_id_signin d-flex justify-content-center w-100 mb-3"
            data-type="standard" data-shape="rectangular" data-theme="outline"
-           data-text="signin_with" data-size="large" data-logo_alignment="left">
+           data-text="signin_with" data-size="large" data-logo_alignment="left" data-locale="en">
       </div>
     </form>
 
     <div class="text-center mt-3 auth-glass-footer">
-      Don't have an account? <a href="/register">Register here.</a>
+      Don't have an account? <a href="/signup">Register here.</a>
     </div>
   </div>
 </div>
@@ -205,3 +204,5 @@
 
 </body>
 </html>
+
+

@@ -208,7 +208,7 @@
     // QUIZZES JS (Logic quản lý danh sách và tạo mới Bài kiểm tra)
     // ==============================================================
     const TOKEN_KEY = 'jwt_token';
-    const USER_KEY = 'currentUser';
+    const USER_KEY = 'currentUser_mentor';
 
     // Các hàm tiện ích xử lý token và đăng xuất
     function getToken() { return localStorage.getItem(TOKEN_KEY); }
@@ -222,7 +222,7 @@
     function logout() {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
-      localStorage.removeItem('user_id');
+      localStorage.removeItem('user_id_mentor');
       window.location.href = '/signin';
     }
 
@@ -650,3 +650,5 @@
 </body>
 
 </html>
+
+

@@ -82,10 +82,12 @@
                             <div class="mb-3">
                                 <label for="nodeTitle" class="form-label fw-bold">Lesson Title</label>
                                 <input type="text" class="form-control bg-light border-0" id="nodeTitle" required minlength="1" maxlength="255">
+                                <div class="invalid-feedback">Lesson title is required</div>
                             </div>
                             <div class="mb-3">
                                 <label for="nodeDescription" class="form-label fw-bold">Description</label>
                                 <textarea class="form-control bg-light border-0" id="nodeDescription" rows="3" maxlength="1000"></textarea>
+                                <div class="invalid-feedback">Description is required</div>
                             </div>
                             <div class="mb-3">
                                 <label for="nodeType" class="form-label fw-bold">Lesson Type</label>
@@ -93,7 +95,7 @@
                                     <option value="LESSON">Theory Lesson</option>
                                     <option value="PRACTICE">Practice Module</option>
                                     <option value="VIDEO">Video Lesson</option>
-                                    <option value="QUIZ">Quiz / Assessment</option>
+<!--                                    <option value="QUIZ">Quiz / Assessment</option>-->
                                     <option value="REVIEW">Review Session</option>
                                 </select>
                             </div>
@@ -123,10 +125,12 @@
                             <div class="mb-3">
                                 <label for="editNodeTitle" class="form-label fw-bold">Lesson Title</label>
                                 <input type="text" class="form-control bg-light border-0" id="editNodeTitle" required minlength="1" maxlength="255">
+                                <div class="invalid-feedback">Lesson title is required</div>
                             </div>
                             <div class="mb-3">
                                 <label for="editNodeDescription" class="form-label fw-bold">Description</label>
                                 <textarea class="form-control bg-light border-0" id="editNodeDescription" rows="3" maxlength="1000"></textarea>
+                                <div class="invalid-feedback">Description is required</div>
                             </div>
                             <div class="mb-3">
                                 <label for="editNodeType" class="form-label fw-bold">Lesson Type</label>
@@ -134,7 +138,7 @@
                                     <option value="LESSON">Theory Lesson</option>
                                     <option value="PRACTICE">Practice Module</option>
                                     <option value="VIDEO">Video Lesson</option>
-                                    <option value="QUIZ">Quiz / Assessment</option>
+<!--                                    <option value="QUIZ">Quiz / Assessment</option>-->
                                     <option value="REVIEW">Review Session</option>
                                 </select>
                             </div>
@@ -165,6 +169,7 @@
                             <div class="mb-3">
                                 <label for="youtubeUrl" class="form-label fw-bold">Youtube URL</label>
                                 <input type="url" class="form-control bg-light border-0" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." required>
+                                <div class="invalid-feedback">Valid Youtube URL is required</div>
                                 <div class="form-text">Paste the full Youtube video link here.</div>
                             </div>
                             <div id="addYoutubeError" class="text-danger mb-3" style="display:none;"></div>
@@ -184,3 +189,6 @@
     </div>
 </body>
 </html>
+
+
+

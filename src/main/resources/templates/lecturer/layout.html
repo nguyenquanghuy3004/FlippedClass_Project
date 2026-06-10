@@ -14,6 +14,7 @@
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <!-- FontAwesome for fallback -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" th:href="@{/assets/css/lecturer-layout.css}">
   <th:block layout:fragment="head"></th:block>
 </head>
@@ -126,7 +127,7 @@
     // Setup AJAX to include JWT token if stored in localStorage
     $.ajaxSetup({
       beforeSend: function (xhr) {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('jwt_token');
         if (token) {
           xhr.setRequestHeader('Authorization', 'Bearer ' + token);
         }
@@ -134,8 +135,8 @@
     });
 
     function logout() {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      localStorage.removeItem('jwt_token');
+      window.location.href = '/signin';
     }
 
     // Auto-highlight active sidebar menu item
@@ -161,3 +162,6 @@
 </body>
 
 </html>
+
+
+
