@@ -25,11 +25,11 @@
       <div id="mainUI" class="d-none">
 
         <div class="page-banner">
-          <div style="z-index:2;">
+          <div style="position:relative; z-index:2;">
             <h1 class="banner-title"><i class="ti ti-brain me-2"></i>Quiz Management</h1>
             <p class="banner-sub">Design, publish and monitor your course assessments.</p>
           </div>
-          <div style="z-index:2;">
+          <div style="position:relative; z-index:2;">
             <button class="btn-banner" onclick="openCreateModal()">
               <i class="ti ti-plus"></i> Create New Quiz
             </button>
@@ -110,9 +110,7 @@
           <div id="quizContent"></div>
         </div>
 
-      </div>
-    </div>
-    </div>
+      <!-- Closed divs moved to the bottom -->
 
   <div class="modal-overlay" id="quizModal">
     <div class="modal-box">
@@ -201,6 +199,12 @@
     </div>
   </div>
   </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+      </div> <!-- closes mainUI -->
+    </div> <!-- closes container-fluid -->
+  </div> <!-- closes layout:fragment="content" -->
 
   <th:block layout:fragment="scripts">
   <script>
@@ -414,19 +418,41 @@
     }
 
     function openCreateModal() {
-      document.getElementById('modalTitle').innerHTML = '<i class="ti ti-plus me-2 text-primary"></i>Create New Quiz';
-      document.getElementById('editQuizId').value = '';
-      document.getElementById('mTitle').value = '';
-      document.getElementById('mDescription').value = '';
-      document.getElementById('mDuration').value = 30;
-      document.getElementById('mPassScore').value = 50;
-      document.getElementById('mDifficulty').value = 'MEDIUM';
-      document.getElementById('mActive').checked = true;
-      document.getElementById('nodePickerSection').style.display = 'block';
-      renderNodePicker();
-      document.getElementById('nodePicker').value = '';
-      clearErrors();
-      document.getElementById('quizModal').classList.add('show');
+      try {
+        if (!availableNodes || availableNodes.length === 0) {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Chưa có Bài học nào!',
+              text: 'Mỗi bài Quiz bắt buộc phải gắn với một Bài học (Learning Node). Vui lòng vào mục My Spaces để tạo Bài học trước!',
+              confirmButtonText: 'Đến My Spaces',
+              showCancelButton: true,
+              cancelButtonText: 'Đóng'
+            }).then((result) => {
+              if (result.isConfirmed) window.location.href = '/lecturer/dashboard';
+            });
+          } else {
+            alert('Cảnh báo: Bạn chưa tạo bài học (Learning Node) nào!\nVui lòng vào mục "My Spaces" để tạo Space và Node trước khi tạo Quiz.');
+          }
+          return;
+        }
+
+        document.getElementById('modalTitle').innerHTML = '<i class="ti ti-plus me-2 text-primary"></i>Create New Quiz';
+        document.getElementById('editQuizId').value = '';
+        document.getElementById('mTitle').value = '';
+        document.getElementById('mDescription').value = '';
+        document.getElementById('mDuration').value = 30;
+        document.getElementById('mPassScore').value = 50;
+        document.getElementById('mDifficulty').value = 'MEDIUM';
+        document.getElementById('mActive').checked = true;
+        document.getElementById('nodePickerSection').style.display = 'block';
+        renderNodePicker();
+        document.getElementById('nodePicker').value = '';
+        clearErrors();
+        document.getElementById('quizModal').classList.add('show');
+      } catch (err) {
+        alert("Lỗi JS: " + err.message + "\nStack: " + err.stack);
+      }
     }
 
     function openEditModal(id) {
@@ -510,16 +536,16 @@
       clearErrors();
       let hasError = false;
 
-      if (!title) { showError('title', 'Title is required'); hasError = true; }
-      else if (title.length < 3 || title.length > 255) { showError('title', 'Title must be between 3 and 255 characters'); hasError = true; }
+      if (!title) { showError('mTitle', 'Title is required'); hasError = true; }
+      else if (title.length < 3 || title.length > 255) { showError('mTitle', 'Title must be between 3 and 255 characters'); hasError = true; }
 
-      if (description && description.length > 500) { showError('description', 'Description must not exceed 500 characters'); hasError = true; }
+      if (description && description.length > 500) { showError('mDescription', 'Description must not exceed 500 characters'); hasError = true; }
       
-      if (!durationStr || duration < 1 || duration > 480) { showError('durationMinutes', 'Duration must be between 1 and 480 minutes'); hasError = true; }
+      if (!durationStr || duration < 1 || duration > 480) { showError('mDuration', 'Duration must be between 1 and 480 minutes'); hasError = true; }
       
-      if (!passScoreStr || passScore < 1 || passScore > 100) { showError('passScore', 'Pass score must be between 1 and 100'); hasError = true; }
+      if (!passScoreStr || passScore < 1 || passScore > 100) { showError('mPassScore', 'Pass score must be between 1 and 100'); hasError = true; }
 
-      if (!id && !nodeId) { showError('learningNodeId', 'Please select a Learning Node'); hasError = true; }
+      if (!id && !nodeId) { showError('nodePicker', 'Please select a Learning Node'); hasError = true; }
 
       if (hasError) return;
 
@@ -546,14 +572,24 @@
         if (res.status === 401) { toast('Session expired!', true); logout(); return; }
         
         if (!res.ok) {
-          let msg = id ? 'Update failed' : 'Create failed';
-          try { 
-            const e = await res.json(); 
-            msg = e.message || msg; 
+          try {
+            const e = await res.json();
             if (res.status === 400 && e.error === 'VALIDATION_FAILED' && e.fieldErrors) {
-               e.fieldErrors.forEach(err => showError(err.field, err.message));
-               throw new Error('Please fix the validation errors.');
+              const fieldMap = {
+                'title': 'mTitle',
+                'description': 'mDescription',
+                'durationMinutes': 'mDuration',
+                'passScore': 'mPassScore',
+                'difficulty': 'mDifficulty',
+                'learningNodeId': 'nodePicker'
+              };
+              e.fieldErrors.forEach(err => {
+                const elId = fieldMap[err.field] || err.field;
+                showError(elId, err.message);
+              });
+              throw new Error('Please fix the validation errors.');
             }
+            throw new Error(e.message || 'Failed to save quiz');
           } catch (e) { throw e; }
         } else {
           toast(id ? 'Quiz updated successfully!' : 'Quiz created successfully!');
