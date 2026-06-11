@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LearningSpaceServiceImpl implements LearningSpaceService {
 
-
     private  final  LearningSpaceRepository learningSpaceRepository;
     private final LearningSpaceMemberRepository memberRepository;
     private final UserRepository userRepository;
