@@ -82,10 +82,10 @@
       </div>
 
       <form id="joinSpaceForm" class="join-form-card">
-        <label for="inviteCode" class="form-label fw-bold text-dark">MÃ£ má»i lá»›p há»c</label>
+        <label for="inviteCode" class="form-label fw-bold text-dark">MÃ£ má» i lá»›p há» c</label>
         <div class="d-flex flex-column gap-3">
           <input id="inviteCode" class="form-control invite-input" type="text" placeholder="" autocomplete="off" maxlength="24" required>
-          <button id="joinSpaceButton" class="btn btn-primary rounded-pill fw-bold" type="submit">
+          <button id="joinSpaceButton" class="btn btn-primary rounded-pill fw-bold" type="button" onclick="submitJoinSpaceForm(event)">
             <i class="ti ti-door-enter me-2"></i>Tham gia lá»›p
           </button>
         </div>
@@ -103,11 +103,11 @@
         </div>
 
         <div class="mt-3">
-          <input id="spaceSearch" class="form-control rounded-pill" type="search" placeholder="TÃ¬m lá»›p há»c...">
+          <input id="spaceSearch" class="form-control rounded-pill" type="search" placeholder="TÃ¬m lá»›p há» c...">
         </div>
 
         <div id="spacesList" class="space-list">
-          <div class="loading-state">Äang táº£i danh sÃ¡ch lá»›p...</div>
+          <div class="loading-state">Ä ang táº£i danh sÃ¡ch lá»›p...</div>
         </div>
       </aside>
 
@@ -183,19 +183,19 @@
 
   function statusLabel(status) {
     const labels = {
-      ACTIVE: 'Äang há»c',
+      ACTIVE: 'Ä ang há» c',
       DRAFT: 'Báº£n nhÃ¡p',
       LOCKED: 'ChÆ°a má»Ÿ',
-      UNLOCKED: 'ÄÃ£ má»Ÿ',
+      UNLOCKED: 'Ä Ã£ má»Ÿ',
       ARCHIVED: 'LÆ°u trá»¯',
-      DELETED: 'ÄÃ£ xÃ³a'
+      DELETED: 'Ä Ã£ xÃ³a'
     };
     return labels[status] || status || 'ChÆ°a rÃµ';
   }
 
   function nodeTypeLabel(type) {
     const labels = {
-      LESSON: 'BÃ i há»c',
+      LESSON: 'BÃ i há» c',
       VIDEO: 'Video',
       PRACTICE: 'Thá»±c hÃ nh',
       QUIZ: 'Quiz',
@@ -259,7 +259,7 @@
       return;
     }
 
-    spacesList.innerHTML = '<div class="loading-state">Äang táº£i danh sÃ¡ch lá»›p...</div>';
+    spacesList.innerHTML = '<div class="loading-state">Ä ang táº£i danh sÃ¡ch lá»›p...</div>';
 
     try {
       const response = await fetchWithAuth(`/api/students/${userId}/dashboard`);
@@ -344,7 +344,7 @@
     });
   }
 
-  function renderEmptyDetail(title = 'Chá»n má»™t learning space', message = 'Roadmap mÃ´n há»c vÃ  cÃ¡c node sáº½ hiá»ƒn thá»‹ á»Ÿ Ä‘Ã¢y.') {
+  function renderEmptyDetail(title = 'Chá» n má»™t learning space', message = 'Roadmap mÃ´n há» c vÃ  cÃ¡c node sáº½ hiá»ƒn thá»‹ á»Ÿ Ä‘Ã¢y.') {
     spaceDetail.innerHTML = `
       <div class="empty-state">
         <div>
@@ -383,7 +383,7 @@
   function renderDetailLoading(space) {
     spaceDetail.innerHTML = `
       ${detailHeaderTemplate(space)}
-      <div class="loading-state">Äang táº£i roadmap cá»§a lá»›p...</div>`;
+      <div class="loading-state">Ä ang táº£i roadmap cá»§a lá»›p...</div>`;
   }
 
     function detailHeaderTemplate(space) {
@@ -410,7 +410,7 @@
           <div>
             <div class="mb-3 text-primary" style="font-size: 3rem;"><i class="ti ti-map-off"></i></div>
             <h2 class="section-title">ChÆ°a cÃ³ roadmap</h2>
-            <p class="section-note">Giáº£ng viÃªn chÆ°a táº¡o mÃ´n há»c hoáº·c node cho learning space nÃ y.</p>
+            <p class="section-note">Giáº£ng viÃªn chÆ°a táº¡o mÃ´n há» c hoáº·c node cho learning space nÃ y.</p>
           </div>
         </div>`;
       return;
@@ -433,8 +433,8 @@
       <article class="path-card">
         <header class="path-header">
           <div>
-            <span class="path-kicker">MÃ´n há»c ${index + 1}</span>
-            <h3 class="path-title">${escapeHtml(path.title || 'MÃ´n há»c chÆ°a Ä‘áº·t tÃªn')}</h3>
+            <span class="path-kicker">MÃ´n há» c ${index + 1}</span>
+            <h3 class="path-title">${escapeHtml(path.title || 'MÃ´n há» c chÆ°a Ä‘áº·t tÃªn')}</h3>
           </div>
           <div class="path-progress">
             <div class="fw-bold text-primary mb-2">${percent}% Ä‘Ã£ má»Ÿ</div>
@@ -461,7 +461,7 @@
         <div class="node-index">${index + 1}</div>
         <div>
           <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
-          <p class="node-content">${escapeHtml(node.content || 'Báº¥m Ä‘á»ƒ má»Ÿ trang há»c riÃªng cá»§a node nÃ y.')}</p>
+          <p class="node-content">${escapeHtml(node.content || 'Báº¥m Ä‘á»ƒ má»Ÿ trang há» c riÃªng cá»§a node nÃ y.')}</p>
         </div>
         <div class="node-badges">
           <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
@@ -476,7 +476,7 @@
       <div class="empty-state" style="min-height: 160px;">
         <div>
           <div class="mb-2 text-primary" style="font-size: 2rem;"><i class="ti ti-node-off"></i></div>
-          <p class="mb-0">MÃ´n há»c nÃ y chÆ°a cÃ³ node.</p>
+          <p class="mb-0">MÃ´n há» c nÃ y chÆ°a cÃ³ node.</p>
         </div>
       </div>`;
   }
@@ -485,7 +485,7 @@
     if (!code) return;
     try {
       await navigator.clipboard.writeText(code);
-      setJoinMessage(`ÄÃ£ sao chÃ©p mÃ£ ${code}.`, 'success');
+      setJoinMessage(`Ä Ã£ sao chÃ©p mÃ£ ${code}.`, 'success');
     } catch {
       setJoinMessage(`MÃ£ lá»›p: ${code}`, 'success');
     }
