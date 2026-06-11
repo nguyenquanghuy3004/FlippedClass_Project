@@ -71,4 +71,9 @@ public class LearningSpaceController {
          LearningSpace update =  learningSpaceService.updateLearningSpace(id, spaceDetail);
             return ResponseEntity.ok(update);
     }
+
+    @GetMapping("/public")
+    public ResponseEntity<List<LearningSpaceResponse>> getPublicSpaces() {
+        return ResponseEntity.ok(learningSpaceService.getPublicSpaces());
+    }
 }

@@ -23,10 +23,7 @@ public interface QuizService {
     QuizResponse getById(Long id);
     List<QuizResponse> getAll();
     List<QuizResponse> getByLecturer(Long lecturerId);
-    QuizQuestionResponse addQuestion(Long quizId, CreateQuizQuestionRequest request);
     List<QuizQuestionResponse> getQuestions(Long quizId);
-    QuizQuestionResponse updateQuestion(Long questionId, CreateQuizQuestionRequest request);
-    void deleteQuestion(Long questionId);
     QuizAttemptResponse submitAttempt(Long quizId, SubmitQuizAttemptRequest request);
     List<QuizAttemptResponse> getAttempts(Long quizId);
     List<QuizAttemptResponse> getAttemptsByStudent(Long studentId);
@@ -34,7 +31,4 @@ public interface QuizService {
     QuizStatisticsResponse getStatistics(Long quizId);
     List<QuizResponse> getActiveQuizzesByLearningNode(Long learningNodeId);
 
-    QuizResponse create(CreateQuizRequest request);
-    QuizResponse update(Long id, UpdateQuizRequest request);
-    void delete(Long id);
 }

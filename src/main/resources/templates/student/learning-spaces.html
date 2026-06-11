@@ -13,128 +13,128 @@
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
 
   <script>
-/* --- Inlined from student-auth.js --- */
-if (!localStorage.getItem('jwt_token')) {
-  window.location.href = '/login';
-}
+    /* --- Inlined from student-auth.js --- */
+    if (!localStorage.getItem('jwt_token')) {
+      window.location.href = '/login';
+    }
 
-</script>
+  </script>
   <script>
-/* --- Inlined from student-user-menu.js --- */
-(function () {
-  const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
+    /* --- Inlined from student-user-menu.js --- */
+    (function () {
+      const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
 
-  function storedUser() {
-    return {
-      fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
-      username: localStorage.getItem('username') || '',
-      avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
-    };
-  }
-
-  function normalizeUser(user = {}) {
-    const stored = storedUser();
-    return {
-      name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
-      username: user.username || stored.username || '',
-      avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
-    };
-  }
-
-  function setStudentMenuUser(user = {}) {
-    const normalized = normalizeUser(user);
-
-    if (normalized.name && normalized.name !== 'Student') {
-      localStorage.setItem('full_name', normalized.name);
-    }
-    if (normalized.username) {
-      localStorage.setItem('username', normalized.username);
-    }
-    if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
-      localStorage.setItem('avatar_url', normalized.avatarUrl);
-    }
-
-    document.querySelectorAll('[data-user-name]').forEach((element) => {
-      element.textContent = normalized.name;
-    });
-    document.querySelectorAll('[data-user-avatar]').forEach((image) => {
-      image.src = normalized.avatarUrl;
-      image.onerror = () => {
-        image.onerror = null;
-        image.src = defaultAvatarUrl;
-      };
-    });
-
-    const topbarName = document.getElementById('studentName');
-    if (topbarName) topbarName.textContent = normalized.name;
-  }
-
-  function studentLogout() {
-    ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
-      localStorage.removeItem(key);
-    });
-    window.location.href = '/';
-  }
-
-  async function refreshStudentMenuUser() {
-    const token = localStorage.getItem('jwt_token');
-    const userId = localStorage.getItem('user_id');
-    if (!token || !userId) return;
-
-    try {
-      const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!response.ok) return;
-      const user = await response.json();
-      setStudentMenuUser(user);
-    } catch (error) {
-      console.warn('Could not load user menu profile.', error);
-    }
-  }
-
-  function closeAllMenus(exceptMenu = null) {
-    document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
-      if (menu !== exceptMenu) {
-        menu.classList.remove('is-open');
-        menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+      function storedUser() {
+        return {
+          fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
+          username: localStorage.getItem('username') || '',
+          avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
+        };
       }
-    });
-  }
 
-  function initStudentUserMenus() {
-    setStudentMenuUser();
-    refreshStudentMenuUser();
+      function normalizeUser(user = {}) {
+        const stored = storedUser();
+        return {
+          name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
+          username: user.username || stored.username || '',
+          avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
+        };
+      }
 
-    document.querySelectorAll('[data-user-menu]').forEach((menu) => {
-      const toggle = menu.querySelector('[data-user-menu-toggle]');
-      const logoutButton = menu.querySelector('[data-user-logout]');
+      function setStudentMenuUser(user = {}) {
+        const normalized = normalizeUser(user);
 
-      toggle?.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const shouldOpen = !menu.classList.contains('is-open');
-        closeAllMenus(menu);
-        menu.classList.toggle('is-open', shouldOpen);
-        toggle.setAttribute('aria-expanded', String(shouldOpen));
-      });
+        if (normalized.name && normalized.name !== 'Student') {
+          localStorage.setItem('full_name', normalized.name);
+        }
+        if (normalized.username) {
+          localStorage.setItem('username', normalized.username);
+        }
+        if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
+          localStorage.setItem('avatar_url', normalized.avatarUrl);
+        }
 
-      logoutButton?.addEventListener('click', studentLogout);
-    });
+        document.querySelectorAll('[data-user-name]').forEach((element) => {
+          element.textContent = normalized.name;
+        });
+        document.querySelectorAll('[data-user-avatar]').forEach((image) => {
+          image.src = normalized.avatarUrl;
+          image.onerror = () => {
+            image.onerror = null;
+            image.src = defaultAvatarUrl;
+          };
+        });
 
-    document.addEventListener('click', () => closeAllMenus());
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closeAllMenus();
-    });
-  }
+        const topbarName = document.getElementById('studentName');
+        if (topbarName) topbarName.textContent = normalized.name;
+      }
 
-  window.setStudentMenuUser = setStudentMenuUser;
-  window.studentLogout = studentLogout;
-  if (!window.logout) window.logout = studentLogout;
+      function studentLogout() {
+        ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
+          localStorage.removeItem(key);
+        });
+        window.location.href = '/';
+      }
 
-  document.addEventListener('DOMContentLoaded', initStudentUserMenus);
-})();
+      async function refreshStudentMenuUser() {
+        const token = localStorage.getItem('jwt_token');
+        const userId = localStorage.getItem('user_id');
+        if (!token || !userId) return;
 
-</script>
+        try {
+          const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!response.ok) return;
+          const user = await response.json();
+          setStudentMenuUser(user);
+        } catch (error) {
+          console.warn('Could not load user menu profile.', error);
+        }
+      }
+
+      function closeAllMenus(exceptMenu = null) {
+        document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
+          if (menu !== exceptMenu) {
+            menu.classList.remove('is-open');
+            menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      function initStudentUserMenus() {
+        setStudentMenuUser();
+        refreshStudentMenuUser();
+
+        document.querySelectorAll('[data-user-menu]').forEach((menu) => {
+          const toggle = menu.querySelector('[data-user-menu-toggle]');
+          const logoutButton = menu.querySelector('[data-user-logout]');
+
+          toggle?.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const shouldOpen = !menu.classList.contains('is-open');
+            closeAllMenus(menu);
+            menu.classList.toggle('is-open', shouldOpen);
+            toggle.setAttribute('aria-expanded', String(shouldOpen));
+          });
+
+          logoutButton?.addEventListener('click', studentLogout);
+        });
+
+        document.addEventListener('click', () => closeAllMenus());
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') closeAllMenus();
+        });
+      }
+
+      window.setStudentMenuUser = setStudentMenuUser;
+      window.studentLogout = studentLogout;
+      if (!window.logout) window.logout = studentLogout;
+
+      document.addEventListener('DOMContentLoaded', initStudentUserMenus);
+    })();
+
+  </script>
   <link rel="stylesheet" th:href="@{/assets/css/student-learning-spaces.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
@@ -204,21 +204,21 @@ if (!localStorage.getItem('jwt_token')) {
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
 
     <li class="sidebar-user-slot">
-  <div class="student-user-menu" data-user-menu>
-    <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
-      <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
-      <span class="student-menu-info">
+      <div class="student-user-menu" data-user-menu>
+        <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+          <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
+          <span class="student-menu-info">
         <span class="student-menu-name" data-user-name>Student</span>
         <span class="student-menu-role">Student</span>
       </span>
-      <i class="ti ti-chevron-up student-menu-chevron"></i>
-    </button>
-    <div class="student-menu-panel" role="menu">
-      <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
-      <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
-    </div>
-  </div>
-</li>
+          <i class="ti ti-chevron-up student-menu-chevron"></i>
+        </button>
+        <div class="student-menu-panel" role="menu">
+          <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+          <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
+        </div>
+      </div>
+    </li>
   </ul>
 </aside>
 
@@ -273,8 +273,8 @@ if (!localStorage.getItem('jwt_token')) {
 </main>
 
 <script>
-/* --- Inlined from student-learning-spaces.js --- */
-const token = localStorage.getItem('jwt_token');
+  /* --- Inlined from student-learning-spaces.js --- */
+  const token = localStorage.getItem('jwt_token');
   const userId = localStorage.getItem('user_id');
 
   const state = {
@@ -302,11 +302,11 @@ const token = localStorage.getItem('jwt_token');
 
   function escapeHtml(value) {
     return String(value ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
   }
 
   function truncate(value, maxLength = 110) {
@@ -370,7 +370,7 @@ const token = localStorage.getItem('jwt_token');
 
   function flattenQuizzes(learningSpaces) {
     return (learningSpaces || []).flatMap((space) =>
-      (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
+            (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
     );
   }
 
@@ -387,8 +387,8 @@ const token = localStorage.getItem('jwt_token');
 
     if (summary) {
       summary.textContent = pending.length
-        ? `You have ${pending.length} quizzes to do.`
-        : 'No new notifications.';
+              ? `You have ${pending.length} quizzes to do.`
+              : 'No new notifications.';
     }
 
     if (!list) return;
@@ -418,8 +418,8 @@ const token = localStorage.getItem('jwt_token');
       </a>`).join('');
 
     const more = pending.length > 5
-      ? `<a class="notification-item text-center fw-bold text-primary" href="/student/my-quizzes">View ${pending.length - 5} more quizzes</a>`
-      : '';
+            ? `<a class="notification-item text-center fw-bold text-primary" href="/student/my-quizzes">View ${pending.length - 5} more quizzes</a>`
+            : '';
 
     list.innerHTML = items + more;
   }
@@ -605,8 +605,8 @@ const token = localStorage.getItem('jwt_token');
       <div class="loading-state">Loading class roadmap...</div>`;
   }
 
-    function detailHeaderTemplate(space) {
-    }
+  function detailHeaderTemplate(space) {
+  }
 
   // Hàm hiển thị chi tiết lộ trình học (roadmap) của lớp học bên cột phải
   function renderDetail(space, paths, errorMessage = '') {
@@ -812,4 +812,3 @@ const token = localStorage.getItem('jwt_token');
 </script>
 </body>
 </html>
-

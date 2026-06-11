@@ -20,4 +20,12 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
     List<QuizAttempt> findByStudent_Id(Long studentId);
 
     boolean existsByQuizIdAndStudent_Id(Long quizId, Long studentId);
+
+    @Query("SELECT CASE WHEN COUNT(qa) > 0 THEN true ELSE false END FROM QuizAttempt qa " +
+           "WHERE qa.student.id = :studentId " +
+           "AND qa.quiz.learningNode.id = :nodeId " +
+           "AND qa.score >= :minScore")
+    boolean existsPassedAttemptForNode(@Param("studentId") Long studentId,
+                                       @Param("nodeId") Long nodeId,
+                                       @Param("minScore") BigDecimal minScore);
 }

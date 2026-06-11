@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.example.flippedclass.validation.QuizValidator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -45,6 +46,8 @@ public class QuizServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private LearningNodeRepository learningNodeRepository;
+    @Mock
+    private QuizValidator quizValidator;
 
     @InjectMocks
     private QuizServiceImpl quizService;
@@ -94,7 +97,7 @@ public class QuizServiceImplTest {
             return saved;
         });
 
-        QuizResponse response = quizService.create(request);
+        QuizResponse response = quizService.createForCurrentUser(2L, request);
 
         assertNotNull(response);
         assertEquals(10L, response.getId());
@@ -111,7 +114,7 @@ public class QuizServiceImplTest {
         when(userRepository.findById(2L)).thenReturn(Optional.of(lecturer));
         when(learningNodeRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> quizService.create(request));
+        assertThrows(NotFoundException.class, () -> quizService.createForCurrentUser(2L, request));
     }
 
     // --- Submit Attempt Tests ---
@@ -214,6 +217,9 @@ public class QuizServiceImplTest {
         Map<Long, String> answers = new HashMap<>();
         answers.put(99L, "A"); // ID 99 does not exist in this quiz
         request.setAnswers(answers);
+
+        doThrow(new BusinessException("Unknown question id in answers: 999"))
+            .when(quizValidator).validateAttemptAnswers(any(), any());
 
         BusinessException exception = assertThrows(BusinessException.class, () -> quizService.submitAttempt(1L, request));
         assertTrue(exception.getMessage().contains("Unknown question id"));

@@ -6,6 +6,7 @@ import com.example.flippedclass.dto.response.DashboardUserResponse;
 import com.example.flippedclass.dto.response.CourseDocumentResponse;
 import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.dto.response.StudentProfileResponse;
+import com.example.flippedclass.dto.response.QuizResponse;
 import com.example.flippedclass.entity.LearningSpaceMember;
 import com.example.flippedclass.entity.StudentProfile;
 import com.example.flippedclass.entity.User;
@@ -32,6 +33,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     private final LearningSpaceMemberRepository learningSpaceMemberRepository;
     private final com.example.flippedclass.repository.QuizRepository quizRepository;
     private final com.example.flippedclass.repository.QuizAttemptRepository quizAttemptRepository;
+
     private final QuizQuestionRepository quizQuestionRepository;
     private final CourseDocumentRepository courseDocumentRepository;
 
@@ -55,15 +57,17 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 memberships.stream()
                         .map(member -> {
                             Long spaceId = member.getLearningSpace().getId();
-                            List<com.example.flippedclass.dto.response.DashboardQuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(spaceId).stream()
-                                    .map(q -> {
-                                        boolean isCompleted = quizAttemptRepository.existsByQuizIdAndStudent_Id(q.getId(), studentId);
-                                        int totalQuestions = Math.toIntExact(quizQuestionRepository.countByQuizId(q.getId()));
-                                        return com.example.flippedclass.dto.response.DashboardQuizResponse.from(q, totalQuestions, isCompleted);
-                                    })
+                            List<QuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(spaceId).stream()
+                                    .map(q -> QuizResponse.builder()
+                                            .id(q.getId())
+                                            .title(q.getTitle())
+                                            .durationMinutes(q.getDurationMinutes())
+                                            .isCompleted(quizAttemptRepository.existsByQuizIdAndStudent_Id(q.getId(), studentId))
+                                            .build())
                                     .collect(Collectors.toList());
                             return DashboardLearningSpaceResponse.from(member, quizzes);
                         })
+
                         .toList();
 
         List<CourseDocumentResponse> recentDocuments = learningSpaceIds.isEmpty()

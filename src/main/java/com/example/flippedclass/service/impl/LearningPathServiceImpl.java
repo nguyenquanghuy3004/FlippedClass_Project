@@ -7,13 +7,14 @@ import com.example.flippedclass.dto.response.LearningNodeResponse;
 import com.example.flippedclass.dto.response.LearningPathResponse;
 import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.entity.LearningSpace;
-import com.example.flippedclass.enums.LearningPathStatus;
-import com.example.flippedclass.enums.LearningSpaceStatus;
 import com.example.flippedclass.repository.LearningPathRepository;
 import com.example.flippedclass.repository.LearningSpaceRepository;
 import com.example.flippedclass.service.LearningPathService;
+import com.example.flippedclass.enums.LearningPathStatus;
+import com.example.flippedclass.enums.LearningSpaceStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,20 +22,30 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class LearningPathServiceImpl implements LearningPathService {
+    @Autowired
+     LearningSpaceRepository learningSpaceRepository;
+    @Autowired
+     LearningPathRepository learningPathRepository;
 
-    private final LearningPathRepository learningPathRepository;
-    private final LearningSpaceRepository learningSpaceRepository;
+    @Override
+    public LearningPath getLearningPathEntity(Long id) {
+        return learningPathRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning Path"));
+    }
 
     @Override
     @Transactional
     public LearningPathResponse createLearningPath(Long spaceId, CreateLearningPathRequest request) {
+
+
         LearningSpace space = learningSpaceRepository.findByIdAndStatus(spaceId, LearningSpaceStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("Learning Space not found or inactive"));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning or Space đã bị xóa"));
 
         Integer nextPosition = learningPathRepository
                 .findFirstByLearningSpaceIdAndStatusOrderByPositionDesc(spaceId, LearningPathStatus.ACTIVE)
                 .map(lp -> lp.getPosition() + 1)
-                .orElse(1);
+
+                    .orElse(1);
 
         LearningPath path = new LearningPath();
         path.setTitle(request.getTitle());
@@ -56,16 +67,12 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .toList();
     }
 
-    @Override
-    public LearningPath getLearningPathEntity(Long id) {
-        return learningPathRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Learning Path not found"));
-    }
 
     @Override
     public LearningPathResponse getLearningPathDetail(Long spaceId, Long pathId) {
         return toResponse(findPathInSpace(spaceId, pathId));
     }
+
 
     @Override
     @Transactional
@@ -73,7 +80,7 @@ public class LearningPathServiceImpl implements LearningPathService {
         LearningPath path = findPathInSpace(spaceId, pathId);
 
         if (path.getStatus() == LearningPathStatus.ARCHIVED) {
-            throw new IllegalArgumentException("Cannot update archived learning path. Restore it first.");
+            throw new IllegalArgumentException("Không thể chỉnh sửa roadmap đã lưu trữ. Hãy khôi phục trước.");
         }
 
         if (request.getTitle() != null && !request.getTitle().trim().isEmpty()) {
@@ -83,65 +90,81 @@ public class LearningPathServiceImpl implements LearningPathService {
             path.setDescription(request.getDescription());
         }
 
-        return toResponse(path);
+        return toResponse(path); // Hibernate tự động update dữ liệu nhờ @Transactional
     }
+
 
     @Override
     @Transactional
     public void archiveLearningPath(Long spaceId, Long pathId) {
         LearningPath path = findPathInSpace(spaceId, pathId);
         if (path.getStatus() != LearningPathStatus.ACTIVE) {
-            throw new IllegalArgumentException("Only active learning paths can be archived");
+            throw new IllegalArgumentException("Chỉ có thể lưu trữ roadmap đang hoạt động");
         }
         path.setStatus(LearningPathStatus.ARCHIVED);
     }
+
 
     @Override
     @Transactional
     public void restoreLearningPath(Long spaceId, Long pathId) {
         LearningPath path = findPathInSpace(spaceId, pathId);
-        if (path.getStatus() != LearningPathStatus.ARCHIVED) {
-            throw new IllegalArgumentException("Only archived learning paths can be restored");
+        if (path.getStatus() != LearningPathStatus.ARCHIVED && path.getStatus() != LearningPathStatus.DELETED) {
+            throw new IllegalArgumentException("Chỉ có thể khôi phục roadmap đã lưu trữ hoặc đã xóa");
         }
         path.setStatus(LearningPathStatus.ACTIVE);
     }
 
+
     @Override
     @Transactional
-    public void deleteLearningPath(Long spaceId, Long pathId) {
+    public void deleteLearningPathModul(Long spaceId, Long pathId) {
         findPathInSpace(spaceId, pathId).setStatus(LearningPathStatus.DELETED);
     }
 
     @Override
     @Transactional
+    public void deleteAllLearningPaths(Long spaceId) {
+        List<LearningPath> paths = learningPathRepository.findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.ACTIVE);
+        for (LearningPath path : paths) {
+            path.setStatus(LearningPathStatus.DELETED);
+        }
+    }
+
+    //REORDER
+    @Override
+    @Transactional
     public void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request) {
         List<Long> orderedIds = request.getOrderedIds();
         if (orderedIds == null || orderedIds.isEmpty()) {
-            throw new IllegalArgumentException("Ordered id list must not be empty");
+            throw new IllegalArgumentException("Danh sách id sắp xếp không được để trống");
         }
+
         for (int i = 0; i < orderedIds.size(); i++) {
             findPathInSpace(spaceId, orderedIds.get(i)).setPosition(i + 1);
         }
     }
 
+    // helper
     private LearningPath findPathInSpace(Long spaceId, Long pathId) {
         return learningPathRepository.findByIdAndLearningSpaceId(pathId, spaceId)
-                .orElseThrow(() -> new IllegalArgumentException("Learning Path not found in this Learning Space"));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning Path trong Learning Space này"));
     }
 
     private LearningPathResponse toResponse(LearningPath path) {
         List<LearningNodeResponse> nodeResponses = new java.util.ArrayList<>();
         if (path.getNodes() != null) {
-            nodeResponses = path.getNodes().stream().map(node ->
-                    LearningNodeResponse.builder()
-                            .id(node.getId())
-                            .title(node.getTitle())
-                            .learningPathId(path.getId())
-                            .status(node.getStatus())
-                            .nodeType(node.getNodeType())
-                            .createdAt(node.getCreatedAt())
-                            .updatedAt(node.getUpdatedAt())
-                            .build()
+            nodeResponses = path.getNodes().stream().map(node -> 
+                com.example.flippedclass.dto.response.LearningNodeResponse.builder()
+                    .id(node.getId())
+                    .title(node.getTitle())
+                    .description(node.getDescription())
+                    .learningPathId(path.getId())
+                    .status(node.getStatus())
+                    .nodeType(node.getNodeType())
+                    .createdAt(node.getCreatedAt())
+                    .updatedAt(node.getUpdatedAt())
+                    .build()
             ).toList();
         }
 
@@ -156,5 +179,14 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .createdAt(path.getCreatedAt())
                 .updatedAt(path.getUpdatedAt())
                 .build();
+    }
+
+    @Override
+    public List<LearningPathResponse> getDeletedLearningPaths(Long spaceId) {
+        return learningPathRepository
+                .findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.ARCHIVED)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 }

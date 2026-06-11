@@ -1,19 +1,25 @@
 package com.example.flippedclass.entity;
 
+import com.example.flippedclass.enums.MemberRole;
+import com.example.flippedclass.enums.MemberStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "learning_space_members", uniqueConstraints = {
+@Table(name = "learning_space_members",
+    uniqueConstraints = {
         @UniqueConstraint(columnNames = {"learning_space_id", "user_id"})
-})
+    })
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class LearningSpaceMember {
 
     @Id
@@ -29,16 +35,14 @@ public class LearningSpaceMember {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 30)
-    @Builder.Default
-    private com.example.flippedclass.enums.MemberRole role = com.example.flippedclass.enums.MemberRole.MEMBER;
+    @Column(nullable = false, length = 20)
+    private MemberRole role;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 30)
-    @Builder.Default
-    private com.example.flippedclass.enums.MemberStatus status = com.example.flippedclass.enums.MemberStatus.ACTIVE;
+    @Column(nullable = false, length = 20)
+    private MemberStatus status;
 
-    @Column(name = "joined_at", updatable = false)
-    @Builder.Default
-    private LocalDateTime joinedAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime joinedAt;
 }

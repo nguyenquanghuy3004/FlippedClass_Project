@@ -1,68 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
 
 <head>
   <meta charset="UTF-8" />
   <title>Quiz Management - FlippedClass</title>
-  <meta name="description" content="Create, edit and monitor your course quizzes">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
-  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
-  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
-  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
-  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  <link rel="stylesheet" th:href="@{/assets/css/quizzes.css}">
+  <th:block layout:fragment="head">
+    <link rel="stylesheet" th:href="@{/assets/css/quizzes.css}">
+  </th:block>
 </head>
 
 <body>
-  <div id="overlay" class="overlay"></div>
-
-  <div class="toast-wrap" id="toastWrap"></div>
-
-  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
-    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
-      <i class="ti ti-layout-sidebar-left-expand"></i>
-    </button>
-    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
-      <i class="ti ti-layout-sidebar-left-expand"></i>
-    </button>
-    <div>
-      <ul class="list-unstyled d-flex align-items-center mb-0 gap-2">
-        <li id="userInfoDisplay" class="d-flex align-items-center gap-2"
-          style="font-size:0.85rem;font-weight:600;color:#374151;"></li>
-        <li class="ms-2">
-          <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="logout()" id="logoutBtn"
-            style="display:none;font-weight:600;">
-            <i class="ti ti-logout me-1"></i>Sign out
-          </button>
-        </li>
-        <li class="ms-1 dropdown">
-          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img th:src="@{/assets/images/avatar-1.jpg}" alt="" class="avatar avatar-sm rounded-circle" id="userAvatar"
-              style="display:none;" />
-          </a>
-        </li>
-      </ul>
-    </div>
-  </nav>
-
-  <aside id="sidebar" class="sidebar">
-    <div class="logo-area">
-      <a th:href="@{/}" class="d-inline-flex">
-        <img
-          src="data:image/svg+xml,%3csvg%20width='62'%20height='67'%20viewBox='0%200%2062%2067'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M30.604%2066.378L0.00805664%2048.1582V35.7825L30.604%2054.0023V66.378Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2048.1582L30.604%2066.378V54.0023L61.1996%2035.7825V48.1582Z'%20fill='%23E66239'/%3e%3cpath%20d='M30.5955%200L0%2018.2198V30.5955L30.5955%2012.3757V0Z'%20fill='%23657E92'/%3e%3cpath%20d='M61.191%2018.2198L30.5955%200V12.3757L61.191%2030.5955V18.2198Z'%20fill='%23A3B2BE'/%3e%3cpath%20d='M30.604%2048.8457L0.00805664%2030.6259V18.2498L30.604%2036.47V48.8457Z'%20fill='%23302C4D'/%3e%3cpath%20d='M61.1996%2030.6259L30.604%2048.8457V36.47L61.1996%2018.2498V30.6259Z'%20fill='%23E66239'/%3e%3c/svg%3e"
-          alt="" width="24">
-        <span class="logo-text ms-2"><img th:src="@{/assets/images/logo.svg}" alt=""></span>
-      </a>
-    </div>
-    <ul class="nav flex-column">
-      <li class="px-4 py-2"><small class="nav-text">Lecturer</small></li>
-      <li><a class="nav-link active" th:href="@{/lecturer/quizzes}"><i class="ti ti-brain"></i><span class="nav-text">My
-            Quizzes</span></a></li>
-    </ul>
-  </aside>
-
-  <main id="content" class="content py-10">
+  <div layout:fragment="content">
     <div class="container-fluid">
 
       <div class="auth-required d-none" id="authRequired">
@@ -77,11 +25,11 @@
       <div id="mainUI" class="d-none">
 
         <div class="page-banner">
-          <div style="z-index:2;">
+          <div style="position:relative; z-index:2;">
             <h1 class="banner-title"><i class="ti ti-brain me-2"></i>Quiz Management</h1>
             <p class="banner-sub">Design, publish and monitor your course assessments.</p>
           </div>
-          <div style="z-index:2;">
+          <div style="position:relative; z-index:2;">
             <button class="btn-banner" onclick="openCreateModal()">
               <i class="ti ti-plus"></i> Create New Quiz
             </button>
@@ -162,9 +110,7 @@
           <div id="quizContent"></div>
         </div>
 
-      </div>
-    </div>
-  </main>
+      <!-- Closed divs moved to the bottom -->
 
   <div class="modal-overlay" id="quizModal">
     <div class="modal-box">
@@ -177,10 +123,10 @@
 
         <div id="nodePickerSection" class="mb-4">
           <label class="form-label fw-semibold">Learning Node <span class="text-danger">*</span></label>
-          <div class="d-flex gap-2 flex-wrap" id="nodePicker">
-            <div class="text-muted small">Loading nodes...</div>
-          </div>
-          <input type="hidden" id="selectedNodeId">
+          <select class="form-select" id="nodePicker">
+            <option value="">Loading nodes...</option>
+          </select>
+          <div class="invalid-feedback d-block d-none" id="err-learningNodeId"></div>
         </div>
 
         <div class="row g-3">
@@ -188,19 +134,23 @@
             <label class="form-label fw-semibold">Quiz Title <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="mTitle" placeholder="e.g. Midterm Assessment — Chapter 1"
               maxlength="255">
+            <div class="invalid-feedback d-block d-none" id="err-title"></div>
           </div>
           <div class="col-12">
             <label class="form-label fw-semibold">Description</label>
             <textarea class="form-control" id="mDescription" rows="3" placeholder="Brief description of this quiz..."
               maxlength="500"></textarea>
+            <div class="invalid-feedback d-block d-none" id="err-description"></div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Duration (minutes) <span class="text-danger">*</span></label>
             <input type="number" class="form-control" id="mDuration" value="30" min="1" max="480">
+            <div class="invalid-feedback d-block d-none" id="err-durationMinutes"></div>
           </div>
           <div class="col-md-4">
-            <label class="form-label fw-semibold">Pass Score (%) <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold">Pass Score (/100) <span class="text-danger">*</span></label>
             <input type="number" class="form-control" id="mPassScore" value="50" min="1" max="100">
+            <div class="invalid-feedback d-block d-none" id="err-passScore"></div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Difficulty</label>
@@ -209,6 +159,7 @@
               <option value="MEDIUM" selected>Medium</option>
               <option value="HARD">Hard</option>
             </select>
+            <div class="invalid-feedback d-block d-none" id="err-difficulty"></div>
           </div>
           <div class="col-12">
             <div class="form-check form-switch">
@@ -247,11 +198,23 @@
       </div>
     </div>
   </div>
+  </div>
 
+  <div class="toast-wrap" id="toastWrap"></div>
+
+      </div> <!-- closes mainUI -->
+    </div> <!-- closes container-fluid -->
+  </div> <!-- closes layout:fragment="content" -->
+
+  <th:block layout:fragment="scripts">
   <script>
+    // ==============================================================
+    // QUIZZES JS (Logic quản lý danh sách và tạo mới Bài kiểm tra)
+    // ==============================================================
     const TOKEN_KEY = 'jwt_token';
-    const USER_KEY = 'currentUser';
+    const USER_KEY = 'currentUser_mentor';
 
+    // Các hàm tiện ích xử lý token và đăng xuất
     function getToken() { return localStorage.getItem(TOKEN_KEY); }
     function getUser() { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch (e) { return null; } }
     function authHeaders() {
@@ -263,7 +226,7 @@
     function logout() {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
-      localStorage.removeItem('user_id');
+      localStorage.removeItem('user_id_mentor');
       window.location.href = '/signin';
     }
 
@@ -272,6 +235,7 @@
     let pendingDeleteHasAttempts = false;
     let availableNodes = [];
 
+    // --- Khởi tạo: Tải danh sách quiz và node khi trang tải xong ---
     document.addEventListener('DOMContentLoaded', async () => {
       const token = getToken();
       if (!token) {
@@ -280,7 +244,6 @@
       }
       const user = getUser();
       document.getElementById('mainUI').classList.remove('d-none');
-      document.getElementById('logoutBtn').style.display = 'inline-flex';
       if (user) {
         document.getElementById('userAvatar').style.display = 'inline-block';
         document.getElementById('userInfoDisplay').innerHTML =
@@ -290,8 +253,10 @@
       await fetchMyQuizzes();
     });
 
+    // Hiển thị thông báo (Toast)
     function toast(msg, isError = false) {
       const wrap = document.getElementById('toastWrap');
+      if (!wrap) return; // Bảo vệ nếu không có phần tử toastWrap
       const el = document.createElement('div');
       el.className = 'toast-item' + (isError ? ' error' : '');
       el.innerHTML = `
@@ -303,6 +268,7 @@
       setTimeout(() => el.remove(), 3500);
     }
 
+    // Hàm tải danh sách các Learning Node để có thể gán Quiz vào
     async function loadNodes() {
       try {
         const res = await fetch('/api/learning-nodes', { headers: authHeaders() });
@@ -310,6 +276,7 @@
       } catch (e) { }
     }
 
+    // Hàm gọi API lấy danh sách Quiz của giảng viên
     async function fetchMyQuizzes() {
       document.getElementById('skeletonLoader').style.display = 'flex';
       document.getElementById('quizContent').innerHTML = '';
@@ -332,6 +299,7 @@
       }
     }
 
+    // Cập nhật thống kê trên đầu trang (tổng số, số quiz active, lượt làm bài...)
     function updateStats(quizzes) {
       document.getElementById('statTotal').textContent = quizzes.length;
       document.getElementById('statActive').textContent = quizzes.filter(q => q.active).length;
@@ -339,6 +307,7 @@
       document.getElementById('statQuestions').textContent = quizzes.reduce((s, q) => s + (q.questionCount || 0), 0);
     }
 
+    // Đổ dữ liệu vào bộ lọc theo Không gian học tập (Space Filter)
     function populateSpaceFilter(quizzes) {
       const sel = document.getElementById('spaceFilter');
       const spaces = [...new Set(quizzes.map(q => q.learningSpaceName || 'Uncategorized'))];
@@ -350,6 +319,7 @@
       });
     }
 
+    // Lọc danh sách Quiz theo từ khóa, trạng thái, độ khó, hoặc space
     function filterQuizzes() {
       const term = document.getElementById('searchInput').value.toLowerCase();
       const status = document.getElementById('statusFilter').value;
@@ -371,6 +341,7 @@
       return `<span class="difficulty-chip ${cls[d] || 'diff-medium'}">${label[d] || d || '—'}</span>`;
     }
 
+    // Hàm render danh sách Quiz ra giao diện người dùng
     function renderQuizzes(quizzes) {
       const container = document.getElementById('quizContent');
       container.innerHTML = '';
@@ -410,7 +381,7 @@
           const col = document.createElement('div');
           col.className = 'col-12 col-md-6 col-xl-4';
           col.innerHTML = `
-            <div class="quiz-card">
+            <div class="quiz-card" style="cursor: pointer;" onclick="window.location.href='/lecturer/quizzes/${quiz.id}/statistics'">
               <div class="card-top">
                 <span class="course-tag">${quiz.courseName || 'General'}</span>
                 <span class="status-badge ${quiz.active ? 'active' : 'inactive'}">
@@ -441,14 +412,14 @@
                 <div class="pass-fill" style="width:${passRate}%;"></div>
               </div>
               <div class="card-actions mt-3">
-                <button class="btn-build" onclick="window.location.href='/lecturer/quizzes/${quiz.id}/builder'">
+                <button class="btn-build" onclick="event.stopPropagation(); window.location.href='/lecturer/quizzes/${quiz.id}/builder'">
                   <i class="ti ti-tools"></i> Build Questions
                 </button>
                 <div class="d-flex gap-1">
-                  <button class="btn-icon-sm" onclick="openEditModal(${quiz.id})" title="Edit">
+                  <button class="btn-icon-sm" onclick="event.stopPropagation(); openEditModal(${quiz.id})" title="Edit">
                     <i class="ti ti-pencil"></i>
                   </button>
-                  <button class="btn-icon-sm danger" onclick="openDeleteConfirm(${quiz.id})" title="Delete">
+                  <button class="btn-icon-sm danger" onclick="event.stopPropagation(); openDeleteConfirm(${quiz.id})" title="Delete">
                     <i class="ti ti-trash"></i>
                   </button>
                 </div>
@@ -459,33 +430,59 @@
       }
     }
 
+    // Mở modal tạo mới Quiz
     function openCreateModal() {
-      document.getElementById('editQuizId').value = '';
-      document.getElementById('modalTitle').innerHTML = '<i class="ti ti-plus me-2 text-primary"></i>Create New Quiz';
-      document.getElementById('mTitle').value = '';
-      document.getElementById('mDescription').value = '';
-      document.getElementById('mDuration').value = 30;
-      document.getElementById('mPassScore').value = 50;
-      document.getElementById('mDifficulty').value = 'MEDIUM';
-      document.getElementById('mActive').checked = true;
-      document.getElementById('nodePickerSection').style.display = 'block';
-      document.getElementById('selectedNodeId').value = '';
-      renderNodePicker();
-      document.getElementById('quizModal').classList.add('show');
+      try {
+        if (!availableNodes || availableNodes.length === 0) {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Chưa có Bài học nào!',
+              text: 'Mỗi bài Quiz bắt buộc phải gắn với một Bài học (Learning Node). Vui lòng vào mục My Spaces để tạo Bài học trước!',
+              confirmButtonText: 'Đến My Spaces',
+              showCancelButton: true,
+              cancelButtonText: 'Đóng'
+            }).then((result) => {
+              if (result.isConfirmed) window.location.href = '/lecturer/dashboard';
+            });
+          } else {
+            alert('Cảnh báo: Bạn chưa tạo bài học (Learning Node) nào!\nVui lòng vào mục "My Spaces" để tạo Space và Node trước khi tạo Quiz.');
+          }
+          return;
+        }
+
+        document.getElementById('modalTitle').innerHTML = '<i class="ti ti-plus me-2 text-primary"></i>Create New Quiz';
+        document.getElementById('editQuizId').value = '';
+        document.getElementById('mTitle').value = '';
+        document.getElementById('mDescription').value = '';
+        document.getElementById('mDuration').value = 30;
+        document.getElementById('mPassScore').value = 50;
+        document.getElementById('mDifficulty').value = 'MEDIUM';
+        document.getElementById('mActive').checked = true;
+        document.getElementById('nodePickerSection').style.display = 'block';
+        renderNodePicker();
+        document.getElementById('nodePicker').value = '';
+        clearErrors();
+        document.getElementById('quizModal').classList.add('show');
+      } catch (err) {
+        alert("Lỗi JS: " + err.message + "\nStack: " + err.stack);
+      }
     }
 
+    // Mở modal chỉnh sửa thông tin Quiz đã có
     function openEditModal(id) {
       const quiz = allQuizzes.find(q => q.id === id);
       if (!quiz) return;
-      document.getElementById('editQuizId').value = id;
       document.getElementById('modalTitle').innerHTML = '<i class="ti ti-pencil me-2 text-primary"></i>Edit Quiz';
-      document.getElementById('mTitle').value = quiz.title;
+      document.getElementById('editQuizId').value = quiz.id;
+      document.getElementById('mTitle').value = quiz.title || '';
       document.getElementById('mDescription').value = quiz.description || '';
-      document.getElementById('mDuration').value = quiz.durationMinutes;
-      document.getElementById('mPassScore').value = quiz.passScore;
+      document.getElementById('mDuration').value = quiz.durationMinutes || 30;
+      document.getElementById('mPassScore').value = quiz.passScore || 50;
       document.getElementById('mDifficulty').value = quiz.difficulty || 'MEDIUM';
       document.getElementById('mActive').checked = quiz.active;
       document.getElementById('nodePickerSection').style.display = 'none';
+      clearErrors();
       document.getElementById('quizModal').classList.add('show');
     }
 
@@ -493,40 +490,81 @@
       document.getElementById('quizModal').classList.remove('show');
     }
 
+    // Render danh sách dropdown Learning Node để chọn
     function renderNodePicker() {
       const picker = document.getElementById('nodePicker');
       picker.innerHTML = '';
       if (!availableNodes.length) {
-        picker.innerHTML = '<p class="text-muted small">No learning nodes found. Create a learning space first.</p>';
+        picker.innerHTML = '<option value="">No learning nodes found. Create a learning space first.</option>';
+        picker.disabled = true;
         return;
       }
+      picker.disabled = false;
+      picker.innerHTML = '<option value="">-- Select a Learning Node --</option>';
       availableNodes.forEach(node => {
-        const pill = document.createElement('div');
-        pill.className = 'node-pill';
-        pill.textContent = node.title || node.name || `Node #${node.id}`;
-        pill.dataset.nodeId = node.id;
-        pill.onclick = () => {
-          document.getElementById('selectedNodeId').value = node.id;
-          document.querySelectorAll('.node-pill').forEach(p => p.classList.toggle('selected', p.dataset.nodeId == node.id));
-        };
-        picker.appendChild(pill);
+        const opt = document.createElement('option');
+        opt.value = node.id;
+        const spacePart = node.spaceName && node.spaceName !== 'Uncategorized' ? `[${node.spaceName}] - ` : '';
+        const nodeTitle = node.title || node.name || `Node #${node.id}`;
+        opt.textContent = spacePart + nodeTitle;
+        picker.appendChild(opt);
       });
     }
 
+    function clearErrors() {
+      document.querySelectorAll('.invalid-feedback').forEach(el => {
+        el.classList.add('d-none');
+        el.textContent = '';
+      });
+      document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    }
+
+    function showError(fieldId, message) {
+      const errEl = document.getElementById('err-' + fieldId);
+      if (errEl) {
+        errEl.textContent = message;
+        errEl.classList.remove('d-none');
+        const inputIdMap = {
+          'title': 'mTitle',
+          'description': 'mDescription',
+          'durationMinutes': 'mDuration',
+          'passScore': 'mPassScore',
+          'difficulty': 'mDifficulty',
+          'learningNodeId': 'nodePicker'
+        };
+        const inputEl = document.getElementById(inputIdMap[fieldId]);
+        if (inputEl) inputEl.classList.add('is-invalid');
+      }
+    }
+
+    // Lưu (Tạo mới hoặc Cập nhật) Quiz vào CSDL
     async function saveQuiz() {
       const id = document.getElementById('editQuizId').value;
       const title = document.getElementById('mTitle').value.trim();
       const description = document.getElementById('mDescription').value.trim();
-      const duration = parseInt(document.getElementById('mDuration').value);
-      const passScore = parseInt(document.getElementById('mPassScore').value);
+      const durationStr = document.getElementById('mDuration').value;
+      const duration = parseInt(durationStr);
+      const passScoreStr = document.getElementById('mPassScore').value;
+      const passScore = parseInt(passScoreStr);
       const difficulty = document.getElementById('mDifficulty').value;
       const active = document.getElementById('mActive').checked;
-      const nodeId = document.getElementById('selectedNodeId').value;
+      const nodeId = document.getElementById('nodePicker').value;
 
-      if (!title) { toast('Title is required!', true); return; }
-      if (!duration || duration < 1) { toast('Duration must be at least 1 minute!', true); return; }
-      if (!passScore || passScore < 1) { toast('Pass score must be at least 1%!', true); return; }
-      if (!id && !nodeId) { toast('Please select a Learning Node!', true); return; }
+      clearErrors();
+      let hasError = false;
+
+      if (!title) { showError('mTitle', 'Title is required'); hasError = true; }
+      else if (title.length < 3 || title.length > 255) { showError('mTitle', 'Title must be between 3 and 255 characters'); hasError = true; }
+
+      if (description && description.length > 500) { showError('mDescription', 'Description must not exceed 500 characters'); hasError = true; }
+      
+      if (!durationStr || duration < 1 || duration > 480) { showError('mDuration', 'Duration must be between 1 and 480 minutes'); hasError = true; }
+      
+      if (!passScoreStr || passScore < 1 || passScore > 100) { showError('mPassScore', 'Pass score must be between 1 and 100'); hasError = true; }
+
+      if (!id && !nodeId) { showError('nodePicker', 'Please select a Learning Node'); hasError = true; }
+
+      if (hasError) return;
 
       const btn = document.getElementById('btnSaveQuiz');
       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
@@ -547,23 +585,45 @@
             body: JSON.stringify({ learningNodeId: parseInt(nodeId), title, description, durationMinutes: duration, passScore, difficulty, active })
           });
         }
+        
         if (res.status === 401) { toast('Session expired!', true); logout(); return; }
+        
         if (!res.ok) {
-          let msg = id ? 'Update failed' : 'Create failed';
-          try { const e = await res.json(); msg = e.message || msg; } catch (e) { }
-          throw new Error(msg);
+          try {
+            const e = await res.json();
+            if (res.status === 400 && e.error === 'VALIDATION_FAILED' && e.fieldErrors) {
+              const fieldMap = {
+                'title': 'mTitle',
+                'description': 'mDescription',
+                'durationMinutes': 'mDuration',
+                'passScore': 'mPassScore',
+                'difficulty': 'mDifficulty',
+                'learningNodeId': 'nodePicker'
+              };
+              e.fieldErrors.forEach(err => {
+                const elId = fieldMap[err.field] || err.field;
+                showError(elId, err.message);
+              });
+              throw new Error('Please fix the validation errors.');
+            }
+            throw new Error(e.message || 'Failed to save quiz');
+          } catch (e) { throw e; }
+        } else {
+          toast(id ? 'Quiz updated successfully!' : 'Quiz created successfully!');
+          closeModal();
+          await fetchMyQuizzes();
         }
-        toast(id ? 'Quiz updated successfully!' : 'Quiz created successfully!');
-        closeModal();
-        await fetchMyQuizzes();
       } catch (e) {
-        toast(e.message, true);
+        if (e.message !== 'Please fix the validation errors.') {
+          toast(e.message, true);
+        }
       } finally {
         btn.innerHTML = '<i class="ti ti-check me-1"></i>Save Quiz';
         btn.disabled = false;
       }
     }
 
+    // Hiển thị modal xác nhận Xóa hoặc Vô hiệu hóa (Deactivate) Quiz
     function openDeleteConfirm(id) {
       const quiz = allQuizzes.find(q => q.id === id);
       if (!quiz) return;
@@ -585,6 +645,7 @@
       document.getElementById('deleteModal').classList.add('show');
     }
 
+    // Xử lý Xóa vĩnh viễn (DELETE) hoặc Vô hiệu hóa (PUT -> active:false) Quiz
     async function confirmDelete() {
       if (!pendingDeleteId) return;
       const btn = document.getElementById('btnConfirmDelete');
@@ -621,6 +682,9 @@
     document.getElementById('quizModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
     document.getElementById('deleteModal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('show'); });
   </script>
+  </th:block>
 </body>
 
 </html>
+
+

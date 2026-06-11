@@ -22,7 +22,7 @@ public class QuestionBank {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String options;
 
-    @Column(length = 50)
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String correctAnswer;
 
     @Column

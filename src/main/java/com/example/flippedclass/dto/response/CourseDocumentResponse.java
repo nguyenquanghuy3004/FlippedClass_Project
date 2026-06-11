@@ -4,10 +4,10 @@ import com.example.flippedclass.entity.CourseDocument;
 import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.enums.DocumentType;
-
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor

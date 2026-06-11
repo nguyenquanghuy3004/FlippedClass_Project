@@ -9,12 +9,13 @@ import com.example.flippedclass.repository.NodeConnectionRepository;
 import com.example.flippedclass.service.LearningPathService;
 import com.example.flippedclass.service.NodeConnectionService;
 import com.example.flippedclass.service.NodeService;
-import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor

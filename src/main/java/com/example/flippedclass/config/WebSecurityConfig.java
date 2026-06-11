@@ -55,14 +55,30 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private static final String[] PUBLIC_URLS = {"/swagger", "/swagger-ui/**", "/swagger-ui.html",
-            "/api-docs", "/api-docs/**", "/v3/api-docs/**",
-            "/google-test.html", "/error", "/uploads/**",
+    private static final String[] PUBLIC_URLS = {
+            // Swagger & API Docs
+            "/swagger", "/swagger-ui/**", "/swagger-ui.html", "/api-docs", "/api-docs/**", "/v3/api-docs/**", "/docs",
+            // Static Resources & Public Files
+            "/css/**", "/js/**", "/images/**", "/assets/**", "/uploads/**", "/error", "/404-error", "/google-test.html", "/favicon.ico",
+            // Public APIs
             "/api/quizzes/**", "/api/question-bank/**",
-            "/assets/**", "/", "/inventory", "/create-product", "/reports",
-            "/signin", "/login", "/signup", "/register",
-            "/docs", "/404-error", "/lecturer/**", "/student/**"
+            // Public UI Pages (Authentication, Landing, etc.)
+            "/", "/index", "/login", "/register", "/signin", "/signup", 
+            // Feature UI Routes (Bypass JWT for HTML load)
+            "/inventory", "/create-product", "/reports", "/lecturer/**", "/student/**", "/admin/**", "/mentor/**"
     };
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

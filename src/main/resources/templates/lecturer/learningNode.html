@@ -1,0 +1,194 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="nodeCard(node, path)">
+        <div class="border rounded-4 mb-3" style="background-color: #f8f9fa; transition: background-color 0.2s; border-color: #e2e8f0 !important;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='#f8f9fa'">
+            <div class="p-3 px-4">
+                <div class="d-flex justify-content-between align-items-center mb-0">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background-color: #10b981 !important;">
+                            <i class="ti ti-clipboard-text fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="fw-semibold text-dark" th:text="${node.title}" style="font-size: 0.95rem; letter-spacing: 0.2px;">Node Title</span>
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center border-0 text-muted hover-bg-light" 
+                                data-bs-toggle="dropdown" style="width: 36px; height: 36px; background: transparent;">
+                            <i class="ti ti-dots-vertical fs-5"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border border-light rounded-4 p-2">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2 edit-node-btn" 
+                                   href="#" 
+                                   th:data-pathid="${path.id}" 
+                                   th:data-nodeid="${node.id}" 
+                                   th:data-title="${node.title}" 
+                                   th:data-description="${node.description}" 
+                                   th:data-type="${node.nodeType}">
+                                    <i class="ti ti-pencil"></i> Edit Lesson
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2 text-danger delete-node-btn" 
+                                   href="#" th:data-pathid="${path.id}" th:data-nodeid="${node.id}">
+                                    <i class="ti ti-trash"></i> Delete Lesson
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li th:if="${node.nodeType == 'VIDEO'}">
+                                <a class="dropdown-item d-flex align-items-center gap-2 text-primary upload-video-btn" 
+                                   href="#" th:data-nodeid="${node.id}">
+                                    <i class="ti ti-upload"></i> Upload Video (MP4)
+                                </a>
+                            </li>
+                            <li th:if="${node.nodeType == 'VIDEO'}">
+                                <a class="dropdown-item d-flex align-items-center gap-2 text-danger add-youtube-btn" 
+                                   href="#" th:data-nodeid="${node.id}">
+                                    <i class="ti ti-brand-youtube"></i> Add Youtube Link
+                                </a>
+                            </li>
+                            <li th:if="${node.nodeType == 'DOCUMENT'}">
+                                <a class="dropdown-item d-flex align-items-center gap-2 text-success upload-document-btn" 
+                                   href="#" th:data-nodeid="${node.id}">
+                                    <i class="ti ti-file-upload"></i> Upload Document (PDF)
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- The grey box placeholder will be handled by Javascript if no items exist -->
+                <div class="node-items-container mt-3" th:data-nodeid="${node.id}" th:data-nodetype="${node.nodeType}">
+                    <div class="bg-white rounded-4 d-flex flex-column align-items-center justify-content-center border placeholder-box" style="height: 120px; border-style: dashed !important; border-color: #cbd5e1 !important;">
+                        <i th:class="'ti fs-1 mb-2 ' + (${node.nodeType == 'VIDEO'} ? 'ti-brand-youtube text-danger' : (${node.nodeType == 'QUIZ'} ? 'ti-question-mark text-primary' : 'ti-file-text text-primary'))"></i>
+                        <span class="text-muted fw-semibold small">No content added yet</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:fragment="nodeModals">
+        <div class="modal fade" id="createNodeModal" tabindex="-1" aria-labelledby="createNodeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title fw-bold" id="createNodeModalLabel">Add Lesson</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createNodeForm">
+                            <input type="hidden" id="nodePathId">
+                            <div class="mb-3">
+                                <label for="nodeTitle" class="form-label fw-bold">Lesson Title</label>
+                                <input type="text" class="form-control bg-light border-0" id="nodeTitle" required minlength="1" maxlength="255">
+                                <div class="invalid-feedback">Lesson title is required</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nodeDescription" class="form-label fw-bold">Description</label>
+                                <textarea class="form-control bg-light border-0" id="nodeDescription" rows="3" maxlength="1000"></textarea>
+                                <div class="invalid-feedback">Description is required</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nodeType" class="form-label fw-bold">Lesson Type</label>
+                                <select class="form-select bg-light border-0" id="nodeType">
+                                    <option value="LESSON">Theory Lesson</option>
+                                    <option value="PRACTICE">Practice Module</option>
+                                    <option value="VIDEO">Video Lesson</option>
+<!--                                    <option value="QUIZ">Quiz / Assessment</option>-->
+                                    <option value="REVIEW">Review Session</option>
+                                </select>
+                            </div>
+                            <div id="createNodeError" class="text-danger mb-3" style="display:none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnSaveNode" style="background-color: #10b981; border-color: #10b981;">Add Lesson</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Node Modal -->
+        <div class="modal fade" id="editNodeModal" tabindex="-1" aria-labelledby="editNodeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title fw-bold" id="editNodeModalLabel">Edit Lesson</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editNodeForm">
+                            <input type="hidden" id="editNodePathId">
+                            <input type="hidden" id="editNodeId">
+                            <div class="mb-3">
+                                <label for="editNodeTitle" class="form-label fw-bold">Lesson Title</label>
+                                <input type="text" class="form-control bg-light border-0" id="editNodeTitle" required minlength="1" maxlength="255">
+                                <div class="invalid-feedback">Lesson title is required</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editNodeDescription" class="form-label fw-bold">Description</label>
+                                <textarea class="form-control bg-light border-0" id="editNodeDescription" rows="3" maxlength="1000"></textarea>
+                                <div class="invalid-feedback">Description is required</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editNodeType" class="form-label fw-bold">Lesson Type</label>
+                                <select class="form-select bg-light border-0" id="editNodeType">
+                                    <option value="LESSON">Theory Lesson</option>
+                                    <option value="PRACTICE">Practice Module</option>
+                                    <option value="VIDEO">Video Lesson</option>
+<!--                                    <option value="QUIZ">Quiz / Assessment</option>-->
+                                    <option value="REVIEW">Review Session</option>
+                                </select>
+                            </div>
+                            <div id="editNodeError" class="text-danger mb-3" style="display:none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnUpdateNode" style="background-color: #10b981; border-color: #10b981;">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Youtube Link Modal -->
+        <div class="modal fade" id="addYoutubeModal" tabindex="-1" aria-labelledby="addYoutubeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title fw-bold text-danger" id="addYoutubeModalLabel">
+                            <i class="ti ti-brand-youtube"></i> Add Youtube Link
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addYoutubeForm">
+                            <input type="hidden" id="youtubeNodeId">
+                            <div class="mb-3">
+                                <label for="youtubeUrl" class="form-label fw-bold">Youtube URL</label>
+                                <input type="url" class="form-control bg-light border-0" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." required>
+                                <div class="invalid-feedback">Valid Youtube URL is required</div>
+                                <div class="form-text">Paste the full Youtube video link here.</div>
+                            </div>
+                            <div id="addYoutubeError" class="text-danger mb-3" style="display:none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger rounded-pill px-4" id="btnSaveYoutube" style="background-color: #ef4444; border-color: #ef4444;">Add Video</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden inputs for file upload -->
+        <input type="file" id="hiddenVideoInput" accept="video/mp4,video/x-m4v,video/*" style="display: none;">
+        <input type="file" id="hiddenDocumentInput" accept=".pdf" style="display: none;">
+    </div>
+</body>
+</html>
+
+
+

@@ -23,6 +23,7 @@ import com.example.flippedclass.repository.QuizRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.repository.LearningNodeRepository;
 import com.example.flippedclass.service.QuizService;
+import com.example.flippedclass.validation.QuizValidator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -43,19 +44,22 @@ public class QuizServiceImpl implements QuizService {
     private final UserRepository userRepository;
     private final LearningNodeRepository learningNodeRepository;
     private final com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository;
+    private final QuizValidator quizValidator;
 
     public QuizServiceImpl(QuizRepository quizRepository,
                            QuizQuestionRepository questionRepository,
                            QuizAttemptRepository attemptRepository,
                            UserRepository userRepository,
                            LearningNodeRepository learningNodeRepository,
-                           com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository) {
+                           com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository,
+                           QuizValidator quizValidator) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.attemptRepository = attemptRepository;
         this.userRepository = userRepository;
         this.learningNodeRepository = learningNodeRepository;
         this.interactionLogRepository = interactionLogRepository;
+        this.quizValidator = quizValidator;
     }
 
     @Override
@@ -81,18 +85,15 @@ public class QuizServiceImpl implements QuizService {
     @Override
     public QuizResponse updateOwned(Long currentUserId, Long quizId, UpdateQuizRequest request) {
         Quiz quiz = findQuiz(quizId);
-        assertOwnership(currentUserId, quiz, "update");
+        quizValidator.validateOwnership(currentUserId, quiz, "update");
         return applyUpdate(quiz, request);
     }
 
     @Override
     public void deleteOwned(Long currentUserId, Long quizId) {
         Quiz quiz = findQuiz(quizId);
-        assertOwnership(currentUserId, quiz, "delete");
-        long attemptsCount = attemptRepository.countByQuizId(quizId);
-        if (attemptsCount > 0) {
-            throw new BusinessException("Cannot delete quiz because it has already been attempted by students.");
-        }
+        quizValidator.validateOwnership(currentUserId, quiz, "delete");
+        quizValidator.validateDeletable(quizId);
         questionRepository.deleteByQuizId(quizId);
         quizRepository.delete(quiz);
     }
@@ -100,62 +101,22 @@ public class QuizServiceImpl implements QuizService {
     @Override
     public QuizQuestionResponse addQuestionOwned(Long currentUserId, Long quizId, CreateQuizQuestionRequest request) {
         Quiz quiz = findQuiz(quizId);
-        assertOwnership(currentUserId, quiz, "add question to");
+        quizValidator.validateOwnership(currentUserId, quiz, "add question to");
         return buildAndSaveQuestion(quiz, request);
     }
 
     @Override
     public QuizQuestionResponse updateQuestionOwned(Long currentUserId, Long questionId, CreateQuizQuestionRequest request) {
         QuizQuestion question = findQuestion(questionId);
-        assertOwnership(currentUserId, question.getQuiz(), "update question of");
+        quizValidator.validateOwnership(currentUserId, question.getQuiz(), "update question of");
         return applyQuestionUpdate(question, request);
     }
 
     @Override
     public void deleteQuestionOwned(Long currentUserId, Long questionId) {
         QuizQuestion question = findQuestion(questionId);
-        assertOwnership(currentUserId, question.getQuiz(), "delete question of");
+        quizValidator.validateOwnership(currentUserId, question.getQuiz(), "delete question of");
         questionRepository.delete(question);
-    }
-
-    @Override
-    public QuizResponse create(CreateQuizRequest request) {
-        Long lecturerId = request.getLecturerId();
-        if (lecturerId == null) {
-            throw new BusinessException("lecturerId is required when using legacy create method");
-        }
-        User lecturer = UserServiceImpl.findUser(userRepository, lecturerId);
-        LearningNode node = learningNodeRepository.findById(request.getLearningNodeId())
-                .orElseThrow(() -> new NotFoundException("Learning node not found: " + request.getLearningNodeId()));
-
-        Quiz quiz = Quiz.builder()
-                .learningNode(node)
-                .lecturer(lecturer)
-                .title(request.getTitle().trim())
-                .description(trimToNull(request.getDescription()))
-                .durationMinutes(request.getDurationMinutes() != null ? request.getDurationMinutes() : 30)
-                .active(request.getActive() == null || request.getActive())
-                .passScore(request.getPassScore() != null ? request.getPassScore() : 50)
-                .difficulty(request.getDifficulty())
-                .thumbnailUrl(request.getThumbnailUrl())
-                .build();
-        return toResponse(quizRepository.save(quiz));
-    }
-
-    @Override
-    public QuizResponse update(Long id, UpdateQuizRequest request) {
-        Quiz quiz = findQuiz(id);
-        return applyUpdate(quiz, request);
-    }
-
-    @Override
-    public void delete(Long id) {
-        long attemptsCount = attemptRepository.countByQuizId(id);
-        if (attemptsCount > 0) {
-            throw new BusinessException("Cannot delete quiz because it has already been attempted by students.");
-        }
-        questionRepository.deleteByQuizId(id);
-        quizRepository.delete(findQuiz(id));
     }
 
     @Override
@@ -174,28 +135,11 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public QuizQuestionResponse addQuestion(Long quizId, CreateQuizQuestionRequest request) {
-        Quiz quiz = findQuiz(quizId);
-        return buildAndSaveQuestion(quiz, request);
-    }
-
-    @Override
     public List<QuizQuestionResponse> getQuestions(Long quizId) {
         findQuiz(quizId);
         return questionRepository.findByQuizId(quizId).stream()
                 .map(this::toQuestionResponse)
                 .toList();
-    }
-
-    @Override
-    public QuizQuestionResponse updateQuestion(Long questionId, CreateQuizQuestionRequest request) {
-        QuizQuestion question = findQuestion(questionId);
-        return applyQuestionUpdate(question, request);
-    }
-
-    @Override
-    public void deleteQuestion(Long questionId) {
-        questionRepository.delete(findQuestion(questionId));
     }
 
     @Override
@@ -208,19 +152,7 @@ public class QuizServiceImpl implements QuizService {
         User student = UserServiceImpl.findUser(userRepository, request.getStudentId());
 
         List<QuizQuestion> questions = questionRepository.findByQuizId(quizId);
-        if (questions.isEmpty()) {
-            throw new BusinessException("Quiz has no questions");
-        }
-
-        Set<Long> validQuestionIds = questions.stream()
-                .map(QuizQuestion::getId)
-                .collect(Collectors.toSet());
-
-        for (Long answerQuestionId : request.getAnswers().keySet()) {
-            if (!validQuestionIds.contains(answerQuestionId)) {
-                throw new BusinessException("Unknown question id in answers: " + answerQuestionId);
-            }
-        }
+        quizValidator.validateAttemptAnswers(questions, request.getAnswers());
 
         Map<Long, String> answers = request.getAnswers();
         int correct = 0;
@@ -324,12 +256,6 @@ public class QuizServiceImpl implements QuizService {
         return quizRepository.findByLearningNode_IdAndActiveTrue(learningNodeId).stream()
                 .map(this::toResponse)
                 .toList();
-    }
-
-    private void assertOwnership(Long currentUserId, Quiz quiz, String action) {
-        if (quiz.getLecturer() == null || !quiz.getLecturer().getId().equals(currentUserId)) {
-            throw new BusinessException("Access denied: you can only " + action + " your own quiz.");
-        }
     }
 
     private QuizResponse applyUpdate(Quiz quiz, UpdateQuizRequest request) {
@@ -437,11 +363,16 @@ public class QuizServiceImpl implements QuizService {
     }
 
     private QuizAttemptResponse toAttemptResponse(QuizAttempt a) {
+        String name = a.getStudent().getFullName();
+        if (name == null || name.trim().isEmpty()) {
+            name = a.getStudent().getUsername();
+        }
+        
         return QuizAttemptResponse.builder()
                 .id(a.getId())
                 .quizId(a.getQuiz().getId())
                 .studentId(a.getStudent().getId())
-                .studentName(a.getStudent().getFullName())
+                .studentName(name)
                 .score(a.getScore())
                 .totalQuestions(a.getTotalQuestions())
                 .correctAnswers(a.getCorrectAnswers())
