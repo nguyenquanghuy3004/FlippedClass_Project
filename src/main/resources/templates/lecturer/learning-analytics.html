@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
+<head>
+    <title>Learning Analytics</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <input type="hidden" id="spaceId" th:value="${spaceId}" />
+        
+        <div class="container-fluid py-4">
+            <!-- Classroom Style Tabs -->
+            <ul class="nav nav-tabs mb-4 border-bottom-0 gap-3 fw-bold" style="font-size: 0.95rem;">
+                <li class="nav-item">
+                    <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/dashboard" style="transition: color 0.2s;"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/space/' + ${spaceId}}">Classwork / Roadmap</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/space-members?spaceId=' + ${spaceId}}">People</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active text-primary border-0 border-bottom border-primary border-3 pb-3 px-3" href="#" style="color: #1a73e8 !important; border-color: #1a73e8 !important;">Analytics</a>
+                </li>
+            </ul>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h1 class="fs-3 fw-bold mb-1">Learning Analytics</h1>
+                    <p class="text-muted">Track student performance and identify supporter candidates.</p>
+                </div>
+            </div>
+
+            <!-- KPI Cards Overview -->
+            <div class="row g-4 mb-5" id="kpi-overview">
+                <!-- Total Students -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm border-0 rounded-4 h-100">
+                        <div class="card-body p-4 d-flex align-items-center">
+                            <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 56px; height: 56px;">
+                                <i class="ti ti-users fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="text-muted mb-0 fw-semibold small text-uppercase">Total Students</p>
+                                <h2 class="mb-0 fw-bold" id="kpi-total-students">--</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Average Progress -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm border-0 rounded-4 h-100">
+                        <div class="card-body p-4 d-flex align-items-center">
+                            <div class="bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 56px; height: 56px;">
+                                <i class="ti ti-chart-bar fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="text-muted mb-0 fw-semibold small text-uppercase">Avg Progress</p>
+                                <h2 class="mb-0 fw-bold" id="kpi-avg-progress">--%</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Students -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm border-0 rounded-4 h-100">
+                        <div class="card-body p-4 d-flex align-items-center">
+                            <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 56px; height: 56px;">
+                                <i class="ti ti-activity fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="text-muted mb-0 fw-semibold small text-uppercase">Active Students</p>
+                                <h2 class="mb-0 fw-bold" id="kpi-active-students">--</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supporter Candidates -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm border-0 rounded-4 h-100">
+                        <div class="card-body p-4 d-flex align-items-center">
+                            <div class="bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 56px; height: 56px;">
+                                <i class="ti ti-star fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="text-muted mb-0 fw-semibold small text-uppercase">Candidates</p>
+                                <h2 class="mb-0 fw-bold" id="kpi-candidates">--</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Performance Table -->
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white px-4 py-3 border-bottom d-flex justify-content-between align-items-center rounded-top-4">
+                    <h5 class="mb-0 fw-bold">Student Performance</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4 py-3 text-muted fw-semibold">Student Name</th>
+                                    <th class="py-3 text-muted fw-semibold">Progress</th>
+                                    <th class="py-3 text-muted fw-semibold">Quiz Avg</th>
+                                    <th class="py-3 text-muted fw-semibold">Last Active</th>
+                                    <th class="py-3 text-muted fw-semibold">Status/Badge</th>
+                                    <th class="py-3 text-muted fw-semibold pe-4 text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analytics-table-body">
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                        Loading analytics data...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            // LEARNING ANALYTICS JS
+
+            const spaceId = $('#spaceId').val();
+
+            $(document).ready(function() {
+                loadAnalytics();
+            });
+
+            function loadAnalytics() {
+                $.ajax({
+                    // Thay đổi URL này cho khớp với endpoint Backend thực tế của bạn
+                    url: `/api/spaces/${spaceId}/analytics`,
+                    method: 'GET',
+                    success: function(data) {
+                        renderKPI(data);
+                        renderTable(data.students);
+                    },
+                    error: function(err) {
+                        console.error('Lỗi khi tải dữ liệu Analytics:', err);
+                        const errorHtml = '<tr><td colspan="6" class="text-center py-5 text-danger"><i class="ti ti-alert-circle fs-4 mb-2 d-block"></i> Không thể tải dữ liệu. Vui lòng kiểm tra API Backend.</td></tr>';
+                        $('#analytics-table-body').html(errorHtml);
+                        renderKPI({ totalStudents: 0, averageProgress: 0, activeStudents: 0, supporterCandidates: 0 });
+                    }
+                });
+            }
+
+            function renderKPI(data) {
+                $('#kpi-total-students').text(data.totalStudents || 0);
+                $('#kpi-avg-progress').text((data.averageProgress || 0) + '%');
+                $('#kpi-active-students').text(data.activeStudents || 0);
+                $('#kpi-candidates').text(data.supporterCandidates || 0);
+            }
+
+            function renderTable(students) {
+                let html = '';
+                if (!students || students.length === 0) {
+                    html = '<tr><td colspan="6" class="text-center py-5 text-muted">No student data available.</td></tr>';
+                } else {
+                    students.forEach(s => {
+                        // Logic xét điều kiện Supporter Candidate
+                        const isCandidate = (s.progress >= 80 && s.quizAvg >= 8.0);
+                        
+                        let badgeHtml = '';
+                        if (isCandidate) {
+                            badgeHtml = `<span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1">
+                                            <i class="ti ti-star-filled me-1"></i> Supporter Candidate
+                                         </span>`;
+                        } else {
+                            badgeHtml = `<span class="text-muted small">Standard</span>`;
+                        }
+
+                        // Progress bar màu sắc tuỳ vào mức độ
+                        let progressColor = 'bg-primary';
+                        if (s.progress < 50) progressColor = 'bg-danger';
+                        else if (s.progress >= 80) progressColor = 'bg-success';
+
+                        html += `
+                            <tr>
+                                <td class="ps-4 fw-semibold text-dark">${s.fullName || 'N/A'}</td>
+                                <td style="min-width: 200px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                            <div class="progress-bar ${progressColor} rounded-pill" role="progressbar" style="width: ${s.progress}%" aria-valuenow="${s.progress}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="small fw-semibold" style="width: 35px;">${s.progress}%</span>
+                                    </div>
+                                </td>
+                                <td><span class="fw-bold">${s.quizAvg}</span></td>
+                                <td>${s.lastActive}</td>
+                                <td>${badgeHtml}</td>
+                                <td class="pe-4 text-end">
+                                    <a href="/lecturer/grading?studentId=${s.studentId}&spaceId=${spaceId}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                                        <i class="ti ti-edit me-1"></i> Evaluate
+                                    </a>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                $('#analytics-table-body').html(html);
+            }
+        </script>
+    </th:block>
+</body>
+</html>
+
+
+

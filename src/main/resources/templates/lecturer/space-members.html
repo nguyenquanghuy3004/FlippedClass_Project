@@ -16,6 +16,22 @@
         
         <input type="hidden" id="spaceId" th:value="${spaceId}">
         
+        <!-- Classroom Style Tabs -->
+        <ul class="nav nav-tabs mb-4 border-bottom-0 gap-3 fw-bold" style="font-size: 0.95rem;">
+            <li class="nav-item">
+                <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/dashboard" style="transition: color 0.2s;"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/space/' + ${spaceId}}">Classwork / Roadmap</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active text-primary border-0 border-bottom border-primary border-3 pb-3 px-3" href="#" style="color: #1a73e8 !important; border-color: #1a73e8 !important;">People</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/spaces/' + ${spaceId} + '/analytics'}">Analytics</a>
+            </li>
+        </ul>
+        
         <div class="card">
             <div class="card-header bg-white px-4 py-3 border-bottom d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Members List</h5>
@@ -42,7 +58,118 @@
     </div>
 
     <th:block layout:fragment="scripts">
-        <script th:src="@{/assets/js/lecturer/space-members.js}"></script>
+        <script>
+
+            // SPACE MEMBERS JS (Logic quản lý thành viên trong Không gian học tập)
+
+            const spaceId = $('#spaceId').val();
+
+            // Khởi tạo: Tải danh sách thành viên khi trang được tải xong
+            $(document).ready(function() {
+                loadMembers();
+            });
+
+            // Hàm gọi API để lấy danh sách thành viên
+            function loadMembers() {
+                $.ajax({
+                    url: `/api/spaces/${spaceId}/members`,
+                    method: 'GET',
+                    success: function(data) {
+                        renderTable(data.content);
+                    },
+                    error: function() {
+                        alert('Failed to load members.');
+                    }
+                });
+            }
+
+            // Hàm render dữ liệu thành viên ra bảng HTML
+            function renderTable(members) {
+                let html = '';
+                if(members.length === 0) {
+                    html = '<tr><td colspan="5" class="text-center py-4 text-muted">No members found.</td></tr>';
+                } else {
+                    members.forEach(m => {
+                        let badgeClass = 'bg-secondary-subtle text-secondary border border-secondary';
+                        if (m.role === 'OWNER') badgeClass = 'bg-primary-subtle text-primary border border-primary';
+                        if (m.role === 'SUPPORTER') badgeClass = 'bg-success-subtle text-success border border-success';
+
+                        let actionsHtml = '';
+                        if (m.role !== 'OWNER') {
+                            if (m.role === 'MEMBER') {
+                                actionsHtml += `<button class="btn btn-sm btn-outline-success me-2" onclick="promote(${m.memberId})"><i class="ti ti-arrow-up"></i> Promote</button>`;
+                            } else if (m.role === 'SUPPORTER') {
+                                actionsHtml += `<button class="btn btn-sm btn-outline-warning me-2" onclick="demote(${m.memberId})"><i class="ti ti-arrow-down"></i> Demote</button>`;
+                            }
+                            actionsHtml += `<button class="btn btn-sm btn-outline-danger" onclick="removeMember(${m.memberId})"><i class="ti ti-trash"></i> Remove</button>`;
+                        } else {
+                            actionsHtml = '<span class="text-muted fst-italic">No actions</span>';
+                        }
+
+                        html += `
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-semibold text-dark">${m.fullName || 'N/A'}</div>
+                                </td>
+                                <td>${m.email}</td>
+                                <td><span class="badge ${badgeClass}">${m.role}</span></td>
+                                <td>${new Date(m.joinedAt).toLocaleDateString()}</td>
+                                <td class="text-end pe-4">${actionsHtml}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                $('#members-table-body').html(html);
+            }
+
+            // Hàm thăng cấp thành viên lên Supporter
+            function promote(memberId) {
+                if(!confirm('Promote this member to Supporter?')) return;
+                $.ajax({
+                    url: `/api/spaces/${spaceId}/members/${memberId}/promote`,
+                    method: 'POST',
+                    success: function() {
+                        loadMembers();
+                    },
+                    error: function(err) {
+                        alert('Error promoting member');
+                    }
+                });
+            }
+
+            // Hàm giáng cấp Supporter xuống Member thường
+            function demote(memberId) {
+                if(!confirm('Demote this supporter to Member?')) return;
+                $.ajax({
+                    url: `/api/spaces/${spaceId}/members/${memberId}/demote`,
+                    method: 'POST',
+                    success: function() {
+                        loadMembers();
+                    },
+                    error: function(err) {
+                        alert('Error demoting member');
+                    }
+                });
+            }
+
+            // Hàm xóa thành viên khỏi Không gian học tập
+            function removeMember(memberId) {
+                if(!confirm('Are you sure you want to remove this member?')) return;
+                $.ajax({
+                    url: `/api/spaces/${spaceId}/members/${memberId}`,
+                    method: 'DELETE',
+                    success: function() {
+                        loadMembers();
+                    },
+                    error: function(err) {
+                        alert('Error removing member');
+                    }
+                });
+            }
+        </script>
     </th:block>
 </body>
 </html>
+
+
+

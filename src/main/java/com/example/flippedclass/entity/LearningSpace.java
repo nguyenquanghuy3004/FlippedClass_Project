@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "learning_spaces")
@@ -50,4 +52,16 @@ public class LearningSpace {
     @Column(name = "updated_at")
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+
+
+
+
+
+
+//    @OneToMany(mappedBy = "learningSpace", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<LearningPath> paths = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "learningSpace", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<LearningSpaceMember> members = new ArrayList<>();
 }

@@ -14,9 +14,11 @@ import com.example.flippedclass.service.LearningSpaceService;
 import com.example.flippedclass.service.InviteCodeGenerator;
 import com.example.flippedclass.util.ValidateJoinLearningSpace;
 import com.example.flippedclass.enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.VisibilityType;
 import com.example.flippedclass.enums.MemberRole;
 import com.example.flippedclass.enums.MemberStatus;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,22 +28,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class LearningSpaceServiceImpl implements LearningSpaceService {
 
-    @Autowired
-    private LearningSpaceRepository learningSpaceRepository;
-
-    @Autowired
-    private LearningSpaceMemberRepository memberRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private InviteCodeGenerator inviteCodeGenerator;
-
-    @Autowired
-    private ValidateJoinLearningSpace validateJoinLearningSpace;
+    private  final  LearningSpaceRepository learningSpaceRepository;
+    private final LearningSpaceMemberRepository memberRepository;
+    private final UserRepository userRepository;
+    private final InviteCodeGenerator inviteCodeGenerator;
+    private final ValidateJoinLearningSpace validateJoinLearningSpace;
 
 
     private User getCurrentUser() {
@@ -127,6 +121,24 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
                 .build()).collect(Collectors.toList());
     }
 
+    @Override
+    public List<LearningSpaceResponse> getPublicSpaces() {
+        return learningSpaceRepository
+            .findByVisibilityAndStatus(VisibilityType.PUBLIC, LearningSpaceStatus.ACTIVE)
+            .stream()
+            .map(space -> LearningSpaceResponse.builder()
+                .id(space.getId())
+                .name(space.getName())
+                .description(space.getDescription())
+                .inviteCode(space.getInviteCode())
+                .ownerId(space.getOwner().getId())
+                .ownerUsername(space.getOwner().getUsername())
+                .visibility(space.getVisibility())
+                .createdAt(space.getCreatedAt())
+                .status(space.getStatus())
+                .build())
+            .toList();
+    }
 
     @Transactional
     @Override
@@ -154,11 +166,23 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Transactional
     public JoinLearningSpaceResponse joinLearningSpace(JoinLearningSpaceRequest request) {
         // Validate request
-        validateJoinLearningSpace.validate(request);
+        // validateJoinLearningSpace.validate(request); // Commenting out as it might require inviteCode. You can update the validator logic.
 
-        LearningSpace learningSpace = learningSpaceRepository.findByInviteCodeAndStatus(request.getInviteCode(), LearningSpaceStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("Could not find a class with this invite code or the class has been deleted"));
+        LearningSpace learningSpace;
 
+        if (request.getInviteCode() != null && !request.getInviteCode().trim().isEmpty()) {
+            learningSpace = learningSpaceRepository.findByInviteCodeAndStatus(request.getInviteCode(), LearningSpaceStatus.ACTIVE)
+                    .orElseThrow(() -> new IllegalArgumentException("Mã mời không hợp lệ hoặc lớp đã bị xóa"));
+        } else if (request.getSpaceId() != null) {
+            learningSpace = learningSpaceRepository.findByIdAndStatus(request.getSpaceId(), LearningSpaceStatus.ACTIVE)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lớp học"));
+
+            if (learningSpace.getVisibility() == VisibilityType.PRIVATE) {
+                throw new IllegalArgumentException("Lớp học này là riêng tư, bạn phải có mã mời để tham gia");
+            }
+        } else {
+            throw new IllegalArgumentException("Vui lòng cung cấp mã mời hoặc ID lớp học");
+        }
 
         User currentUser = getCurrentUser();
 

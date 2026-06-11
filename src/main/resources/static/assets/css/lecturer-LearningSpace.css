@@ -1,3 +1,10 @@
+/* =====================================================
+   lecturer-LearningSpace.css
+   CSS cho trang Lecturer > My Learning Spaces (dashboard)
+   Dùng bởi: lecturer/LearningSpace.html (nhúng vào dashboard.html)
+   ===================================================== */
+
+/* --- Classroom Card Grid --- */
 .classroom-card {
     border-radius: 20px;
     border: none;
@@ -11,32 +18,12 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.06);
 }
 
-.status-indicator {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 6px;
-    vertical-align: middle;
-}
-.status-ACTIVE {
-    background-color: #10b981;
-    box-shadow: 0 0 4px #10b981;
-}
-.status-ARCHIVE {
-    background-color: #f59e0b;
-    box-shadow: 0 0 4px #f59e0b;
-}
-.status-DELETE {
-    background-color: #ef4444;
-    box-shadow: 0 0 4px #ef4444;
-}
-
 .classroom-card:hover {
     box-shadow: 0 15px 35px rgba(0,0,0,0.12);
     transform: translateY(-4px);
 }
 
+/* --- Banner --- */
 .card-banner {
     height: 115px;
     padding: 16px;
@@ -58,6 +45,20 @@
 .banner-red      { background: linear-gradient(135deg, #ea580c 0%, #9a3412 100%); }
 .banner-gray     { background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%); }
 
+/* --- Status Indicators --- */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.status-ACTIVE  { background-color: #10b981; box-shadow: 0 0 4px #10b981; }
+.status-ARCHIVE { background-color: #f59e0b; box-shadow: 0 0 4px #f59e0b; }
+.status-DELETE  { background-color: #ef4444; box-shadow: 0 0 4px #ef4444; }
+
+/* --- Card Title Link --- */
 .card-title-link {
     color: white;
     text-decoration: none;
@@ -92,14 +93,7 @@
     cursor: pointer;
 }
 
-.teacher-name {
-    font-size: 0.75rem;
-    margin: 4px 0 0 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
+/* --- 3-dot Options Button --- */
 .card-options-top {
     position: absolute;
     top: 12px;
@@ -116,10 +110,11 @@
     background-color: rgba(255,255,255,0.1);
 }
 
+/* --- Avatar Circle --- */
 .card-avatar {
     position: absolute;
     right: 16px;
-    top: 60px;
+    top: 64px;
     width: 70px;
     height: 70px;
     border-radius: 50%;
@@ -130,40 +125,25 @@
     font-size: 2.5rem;
     color: white;
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+.card-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-.card-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+/* Avatar colors match bold banner gradients */
+.avatar-green  { background: linear-gradient(135deg, #059669, #064e3b); }
+.avatar-blue   { background: linear-gradient(135deg, #0d9488, #6d28d9); }
+.avatar-red    { background: linear-gradient(135deg, #ea580c, #9a3412); }
+.avatar-orange { background: linear-gradient(135deg, #7c3aed, #4c1d95); }
 
-/* Avatar colors match banner gradients */
-.avatar-blue   { background: linear-gradient(135deg, #3730A3, #6366F1); }
-.avatar-orange { background: linear-gradient(135deg, #92400E, #D97706); }
-.avatar-green  { background: linear-gradient(135deg, #064E3B, #047857); }
-.avatar-red    { background: linear-gradient(135deg, #0E7490, #22D3EE); }
-
+/* --- Card Body & Footer --- */
 .card-body-content {
     padding: 16px;
     flex-grow: 1;
-    padding-top: 45px; 
-}
-
-.assignment-item {
-    font-size: 0.8125rem;
-    color: #3c4043;
-    margin-bottom: 4px;
-}
-.assignment-due {
-    color: #3c4043;
-    font-weight: 500;
-    margin-bottom: 2px;
-    font-size: 0.8125rem;
+    padding-top: 45px;
 }
 
 .card-footer {
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #e5e7eb;
     padding: 8px 16px;
     display: flex;
     justify-content: space-between;
@@ -183,20 +163,9 @@
     justify-content: center;
     color: #5f6368;
 }
-.footer-icon:hover {
-    background-color: #f1f3f4;
-}
+.footer-icon:hover { background-color: #f1f3f4; }
 
-/* Layout Utilities from before */
-.banner-bottom {
-    background-color: #0f172a;
-    color: white;
-    border-radius: 16px;
-    padding: 2.5rem;
-    background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-}
-
+/* --- Filter Pills --- */
 .filter-pill {
     border-radius: 20px;
     padding: 0.4rem 1.25rem;
@@ -208,15 +177,8 @@
     font-weight: 500;
     transition: all 0.2s;
 }
-.filter-pill:hover {
-    background: #f1f3f4;
-}
-.filter-pill.active {
-    background: #e8f0fe;
-    color: #1967d2;
-    border-color: #e8f0fe;
-}
+.filter-pill:hover  { background: #f1f3f4; }
+.filter-pill.active { background: #e8f0fe; color: #1967d2; border-color: #e8f0fe; }
 
-.stat-box {
-    padding: 0.75rem 2rem;
-}
+/* --- Stat Box --- */
+.stat-box { padding: 0.75rem 2rem; }
