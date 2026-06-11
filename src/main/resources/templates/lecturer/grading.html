@@ -12,125 +12,131 @@
 </head>
 
 <body>
-  <div layout:fragment="content">
-    <div class="container-fluid">
-      
-      <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-        <div>
-          <h2 class="fw-bold mb-0">Evaluate Student</h2>
-          <p class="text-muted mb-0">Review interaction logs and submit grades.</p>
-        </div>
-        <a href="javascript:history.back()" class="btn btn-light rounded-pill shadow-sm"><i class="ti ti-arrow-left"></i> Back</a>
-      </div>
+<div layout:fragment="content">
+  <div class="container-fluid">
 
-      <div id="loader" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+      <div>
+        <h2 class="fw-bold mb-0">Evaluate Student</h2>
+        <p class="text-muted mb-0">Review interaction logs and submit grades.</p>
       </div>
+      <a href="javascript:history.back()" class="btn btn-light rounded-pill shadow-sm"><i class="ti ti-arrow-left"></i> Back</a>
+    </div>
 
-      <div class="row g-4 d-none" id="gradingContent">
-        <!-- LEFT COLUMN: CONTEXT -->
-        <div class="col-12 col-xl-5">
-          <div class="grading-card">
-            
-            <div class="student-header">
-              <img th:src="@{/assets/images/avatar-2.jpg}" class="student-avatar" id="studentAvatar" alt="Student">
-              <div>
-                <h4 class="fw-bold mb-1" id="studentName">Student Name</h4>
-                <div class="text-muted fs-7 mb-2" id="studentRoll">Roll Number</div>
-                <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="openProfileModal()">
-                  <i class="ti ti-id"></i> View Full Profile
-                </button>
-              </div>
+    <div id="loader" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <div class="row g-4 d-none" id="gradingContent">
+      <!-- LEFT COLUMN: CONTEXT -->
+      <div class="col-12 col-xl-5">
+        <div class="grading-card">
+
+          <div class="student-header">
+            <img th:src="@{/assets/images/avatar-2.jpg}" class="student-avatar" id="studentAvatar" alt="Student">
+            <div>
+              <h4 class="fw-bold mb-1" id="studentName">Student Name</h4>
+              <div class="text-muted fs-7 mb-2" id="studentRoll">Roll Number</div>
+              <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="openProfileModal()">
+                <i class="ti ti-id"></i> View Full Profile
+              </button>
             </div>
+          </div>
 
-            <h5 class="fw-bold mb-3"><i class="ti ti-history text-primary"></i> 20 Recent Interactions</h5>
-            <div class="timeline" id="interactionTimeline">
+          <h5 class="fw-bold mb-3"><i class="ti ti-history text-primary"></i> 20 Recent Interactions</h5>
+          <div class="timeline" id="interactionTimeline">
+            <!-- JS populated -->
+          </div>
+
+          <h5 class="fw-bold mb-3 mt-5"><i class="ti ti-award text-success"></i> Previous Grades</h5>
+          <div id="pastGradesContainer">
+            <!-- JS populated -->
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: GRADE ENTRY -->
+      <div class="col-12 col-xl-7">
+        <div class="grading-card">
+          <h4 class="fw-bold mb-4"><i class="ti ti-checkup-list text-primary"></i> Grade Entry</h4>
+
+          <div id="alertMessage" class="alert d-none" role="alert"></div>
+
+          <form id="gradeForm" onsubmit="submitGrades(event)">
+            <div id="criteriaContainer">
               <!-- JS populated -->
             </div>
 
-            <h5 class="fw-bold mb-3 mt-5"><i class="ti ti-award text-success"></i> Previous Grades</h5>
-            <div id="pastGradesContainer">
-              <!-- JS populated -->
+            <div class="d-grid gap-2 mt-4 pt-3 border-top">
+              <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" id="submitBtn">
+                <i class="ti ti-device-floppy"></i> Submit Grades
+              </button>
             </div>
+          </form>
 
-          </div>
-        </div>
-
-        <!-- RIGHT COLUMN: GRADE ENTRY -->
-        <div class="col-12 col-xl-7">
-          <div class="grading-card">
-            <h4 class="fw-bold mb-4"><i class="ti ti-checkup-list text-primary"></i> Grade Entry</h4>
-            
-            <div id="alertMessage" class="alert d-none" role="alert"></div>
-
-            <form id="gradeForm" onsubmit="submitGrades(event)">
-              <div id="criteriaContainer">
-                <!-- JS populated -->
-              </div>
-              
-              <div class="d-grid gap-2 mt-4 pt-3 border-top">
-                <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" id="submitBtn">
-                  <i class="ti ti-device-floppy"></i> Submit Grades
-                </button>
-              </div>
-            </form>
-
-          </div>
         </div>
       </div>
-
-    </div>
     </div>
 
-  <!-- PROFILE MODAL -->
-  <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg">
-      <div class="modal-content border-0 shadow-lg rounded-4">
-        <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
-          <h4 class="modal-title fw-bold" id="profileModalLabel">Student Profile</h4>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+        <h4 class="modal-title fw-bold" id="profileModalLabel">Student Profile</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div id="profileLoader" class="text-center py-4 d-none">
+          <div class="spinner-border text-primary" role="status"></div>
         </div>
-        <div class="modal-body p-4">
-          <div id="profileLoader" class="text-center py-4 d-none">
-            <div class="spinner-border text-primary" role="status"></div>
-          </div>
-          <div id="profileContent">
-            <!-- Tabs -->
-            <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button class="nav-link active rounded-pill px-4 fw-bold" id="pills-logs-tab" data-bs-toggle="pill" data-bs-target="#pills-logs" type="button" role="tab"><i class="ti ti-list"></i> All Interactions</button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link rounded-pill px-4 fw-bold" id="pills-grades-tab" data-bs-toggle="pill" data-bs-target="#pills-grades" type="button" role="tab"><i class="ti ti-star"></i> All Grades</button>
-              </li>
-            </ul>
-            <div class="tab-content" id="pills-tabContent">
-              <div class="tab-pane fade show active" id="pills-logs" role="tabpanel">
-                <div class="timeline mt-0" id="fullInteractionTimeline"></div>
-              </div>
-              <div class="tab-pane fade" id="pills-grades" role="tabpanel">
-                <div id="fullGradesContainer"></div>
-              </div>
+        <div id="profileContent">
+          <!-- Tabs -->
+          <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active rounded-pill px-4 fw-bold" id="pills-logs-tab" data-bs-toggle="pill" data-bs-target="#pills-logs" type="button" role="tab"><i class="ti ti-list"></i> All Interactions</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link rounded-pill px-4 fw-bold" id="pills-grades-tab" data-bs-toggle="pill" data-bs-target="#pills-grades" type="button" role="tab"><i class="ti ti-star"></i> All Grades</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-logs" role="tabpanel">
+              <div class="timeline mt-0" id="fullInteractionTimeline"></div>
+            </div>
+            <div class="tab-pane fade" id="pills-grades" role="tabpanel">
+              <div id="fullGradesContainer"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <th:block layout:fragment="scripts">
+</div>
+<th:block layout:fragment="scripts">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // Utility to get URL params
     const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('sessionId') || 1; // Default to 1 for demo
-    const studentId = urlParams.get('studentId') || 1; // Default to 1 for demo
+    const sessionId = urlParams.get('sessionId');
+    const studentId = urlParams.get('studentId');
 
+    const LECTURER_ID = localStorage.getItem('user_id') || 1;
     let currentCriteria = [];
     let currentStudentInfo = null;
 
     document.addEventListener("DOMContentLoaded", () => {
+      if (!sessionId || !studentId) {
+        showAlert('Missing sessionId or studentId in URL parameters.', 'danger');
+        document.getElementById('loader').classList.add('d-none');
+        return;
+      }
       loadGradingContext();
     });
 
@@ -145,9 +151,14 @@
     async function loadGradingContext() {
       const loader = document.getElementById('loader');
       const content = document.getElementById('gradingContent');
-      
+
       try {
-        const response = await fetch(`/api/evaluations/sessions/${sessionId}/grading-context?studentId=${studentId}`);
+        const token = localStorage.getItem('jwt_token');
+        const response = await fetch(`/api/evaluations/sessions/${sessionId}/grading-context?studentId=${studentId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (!response.ok) {
           throw new Error('API not available, using mock data');
         }
@@ -178,7 +189,7 @@
 
     function renderContext(data) {
       currentStudentInfo = data.student;
-      currentCriteria = data.criteria;
+      currentCriteria = data.session ? data.session.criteria : data.criteria; // fallback for mock data
 
       // Student Info
       if(data.student) {
@@ -188,19 +199,21 @@
 
       // Interactions Timeline
       const timeline = document.getElementById('interactionTimeline');
+      const interactions = data.interactionHistory || data.recentInteractions || [];
       timeline.innerHTML = '';
-      if (data.recentInteractions && data.recentInteractions.length > 0) {
-        data.recentInteractions.forEach(log => {
-          const isHome = log.type === 'HOME_STUDY';
+      if (interactions.length > 0) {
+        interactions.forEach(log => {
+          const type = log.interactionType || log.type;
+          const isHome = type === 'HOME_STUDY';
           const iconClass = isHome ? 'home' : 'class';
           const icon = isHome ? 'ti-home-2' : 'ti-users';
-          const dateStr = new Date(log.timestamp).toLocaleString();
-          
+          const dateStr = new Date(log.occurredAt || log.timestamp).toLocaleString();
+
           timeline.innerHTML += `
             <div class="timeline-item">
               <div class="timeline-icon ${iconClass}"><i class="ti ${icon} fs-7"></i></div>
               <div class="timeline-content">
-                <div class="timeline-date">${dateStr} &bull; <span class="${isHome ? 'text-primary' : 'text-success'}">${log.type.replace('_', ' ')}</span></div>
+                <div class="timeline-date">${dateStr} &bull; <span class="${isHome ? 'text-primary' : 'text-success'}">${type.replace('_', ' ')}</span></div>
                 <div class="fw-bold text-dark fs-6">${log.summary}</div>
               </div>
             </div>
@@ -212,14 +225,15 @@
 
       // Past Grades
       const pastContainer = document.getElementById('pastGradesContainer');
+      const pastGrades = data.existingGrades || data.previousGrades || [];
       pastContainer.innerHTML = '';
-      if (data.previousGrades && data.previousGrades.length > 0) {
-        data.previousGrades.forEach(grade => {
+      if (pastGrades.length > 0) {
+        pastGrades.forEach(grade => {
           pastContainer.innerHTML += `
             <div class="p-3 bg-light rounded-3 mb-2 border">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="fw-bold text-dark fs-6">${grade.criterionName}</span>
-                <span class="badge bg-success fs-6">${grade.score} / ${grade.maxScore}</span>
+                <span class="badge bg-success fs-6">${grade.score} ${grade.maxScore ? '/ ' + grade.maxScore : ''}</span>
               </div>
               <p class="mb-0 text-muted fs-7"><i class="ti ti-message-2 text-primary"></i> ${grade.comment}</p>
             </div>
@@ -231,10 +245,11 @@
 
       // Render Grade Entry Form
       const criteriaContainer = document.getElementById('criteriaContainer');
+      const renderCriteria = data.session ? data.session.criteria : data.criteria;
       criteriaContainer.innerHTML = '';
-      if(data.criteria && data.criteria.length > 0) {
-          data.criteria.forEach(crit => {
-            criteriaContainer.innerHTML += `
+      if(renderCriteria && renderCriteria.length > 0) {
+        renderCriteria.forEach(crit => {
+          criteriaContainer.innerHTML += `
               <div class="criterion-box">
                 <div class="d-flex justify-content-between">
                   <div>
@@ -255,17 +270,17 @@
                 </div>
               </div>
             `;
-          });
+        });
       } else {
-          criteriaContainer.innerHTML = '<div class="alert alert-warning">No grading criteria found for this session.</div>';
-          document.getElementById('submitBtn').disabled = true;
+        criteriaContainer.innerHTML = '<div class="alert alert-warning">No grading criteria found for this session.</div>';
+        document.getElementById('submitBtn').disabled = true;
       }
     }
 
     async function submitGrades(e) {
       e.preventDefault();
       const form = e.target;
-      
+
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
@@ -274,27 +289,34 @@
 
       for (const crit of currentCriteria) {
         const score = form.elements[`score_${crit.id}`].value;
-        const comment = form.elements[`comment_${crit.id}`].value;
+        const commentInput = form.elements[`comment_${crit.id}`];
+        const comment = commentInput.value.trim();
 
-        if (!comment || comment.trim() === '') {
-          showAlert('Comment is strictly required for all criteria!', 'danger');
+        if (comment.length < 10) {
+          showAlert('Comment must be at least 10 characters long.', 'danger');
           btn.disabled = false;
           btn.innerHTML = '<i class="ti ti-device-floppy"></i> Submit Grades';
+          hasError = true;
           return;
         }
 
         const payload = {
-          evaluationSessionId: parseInt(sessionId),
+          sessionId: parseInt(sessionId),
           studentId: parseInt(studentId),
-          evaluationCriterionId: crit.id,
+          criterionId: crit.id,
+          lecturerId: parseInt(LECTURER_ID),
           score: parseFloat(score),
           comment: comment
         };
 
         try {
+          const token = localStorage.getItem('jwt_token');
           const response = await fetch('/api/evaluations/grades', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(payload)
           });
           if (!response.ok) throw new Error('Submission failed');
@@ -318,15 +340,15 @@
     }
 
     let profileModal = null;
-    
+
     async function openProfileModal() {
       if(!profileModal) {
-         profileModal = new bootstrap.Modal(document.getElementById('profileModal'));
+        profileModal = new bootstrap.Modal(document.getElementById('profileModal'));
       }
       profileModal.show();
       const loader = document.getElementById('profileLoader');
       const content = document.getElementById('profileContent');
-      
+
       loader.classList.remove('d-none');
       content.style.opacity = '0.3';
 
@@ -341,12 +363,12 @@
         const mockData = {
           student: currentStudentInfo,
           allInteractions: [
-             { type: "CLASS_PARTICIPATION", summary: "Answered scenario question correctly", timestamp: new Date().toISOString() },
-             { type: "HOME_STUDY", summary: "Watched video Chapter 3", timestamp: new Date(Date.now() - 86400000).toISOString() },
-             { type: "HOME_STUDY", summary: "Completed quiz prep", timestamp: new Date(Date.now() - 186400000).toISOString() }
+            { type: "CLASS_PARTICIPATION", summary: "Answered scenario question correctly", timestamp: new Date().toISOString() },
+            { type: "HOME_STUDY", summary: "Watched video Chapter 3", timestamp: new Date(Date.now() - 86400000).toISOString() },
+            { type: "HOME_STUDY", summary: "Completed quiz prep", timestamp: new Date(Date.now() - 186400000).toISOString() }
           ],
           allGrades: [
-             { criterionName: "Midterm Attendance", score: 10, maxScore: 10, comment: "Always present." }
+            { criterionName: "Midterm Attendance", score: 10, maxScore: 10, comment: "Always present." }
           ]
         };
         renderProfileModal(mockData);
@@ -359,17 +381,19 @@
     function renderProfileModal(data) {
       // Render Full Interactions
       const tl = document.getElementById('fullInteractionTimeline');
+      const allInteractions = data.allInteractions || data.interactionHistory || [];
       tl.innerHTML = '';
-      if(data.allInteractions && data.allInteractions.length > 0) {
-        data.allInteractions.forEach(log => {
-          const isHome = log.type === 'HOME_STUDY';
+      if(allInteractions.length > 0) {
+        allInteractions.forEach(log => {
+          const type = log.interactionType || log.type;
+          const isHome = type === 'HOME_STUDY';
           const iconClass = isHome ? 'home' : 'class';
           const icon = isHome ? 'ti-home-2' : 'ti-users';
           tl.innerHTML += `
             <div class="timeline-item">
               <div class="timeline-icon ${iconClass}"><i class="ti ${icon} fs-7"></i></div>
               <div class="timeline-content">
-                <div class="timeline-date">${new Date(log.timestamp).toLocaleString()} &bull; <span class="${isHome ? 'text-primary' : 'text-success'}">${log.type.replace('_', ' ')}</span></div>
+                <div class="timeline-date">${new Date(log.occurredAt || log.timestamp).toLocaleString()} &bull; <span class="${isHome ? 'text-primary' : 'text-success'}">${type.replace('_', ' ')}</span></div>
                 <div class="fw-bold text-dark fs-6">${log.summary}</div>
               </div>
             </div>
@@ -381,14 +405,15 @@
 
       // Render Full Grades
       const gl = document.getElementById('fullGradesContainer');
+      const allGrades = data.allGrades || data.existingGrades || [];
       gl.innerHTML = '';
-      if(data.allGrades && data.allGrades.length > 0) {
-        data.allGrades.forEach(grade => {
+      if(allGrades.length > 0) {
+        allGrades.forEach(grade => {
           gl.innerHTML += `
             <div class="p-3 bg-light rounded-3 mb-2 border">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="fw-bold text-dark fs-6">${grade.criterionName}</span>
-                <span class="badge bg-success fs-6">${grade.score} / ${grade.maxScore}</span>
+                <span class="badge bg-success fs-6">${grade.score} ${grade.maxScore ? '/ ' + grade.maxScore : ''}</span>
               </div>
               <p class="mb-0 text-muted fs-7"><i class="ti ti-message-2 text-primary"></i> ${grade.comment}</p>
             </div>
@@ -399,7 +424,7 @@
       }
     }
   </script>
-  </th:block>
+</th:block>
 </body>
 </html>
 

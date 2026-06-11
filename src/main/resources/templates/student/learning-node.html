@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Há»c node - FlippedClass</title>
+  <title>Learning Node - FlippedClass</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
@@ -10,13 +10,130 @@
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 
-  <script>
+  <script type="text/javascript">
     if (!localStorage.getItem('jwt_token')) {
       window.location.href = '/login';
     }
   </script>
-
   <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <script>
+/* --- Inlined from student-user-menu.js --- */
+(function () {
+  const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
+
+  function storedUser() {
+    return {
+      fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
+      username: localStorage.getItem('username') || '',
+      avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
+    };
+  }
+
+  function normalizeUser(user = {}) {
+    const stored = storedUser();
+    return {
+      name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
+      username: user.username || stored.username || '',
+      avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
+    };
+  }
+
+  function setStudentMenuUser(user = {}) {
+    const normalized = normalizeUser(user);
+
+    if (normalized.name && normalized.name !== 'Student') {
+      localStorage.setItem('full_name', normalized.name);
+    }
+    if (normalized.username) {
+      localStorage.setItem('username', normalized.username);
+    }
+    if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
+      localStorage.setItem('avatar_url', normalized.avatarUrl);
+    }
+
+    document.querySelectorAll('[data-user-name]').forEach((element) => {
+      element.textContent = normalized.name;
+    });
+    document.querySelectorAll('[data-user-avatar]').forEach((image) => {
+      image.src = normalized.avatarUrl;
+      image.onerror = () => {
+        image.onerror = null;
+        image.src = defaultAvatarUrl;
+      };
+    });
+
+    const topbarName = document.getElementById('studentName');
+    if (topbarName) topbarName.textContent = normalized.name;
+  }
+
+  function studentLogout() {
+    ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
+      localStorage.removeItem(key);
+    });
+    window.location.href = '/';
+  }
+
+  async function refreshStudentMenuUser() {
+    const token = localStorage.getItem('jwt_token');
+    const userId = localStorage.getItem('user_id');
+    if (!token || !userId) return;
+
+    try {
+      const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) return;
+      const user = await response.json();
+      setStudentMenuUser(user);
+    } catch (error) {
+      console.warn('Could not load user menu profile.', error);
+    }
+  }
+
+  function closeAllMenus(exceptMenu = null) {
+    document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
+      if (menu !== exceptMenu) {
+        menu.classList.remove('is-open');
+        menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  function initStudentUserMenus() {
+    setStudentMenuUser();
+    refreshStudentMenuUser();
+
+    document.querySelectorAll('[data-user-menu]').forEach((menu) => {
+      const toggle = menu.querySelector('[data-user-menu-toggle]');
+      const logoutButton = menu.querySelector('[data-user-logout]');
+
+      toggle?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const shouldOpen = !menu.classList.contains('is-open');
+        closeAllMenus(menu);
+        menu.classList.toggle('is-open', shouldOpen);
+        toggle.setAttribute('aria-expanded', String(shouldOpen));
+      });
+
+      logoutButton?.addEventListener('click', studentLogout);
+    });
+
+    document.addEventListener('click', () => closeAllMenus());
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAllMenus();
+    });
+  }
+
+  window.setStudentMenuUser = setStudentMenuUser;
+  window.studentLogout = studentLogout;
+  if (!window.logout) window.logout = studentLogout;
+
+  document.addEventListener('DOMContentLoaded', initStudentUserMenus);
+})();
+
+</script>
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
 </head>
 
 <body>
@@ -27,48 +144,48 @@
   </a>
   <a id="backLink" class="back-link" th:href="@{/student/learning-spaces}">
     <i class="ti ti-arrow-left"></i>
-    Vá» roadmap
+    Back to roadmap
   </a>
   <div class="topbar-spacer"></div>
   <a class="back-link" th:href="@{/student/my-quizzes}">
     <i class="ti ti-brain"></i>
-    My quiz
+    My Quizzes
   </a>
-  <div class="dropdown">
-    <div class="student-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-      <img th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
-      <span id="studentName">Sinh viÃªn</span>
-    </div>
-    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
-      <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>ÄÄƒng xuáº¥t</a></li>
-    </ul>
+  <div class="student-user-menu topbar-user-menu" data-user-menu>
+  <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+    <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
+    <span class="student-menu-info">
+      <span id="studentName" class="student-menu-name" data-user-name>Student</span>
+      <span class="student-menu-role">Student</span>
+    </span>
+    <i class="ti ti-chevron-down student-menu-chevron"></i>
+  </button>
+  <div class="student-menu-panel" role="menu">
+    <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+    <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
   </div>
+</div>
 </header>
 
 <main class="lesson-shell">
   <div id="pageRoot" class="loading-state">
     <div>
       <i class="ti ti-loader-2"></i>
-      <p class="mt-3 mb-0">Äang táº£i ná»™i dung node...</p>
+      <p class="mt-3 mb-0">Loading node content...</p>
     </div>
   </div>
 </main>
 
 <script>
-  const token = localStorage.getItem('jwt_token');
+/* --- Inlined from student-learning-node.js --- */
+﻿const token = localStorage.getItem('jwt_token');
   const urlParams = new URLSearchParams(window.location.search);
   const pathNodeMatch = window.location.pathname.match(/\/student\/learning-nodes\/(\d+)/);
   const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
   const pageRoot = document.getElementById('pageRoot');
   const studentName = document.getElementById('studentName');
 
-  studentName.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Sinh viÃªn';
-
-  function logout() {
-    localStorage.removeItem('jwt_token');
-    localStorage.removeItem('user_id');
-    window.location.href = '/';
-  }
+  studentName.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Student';
 
   function authHeaders(includeJson = true) {
     const headers = { Authorization: `Bearer ${token}` };
@@ -87,7 +204,7 @@
 
   async function readError(response) {
     const text = await response.text();
-    if (!text) return 'CÃ³ lá»—i xáº£y ra. Vui lÃ²ng thá»­ láº¡i.';
+    if (!text) return 'Something went wrong. Please try again.';
     try {
       const json = JSON.parse(text);
       return json.message || json.error || text;
@@ -104,6 +221,14 @@
     return item.fullUrl || item.url || '';
   }
 
+  const resourceLogoSources = {
+    DOC: '/uploads/anh/1200x630wa.jpg',
+    VIDEO: '/uploads/anh/R.jpg',
+    YOUTUBE: '/uploads/anh/OIP.jpg',
+    PDF: '/uploads/anh/pdf-file-download-symbols-format-for-texts-vector.jpg',
+    GOOGLE_DRIVE: '/uploads/anh/Google-Drive-Logo-2020-present.jpg'
+  };
+
   function youtubeEmbedUrl(url) {
     const value = String(url || '');
     const watchMatch = value.match(/[?&]v=([^&]+)/);
@@ -115,36 +240,36 @@
 
   function statusLabel(status) {
     const labels = {
-      ACTIVE: 'Äang há»c',
-      DRAFT: 'Báº£n nhÃ¡p',
-      LOCKED: 'ChÆ°a má»Ÿ',
-      UNLOCKED: 'ÄÃ£ má»Ÿ',
-      ARCHIVED: 'LÆ°u trá»¯',
-      DELETED: 'ÄÃ£ xÃ³a'
+      ACTIVE: 'Active',
+      DRAFT: 'Draft',
+      LOCKED: 'Locked',
+      UNLOCKED: 'Unlocked',
+      ARCHIVED: 'Archived',
+      DELETED: 'Deleted'
     };
-    return labels[status] || status || 'ChÆ°a rÃµ';
+    return labels[status] || status || 'Unknown';
   }
 
   function nodeTypeLabel(type) {
     const labels = {
-      LESSON: 'BÃ i há»c',
+      LESSON: 'Lesson',
       VIDEO: 'Video',
-      PRACTICE: 'Thá»±c hÃ nh',
+      PRACTICE: 'Practice',
       QUIZ: 'Quiz',
-      REVIEW: 'Ã”n táº­p'
+      REVIEW: 'Review'
     };
     return labels[type] || type || 'Node';
   }
 
   function resourceTypeLabel(type) {
     const labels = {
-      PDF: 'TÃ i liá»‡u PDF',
-      CODE: 'MÃ£ nguá»“n',
+      PDF: 'Document PDF',
+      CODE: 'Source Code',
       QUIZ: 'Quiz',
-      DISCUSSION: 'Tháº£o luáº­n',
+      DISCUSSION: 'Discussion',
       VIDEO: 'Video'
     };
-    return labels[normalizeItemType(type)] || 'TÃ i nguyÃªn';
+    return labels[normalizeItemType(type)] || 'Resource';
   }
 
   function resourceIcon(type) {
@@ -156,6 +281,41 @@
       VIDEO: 'ti-video'
     };
     return icons[normalizeItemType(type)] || 'ti-file';
+  }
+
+  function resourceLogo(item) {
+    const type = normalizeItemType(item?.itemType);
+    const url = itemUrl(item).toLowerCase();
+    const title = String(item?.title || '').toLowerCase();
+    const sourceText = `${url} ${title}`;
+
+    if (sourceText.includes('youtube') || sourceText.includes('youtu.be')) {
+      return resourceLogoSources.YOUTUBE;
+    }
+    if (sourceText.includes('drive.google')) {
+      return resourceLogoSources.GOOGLE_DRIVE;
+    }
+    if (type === 'PDF' || sourceText.includes('.pdf')) {
+      return resourceLogoSources.PDF;
+    }
+    if (type === 'VIDEO' || /\.(mp4|webm|mov|avi|mkv)(?:$|[?#])/.test(url) || sourceText.includes('video')) {
+      return resourceLogoSources.VIDEO;
+    }
+    if (sourceText.includes('.doc') || sourceText.includes('docx') || sourceText.includes('document')) {
+      return resourceLogoSources.DOC;
+    }
+    return '';
+  }
+
+  function resourceIconTemplate(item) {
+    const logo = resourceLogo(item);
+    if (logo) {
+      return `
+      <span class="resource-icon resource-icon-image">
+        <img class="resource-logo-img" src="${escapeHtml(logo)}" alt="${escapeHtml(resourceTypeLabel(item?.itemType))} logo" loading="lazy">
+      </span>`;
+    }
+    return `<span class="resource-icon"><i class="ti ${resourceIcon(item?.itemType)}"></i></span>`;
   }
 
   function emptyLightTemplate(icon, message) {
@@ -175,7 +335,7 @@
         <div class="empty-video">
           <div>
             <i class="ti ti-video-off"></i>
-            Giáº£ng viÃªn chÆ°a thÃªm video cho node nÃ y.
+            Your instructor has not added a video for this node yet.
           </div>
         </div>`;
     }
@@ -183,7 +343,7 @@
     const url = itemUrl(video);
     const embedUrl = youtubeEmbedUrl(url);
     const player = embedUrl
-      ? `<iframe src="${escapeHtml(embedUrl)}" title="${escapeHtml(video.title || node.title || 'Video bÃ i há»c')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+      ? `<iframe src="${escapeHtml(embedUrl)}" title="${escapeHtml(video.title || node.title || 'Lesson Video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
       : `<video controls preload="metadata" src="${escapeHtml(url)}"></video>`;
 
     return `<div class="video-frame">${player}</div>`;
@@ -195,7 +355,7 @@
       ? `/student/take-quiz?quizId=${encodeURIComponent(item.quizId)}`
       : itemUrl(item);
     const body = `
-      <span class="resource-icon"><i class="ti ${resourceIcon(item.itemType)}"></i></span>
+      ${resourceIconTemplate(item)}
       <span>
         <span class="resource-title">${escapeHtml(item.title || resourceTypeLabel(item.itemType))}</span>
         <span class="resource-meta">${escapeHtml(resourceTypeLabel(item.itemType))}</span>
@@ -209,7 +369,7 @@
 
   function resourcesTemplate(items) {
     const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
-    if (!resources.length) return emptyLightTemplate('ti-folder-off', 'ChÆ°a cÃ³ resource riÃªng cho node nÃ y.');
+    if (!resources.length) return emptyLightTemplate('ti-folder-off', 'No resources have been added for this node yet.');
     return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
   }
 
@@ -218,17 +378,17 @@
     const body = discussions.length
       ? `<div class="comment-list">${discussions.map((item) => `
           <div class="comment-item">
-            <span class="comment-author">${escapeHtml(item.title || 'Tháº£o luáº­n')}</span>
-            <span class="comment-text">${escapeHtml(item.content || 'Giáº£ng viÃªn Ä‘Ã£ má»Ÿ chá»§ Ä‘á» tháº£o luáº­n cho node nÃ y.')}</span>
+            <span class="comment-author">${escapeHtml(item.title || 'Discussion')}</span>
+            <span class="comment-text">${escapeHtml(item.content || 'Your instructor opened a discussion topic for this node.')}</span>
           </div>
         `).join('')}</div>`
-      : emptyLightTemplate('ti-message-off', 'ChÆ°a cÃ³ bÃ¬nh luáº­n hoáº·c chá»§ Ä‘á» tháº£o luáº­n.');
+      : emptyLightTemplate('ti-message-off', 'No comments or discussion topics yet.');
 
     return `
       ${body}
       <div class="comment-compose">
-        <textarea placeholder="Viáº¿t bÃ¬nh luáº­n hoáº·c cÃ¢u há»i cá»§a báº¡n..."></textarea>
-        <button type="button" disabled>Gá»­i bÃ¬nh luáº­n</button>
+        <textarea placeholder="Write a comment or question..."></textarea>
+        <button type="button" disabled>Send Comment</button>
       </div>`;
   }
 
@@ -239,7 +399,7 @@
         <i class="ti ti-alert-circle"></i>
         <h1>${escapeHtml(title)}</h1>
         <p class="mb-4">${escapeHtml(message)}</p>
-        <a class="back-link" href="/student/learning-spaces"><i class="ti ti-arrow-left"></i> Vá» roadmap</a>
+        <a class="back-link" href="/student/learning-spaces"><i class="ti ti-arrow-left"></i> Back to Roadmap</a>
       </div>`;
   }
 
@@ -252,30 +412,30 @@
     pageRoot.innerHTML = `
       <section class="player-column">
         <section class="node-hero">
-          <span class="eyebrow"><i class="ti ti-player-play"></i> KhÃ´ng gian há»c node</span>
-          <h1 class="node-title">${escapeHtml(node.title || 'Node bÃ i há»c')}</h1>
-          <p class="node-description">${escapeHtml(node.content || 'Giáº£ng viÃªn chÆ°a thÃªm ná»™i dung mÃ´ táº£ cho node nÃ y.')}</p>
+          <span class="eyebrow"><i class="ti ti-player-play"></i> Learning Spaces node</span>
+          <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
+          <p class="node-description">${escapeHtml(node.content || 'Your instructor has not added a description for this node yet.')}</p>
           <div class="meta-row">
             <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
             <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
-            <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'CÃ³ video' : 'ChÆ°a cÃ³ video'}</span>
+            <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Video available' : 'No video'}</span>
             <span class="soft-chip"><i class="ti ti-folder-open"></i>${resources.length} resource</span>
-            <span class="soft-chip"><i class="ti ti-messages"></i>${discussions.length} bÃ¬nh luáº­n</span>
+            <span class="soft-chip"><i class="ti ti-messages"></i>${discussions.length} comments</span>
           </div>
         </section>
 
         <section class="video-shell">
           ${videoTemplate(node, items)}
           <div class="player-controls">
-            <button class="server-pill active" type="button">Video bÃ i há»c</button>
+            <button class="server-pill active" type="button">Lesson Video</button>
             <button class="server-pill" type="button">${resources.length} resource</button>
-            <button class="server-pill" type="button">${discussions.length} bÃ¬nh luáº­n</button>
+            <button class="server-pill" type="button">${discussions.length} comments</button>
           </div>
         </section>
 
         <section class="content-card">
-          <h2>Ná»™i dung node</h2>
-          <p>${escapeHtml(node.content || 'Ná»™i dung chi tiáº¿t sáº½ Ä‘Æ°á»£c giáº£ng viÃªn cáº­p nháº­t sau.')}</p>
+          <h2>Node Content</h2>
+          <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
         </section>
       </section>
 
@@ -284,7 +444,7 @@
           <div class="side-card-header">
             <div>
               <h2>Resources</h2>
-              <p>TÃ i liá»‡u, source code hoáº·c quiz cá»§a node.</p>
+              <p>Documents, source code, or quizzes for this node.</p>
             </div>
             <span class="soft-chip">${resources.length}</span>
           </div>
@@ -294,8 +454,8 @@
         <section class="side-card">
           <div class="side-card-header">
             <div>
-              <h2>BÃ¬nh luáº­n</h2>
-              <p>Tháº£o luáº­n vÃ  cÃ¢u há»i liÃªn quan Ä‘áº¿n node.</p>
+              <h2>Comments</h2>
+              <p>Discussions and questions related to this node.</p>
             </div>
             <span class="soft-chip">${discussions.length}</span>
           </div>
@@ -306,7 +466,7 @@
 
   async function loadNodePage() {
     if (!nodeId) {
-      renderError('Thiáº¿u nodeId', 'KhÃ´ng tÃ¬m tháº¥y node cáº§n má»Ÿ. Vui lÃ²ng quay láº¡i roadmap vÃ  chá»n láº¡i node.');
+      renderError('Missing nodeId', 'Could not find the node to open. Please return to the roadmap and select a node again.');
       return;
     }
 
@@ -328,11 +488,12 @@
 
       renderNodePage(node, sortedItems);
     } catch (error) {
-      renderError('KhÃ´ng táº£i Ä‘Æ°á»£c node', error.message || 'Vui lÃ²ng thá»­ láº¡i sau.');
+      renderError('Could not load node', error.message || 'Please try again later.');
     }
   }
 
   loadNodePage();
+
 </script>
 </body>
 </html>

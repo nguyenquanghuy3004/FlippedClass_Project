@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8" />
-  <title>Báº£ng Ä‘iá»u khiá»ƒn sinh viÃªn - FlippedClass</title>
+  <title>Student Dashboard - FlippedClass</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
@@ -14,31 +14,150 @@
 
   <!-- AUTHENTICATION GUARD -->
   <script>
+    /* --- Inlined from student-auth.js --- */
     if (!localStorage.getItem('jwt_token')) {
       window.location.href = '/login';
     }
-  </script>
 
-  <link rel="stylesheet" th:href="@{/assets/css/student-student-dashboard.css}">
+  </script>
+  <script>
+    /* --- Inlined from student-user-menu.js --- */
+    (function () {
+      const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
+
+      function storedUser() {
+        return {
+          fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
+          username: localStorage.getItem('username') || '',
+          avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
+        };
+      }
+
+      function normalizeUser(user = {}) {
+        const stored = storedUser();
+        return {
+          name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
+          username: user.username || stored.username || '',
+          avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
+        };
+      }
+
+      function setStudentMenuUser(user = {}) {
+        const normalized = normalizeUser(user);
+
+        if (normalized.name && normalized.name !== 'Student') {
+          localStorage.setItem('full_name', normalized.name);
+        }
+        if (normalized.username) {
+          localStorage.setItem('username', normalized.username);
+        }
+        if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
+          localStorage.setItem('avatar_url', normalized.avatarUrl);
+        }
+
+        document.querySelectorAll('[data-user-name]').forEach((element) => {
+          element.textContent = normalized.name;
+        });
+        document.querySelectorAll('[data-user-avatar]').forEach((image) => {
+          image.src = normalized.avatarUrl;
+          image.onerror = () => {
+            image.onerror = null;
+            image.src = defaultAvatarUrl;
+          };
+        });
+
+        const topbarName = document.getElementById('studentName');
+        if (topbarName) topbarName.textContent = normalized.name;
+      }
+
+      function studentLogout() {
+        ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
+          localStorage.removeItem(key);
+        });
+        window.location.href = '/';
+      }
+
+      async function refreshStudentMenuUser() {
+        const token = localStorage.getItem('jwt_token');
+        const userId = localStorage.getItem('user_id');
+        if (!token || !userId) return;
+
+        try {
+          const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!response.ok) return;
+          const user = await response.json();
+          setStudentMenuUser(user);
+        } catch (error) {
+          console.warn('Could not load user menu profile.', error);
+        }
+      }
+
+      function closeAllMenus(exceptMenu = null) {
+        document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
+          if (menu !== exceptMenu) {
+            menu.classList.remove('is-open');
+            menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      function initStudentUserMenus() {
+        setStudentMenuUser();
+        refreshStudentMenuUser();
+
+        document.querySelectorAll('[data-user-menu]').forEach((menu) => {
+          const toggle = menu.querySelector('[data-user-menu-toggle]');
+          const logoutButton = menu.querySelector('[data-user-logout]');
+
+          toggle?.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const shouldOpen = !menu.classList.contains('is-open');
+            closeAllMenus(menu);
+            menu.classList.toggle('is-open', shouldOpen);
+            toggle.setAttribute('aria-expanded', String(shouldOpen));
+          });
+
+          logoutButton?.addEventListener('click', studentLogout);
+        });
+
+        document.addEventListener('click', () => closeAllMenus());
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') closeAllMenus();
+        });
+      }
+
+      window.setStudentMenuUser = setStudentMenuUser;
+      window.studentLogout = studentLogout;
+      if (!window.logout) window.logout = studentLogout;
+
+      document.addEventListener('DOMContentLoaded', initStudentUserMenus);
+    })();
+
+  </script>
+  <link rel="stylesheet" th:href="@{/assets/css/student-dashboard.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
 </head>
 
 <body>
 <div id="overlay" class="overlay"></div>
 
 <!-- TOPBAR -->
-<nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.9) !important;">
-  <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+<nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm">
+  <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
     <i class="ti ti-layout-sidebar-left-expand"></i>
   </button>
   <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
     <i class="ti ti-layout-sidebar-left-expand"></i>
   </button>
 
-  <div class="d-flex align-items-center w-100 justify-content-between">
-    <div class="d-none d-md-block">
-      <h5 class="mb-0 fw-bold text-dark ms-2" style="letter-spacing: -0.5px;">Cá»•ng sinh viÃªn <span class="badge bg-primary-subtle text-primary ms-2 rounded-pill">Há»c táº­p</span></h5>
+  <div class="topbar-main">
+    <div class="topbar-title-wrap d-none d-md-block">
+      <h5 class="topbar-title fw-bold text-dark ms-1">Student Portal <span class="badge bg-primary-subtle text-primary rounded-pill">Learning</span></h5>
     </div>
-    <ul class="list-unstyled d-flex align-items-center mb-0 gap-3">
+    <ul class="topbar-actions list-unstyled">
       <!-- Notification Bell -->
       <li class="dropdown">
         <button class="notification-trigger position-relative text-secondary d-flex align-items-center justify-content-center border-0"
@@ -46,7 +165,7 @@
                 id="notificationDropdown"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
-                aria-label="ThÃ´ng bÃ¡o quiz cáº§n lÃ m">
+                aria-label="Pending quiz notifications">
           <i class="ti ti-bell-ringing fs-5 text-dark"></i>
           <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm d-none">0</span>
         </button>
@@ -54,8 +173,8 @@
           <div class="p-3 border-bottom bg-white">
             <div class="d-flex align-items-center justify-content-between">
               <div>
-                <h6 class="fw-900 text-dark mb-1">ThÃ´ng bÃ¡o</h6>
-                <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Äang táº£i thÃ´ng bÃ¡o...</p>
+                <h6 class="fw-900 text-dark mb-1">Notifications</h6>
+                <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Loading notifications...</p>
               </div>
               <i class="ti ti-bell text-primary fs-4"></i>
             </div>
@@ -63,19 +182,10 @@
           <div id="notificationList" class="notification-list">
             <div class="text-center text-muted py-4 px-3">
               <div class="spinner-border text-primary mb-2" role="status"></div>
-              <p class="small fw-semibold mb-0">Äang táº£i quiz cáº§n lÃ m...</p>
+              <p class="small fw-semibold mb-0">Loading pending quizzes...</p>
             </div>
           </div>
         </div>
-      </li>
-      <li class="dropdown">
-        <div class="student-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-          <img th:src="@{/assets/images/avatar-1.jpg}" alt="áº¢nh Ä‘áº¡i diá»‡n sinh viÃªn">
-          <span id="studentNameTop">Sinh viÃªn</span>
-        </div>
-        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
-          <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>ÄÄƒng xuáº¥t</a></li>
-        </ul>
       </li>
     </ul>
   </div>
@@ -92,11 +202,27 @@
     </a>
   </div>
   <ul class="nav flex-column mt-4">
-    <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4" th:href="@{/student/dashboard}" data-nav-key="dashboard" aria-current="page"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Tá»•ng quan</span></a></li>
-    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Lá»›p cá»§a tÃ´i</span></a></li>
-    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My quiz</span></a></li>
-    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">BÃ¡o cÃ¡o</span></a></li>
+    <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4" th:href="@{/student/dashboard}" data-nav-key="dashboard" aria-current="page"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
 
+    <li class="sidebar-user-slot">
+      <div class="student-user-menu" data-user-menu>
+        <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+          <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
+          <span class="student-menu-info">
+        <span class="student-menu-name" data-user-name>Student</span>
+        <span class="student-menu-role">Student</span>
+      </span>
+          <i class="ti ti-chevron-up student-menu-chevron"></i>
+        </button>
+        <div class="student-menu-panel" role="menu">
+          <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+          <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
+        </div>
+      </div>
+    </li>
   </ul>
 </aside>
 
@@ -112,27 +238,27 @@
         <div class="bento-card profile-bento">
           <div class="profile-avatar-container mt-3">
             <!-- MASSIVE AVATAR FOR DETAIL VIEW -->
-            <img th:src="@{/assets/images/avatar-1.jpg}" alt="áº¢nh Ä‘áº¡i diá»‡n sinh viÃªn" class="massive-avatar" />
+            <img th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar" class="massive-avatar" />
             <div class="status-dot"></div>
           </div>
 
-          <h2 class="profile-name" id="profileName">Äang táº£i...</h2>
-          <p class="profile-major" id="profileSummary">Äang táº£i há»“ sÆ¡ sinh viÃªn...</p>
+          <h2 class="profile-name" id="profileName">Loading...</h2>
+          <p class="profile-major" id="profileSummary">Loading student profile...</p>
 
           <div class="w-100 mt-4 d-flex gap-2 profile-actions">
-            <a href="#" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm">Chá»‰nh há»“ sÆ¡</a>
-            <a href="#" class="btn btn-outline-light rounded-pill w-100 fw-bold">Xem chi tiáº¿t</a>
+            <button type="button" class="btn btn-light text-primary fw-bold rounded-pill w-100 shadow-sm" id="editProfileButton" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
+            <button type="button" class="btn btn-outline-light rounded-pill w-100 fw-bold" id="viewProfileButton" data-bs-toggle="modal" data-bs-target="#profileDetailModal">View Details</button>
           </div>
 
           <div class="mt-5 w-100 bg-white bg-opacity-10 rounded-4 p-3 d-flex justify-content-around profile-meta-card">
             <div>
               <div class="fs-4 fw-bold" id="profileStudentCode">--</div>
-              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">MÃ£ SV</div>
+              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Student ID</div>
             </div>
             <div class="border-end border-light opacity-25"></div>
             <div>
               <div class="fs-4 fw-bold" id="profileClassName">--</div>
-              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Lá»›p</div>
+              <div class="small text-white-50 text-uppercase" style="letter-spacing: 1px;">Class</div>
             </div>
           </div>
         </div>
@@ -144,13 +270,13 @@
 
           <!-- Welcome Bento -->
           <div class="col-12">
-            <div class="bento-card welcome-card d-flex align-items-center justify-content-between" style="background: url('data:image/svg+xml;utf8,<svg xmlns=http://www.w3.org/2000/svg viewBox=0 0 100 100><circle cx=90 cy=10 r=40 fill=%23e8f8ea /></svg>') no-repeat right top; background-size: cover; background-color: #fff;">
+            <div class="bento-card welcome-card d-flex align-items-center justify-content-between" style="background: url('data:image/svg+xml;utf8,<svg xmlns=http://www.w3.org/2000/svg viewBox=0 0 100 100><circle cx=90 cy=10 r=40 fill=%23ececff /></svg>') no-repeat right top; background-size: cover; background-color: #fff;">
               <div>
-                <h1 class="display-6 fw-900 text-dark mb-2" style="letter-spacing: -1px;">Xin chÃ o, <span data-greeting-name>Sinh viÃªn</span>!</h1>
-                <p class="fs-5 text-muted mb-0" id="dashboardSummary">Äang Ä‘á»“ng bá»™ dá»¯ liá»‡u há»c táº­p tá»« há»‡ thá»‘ng.</p>
+                <h1 class="display-6 fw-900 text-dark mb-2" style="letter-spacing: -1px;">Hello, <span data-greeting-name>Student</span>!</h1>
+                <p class="fs-5 text-muted mb-0" id="dashboardSummary">Syncing your learning data from the system.</p>
               </div>
               <div class="d-none d-md-block text-center me-4">
-                <div class="text-warning welcome-icon" style="font-size: 4rem; line-height: 1;"><i class="ti ti-flame"></i></div>
+                <div class="text-orange welcome-icon" style="font-size: 4rem; line-height: 1;"><i class="ti ti-flame"></i></div>
               </div>
             </div>
           </div>
@@ -162,7 +288,7 @@
                 <i class="ti ti-book"></i>
               </div>
               <div class="stat-value text-primary" id="learningSpaceCount">0</div>
-              <div class="stat-label">Lá»›p Ä‘ang há»c</div>
+              <div class="stat-label">Active Classes</div>
             </div>
           </div>
 
@@ -173,18 +299,18 @@
                 <i class="ti ti-rosette-discount-check"></i>
               </div>
               <div class="stat-value text-success" id="completedQuizCount">0</div>
-              <div class="stat-label">Quiz Ä‘Ã£ hoÃ n thÃ nh</div>
+              <div class="stat-label">Completed Quizzes</div>
             </div>
           </div>
 
           <!-- Mini Stat 3 -->
           <div class="col-md-4 col-sm-12">
-            <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center" style="background: #2f855a; color: #fff;">
+            <div class="bento-card student-stat-card text-center d-flex flex-column justify-content-center align-items-center" style="background: linear-gradient(135deg, #090b4f, #5b5ce2 58%, #ff5fa8); color: #fff;">
               <div class="stat-icon-bg bg-white bg-opacity-10 text-white mb-3">
                 <i class="ti ti-alert-circle"></i>
               </div>
               <div class="stat-value text-white" id="pendingQuizCount" style="background: none; -webkit-text-fill-color: #fff;">0</div>
-              <div class="stat-label text-white-50">Quiz cáº§n lÃ m</div>
+              <div class="stat-label text-white-50">Pending Quizzes</div>
             </div>
           </div>
 
@@ -198,16 +324,18 @@
       <div class="col-xl-8">
         <div id="myQuizSection" class="d-flex justify-content-between align-items-end mb-4">
           <div>
-            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">KhÃ´ng gian há»c cá»§a tÃ´i</h2>
+            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">My Learning Spaces</h2>
           </div>
-          <a th:href="@{/student/learning-spaces}" class="btn btn-dark rounded-pill fw-bold px-4">Xem táº¥t cáº£</a>
+          <a th:href="@{/student/learning-spaces(focus='join')}" class="join-space-plus" aria-label="Join class with invite code">
+            <i class="ti ti-plus"></i>
+          </a>
         </div>
 
         <div class="row g-4" id="learningSpaceList">
           <div class="col-12">
             <div class="bento-card text-center text-muted py-5">
               <div class="spinner-border text-primary mb-3" role="status"></div>
-              <p class="mb-0 fw-semibold">Äang táº£i khÃ´ng gian há»c...</p>
+              <p class="mb-0 fw-semibold">Loading learning spaces...</p>
             </div>
           </div>
         </div>
@@ -217,15 +345,15 @@
 
         <div class="d-flex justify-content-between align-items-end mb-4">
           <div>
-            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Quiz cá»§a khÃ³a há»c</h2>
-            <p class="text-muted mb-0 fw-semibold">CÃ¡c bÃ i quiz theo tá»«ng khÃ´ng gian há»c báº¡n Ä‘Ã£ tham gia</p>
+            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Course Quizzes</h2>
+            <p class="text-muted mb-0 fw-semibold">Quizzes grouped by the learning spaces you joined</p>
           </div>
         </div>
 
         <div class="accordion accordion-flush quiz-accordion bento-card p-3" id="quizAccordion">
           <div class="text-center text-muted py-4" id="quiz-loading">
             <div class="spinner-border text-primary mb-2" role="status"></div>
-            <p>Äang táº£i khÃ³a há»c vÃ  quiz...</p>
+            <p>Loading courses and quizzes...</p>
           </div>
 
         </div>
@@ -234,12 +362,12 @@
       <!-- RIGHT COLUMN: RECENT DOCS -->
       <div class="col-xl-4">
 
-        <h2 class="h3 fw-900 text-dark mb-4" style="letter-spacing: -0.5px;">TÃ i liá»‡u má»›i</h2>
+        <h2 class="h3 fw-900 text-dark mb-4" style="letter-spacing: -0.5px;">New Documents</h2>
         <div class="bento-card p-4" id="recentDocuments">
           <div class="text-center text-muted py-4">
             <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
-            <h5 class="fw-bold text-dark mt-3 mb-2">ChÆ°a cÃ³ dá»¯ liá»‡u tÃ i liá»‡u</h5>
-            <p class="small fw-semibold mb-0">Dashboard API hiá»‡n chÆ°a tráº£ danh sÃ¡ch tÃ i liá»‡u má»›i.</p>
+            <h5 class="fw-bold text-dark mt-3 mb-2">Loading documents</h5>
+            <p class="small fw-semibold mb-0">Documents from your learning spaces will appear here.</p>
           </div>
         </div>
       </div>
@@ -247,14 +375,104 @@
     </div>
   </div>
 </main>
+
+<div class="modal fade" id="profileDetailModal" tabindex="-1" aria-labelledby="profileDetailTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <div>
+          <h5 class="modal-title fw-900 text-dark" id="profileDetailTitle">Student Profile Details</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <img th:src="@{/assets/images/avatar-1.jpg}" class="rounded-circle border border-3 border-success-subtle" width="76" height="76" alt="Avatar" id="detailAvatar">
+          <div>
+            <h5 class="fw-bold mb-1" id="detailFullName">--</h5>
+            <p class="text-muted fw-semibold mb-0" id="detailEmail">--</p>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-sm-6"><div class="bg-light rounded-4 p-3 h-100"><div class="small text-muted fw-bold text-uppercase">Username</div><div class="fw-bold text-dark" id="detailUsername">--</div></div></div>
+          <div class="col-sm-6"><div class="bg-light rounded-4 p-3 h-100"><div class="small text-muted fw-bold text-uppercase">Student ID</div><div class="fw-bold text-dark" id="detailStudentCode">--</div></div></div>
+          <div class="col-sm-6"><div class="bg-light rounded-4 p-3 h-100"><div class="small text-muted fw-bold text-uppercase">Class</div><div class="fw-bold text-dark" id="detailClassName">--</div></div></div>
+          <div class="col-sm-6"><div class="bg-light rounded-4 p-3 h-100"><div class="small text-muted fw-bold text-uppercase">Major</div><div class="fw-bold text-dark" id="detailMajor">--</div></div></div>
+          <div class="col-sm-6"><div class="bg-light rounded-4 p-3 h-100"><div class="small text-muted fw-bold text-uppercase">Enrollment Year</div><div class="fw-bold text-dark" id="detailEnrollmentYear">--</div></div></div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary rounded-pill fw-bold" data-bs-target="#editProfileModal" data-bs-toggle="modal">Edit Profile</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content border-0 rounded-4 shadow-lg" id="editProfileForm">
+      <div class="modal-header border-0 pb-0">
+        <div>
+          <h5 class="modal-title fw-900 text-dark" id="editProfileTitle">Edit Student Profile</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="editProfileMessage" class="alert d-none rounded-4 fw-semibold" role="alert"></div>
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label fw-bold" for="editFullName">Full Name</label>
+            <input class="form-control rounded-4" id="editFullName" name="fullName" type="text" maxlength="255">
+          </div>
+          <!--            <div class="col-12"> url IMAGE-->
+          <!--              <label class="form-label fw-bold" for="editAvatarUrl">Avatar URL</label>-->
+          <!--              <input class="form-control rounded-4" id="editAvatarUrl" name="avatarUrl" type="url" maxlength="1000" placeholder="https://...">-->
+          <!--            </div>-->
+          <div class="col-sm-6">
+            <label class="form-label fw-bold" for="editStudentCode">Student ID</label>
+            <input class="form-control rounded-4" id="editStudentCode" name="studentCode" type="text" maxlength="255" required>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-bold" for="editClassName">Class</label>
+            <input class="form-control rounded-4" id="editClassName" name="className" type="text" maxlength="255">
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-bold" for="editMajor">Major</label>
+            <input class="form-control rounded-4" id="editMajor" name="major" type="text" maxlength="255">
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-bold" for="editEnrollmentYear">Enrollment Year</label>
+            <input class="form-control rounded-4" id="editEnrollmentYear" name="enrollmentYear" type="number" min="2000" max="2100">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary rounded-pill fw-bold" id="saveProfileButton">Save Profile</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- DYNAMIC DASHBOARD DATA SCRIPT -->
 <script>
+  /* --- Inlined from student-dashboard.js --- */
   const token = localStorage.getItem('jwt_token');
   const userId = localStorage.getItem('user_id');
+  const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
+  let currentDashboardData = null;
+  const documentLogoSources = {
+    DOC: '/uploads/anh/1200x630wa.jpg',
+    VIDEO: '/uploads/anh/R.jpg',
+    YOUTUBE: '/uploads/anh/OIP.jpg',
+    PDF: '/uploads/anh/pdf-file-download-symbols-format-for-texts-vector.jpg',
+    GOOGLE_DRIVE: '/uploads/anh/Google-Drive-Logo-2020-present.jpg'
+  };
 
   const iconThemes = [
     { icon: 'ti-template', color: 'primary' },
-    { icon: 'ti-leaf', color: 'success' },
+    { icon: 'ti-flame', color: 'orange' },
     { icon: 'ti-database', color: 'info' },
     { icon: 'ti-brand-aws', color: 'warning' }
   ];
@@ -273,25 +491,52 @@
     if (el) el.textContent = value;
   }
 
+  function setInputValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value ?? '';
+  }
+
+  function getInputValue(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
+
+  function authHeaders(json = false) {
+    const headers = { Authorization: `Bearer ${token}` };
+    if (json) headers['Content-Type'] = 'application/json';
+    return headers;
+  }
+
+  async function readApiError(response) {
+    const text = await response.text();
+    if (!text) return `Request failed: ${response.status}`;
+    try {
+      const body = JSON.parse(text);
+      return body.message || body.error || text;
+    } catch (err) {
+      return text;
+    }
+  }
+
   function statusLabel(status) {
     const labels = {
-      ACTIVE: 'Äang há»c',
-      DRAFT: 'Báº£n nhÃ¡p',
-      LOCKED: 'ChÆ°a má»Ÿ',
-      UNLOCKED: 'ÄÃ£ má»Ÿ',
-      ARCHIVED: 'LÆ°u trá»¯',
-      DELETED: 'ÄÃ£ xÃ³a'
+      ACTIVE: 'Active',
+      DRAFT: 'Draft',
+      LOCKED: 'Locked',
+      UNLOCKED: 'Unlocked',
+      ARCHIVED: 'Archived',
+      DELETED: 'Deleted'
     };
-    return labels[status] || status || 'ChÆ°a rÃµ';
+    return labels[status] || status || 'Unknown';
   }
 
   function roleLabel(role) {
     const labels = {
-      MEMBER: 'Sinh viÃªn',
-      OWNER: 'Chá»§ lá»›p',
-      SUPPORTER: 'Trá»£ giáº£ng'
+      MEMBER: 'Student',
+      OWNER: 'Owner',
+      SUPPORTER: 'Teaching Assistant'
     };
-    return labels[role] || role || 'ThÃ nh viÃªn';
+    return labels[role] || role || 'Member';
   }
 
   function studyYear(enrollmentYear) {
@@ -309,9 +554,9 @@
   function renderProfile(data) {
     const user = data.user || {};
     const profile = data.studentProfile || {};
-    const displayName = user.fullName || user.username || 'Sinh viÃªn';
-    const major = profile.major || 'ChÆ°a cáº­p nháº­t ngÃ nh';
-    const yearText = profile.enrollmentYear ? `NÄƒm ${studyYear(profile.enrollmentYear)}` : 'ChÆ°a cáº­p nháº­t nÄƒm há»c';
+    const displayName = user.fullName || user.username || 'Student';
+    const major = profile.major || 'Major not updated';
+    const yearText = profile.enrollmentYear ? `Year ${studyYear(profile.enrollmentYear)}` : 'Academic year not updated';
 
     setText('#profileName', displayName);
     setText('[data-greeting-name]', displayName);
@@ -320,7 +565,114 @@
     setText('#profileClassName', profile.className || '--');
 
     const avatar = document.querySelector('.massive-avatar');
-    if (avatar && user.avatarUrl) avatar.src = user.avatarUrl;
+    if (avatar) avatar.src = user.avatarUrl || defaultAvatarUrl;
+    window.setStudentMenuUser?.(user);
+  }
+
+  function renderProfileDetail(data) {
+    const user = data?.user || {};
+    const profile = data?.studentProfile || {};
+    const displayName = user.fullName || user.username || 'Student';
+    const avatar = document.getElementById('detailAvatar');
+
+    if (avatar) avatar.src = user.avatarUrl || defaultAvatarUrl;
+    setText('#detailFullName', displayName);
+    setText('#detailEmail', user.email || '--');
+    setText('#detailUsername', user.username || '--');
+    setText('#detailStudentCode', profile.studentCode || '--');
+    setText('#detailClassName', profile.className || '--');
+    setText('#detailMajor', profile.major || '--');
+    setText('#detailEnrollmentYear', profile.enrollmentYear || '--');
+    setText('#detailProvider', user.provider || '--');
+  }
+
+  function fillProfileForm(data) {
+    const user = data?.user || {};
+    const profile = data?.studentProfile || {};
+
+    setInputValue('editFullName', user.fullName || user.username || '');
+    setInputValue('editAvatarUrl', user.avatarUrl || '');
+    setInputValue('editStudentCode', profile.studentCode || '');
+    setInputValue('editClassName', profile.className || '');
+    setInputValue('editMajor', profile.major || '');
+    setInputValue('editEnrollmentYear', profile.enrollmentYear || '');
+  }
+
+  function showProfileMessage(message, type = 'danger') {
+    const messageEl = document.getElementById('editProfileMessage');
+    if (!messageEl) return;
+    messageEl.className = `alert alert-${type} rounded-4 fw-semibold`;
+    messageEl.textContent = message;
+  }
+
+  function clearProfileMessage() {
+    const messageEl = document.getElementById('editProfileMessage');
+    if (!messageEl) return;
+    messageEl.className = 'alert d-none rounded-4 fw-semibold';
+    messageEl.textContent = '';
+  }
+
+  async function saveProfile(event) {
+    event.preventDefault();
+
+    if (!token || !userId) {
+      window.location.href = '/login';
+      return;
+    }
+
+    const yearValue = getInputValue('editEnrollmentYear');
+    const payload = {
+      fullName: getInputValue('editFullName'),
+      avatarUrl: getInputValue('editAvatarUrl'),
+      studentCode: getInputValue('editStudentCode'),
+      className: getInputValue('editClassName'),
+      major: getInputValue('editMajor'),
+      enrollmentYear: yearValue ? Number(yearValue) : null
+    };
+
+    if (!payload.studentCode) {
+      showProfileMessage('Student ID is required.');
+      return;
+    }
+
+    const saveButton = document.getElementById('saveProfileButton');
+    if (saveButton) {
+      saveButton.disabled = true;
+      saveButton.textContent = 'Saving...';
+    }
+    clearProfileMessage();
+
+    try {
+      const response = await fetch(`/api/students/${encodeURIComponent(userId)}/profile`, {
+        method: 'PUT',
+        headers: authHeaders(true),
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(await readApiError(response));
+      }
+
+      const updatedData = await response.json();
+      renderDashboard(updatedData);
+      showProfileMessage('Profile updated successfully.', 'success');
+
+      setTimeout(() => {
+        const modalElement = document.getElementById('editProfileModal');
+        if (modalElement && window.bootstrap) {
+          const modal = bootstrap.Modal.getInstance(modalElement);
+          if (modal) modal.hide();
+        }
+      }, 700);
+    } catch (err) {
+      console.error(err);
+      showProfileMessage(err.message || 'Could not save profile.');
+    } finally {
+      if (saveButton) {
+        saveButton.disabled = false;
+        saveButton.textContent = 'Save Profile';
+      }
+    }
   }
 
   function renderStats(learningSpaces, quizzes) {
@@ -330,7 +682,7 @@
     setText('#learningSpaceCount', learningSpaces.length);
     setText('#completedQuizCount', completedCount);
     setText('#pendingQuizCount', pendingCount);
-    setText('#dashboardSummary', `Báº¡n Ä‘ang tham gia ${learningSpaces.length} lá»›p, Ä‘Ã£ hoÃ n thÃ nh ${completedCount}/${quizzes.length} quiz.`);
+    setText('#dashboardSummary', `You are enrolled in ${learningSpaces.length} classes and have completed ${completedCount}/${quizzes.length} quizzes.`);
   }
 
   function emptyState(icon, title, message) {
@@ -347,7 +699,7 @@
     if (!list) return;
 
     if (!learningSpaces.length) {
-      list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'ChÆ°a cÃ³ lá»›p há»c', 'Nháº­p mÃ£ lá»›p á»Ÿ trang Lá»›p cá»§a tÃ´i Ä‘á»ƒ tham gia learning space.')}</div>`;
+      list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'No Classes Yet', 'Enter a class code on My Classes to join a learning space.')}</div>`;
       return;
     }
 
@@ -363,23 +715,25 @@
 
       return `
           <div class="col-md-6">
-            <a class="course-card text-decoration-none d-block" href="${roadmapUrl}" aria-label="Má»Ÿ roadmap cá»§a ${escapeHtml(space.name || 'learning space')}">
-              <div class="d-flex justify-content-between align-items-start">
-                <div class="course-icon-wrapper bg-${theme.color}-subtle text-${theme.color}">
+            <a class="course-card text-decoration-none d-block" href="${roadmapUrl}" aria-label="Open roadmap for ${escapeHtml(space.name || 'learning space')}">
+              <div class="course-card-header bg-${theme.color}">
+                <div class="d-flex justify-content-between align-items-start">
+                  <h3 class="course-title text-white pe-3">${escapeHtml(space.name || 'Untitled Learning Space')}</h3>
+                  <span class="badge bg-white text-dark shadow-sm px-2 py-1 rounded-pill flex-shrink-0"><i class="ti ti-circle-check me-1"></i>${escapeHtml(statusLabel(space.status))}</span>
+                </div>
+                <p class="small fw-semibold mb-0 text-white-50">${escapeHtml(space.description || roleLabel(space.memberRole))}</p>
+                <div class="course-instructor-avatar bg-${theme.color}-subtle text-${theme.color}">
                   <i class="ti ${theme.icon}"></i>
                 </div>
-                <span class="badge bg-light text-dark border px-2 py-1 rounded-pill"><i class="ti ti-circle-check me-1"></i>${escapeHtml(statusLabel(space.status))}</span>
               </div>
-
-              <h3 class="course-title">${escapeHtml(space.name || 'Learning space chÆ°a Ä‘áº·t tÃªn')}</h3>
-              <p class="text-muted small fw-semibold mb-0">${escapeHtml(space.description || roleLabel(space.memberRole))}</p>
-
-              <div class="progress-track">
-                <div class="progress-fill bg-${theme.color}" style="width: ${percent}%;"></div>
-              </div>
-              <div class="d-flex justify-content-between mt-2">
-                <span class="small fw-bold text-dark">${percent}% hoÃ n thÃ nh quiz</span>
-                <span class="small text-muted fw-semibold">${pending ? `CÃ²n ${pending} quiz` : quizzes.length ? 'ÄÃ£ xong quiz' : 'ChÆ°a cÃ³ quiz'}</span>
+              <div class="course-card-body">
+                <div class="progress-track mt-0">
+                  <div class="progress-fill bg-${theme.color}" style="width: ${percent}%;"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                  <span class="small fw-bold text-dark">${percent}% quiz completed</span>
+                  <span class="small text-muted fw-semibold">${pending ? `${pending} quizzes left` : quizzes.length ? 'All quizzes done' : 'No quizzes yet'}</span>
+                </div>
               </div>
             </a>
           </div>`;
@@ -388,8 +742,8 @@
 
   function quizAction(quiz) {
     return quiz.isCompleted
-            ? `<span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i class="ti ti-check me-1"></i>ÄÃ£ hoÃ n thÃ nh</span>`
-            : `<a href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">LÃ m quiz</a>`;
+            ? `<span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i class="ti ti-check me-1"></i>Completed</span>`
+            : `<a href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">Take Quiz</a>`;
   }
 
   function renderQuizAccordion(learningSpaces) {
@@ -398,7 +752,7 @@
 
     quizAccordion.innerHTML = '';
     if (!learningSpaces.length) {
-      quizAccordion.innerHTML = `<div class="text-center text-muted py-4"><p class="mb-0 fw-semibold">Báº¡n chÆ°a tham gia khÃ´ng gian há»c nÃ o.</p></div>`;
+      quizAccordion.innerHTML = `<div class="text-center text-muted py-4"><p class="mb-0 fw-semibold">You have not joined any learning spaces yet.</p></div>`;
       return;
     }
 
@@ -410,16 +764,16 @@
               ? `<div class="accordion-body border-top border-light">${quizzes.map((quiz) => `
               <div class="quiz-card-item d-flex align-items-center justify-content-between gap-3 p-3 bg-white rounded-3 shadow-sm mb-2 ${quiz.isCompleted ? 'opacity-75' : ''}">
                 <div>
-                  <h5 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Quiz chÆ°a Ä‘áº·t tÃªn')}</h5>
-                  <span class="small text-muted fw-semibold"><i class="ti ti-clock me-1"></i>${escapeHtml(quiz.durationMinutes || 0)} phÃºt</span>
-                  <span class="small text-muted fw-semibold ms-2"><i class="ti ti-list-check me-1"></i>${escapeHtml(quiz.totalQuestions || 0)} cÃ¢u</span>
+                  <h5 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Untitled Quiz')}</h5>
+                  <span class="small text-muted fw-semibold"><i class="ti ti-clock me-1"></i>${escapeHtml(quiz.durationMinutes || 0)} min</span>
+                  <span class="small text-muted fw-semibold ms-2"><i class="ti ti-list-check me-1"></i>${escapeHtml(quiz.totalQuestions || 0)} questions</span>
                 </div>
                 <div class="text-end">${quizAction(quiz)}</div>
               </div>`).join('')}</div>`
               : `<div class="accordion-body border-top border-light text-center py-4">
               <div class="text-success mb-2"><i class="ti ti-circle-check" style="font-size: 3rem;"></i></div>
-              <h5 class="fw-bold">Lá»›p nÃ y chÆ°a cÃ³ quiz</h5>
-              <p class="text-muted small mb-0">Khi giáº£ng viÃªn táº¡o quiz, bÃ i quiz sáº½ hiá»ƒn thá»‹ táº¡i Ä‘Ã¢y.</p>
+              <h5 class="fw-bold">No quizzes in this class</h5>
+              <p class="text-muted small mb-0">When your instructor creates quizzes, they will appear here.</p>
             </div>`;
 
       quizAccordion.insertAdjacentHTML('beforeend', `
@@ -427,7 +781,7 @@
             <h2 class="accordion-header">
               <button class="accordion-button ${index === 0 ? '' : 'collapsed'} bg-transparent fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index === 0 ? 'true' : 'false'}">
                 <i class="ti ti-book text-primary me-2 fs-4"></i>${escapeHtml(space.name || 'Learning space')}
-                ${pending ? `<span class="badge bg-danger ms-auto me-3 rounded-pill">${pending} quiz cáº§n lÃ m</span>` : `<span class="badge bg-secondary ms-auto me-3 rounded-pill">${quizzes.length ? 'ÄÃ£ xong' : 'ChÆ°a cÃ³ quiz'}</span>`}
+                ${pending ? `<span class="badge bg-danger ms-auto me-3 rounded-pill">${pending} quizzes to do</span>` : `<span class="badge bg-secondary ms-auto me-3 rounded-pill">${quizzes.length ? 'Done' : 'No quizzes yet'}</span>`}
               </button>
             </h2>
             <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" data-bs-parent="#quizAccordion">
@@ -450,8 +804,8 @@
 
     if (summary) {
       summary.textContent = pending.length
-              ? `Báº¡n cÃ³ ${pending.length} quiz cáº§n lÃ m.`
-              : 'KhÃ´ng cÃ³ thÃ´ng bÃ¡o má»›i.';
+              ? `You have ${pending.length} quizzes to do.`
+              : 'No new notifications.';
     }
 
     if (!list) return;
@@ -460,8 +814,8 @@
       list.innerHTML = `
           <div class="text-center text-muted py-4 px-3">
             <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
-            <h6 class="fw-bold text-dark mt-3 mb-1">KhÃ´ng cÃ²n quiz cáº§n lÃ m</h6>
-            <p class="small fw-semibold mb-0">CÃ¡c quiz Ä‘ang má»Ÿ Ä‘Ã£ hoÃ n thÃ nh hoáº·c chÆ°a cÃ³ quiz má»›i.</p>
+            <h6 class="fw-bold text-dark mt-3 mb-1">No pending quizzes</h6>
+            <p class="small fw-semibold mb-0">All open quizzes are complete or no new quizzes are available.</p>
           </div>`;
       return;
     }
@@ -473,29 +827,137 @@
               <i class="ti ti-file-pencil"></i>
             </span>
             <div class="min-w-0">
-              <h6 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Quiz chÆ°a Ä‘áº·t tÃªn')}</h6>
+              <h6 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Untitled Quiz')}</h6>
               <p class="small text-muted fw-semibold mb-1">${escapeHtml(quiz.space?.name || 'Learning space')}</p>
-              <span class="small text-primary fw-bold">LÃ m quiz ngay</span>
+              <span class="small text-primary fw-bold">Start Quiz</span>
             </div>
           </div>
         </a>`).join('');
 
     const more = pending.length > 5
-            ? `<a class="notification-item text-center fw-bold text-primary" href="/student/dashboard#myQuizSection">Xem thÃªm ${pending.length - 5} quiz</a>`
+            ? `<a class="notification-item text-center fw-bold text-primary" href="/student/dashboard#myQuizSection">View ${pending.length - 5} more quizzes</a>`
             : '';
 
     list.innerHTML = items + more;
   }
 
-  function renderDashboard(data) {
-    const learningSpaces = data.learningSpaces || [];
-    const quizzes = flattenQuizzes(learningSpaces);
+  function documentTypeLabel(type) {
+    const labels = {
+      VIDEO: 'Video',
+      YOUTUBE: 'YouTube',
+      PDF: 'PDF',
+      GOOGLE_DRIVE: 'Google Drive',
+      GITHUB: 'GitHub',
+      WEBSITE: 'Website',
+      OTHER: 'Document'
+    };
+    return labels[type] || 'Document';
+  }
 
-    renderProfile(data);
+  function documentIcon(type) {
+    const icons = {
+      VIDEO: 'ti-video',
+      YOUTUBE: 'ti-brand-youtube',
+      PDF: 'ti-file-type-pdf',
+      GOOGLE_DRIVE: 'ti-brand-google-drive',
+      GITHUB: 'ti-brand-github',
+      WEBSITE: 'ti-world',
+      OTHER: 'ti-file-description'
+    };
+    return icons[type] || 'ti-file-description';
+  }
+
+  function documentLogo(doc) {
+    const type = String(doc?.documentType || 'OTHER').toUpperCase();
+    const url = String(doc?.url || doc?.fullUrl || '').toLowerCase();
+    const title = String(doc?.title || '').toLowerCase();
+    const sourceText = `${url} ${title}`;
+
+    if (type === 'YOUTUBE' || sourceText.includes('youtube') || sourceText.includes('youtu.be')) {
+      return documentLogoSources.YOUTUBE;
+    }
+    if (type === 'GOOGLE_DRIVE' || sourceText.includes('drive.google')) {
+      return documentLogoSources.GOOGLE_DRIVE;
+    }
+    if (type === 'PDF' || sourceText.includes('.pdf')) {
+      return documentLogoSources.PDF;
+    }
+    if (type === 'VIDEO' || /\.(mp4|webm|mov|avi|mkv)(?:$|[?#])/.test(url) || sourceText.includes('video')) {
+      return documentLogoSources.VIDEO;
+    }
+    if (type === 'OTHER' || sourceText.includes('.doc') || sourceText.includes('docx') || sourceText.includes('document')) {
+      return documentLogoSources.DOC;
+    }
+    return '';
+  }
+
+  function documentIconTemplate(doc) {
+    const type = doc?.documentType || 'OTHER';
+    const logo = documentLogo(doc);
+    if (logo) {
+      return `
+              <span class="document-logo-box flex-shrink-0">
+                <img class="document-logo-img" src="${escapeHtml(logo)}" alt="${escapeHtml(documentTypeLabel(type))} logo" loading="lazy">
+              </span>`;
+    }
+    return `
+              <span class="document-logo-box document-logo-box-fallback flex-shrink-0">
+                <i class="ti ${documentIcon(type)}"></i>
+              </span>`;
+  }
+
+  function renderRecentDocuments(documents) {
+    const container = document.getElementById('recentDocuments');
+    if (!container) return;
+
+    if (!documents.length) {
+      container.innerHTML = `
+          <div class="text-center text-muted py-4">
+            <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
+            <h5 class="fw-bold text-dark mt-3 mb-2">No Documents Yet</h5>
+            <p class="small fw-semibold mb-0">Your instructor has not added documents for your learning spaces yet.</p>
+          </div>`;
+      return;
+    }
+
+    container.innerHTML = documents.slice(0, 8).map((doc) => {
+      const type = doc.documentType || 'OTHER';
+      const meta = [doc.learningSpaceName, doc.learningPathTitle]
+              .filter(Boolean)
+              .join(' · ');
+      const href = doc.url || '#';
+      const disabledClass = doc.url ? '' : ' opacity-75 pe-none';
+      const targetAttrs = doc.url ? ' target="_blank" rel="noopener noreferrer"' : '';
+
+      return `
+          <a class="notification-item rounded-4 border mb-2${disabledClass}" href="${escapeHtml(href)}"${targetAttrs}>
+            <div class="d-flex gap-3 align-items-start">
+              ${documentIconTemplate(doc)}
+              <div class="min-w-0">
+                <h6 class="fw-bold mb-1">${escapeHtml(doc.title || 'Untitled Document')}</h6>
+                <p class="small text-muted fw-semibold mb-1">${escapeHtml(meta || 'Learning space')}</p>
+                <span class="small text-primary fw-bold">${escapeHtml(documentTypeLabel(type))}</span>
+              </div>
+            </div>
+          </a>`;
+    }).join('');
+  }
+
+  function renderDashboard(data) {
+    const dashboard = data || {};
+    currentDashboardData = dashboard;
+    const learningSpaces = dashboard.learningSpaces || [];
+    const quizzes = flattenQuizzes(learningSpaces);
+    const documents = dashboard.recentDocuments || [];
+
+    renderProfile(dashboard);
+    renderProfileDetail(dashboard);
+    fillProfileForm(dashboard);
     renderStats(learningSpaces, quizzes);
     renderLearningSpaces(learningSpaces);
     renderQuizAccordion(learningSpaces);
     renderNotifications(quizzes);
+    renderRecentDocuments(documents);
   }
 
   async function loadDashboard() {
@@ -506,29 +968,31 @@
 
     try {
       const res = await fetch(`/api/students/${encodeURIComponent(userId)}/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: authHeaders()
       });
       if (!res.ok) {
         const errText = await res.text();
-        throw new Error(`KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u dashboard: ${res.status} ${errText}`);
+        throw new Error(`Could not load dashboard data: ${res.status} ${errText}`);
       }
       renderDashboard(await res.json());
     } catch (err) {
       console.error(err);
-      const message = escapeHtml(err.message || 'KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u dashboard.');
+      const message = escapeHtml(err.message || 'Could not load dashboard data.');
       const quizAccordion = document.getElementById('quizAccordion');
       const learningSpaceList = document.getElementById('learningSpaceList');
       const notificationBadge = document.getElementById('notificationBadge');
       const notificationSummary = document.getElementById('notificationSummary');
       const notificationList = document.getElementById('notificationList');
+      const recentDocuments = document.getElementById('recentDocuments');
       if (quizAccordion) quizAccordion.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
       if (learningSpaceList) learningSpaceList.innerHTML = `<div class="col-12"><div class="alert alert-danger">${message}</div></div>`;
       if (notificationBadge) {
         notificationBadge.textContent = '!';
         notificationBadge.classList.remove('d-none');
       }
-      if (notificationSummary) notificationSummary.textContent = 'KhÃ´ng táº£i Ä‘Æ°á»£c thÃ´ng bÃ¡o.';
+      if (notificationSummary) notificationSummary.textContent = 'Could not load notifications.';
       if (notificationList) notificationList.innerHTML = `<div class="alert alert-danger m-3">${message}</div>`;
+      if (recentDocuments) recentDocuments.innerHTML = `<div class="alert alert-danger m-0">${message}</div>`;
     }
   }
 
@@ -582,6 +1046,27 @@
     });
   }
 
+  function initProfileActions() {
+    const detailModal = document.getElementById('profileDetailModal');
+    const editModal = document.getElementById('editProfileModal');
+    const editForm = document.getElementById('editProfileForm');
+
+    if (detailModal) {
+      detailModal.addEventListener('show.bs.modal', () => renderProfileDetail(currentDashboardData));
+    }
+
+    if (editModal) {
+      editModal.addEventListener('show.bs.modal', () => {
+        clearProfileMessage();
+        fillProfileForm(currentDashboardData);
+      });
+    }
+
+    if (editForm) {
+      editForm.addEventListener('submit', saveProfile);
+    }
+  }
+
   function logout() {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user_id');
@@ -589,13 +1074,11 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const studentNameTop = document.getElementById('studentNameTop');
-    if (studentNameTop) {
-      studentNameTop.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Sinh viÃªn';
-    }
     initSidebarActiveState();
+    initProfileActions();
     loadDashboard();
   });
+
 </script>
 </body>
 </html>

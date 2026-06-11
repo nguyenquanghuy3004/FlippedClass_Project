@@ -13,7 +13,7 @@ public class TemplateController {
 
     @GetMapping("/")
     public String index() {
-        return "home/index";
+        return "homePage";
     }
 
     @GetMapping("/inventory")
@@ -99,6 +99,12 @@ public class TemplateController {
     @GetMapping("/lecturer/evaluation-sessions")
     public String evaluationSessions() {
         return "lecturer/evaluation-sessions";
+    }
+
+    @GetMapping("/lecturer/evaluation-sessions/{sessionId}/students")
+    public String evaluationStudents(@PathVariable Long sessionId, Model model) {
+        model.addAttribute("sessionId", sessionId);
+        return "lecturer/evaluation-students";
     }
 
     @GetMapping("/lecturer/dashboard")

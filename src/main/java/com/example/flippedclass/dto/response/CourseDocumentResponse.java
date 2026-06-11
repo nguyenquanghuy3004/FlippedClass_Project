@@ -1,6 +1,8 @@
 package com.example.flippedclass.dto.response;
 
 import com.example.flippedclass.entity.CourseDocument;
+import com.example.flippedclass.entity.LearningPath;
+import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.enums.DocumentType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +14,9 @@ import java.time.LocalDateTime;
 public class CourseDocumentResponse {
     private Long id;
     private Long learningPathId;
+    private String learningPathTitle;
+    private Long learningSpaceId;
+    private String learningSpaceName;
     private String title;
     private DocumentType documentType;
     private String url;
@@ -19,9 +24,15 @@ public class CourseDocumentResponse {
     private LocalDateTime createdAt;
 
     public static CourseDocumentResponse from(CourseDocument document) {
+        LearningPath learningPath = document.getLearningPath();
+        LearningSpace learningSpace = learningPath != null ? learningPath.getLearningSpace() : null;
+
         CourseDocumentResponse response = new CourseDocumentResponse();
         response.id = document.getId();
-        response.learningPathId = document.getLearningPath().getId();
+        response.learningPathId = learningPath != null ? learningPath.getId() : null;
+        response.learningPathTitle = learningPath != null ? learningPath.getTitle() : null;
+        response.learningSpaceId = learningSpace != null ? learningSpace.getId() : null;
+        response.learningSpaceName = learningSpace != null ? learningSpace.getName() : null;
         response.title = document.getTitle();
         response.documentType = parseDocumentType(document.getDocumentType());
         response.url = document.getUrl();
@@ -34,6 +45,10 @@ public class CourseDocumentResponse {
         if (documentType == null || documentType.isBlank()) {
             return null;
         }
-        return DocumentType.valueOf(documentType);
+        try {
+            return DocumentType.valueOf(documentType.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return DocumentType.OTHER;
+        }
     }
 }
