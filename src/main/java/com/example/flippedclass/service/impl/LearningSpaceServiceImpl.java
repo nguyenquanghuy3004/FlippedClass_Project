@@ -140,6 +140,24 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
             .toList();
     }
 
+    @Override
+    public LearningSpaceResponse getSpaceByInviteCode(String inviteCode) {
+        LearningSpace learningSpace = learningSpaceRepository.findByInviteCodeAndStatus(inviteCode, LearningSpaceStatus.ACTIVE)
+                .orElseThrow(() -> new IllegalArgumentException("Mã mời không hợp lệ hoặc lớp đã bị xóa"));
+
+        return LearningSpaceResponse.builder()
+                .id(learningSpace.getId())
+                .name(learningSpace.getName())
+                .description(learningSpace.getDescription())
+                .inviteCode(learningSpace.getInviteCode())
+                .visibility(learningSpace.getVisibility())
+                .ownerId(learningSpace.getOwner().getId())
+                .ownerUsername(learningSpace.getOwner().getUsername())
+                .createdAt(learningSpace.getCreatedAt())
+                .status(learningSpace.getStatus())
+                .build();
+    }
+
     @Transactional
     @Override
     public LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail){

@@ -340,6 +340,25 @@
           </div>
         </div>
 
+        <!-- PUBLIC SPACES SECTION -->
+        <hr class="my-5 opacity-10 border-secondary">
+
+        <div class="d-flex justify-content-between align-items-end mb-4">
+          <div>
+            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Explore Public Classes</h2>
+            <p class="text-muted mb-0 fw-semibold">Discover and join available public classes without an invite code</p>
+          </div>
+        </div>
+
+        <div class="row g-4" id="publicSpaceList">
+          <div class="col-12">
+            <div class="bento-card text-center text-muted py-5">
+              <div class="spinner-border text-primary mb-3" role="status"></div>
+              <p class="mb-0 fw-semibold">Loading public classes...</p>
+            </div>
+          </div>
+        </div>
+
         <!-- COURSE QUIZZES SECTION -->
         <hr class="my-5 opacity-10 border-secondary">
 
@@ -943,6 +962,91 @@
     }).join('');
   }
 
+  async function loadPublicSpaces() {
+    try {
+      const response = await fetch('/api/learning-spaces/public', { headers: authHeaders() });
+      if (!response.ok) throw new Error("Failed to load public spaces");
+      const spaces = await response.json();
+      renderPublicSpaces(spaces);
+    } catch (err) {
+      console.error(err);
+      const list = document.getElementById('publicSpaceList');
+      if (list) list.innerHTML = `<div class="col-12"><div class="alert alert-danger m-0 text-center">Failed to load public classes.</div></div>`;
+    }
+  }
+
+  function renderPublicSpaces(spaces) {
+    const list = document.getElementById('publicSpaceList');
+    if (!list) return;
+    
+    // Filter out spaces that the user already joined
+    const joinedIds = currentDashboardData?.learningSpaces?.map(s => s.id) || [];
+    const availableSpaces = spaces.filter(s => !joinedIds.includes(s.id));
+
+    if (!availableSpaces.length) {
+      list.innerHTML = `<div class="col-12">${emptyState('ti-world-search', 'No Public Classes', 'There are currently no new public classes available to join.')}</div>`;
+      return;
+    }
+
+    list.innerHTML = availableSpaces.map((space, index) => {
+      const theme = iconThemes[index % iconThemes.length];
+      return `
+          <div class="col-md-6">
+            <div class="course-card border-0 d-block h-100 shadow-sm" style="transition: transform 0.2s;">
+              <div class="course-card-header bg-${theme.color}">
+                <div class="d-flex justify-content-between align-items-start">
+                  <h3 class="course-title text-white pe-3">${escapeHtml(space.name || 'Untitled')}</h3>
+                  <span class="badge bg-white text-dark shadow-sm px-2 py-1 rounded-pill flex-shrink-0"><i class="ti ti-world me-1 text-primary"></i>Public</span>
+                </div>
+                <p class="small fw-semibold mb-0 text-white-50">Instructor: ${escapeHtml(space.ownerUsername || 'Unknown')}</p>
+              </div>
+              <div class="course-card-body d-flex justify-content-between align-items-center">
+                <p class="text-muted small mb-0 text-truncate me-3" style="max-width: 70%;">${escapeHtml(space.description || 'No description')}</p>
+                <button class="btn btn-sm btn-primary rounded-pill fw-bold px-3 join-public-btn" data-space-id="${space.id}">Join</button>
+              </div>
+            </div>
+          </div>`;
+    }).join('');
+
+    document.querySelectorAll('.join-public-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const spaceId = e.target.getAttribute('data-space-id');
+        await joinPublicSpace(spaceId, e.target);
+      });
+    });
+  }
+
+  async function joinPublicSpace(spaceId, btnElement) {
+    const originalText = btnElement.innerHTML;
+    btnElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+    btnElement.disabled = true;
+
+    try {
+      const response = await fetch('/api/learning-spaces/join', {
+        method: 'POST',
+        headers: authHeaders(true),
+        body: JSON.stringify({ spaceId: parseInt(spaceId) })
+      });
+      
+      if (!response.ok) {
+        throw new Error(await readApiError(response));
+      }
+      
+      btnElement.innerHTML = '<i class="ti ti-check"></i> Joined';
+      btnElement.classList.replace('btn-primary', 'btn-success');
+      
+      // Reload dashboard after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err) {
+      alert(err.message || 'Failed to join class');
+      btnElement.innerHTML = originalText;
+      btnElement.disabled = false;
+    }
+  }
+
   function renderDashboard(data) {
     const dashboard = data || {};
     currentDashboardData = dashboard;
@@ -958,6 +1062,9 @@
     renderQuizAccordion(learningSpaces);
     renderNotifications(quizzes);
     renderRecentDocuments(documents);
+    
+    // Once dashboard (and joined spaces) are loaded, load public spaces
+    loadPublicSpaces();
   }
 
   async function loadDashboard() {

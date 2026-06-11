@@ -167,11 +167,11 @@
 
               try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                if (payload.roles && payload.roles.includes('ADMIN')) {
+                if (payload.roles && (payload.roles.includes('ADMIN') || payload.roles.includes('ROLE_ADMIN'))) {
                   window.location.href = '/admin/dashboard';
-                } else if (payload.roles && payload.roles.includes('MENTOR')) {
+                } else if (payload.roles && (payload.roles.includes('MENTOR') || payload.roles.includes('ROLE_MENTOR'))) {
                   window.location.href = '/lecturer/dashboard';
-                } else if (payload.roles && payload.roles.includes('STUDENT')) {
+                } else if (payload.roles && (payload.roles.includes('STUDENT') || payload.roles.includes('ROLE_STUDENT'))) {
                   window.location.href = '/student/dashboard';
                 } else {
                   window.location.href = '/';
