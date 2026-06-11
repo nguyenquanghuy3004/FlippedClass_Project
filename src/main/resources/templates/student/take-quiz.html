@@ -351,6 +351,7 @@ const token = localStorage.getItem('jwt_token');
     return false;
   }
 
+  // Hàm chính: Khởi tạo bài kiểm tra (lấy thông tin quiz và danh sách câu hỏi từ backend)
   async function initQuiz() {
     if (!token || !userId) {
       window.location.href = '/login';
@@ -361,6 +362,7 @@ const token = localStorage.getItem('jwt_token');
     setStudentName(localStorage.getItem('username') || localStorage.getItem('full_name'));
 
     try {
+      // 1. Kiểm tra xem sinh viên đã làm bài quiz này chưa
       const attemptsRes = await fetch(`/api/quizzes/attempts/student/${userId}`, { headers: authHeaders() });
       if (attemptsRes.ok) {
         const attempts = await attemptsRes.json();
@@ -378,6 +380,7 @@ const token = localStorage.getItem('jwt_token');
         }
       }
 
+      // 2. Lấy thông tin cơ bản của quiz (tên, thời gian, ...)
       const quizRes = await fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() });
       if (!quizRes.ok) throw new Error('Could not load quiz information.');
       const quizData = await quizRes.json();
@@ -392,8 +395,9 @@ const token = localStorage.getItem('jwt_token');
 
       timeRemaining = duration * 60;
       renderTimer();
-      startTimer();
+      startTimer(); // Bắt đầu đếm ngược thời gian
 
+      // 3. Lấy danh sách câu hỏi của quiz
       const questionsRes = await fetch(`/api/quizzes/${quizId}/questions`, { headers: authHeaders() });
       if (!questionsRes.ok) throw new Error('Could not load question list.');
       quizQuestions = await questionsRes.json();
@@ -422,9 +426,11 @@ const token = localStorage.getItem('jwt_token');
     countdownEl.classList.toggle('is-warning', timeRemaining <= 300);
   }
 
+  // Hàm bắt đầu đếm ngược thời gian làm bài
   function startTimer() {
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
+      // Nếu hết giờ
       if (timeRemaining <= 0) {
         clearInterval(timerInterval);
         Swal.fire({
@@ -433,12 +439,12 @@ const token = localStorage.getItem('jwt_token');
           text: 'The system will automatically submit your quiz.',
           confirmButtonText: 'OK',
           confirmButtonColor: swalColors.confirmButtonColor
-        }).then(() => submitQuiz(true));
+        }).then(() => submitQuiz(true)); // Tự động nộp bài
         return;
       }
       timeRemaining -= 1;
       renderTimer();
-    }, 1000);
+    }, 1000); // Đếm ngược mỗi 1 giây
   }
 
   function renderQuestions() {
@@ -540,12 +546,16 @@ const token = localStorage.getItem('jwt_token');
     return result.isConfirmed;
   }
 
+  // Hàm nộp bài (Submit Quiz) lên backend để chấm điểm
   async function submitQuiz(autoSubmit = false) {
-    if (isSubmitting) return;
+    if (isSubmitting) return; // Tránh bấm nhiều lần
+    
+    // Kiểm tra xem đã trả lời hết chưa, nếu chưa thì hỏi lại
     const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
     const shouldSubmit = await confirmSubmit(autoSubmit, answeredCount);
     if (!shouldSubmit) return;
 
+    // Lấy đáp án người dùng đã chọn
     const answers = {};
     quizQuestions.forEach(question => {
       const selected = document.querySelector(`input[name="q${question.id}"]:checked`);
@@ -554,12 +564,13 @@ const token = localStorage.getItem('jwt_token');
 
     isSubmitting = true;
     try {
+      // Gửi đáp án lên backend
       const response = await fetch(`/api/quizzes/${quizId}/attempts`, {
         method: 'POST',
         headers: authHeaders(true),
         body: JSON.stringify({
           studentId: Number(userId),
-          answers
+          answers // object chứa các đáp án { questionId: 'đáp án đã chọn' }
         })
       });
 

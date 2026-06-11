@@ -231,6 +231,7 @@ if (!localStorage.getItem('jwt_token')) {
     GOOGLE_DRIVE: '/uploads/anh/Google-Drive-Logo-2020-present.jpg'
   };
 
+  // Hàm hỗ trợ: Chuyển đổi link video YouTube thường thành dạng link nhúng (embed) để có thể xem trực tiếp trên web
   function youtubeEmbedUrl(url) {
     const value = String(url || '');
     const watchMatch = value.match(/[?&]v=([^&]+)/);
@@ -405,7 +406,9 @@ if (!localStorage.getItem('jwt_token')) {
       </div>`;
   }
 
+  // Hàm hiển thị giao diện toàn bộ nội dung của bài học (node)
   function renderNodePage(node, items) {
+    // Phân loại các tài liệu đính kèm (items) thành: tài nguyên (tài liệu/code), bình luận, và video
     const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
     const discussions = items.filter((item) => normalizeItemType(item.itemType) === 'DISCUSSION');
     const videoCount = items.some((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item)) ? 1 : 0;
@@ -466,6 +469,7 @@ if (!localStorage.getItem('jwt_token')) {
       </aside>`;
   }
 
+  // Hàm chính: Tải thông tin của bài học (node) và các tài liệu/item liên quan từ backend
   async function loadNodePage() {
     if (!nodeId) {
       renderError('Missing nodeId', 'Could not find the node to open. Please return to the roadmap and select a node again.');
@@ -473,6 +477,7 @@ if (!localStorage.getItem('jwt_token')) {
     }
 
     try {
+      // Gọi đồng thời 2 API: lấy chi tiết node và lấy các item (tài liệu/video) thuộc node đó
       const [nodeResponse, itemsResponse] = await Promise.all([
         fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}`, { headers: authHeaders(false) }),
         fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}/items`, { headers: authHeaders(false) })
@@ -484,10 +489,12 @@ if (!localStorage.getItem('jwt_token')) {
 
       const node = await nodeResponse.json();
       const items = itemsResponse.ok ? await itemsResponse.json() : [];
+      // Sắp xếp các tài liệu theo thứ tự (position)
       const sortedItems = Array.isArray(items)
         ? [...items].sort((a, b) => (a.position || 0) - (b.position || 0))
         : [];
 
+      // Hiển thị nội dung ra giao diện
       renderNodePage(node, sortedItems);
     } catch (error) {
       renderError('Could not load node', error.message || 'Please try again later.');

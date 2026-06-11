@@ -471,7 +471,9 @@ const token = localStorage.getItem('jwt_token');
     });
   }
 
+  // Hàm chính: Tải danh sách các lớp học (learning spaces) từ backend
   async function loadSpaces(preferredSpaceId = null) {
+    // Kiểm tra quyền đăng nhập
     if (!token || !userId) {
       window.location.href = '/login';
       return;
@@ -509,8 +511,10 @@ const token = localStorage.getItem('jwt_token');
     }
   }
 
+  // Hàm hiển thị danh sách các lớp học (cột bên trái)
   function renderSpaces() {
     const keyword = state.searchTerm.trim().toLowerCase();
+    // Lọc danh sách lớp học theo từ khóa tìm kiếm
     const filtered = state.spaces.filter((space) => {
       const haystack = `${space.name || ''} ${space.description || ''} ${space.inviteCode || ''}`.toLowerCase();
       return haystack.includes(keyword);
@@ -567,15 +571,17 @@ const token = localStorage.getItem('jwt_token');
       </div>`;
   }
 
+  // Hàm xử lý khi người dùng chọn/nhấp vào một lớp học cụ thể
   async function selectSpace(spaceId) {
     const selected = state.spaces.find((space) => space.id === Number(spaceId));
     if (!selected) return;
 
     state.selectedSpaceId = selected.id;
-    renderSpaces();
-    renderDetailLoading(selected);
+    renderSpaces(); // Cập nhật lại giao diện (đánh dấu active)
+    renderDetailLoading(selected); // Hiển thị trạng thái đang tải dữ liệu roadmap
 
     try {
+      // Gọi API để lấy lộ trình học (roadmap/paths) của lớp được chọn
       const response = await fetch(`/api/learning-spaces/${selected.id}/learning-paths`, {
         headers: authHeaders(false)
       });
@@ -602,7 +608,9 @@ const token = localStorage.getItem('jwt_token');
     function detailHeaderTemplate(space) {
     }
 
+  // Hàm hiển thị chi tiết lộ trình học (roadmap) của lớp học bên cột phải
   function renderDetail(space, paths, errorMessage = '') {
+    // Nếu có lỗi, hiển thị thông báo lỗi
     if (errorMessage) {
       spaceDetail.innerHTML = `
         ${detailHeaderTemplate(space)}
@@ -693,35 +701,36 @@ const token = localStorage.getItem('jwt_token');
         </div>
       </div>`;
   }
+  //
+  // async function copyInviteCode(code) {
+  //   if (!code) return;
+  //   try {
+  //     await navigator.clipboard.writeText(code);
+  //     setJoinMessage(`Copied code ${code}.`, 'success');
+  //   } catch {
+  //     setJoinMessage(`Class code: ${code}`, 'success');
+  //   }
+  // } ==>>>>>>> hàm copy invite code cho student, chức năng này bỏ rổi
 
-  async function copyInviteCode(code) {
-    if (!code) return;
-    try {
-      await navigator.clipboard.writeText(code);
-      setJoinMessage(`Copied code ${code}.`, 'success');
-    } catch {
-      setJoinMessage(`Class code: ${code}`, 'success');
-    }
-  }
-
-  joinForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
+  joinForm.addEventListener('submit', async (event) => { // Bắt sự kiện submit form ,, sửa bắt sự kiện bằng onclick
+    event.preventDefault(); // Chặn reload trang
     clearJoinMessage();
-
-    const inviteCode = inviteCodeInput.value.trim().toUpperCase();
+    const inviteCode = inviteCodeInput.value.trim().toUpperCase(); // lấy invite code, up để check
+    // check if invite code có đúng hay không
     if (!inviteCode) {
       setJoinMessage('Please enter an invite code.', 'error');
       return;
     }
 
-    joinButton.disabled = true;
-    joinButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Joining...';
+    joinButton.disabled = true; // tránh người dùng click nhiều lần gây lỗi gửi nhiều request với backend
+    // code này chỉ dùng khi thời gian join class lâu cần in ra mess
+    // joinButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Joining...';
 
     try {
       const response = await fetch('/api/learning-spaces/join', {
         method: 'POST',
-        headers: authHeaders(true),
-        body: JSON.stringify({ inviteCode })
+        headers: authHeaders(true),//
+        body: JSON.stringify({ inviteCode }) // trả invite JSON cho backend
       });
 
       if (!response.ok) {

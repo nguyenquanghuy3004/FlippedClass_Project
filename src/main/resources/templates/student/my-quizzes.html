@@ -291,14 +291,17 @@ const token = localStorage.getItem('jwt_token');
     document.getElementById('statSpaces').textContent = spacesCount;
   }
 
+  // Hàm lọc danh sách quiz dựa trên từ khóa tìm kiếm và trạng thái lọc (Tất cả / Chưa làm / Đã làm)
   function filteredQuizzes() {
     const keyword = state.search.trim().toLowerCase();
     return state.quizzes.filter(quiz => {
+      // Kiểm tra trạng thái làm bài
       const matchesStatus =
         state.status === 'all' ||
         (state.status === 'pending' && !quiz.isCompleted) ||
         (state.status === 'completed' && quiz.isCompleted);
 
+      // Tìm kiếm từ khóa trong tên quiz, tên khóa học, tên không gian học tập
       const haystack = [
         quiz.title,
         quiz.courseName,
@@ -309,6 +312,7 @@ const token = localStorage.getItem('jwt_token');
     });
   }
 
+  // Hàm hiển thị danh sách quiz lên màn hình
   function renderQuizzes() {
     const quizzes = filteredQuizzes();
     if (!quizzes.length) {
@@ -348,20 +352,24 @@ const token = localStorage.getItem('jwt_token');
     }).join('');
   }
 
+  // Hàm chính: Gọi API lấy dữ liệu và hiển thị danh sách bài tập/quiz
   async function loadMyQuizzes() {
+    // Kiểm tra đã đăng nhập chưa
     if (!token || !userId) {
       window.location.href = '/login';
       return;
     }
 
     try {
+      // Gọi API dashboard để lấy toàn bộ dữ liệu, sau đó trích xuất các quiz
       const response = await fetch(`/api/students/${userId}/dashboard`, { headers: authHeaders() });
       if (!response.ok) throw new Error('Could not load quiz list.');
       const data = await response.json();
+      
       setStudentName(data.user);
-      state.quizzes = flattenQuizzes(data);
-      updateStats((data.learningSpaces || []).length);
-      renderQuizzes();
+      state.quizzes = flattenQuizzes(data); // Gom tất cả quiz từ các lớp học lại thành 1 mảng
+      updateStats((data.learningSpaces || []).length); // Cập nhật các con số thống kê ở trên cùng
+      renderQuizzes(); // Hiển thị danh sách
     } catch (error) {
       quizGrid.innerHTML = `
         <div class="empty-card" style="grid-column: 1 / -1;">

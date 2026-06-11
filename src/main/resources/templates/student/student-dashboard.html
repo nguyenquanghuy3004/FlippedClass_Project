@@ -612,9 +612,11 @@ const token = localStorage.getItem('jwt_token');
       messageEl.textContent = '';
     }
 
+    // Hàm gửi yêu cầu cập nhật thông tin cá nhân (Profile) lên backend
     async function saveProfile(event) {
-      event.preventDefault();
+      event.preventDefault(); // Ngăn chặn hành vi reload trang mặc định của form
 
+      // Kiểm tra xem đã đăng nhập chưa
       if (!token || !userId) {
         window.location.href = '/login';
         return;
@@ -694,6 +696,7 @@ const token = localStorage.getItem('jwt_token');
         </div>`;
     }
 
+    // Hàm hiển thị danh sách các không gian học tập (lớp học) sinh viên đang tham gia
     function renderLearningSpaces(learningSpaces) {
       const list = document.getElementById('learningSpaceList');
       if (!list) return;
@@ -746,6 +749,7 @@ const token = localStorage.getItem('jwt_token');
         : `<a href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">Take Quiz</a>`;
     }
 
+    // Hàm hiển thị danh sách các bài tập/quiz được nhóm theo từng lớp học
     function renderQuizAccordion(learningSpaces) {
       const quizAccordion = document.getElementById('quizAccordion');
       if (!quizAccordion) return;
@@ -943,6 +947,7 @@ const token = localStorage.getItem('jwt_token');
       }).join('');
     }
 
+    // Hàm tổng hợp gọi tất cả các hàm render để hiển thị toàn bộ giao diện dashboard
     function renderDashboard(data) {
       const dashboard = data || {};
       currentDashboardData = dashboard;
@@ -960,7 +965,9 @@ const token = localStorage.getItem('jwt_token');
       renderRecentDocuments(documents);
     }
 
+    // Hàm chính: Gọi API lấy dữ liệu tổng hợp cho dashboard khi tải trang
     async function loadDashboard() {
+      // Kiểm tra quyền truy cập
       if (!token || !userId) {
         window.location.href = '/login';
         return;
