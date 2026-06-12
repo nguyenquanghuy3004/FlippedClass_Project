@@ -41,9 +41,10 @@ public class JwtUtils {
                 .compact();
     }
 
-    public String generateJwtTokenFromUsername(String username) {
+    public String generateJwtTokenFromUsername(String username, java.util.List<String> roles) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)

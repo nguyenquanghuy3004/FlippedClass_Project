@@ -178,7 +178,8 @@
 
 <script>
 /* --- Inlined from student-learning-node.js --- */
-﻿const token = localStorage.getItem('jwt_token');
+const token = localStorage.getItem('jwt_token');
+  const userId = localStorage.getItem('user_id');
   const urlParams = new URLSearchParams(window.location.search);
   const pathNodeMatch = window.location.pathname.match(/\/student\/learning-nodes\/(\d+)/);
   const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
@@ -374,24 +375,246 @@
     return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
   }
 
-  function commentsTemplate(items) {
-    const discussions = items.filter((item) => normalizeItemType(item.itemType) === 'DISCUSSION');
-    const body = discussions.length
-      ? `<div class="comment-list">${discussions.map((item) => `
-          <div class="comment-item">
-            <span class="comment-author">${escapeHtml(item.title || 'Discussion')}</span>
-            <span class="comment-text">${escapeHtml(item.content || 'Your instructor opened a discussion topic for this node.')}</span>
-          </div>
-        `).join('')}</div>`
-      : emptyLightTemplate('ti-message-off', 'No comments or discussion topics yet.');
+  let currentComments = [];
 
-    return `
-      ${body}
-      <div class="comment-compose">
-        <textarea placeholder="Write a comment or question..."></textarea>
-        <button type="button" disabled>Send Comment</button>
-      </div>`;
+  async function loadComments() {
+    const container = document.getElementById('nodeCommentsContainer');
+    const badge = document.getElementById('commentsCountBadge');
+    if (!container) return;
+
+    try {
+      const response = await fetch(`/api/learning-nodes/${nodeId}/comments?userId=${userId}`, { headers: authHeaders(false) });
+      if (response.status === 403) {
+        container.innerHTML = emptyLightTemplate('ti-lock', 'You do not have permission to comment in this class.');
+        if (badge) badge.textContent = '0';
+        return;
+      }
+      if (!response.ok) throw new Error(await readError(response));
+      
+      currentComments = await response.json();
+      renderCommentsUI();
+    } catch (err) {
+      container.innerHTML = emptyLightTemplate('ti-alert-circle', err.message || 'Could not load comments.');
+    }
   }
+
+  function formatTime(dateString) {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderCommentItem(comment, isReply = false, rootId = null) {
+    const isOwner = String(comment.userId) === String(userId);
+    const defaultAvt = '/assets/images/avatar-1.jpg';
+    const avatar = comment.avatarUrl || defaultAvt;
+    const author = comment.fullName || 'Student';
+    const time = formatTime(comment.createdAt);
+    const currentRootId = rootId || comment.id;
+    const safeAuthor = author.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+    let html = `
+      <div class="comment-item ${isReply ? 'comment-reply' : ''}" style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <img src="${escapeHtml(avatar)}" alt="avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='${defaultAvt}'">
+        <div style="flex: 1; background: #f8f9fa; border-radius: 8px; padding: 10px 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+            <strong style="font-size: 0.9rem; color: #1e293b;">${escapeHtml(author)}</strong>
+            <span style="font-size: 0.75rem; color: #64748b;">${escapeHtml(time)}</span>
+          </div>
+          <div style="font-size: 0.875rem; color: #334155; margin-bottom: 8px; white-space: pre-wrap;" id="comment-content-${comment.id}">${escapeHtml(comment.content)}</div>
+          
+          <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #64748b;">
+            <button type="button" onclick="openReplyBox(${currentRootId}, '${safeAuthor}')" style="border:none; background:none; color:#64748b; cursor:pointer; padding:0;">Reply</button>
+            ${isOwner ? `<button type="button" onclick="toggleEditForm(${comment.id})" style="border:none; background:none; color:#64748b; cursor:pointer; padding:0;">Edit</button>` : ''}
+            ${isOwner ? `<button type="button" onclick="deleteComment(${comment.id})" style="border:none; background:none; color:#ef4444; cursor:pointer; padding:0;">Delete</button>` : ''}
+          </div>
+
+          <!-- Edit Form -->
+          <div id="edit-form-${comment.id}" style="display: none; margin-top: 8px;">
+            <textarea id="edit-input-${comment.id}" class="form-control" style="width: 100%; border-radius: 6px; padding: 8px; border: 1px solid #e2e8f0; font-size: 0.875rem; margin-bottom: 8px;" rows="2"></textarea>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" onclick="submitEdit(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #3b82f6; color: white; border: none; cursor: pointer;">Save</button>
+              <button type="button" onclick="toggleEditForm(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
+            </div>
+          </div>
+
+          <!-- Reply Form -->
+          ${!isReply ? `
+          <div id="reply-form-${comment.id}" style="display: none; margin-top: 12px;">
+            <textarea id="reply-input-${comment.id}" placeholder="Write a reply..." class="form-control" style="width: 100%; border-radius: 6px; padding: 8px; border: 1px solid #e2e8f0; font-size: 0.875rem; margin-bottom: 8px;" rows="2"></textarea>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" onclick="submitReply(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #3b82f6; color: white; border: none; cursor: pointer;">Reply</button>
+              <button type="button" onclick="toggleReplyForm(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    if (!isReply && comment.replies && comment.replies.length > 0) {
+      html += `<div style="padding-left: 32px; border-left: 2px solid #e2e8f0; margin-left: 16px; margin-bottom: 16px;">`;
+      comment.replies.forEach(reply => {
+        html += renderCommentItem(reply, true, comment.id);
+      });
+      html += `</div>`;
+    }
+
+    return html;
+  }
+
+  function renderCommentsUI() {
+    const container = document.getElementById('nodeCommentsContainer');
+    const badge = document.getElementById('commentsCountBadge');
+    if (!container) return;
+
+    let totalCount = currentComments.length;
+    currentComments.forEach(c => totalCount += (c.replies ? c.replies.length : 0));
+    if (badge) badge.textContent = totalCount;
+
+    let body = '';
+    if (currentComments.length === 0) {
+      body = emptyLightTemplate('ti-message-off', 'No comments yet. Be the first to start a discussion!');
+    } else {
+      body = `<div class="comment-list" style="max-height: 400px; overflow-y: auto; padding-right: 8px;">
+        ${currentComments.map(c => renderCommentItem(c, false)).join('')}
+      </div>`;
+    }
+
+    container.innerHTML = `
+      ${body}
+      <div class="comment-compose" style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+        <textarea id="rootCommentInput" placeholder="Write a comment or question..." style="width: 100%; border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1; font-size: 0.875rem; resize: vertical; margin-bottom: 8px;" rows="3"></textarea>
+        <button type="button" onclick="submitRootComment()" id="rootCommentBtn" style="width: 100%; padding: 8px; border-radius: 6px; background: #2563eb; color: white; border: none; font-weight: 500; cursor: pointer; transition: background 0.2s;">Send Comment</button>
+      </div>
+    `;
+
+    const input = document.getElementById('rootCommentInput');
+    const btn = document.getElementById('rootCommentBtn');
+    if (input && btn) {
+      input.addEventListener('input', () => {
+        btn.disabled = input.value.trim().length === 0;
+        btn.style.opacity = btn.disabled ? '0.6' : '1';
+      });
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+    }
+  }
+
+  window.toggleReplyForm = function(id) {
+    const form = document.getElementById(`reply-form-${id}`);
+    if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  };
+
+  window.openReplyBox = function(rootId, mentionName) {
+    const form = document.getElementById(`reply-form-${rootId}`);
+    const input = document.getElementById(`reply-input-${rootId}`);
+    if (form && input) {
+      form.style.display = 'block';
+      if (mentionName && !input.value.includes(`@${mentionName}`)) {
+        input.value = `@${mentionName} ${input.value}`;
+      }
+      // Put cursor at the end
+      input.focus();
+      const val = input.value;
+      input.value = '';
+      input.value = val;
+    }
+  };
+
+  window.toggleEditForm = function(id) {
+    const form = document.getElementById(`edit-form-${id}`);
+    const contentDiv = document.getElementById(`comment-content-${id}`);
+    const input = document.getElementById(`edit-input-${id}`);
+    
+    if (form && contentDiv && input) {
+      if (form.style.display === 'none') {
+        form.style.display = 'block';
+        contentDiv.style.display = 'none';
+        input.value = contentDiv.textContent;
+      } else {
+        form.style.display = 'none';
+        contentDiv.style.display = 'block';
+      }
+    }
+  };
+
+  window.submitRootComment = async function() {
+    const input = document.getElementById('rootCommentInput');
+    const content = input.value.trim();
+    if (!content) return;
+
+    const btn = document.getElementById('rootCommentBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch(`/api/learning-nodes/${nodeId}/comments?userId=${userId}`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ content })
+      });
+      if (!res.ok) throw new Error(await readError(res));
+      await loadComments();
+    } catch(err) {
+      alert(err.message || 'Could not post comment');
+    } finally {
+      if(btn) {
+        btn.disabled = false;
+        btn.textContent = 'Send Comment';
+      }
+    }
+  };
+
+  window.submitReply = async function(parentId) {
+    const input = document.getElementById(`reply-input-${parentId}`);
+    const content = input?.value.trim();
+    if (!content) return;
+
+    try {
+      const res = await fetch(`/api/learning-nodes/${nodeId}/comments/${parentId}/replies?userId=${userId}`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ content })
+      });
+      if (!res.ok) throw new Error(await readError(res));
+      await loadComments();
+    } catch(err) {
+      alert(err.message || 'Could not post reply');
+    }
+  };
+
+  window.submitEdit = async function(commentId) {
+    const input = document.getElementById(`edit-input-${commentId}`);
+    const content = input?.value.trim();
+    if (!content) return;
+
+    try {
+      const res = await fetch(`/api/comments/${commentId}?userId=${userId}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ content })
+      });
+      if (!res.ok) throw new Error(await readError(res));
+      await loadComments();
+    } catch(err) {
+      alert(err.message || 'Could not update comment');
+    }
+  };
+
+  window.deleteComment = async function(commentId) {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    try {
+      const res = await fetch(`/api/comments/${commentId}?userId=${userId}`, {
+        method: 'DELETE',
+        headers: authHeaders(false)
+      });
+      if (!res.ok) throw new Error(await readError(res));
+      await loadComments();
+    } catch(err) {
+      alert(err.message || 'Could not delete comment');
+    }
+  };
 
   function renderError(title, message) {
     pageRoot.className = 'error-state';
@@ -460,9 +683,13 @@
               <h2>Comments</h2>
               <p>Discussions and questions related to this node.</p>
             </div>
-            <span class="soft-chip">${discussions.length}</span>
+            <span class="soft-chip" id="commentsCountBadge">0</span>
           </div>
-          ${commentsTemplate(items)}
+          <div id="nodeCommentsContainer">
+            <div class="empty-light">
+              <div><i class="ti ti-loader-2"></i> Loading comments...</div>
+            </div>
+          </div>
         </section>
       </aside>`;
   }
@@ -494,6 +721,7 @@
 
       // Hiển thị nội dung ra giao diện
       renderNodePage(node, sortedItems);
+      loadComments();
     } catch (error) {
       renderError('Could not load node', error.message || 'Please try again later.');
     }

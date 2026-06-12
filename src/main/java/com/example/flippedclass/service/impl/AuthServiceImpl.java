@@ -163,12 +163,12 @@ public class AuthServiceImpl implements AuthService {
                 userRepository.save(user);
             }
         }
-        // Sinh JWT từ username
-        String jwt = jwtUtils.generateJwtTokenFromUsername(user.getUsername());
-
         List<String> roles = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(Collectors.toList());
+                
+        // Sinh JWT từ username
+        String jwt = jwtUtils.generateJwtTokenFromUsername(user.getUsername(), roles);
         // Check xem đã hoàn thành profile
         boolean isProfileComplete = (user.getStudentProfile() != null);
         return new GoogleJwtResponse(

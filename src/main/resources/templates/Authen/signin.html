@@ -54,7 +54,7 @@
 
       <div id="errorMsg" class="auth-msg auth-msg-error" style="display: none;"></div>
 
-      <button class="auth-glass-btn" type="submit">Sign In</button>
+      <button class="auth-glass-btn" type="button" onclick="submitLoginForm(event)">Sign In</button>
 
       <div class="auth-glass-divider">Or sign in with</div>
 
@@ -78,127 +78,126 @@
 </div>
 
 <script>
-  document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const errorMsg = document.getElementById('errorMsg');
-      const btn = this.querySelector('button[type="submit"]');
-      
-      const form = this;
-      
-      if (!form.checkValidity()) {
-          e.stopPropagation();
-          form.classList.add('was-validated');
-          return;
-      }
+  function submitLoginForm(e) {
+    if (e) e.preventDefault();
+
+    const form = document.getElementById('loginForm');
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorMsg = document.getElementById('errorMsg');
+    const btn = form.querySelector('button[type="button"]');
+
+    if (!form.checkValidity()) {
+      if (e) e.stopPropagation();
       form.classList.add('was-validated');
-      
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
-      btn.disabled = true;
-      
-      fetch('/api/auth/signin', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-              username: username,
-              password: password
-          })
+      return;
+    }
+    form.classList.add('was-validated');
+
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+    btn.disabled = true;
+
+    fetch('/api/auth/signin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password
       })
-      .then(response => {
-          if (!response.ok) {
-              throw new Error('Sign in failed. Incorrect username or password.');
-          }
-          return response.json();
-      })
-      .then(data => {
-          const token = data.token;
-          localStorage.setItem('jwt_token', token);
-          localStorage.setItem('user_id', data.id);
-          
-          try {
-              const payload = JSON.parse(atob(token.split('.')[1]));
-              if (payload.roles && (payload.roles.includes('ADMIN') || payload.roles.includes('ROLE_ADMIN'))) {
-                  window.location.href = '/admin/dashboard';
-              } else if (payload.roles && (payload.roles.includes('MENTOR') || payload.roles.includes('ROLE_MENTOR'))) {
-                  window.location.href = '/lecturer/dashboard';
-              } else if (payload.roles && (payload.roles.includes('STUDENT') || payload.roles.includes('ROLE_STUDENT'))) {
-                  window.location.href = '/student/dashboard';
-              } else {
-                  window.location.href = '/';
+    })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Sign in failed. Incorrect username or password.');
               }
-          } catch(e) {
-              window.location.href = '/';
-          }
-      })
-      .catch(error => {
-          errorMsg.textContent = error.message;
-          errorMsg.style.display = 'block';
-          btn.innerHTML = 'Sign In';
-          btn.disabled = false;
-      });
-  });
+              return response.json();
+            })
+            .then(data => {
+              const token = data.token;
+              localStorage.setItem('jwt_token', token);
+              localStorage.setItem('user_id', data.id);
+
+              try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if (payload.roles && (payload.roles.includes('ADMIN') || payload.roles.includes('ROLE_ADMIN'))) {
+                  window.location.href = '/admin/dashboard';
+                } else if (payload.roles && (payload.roles.includes('MENTOR') || payload.roles.includes('ROLE_MENTOR'))) {
+                  window.location.href = '/lecturer/dashboard';
+                } else if (payload.roles && (payload.roles.includes('STUDENT') || payload.roles.includes('ROLE_STUDENT'))) {
+                  window.location.href = '/student/dashboard';
+                } else {
+                  window.location.href = '/';
+                }
+              } catch(err) {
+                window.location.href = '/';
+              }
+            })
+            .catch(error => {
+              errorMsg.textContent = error.message;
+              errorMsg.style.display = 'block';
+              btn.innerHTML = 'Sign In';
+              btn.disabled = false;
+            });
+  }
 
   function handleGoogleLogin(response) {
-      const errorMsg = document.getElementById('errorMsg');
-      errorMsg.style.display = 'none';
+    const errorMsg = document.getElementById('errorMsg');
+    errorMsg.style.display = 'none';
 
-      fetch('/api/auth/google', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-              idToken: response.credential
-          })
+    fetch('/api/auth/google', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        idToken: response.credential
       })
-      .then(res => {
-          if (!res.ok) {
-              throw new Error('Google sign in failed.');
-          }
-          return res.json();
-      })
-      .then(data => {
-          const token = data.token;
-          localStorage.setItem('jwt_token', token);
-          localStorage.setItem('user_id', data.id);
-          
-          try {
-              const payload = JSON.parse(atob(token.split('.')[1]));
-              if (payload.roles && payload.roles.includes('ADMIN')) {
-                  window.location.href = '/admin/dashboard';
-              } else if (payload.roles && payload.roles.includes('MENTOR')) {
-                  window.location.href = '/lecturer/dashboard';
-              } else if (payload.roles && payload.roles.includes('STUDENT')) {
-                  window.location.href = '/student/dashboard';
-              } else {
-                  window.location.href = '/';
+    })
+            .then(res => {
+              if (!res.ok) {
+                throw new Error('Google sign in failed.');
               }
-          } catch(e) {
-              window.location.href = '/';
-          }
-      })
-      .catch(error => {
-          errorMsg.textContent = error.message;
-          errorMsg.style.display = 'block';
-      });
+              return res.json();
+            })
+            .then(data => {
+              const token = data.token;
+              localStorage.setItem('jwt_token', token);
+              localStorage.setItem('user_id', data.id);
+
+              try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if (payload.roles && (payload.roles.includes('ADMIN') || payload.roles.includes('ROLE_ADMIN'))) {
+                  window.location.href = '/admin/dashboard';
+                } else if (payload.roles && (payload.roles.includes('MENTOR') || payload.roles.includes('ROLE_MENTOR'))) {
+                  window.location.href = '/lecturer/dashboard';
+                } else if (payload.roles && (payload.roles.includes('STUDENT') || payload.roles.includes('ROLE_STUDENT'))) {
+                  window.location.href = '/student/dashboard';
+                } else {
+                  window.location.href = '/';
+                }
+              } catch(e) {
+                window.location.href = '/';
+              }
+            })
+            .catch(error => {
+              errorMsg.textContent = error.message;
+              errorMsg.style.display = 'block';
+            });
   }
 
   function togglePassword(inputId, btnElement) {
-      const input = document.getElementById(inputId);
-      const icon = btnElement.querySelector('i');
-      if (input.type === 'password') {
-          input.type = 'text';
-          icon.classList.remove('ti-eye');
-          icon.classList.add('ti-eye-off');
-      } else {
-          input.type = 'password';
-          icon.classList.remove('ti-eye-off');
-          icon.classList.add('ti-eye');
-      }
+    const input = document.getElementById(inputId);
+    const icon = btnElement.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('ti-eye');
+      icon.classList.add('ti-eye-off');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('ti-eye-off');
+      icon.classList.add('ti-eye');
+    }
   }
 </script>
 
