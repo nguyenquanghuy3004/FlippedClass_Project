@@ -76,4 +76,9 @@ public class LearningSpaceController {
     public ResponseEntity<List<LearningSpaceResponse>> getPublicSpaces() {
         return ResponseEntity.ok(learningSpaceService.getPublicSpaces());
     }
+
+    @GetMapping("/invite-code/{inviteCode}")
+    public ResponseEntity<LearningSpaceResponse> getSpaceByInviteCode(@PathVariable String inviteCode) {
+        return ResponseEntity.ok(learningSpaceService.getSpaceByInviteCode(inviteCode));
+    }
 }

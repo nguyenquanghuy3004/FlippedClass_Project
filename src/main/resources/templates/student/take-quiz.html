@@ -1,620 +1,691 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Take Quiz - FlippedClass</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
-  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
-  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
-  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <!DOCTYPE html>
+  <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-  <script type="text/javascript">
-    if (!localStorage.getItem('jwt_token')) {
-      window.location.href = '/login';
-    }
-  </script>
-  <link rel="stylesheet" th:href="@{/assets/css/student-take-quiz.css}">
-  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
-  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
-  <script>
-/* --- Inlined from student-user-menu.js --- */
-(function () {
-  const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
-
-  function storedUser() {
-    return {
-      fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
-      username: localStorage.getItem('username') || '',
-      avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
-    };
-  }
-
-  function normalizeUser(user = {}) {
-    const stored = storedUser();
-    return {
-      name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
-      username: user.username || stored.username || '',
-      avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
-    };
-  }
-
-  function setStudentMenuUser(user = {}) {
-    const normalized = normalizeUser(user);
-
-    if (normalized.name && normalized.name !== 'Student') {
-      localStorage.setItem('full_name', normalized.name);
-    }
-    if (normalized.username) {
-      localStorage.setItem('username', normalized.username);
-    }
-    if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
-      localStorage.setItem('avatar_url', normalized.avatarUrl);
-    }
-
-    document.querySelectorAll('[data-user-name]').forEach((element) => {
-      element.textContent = normalized.name;
-    });
-    document.querySelectorAll('[data-user-avatar]').forEach((image) => {
-      image.src = normalized.avatarUrl;
-      image.onerror = () => {
-        image.onerror = null;
-        image.src = defaultAvatarUrl;
-      };
-    });
-
-    const topbarName = document.getElementById('studentName');
-    if (topbarName) topbarName.textContent = normalized.name;
-  }
-
-  function studentLogout() {
-    ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
-      localStorage.removeItem(key);
-    });
-    window.location.href = '/';
-  }
-
-  async function refreshStudentMenuUser() {
-    const token = localStorage.getItem('jwt_token');
-    const userId = localStorage.getItem('user_id');
-    if (!token || !userId) return;
-
-    try {
-      const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!response.ok) return;
-      const user = await response.json();
-      setStudentMenuUser(user);
-    } catch (error) {
-      console.warn('Could not load user menu profile.', error);
-    }
-  }
-
-  function closeAllMenus(exceptMenu = null) {
-    document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
-      if (menu !== exceptMenu) {
-        menu.classList.remove('is-open');
-        menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+  <head>
+    <meta charset="UTF-8">
+    <title>Take Quiz - FlippedClass</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+    <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+    <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  
+    <script type="text/javascript">
+      if (!localStorage.getItem('jwt_token')) {
+        window.location.href = '/login';
       }
-    });
-  }
+    </script>
+    <link rel="stylesheet" th:href="@{/assets/css/student-take-quiz.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+    <script th:inline="none">
+      /* --- Inlined from student-user-menu.js --- */
+      (function () {
+        const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
 
-  function initStudentUserMenus() {
-    setStudentMenuUser();
-    refreshStudentMenuUser();
+        function storedUser() {
+          return {
+            fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
+            username: localStorage.getItem('username') || '',
+            avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
+          };
+        }
 
-    document.querySelectorAll('[data-user-menu]').forEach((menu) => {
-      const toggle = menu.querySelector('[data-user-menu-toggle]');
-      const logoutButton = menu.querySelector('[data-user-logout]');
+        function normalizeUser(user = {}) {
+          const stored = storedUser();
+          return {
+            name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
+            username: user.username || stored.username || '',
+            avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
+          };
+        }
 
-      toggle?.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const shouldOpen = !menu.classList.contains('is-open');
-        closeAllMenus(menu);
-        menu.classList.toggle('is-open', shouldOpen);
-        toggle.setAttribute('aria-expanded', String(shouldOpen));
-      });
+        function setStudentMenuUser(user = {}) {
+          const normalized = normalizeUser(user);
 
-      logoutButton?.addEventListener('click', studentLogout);
-    });
+          if (normalized.name && normalized.name !== 'Student') {
+            localStorage.setItem('full_name', normalized.name);
+          }
+          if (normalized.username) {
+            localStorage.setItem('username', normalized.username);
+          }
+          if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
+            localStorage.setItem('avatar_url', normalized.avatarUrl);
+          }
 
-    document.addEventListener('click', () => closeAllMenus());
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closeAllMenus();
-    });
-  }
+          document.querySelectorAll('[data-user-name]').forEach((element) => {
+            element.textContent = normalized.name;
+          });
+          document.querySelectorAll('[data-user-avatar]').forEach((image) => {
+            image.src = normalized.avatarUrl;
+            image.onerror = () => {
+              image.onerror = null;
+              image.src = defaultAvatarUrl;
+            };
+          });
 
-  window.setStudentMenuUser = setStudentMenuUser;
-  window.studentLogout = studentLogout;
-  if (!window.logout) window.logout = studentLogout;
+          const topbarName = document.getElementById('studentName');
+          if (topbarName) topbarName.textContent = normalized.name;
+        }
 
-  document.addEventListener('DOMContentLoaded', initStudentUserMenus);
-})();
+        function studentLogout() {
+          ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
+            localStorage.removeItem(key);
+          });
+          window.location.href = '/';
+        }
 
-</script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body>
-<div id="overlay" class="overlay"></div>
+        async function refreshStudentMenuUser() {
+          const token = localStorage.getItem('jwt_token');
+          const userId = localStorage.getItem('user_id');
+          if (!token || !userId) return;
 
+          try {
+            const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!response.ok) return;
+            const user = await response.json();
+            setStudentMenuUser(user);
+          } catch (error) {
+            console.warn('Could not load user menu profile.', error);
+          }
+        }
 
-<aside id="sidebar" class="sidebar">
-  <div class="logo-area">
-    <a th:href="@{/}" class="logo-link">
-      <span class="logo-mark"><i class="ti ti-book-2 fs-3"></i></span>
-      <span>Flipped<span>Class</span></span>
-    </a>
-  </div>
-  <ul class="nav">
-    <li><a class="nav-link" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
-    <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
-    <li><a class="nav-link active" href="/student/my-quizzes" data-nav-key="my-quiz" aria-current="page"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
-    <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
-    <li class="sidebar-user-slot">
-  <div class="student-user-menu" data-user-menu>
-    <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
-      <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
-      <span class="student-menu-info">
-        <span class="student-menu-name" data-user-name>Student</span>
-        <span class="student-menu-role">Student</span>
-      </span>
-      <i class="ti ti-chevron-up student-menu-chevron"></i>
-    </button>
-    <div class="student-menu-panel" role="menu">
-      <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
-      <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
-    </div>
-  </div>
-</li>
-  </ul>
-</aside>
+        function closeAllMenus(exceptMenu = null) {
+          document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
+            if (menu !== exceptMenu) {
+              menu.classList.remove('is-open');
+              menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+            }
+          });
+        }
 
-<main id="content" class="content">
-  <div class="page-wrap">
-    <section class="quiz-hero">
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <span>Subject</span>
-          <strong id="hero-course">Loading</strong>
-        </div>
-        <div class="hero-stat">
-          <span>Duration</span>
-          <strong id="hero-duration">-- min</strong>
-        </div>
-        <div class="hero-stat">
-          <span>Questions</span>
-          <strong id="hero-total">-- questions</strong>
+        function initStudentUserMenus() {
+          setStudentMenuUser();
+          refreshStudentMenuUser();
+
+          document.querySelectorAll('[data-user-menu]').forEach((menu) => {
+            const toggle = menu.querySelector('[data-user-menu-toggle]');
+            const logoutButton = menu.querySelector('[data-user-logout]');
+
+            toggle?.addEventListener('click', (event) => {
+              event.stopPropagation();
+              const shouldOpen = !menu.classList.contains('is-open');
+              closeAllMenus(menu);
+              menu.classList.toggle('is-open', shouldOpen);
+              toggle.setAttribute('aria-expanded', String(shouldOpen));
+            });
+
+            logoutButton?.addEventListener('click', studentLogout);
+          });
+
+          document.addEventListener('click', () => closeAllMenus());
+          document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeAllMenus();
+          });
+        }
+
+        window.setStudentMenuUser = setStudentMenuUser;
+        window.studentLogout = studentLogout;
+        if (!window.logout) window.logout = studentLogout;
+
+        document.addEventListener('DOMContentLoaded', initStudentUserMenus);
+      })();
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+
+  <body>
+    <div id="overlay" class="overlay"></div>
+
+    <nav id="topbar" class="topbar">
+      <button id="toggleBtn" class="icon-button" type="button" aria-label="Toggle sidebar">
+        <i class="ti ti-layout-sidebar-left-expand"></i>
+      </button>
+      <div class="topbar-title">
+        <strong>Take Quiz</strong>
+        <span>Answer each question before time runs out</span>
+      </div>
+      <div class="topbar-spacer"></div>
+      <a class="btn-quiz btn-quiz-outline" href="/student/my-quizzes">
+        <i class="ti ti-arrow-left"></i> My Quizzes
+      </a>
+    </nav>
+
+    <aside id="sidebar" class="sidebar">
+      <div class="logo-area">
+        <a th:href="@{/}" class="logo-link">
+          <span class="logo-mark"><i class="ti ti-book-2 fs-3"></i></span>
+          <span>Flipped<span>Class</span></span>
+        </a>
+      </div>
+      <ul class="nav">
+        <li><a class="nav-link" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i
+              class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
+        <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i
+              class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
+        <li><a class="nav-link active" href="/student/my-quizzes" data-nav-key="my-quiz" aria-current="page"><i
+              class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
+        <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span
+              class="nav-text">Reports</span></a></li>
+        <li class="sidebar-user-slot">
+          <div class="student-user-menu" data-user-menu>
+            <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false"
+              aria-label="Account menu">
+              <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}"
+                alt="Student avatar">
+              <span class="student-menu-info">
+                <span class="student-menu-name" data-user-name>Student</span>
+                <span class="student-menu-role">Student</span>
+              </span>
+              <i class="ti ti-chevron-up student-menu-chevron"></i>
+            </button>
+            <div class="student-menu-panel" role="menu">
+              <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i
+                  class="ti ti-help-circle"></i><span>Help</span></a>
+              <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i
+                  class="ti ti-logout"></i><span>Logout</span></button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </aside>
+
+    <main id="content" class="content">
+      <div class="page-wrap">
+        <section class="quiz-hero">
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span>Subject</span>
+              <strong id="hero-course">Loading</strong>
+            </div>
+            <div class="hero-stat">
+              <span>Duration</span>
+              <strong id="hero-duration">-- min</strong>
+            </div>
+            <div class="hero-stat">
+              <span>Questions</span>
+              <strong id="hero-total">-- questions</strong>
+            </div>
+          </div>
+        </section>
+
+        <div class="quiz-shell">
+          <aside class="sticky-panel">
+            <section class="quiz-card">
+              <div class="panel-title"><i class="ti ti-clipboard-text"></i> Attempt Info</div>
+
+              <div class="timer-box">
+                <div class="timer-label">Time Left</div>
+                <div class="timer-value" id="countdown">--:--</div>
+              </div>
+
+              <div class="action-buttons">
+                <a class="btn-quiz btn-quiz-outline" href="/student/my-quizzes">
+                  <i class="ti ti-arrow-left"></i> Back
+                </a>
+                <button id="submitQuizButton" class="btn-quiz btn-quiz-primary" type="button">
+                  <i class="ti ti-send"></i> Submit
+                </button>
+              </div>
+            </section>
+
+            <section class="quiz-card">
+              <div class="panel-title"><i class="ti ti-progress-check"></i> Progress</div>
+              <div class="progress-row">
+                <span>Answered</span>
+                <strong><span id="answered-count">0</span>/<span id="total-count">0</span></strong>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+              </div>
+              <div class="progress-row" style="margin-top: 0.65rem; margin-bottom: 0;">
+                <span>Complete</span>
+                <strong id="progress-percent">0%</strong>
+              </div>
+            </section>
+          </aside>
+
+          <section class="questions-column" id="questions-container">
+            <div class="quiz-card loading-state">
+              <i class="ti ti-loader-2"></i>
+              Loading questions...
+            </div>
+          </section>
+
+          <aside class="sticky-panel nav-panel">
+            <section class="quiz-card">
+              <div class="panel-title"><i class="ti ti-grid-dots"></i> Question List</div>
+              <div class="nav-grid" id="navGrid"></div>
+            </section>
+          </aside>
         </div>
       </div>
-    </section>
+    </main>
 
-    <div class="quiz-shell">
-      <aside class="sticky-panel">
-        <section class="quiz-card">
-          <div class="panel-title"><i class="ti ti-clipboard-text"></i> Attempt Info</div>
+    <script th:inline="none">
 
-          <div class="timer-box">
-            <div class="timer-label">Time Left</div>
-            <div class="timer-value" id="countdown">--:--</div>
-          </div>
+      const token = localStorage.getItem('jwt_token');
+      const userId = localStorage.getItem('user_id');
+      const urlParams = new URLSearchParams(window.location.search);
+      const quizId = urlParams.get('quizId');
 
-          <div class="action-buttons">
-            <a class="btn-quiz btn-quiz-outline" href="/student/my-quizzes">
-              <i class="ti ti-arrow-left"></i> Back
-            </a>
-            <button class="btn-quiz btn-quiz-primary" type="button" onclick="submitQuiz()">
-              <i class="ti ti-send"></i> Submit
-            </button>
-          </div>
-        </section>
+      let timeRemaining = 0;
+      let timerInterval = null;
+      let totalQuestions = 0;
+      let quizQuestions = [];
+      let isSubmitting = false;
 
-        <section class="quiz-card">
-          <div class="panel-title"><i class="ti ti-progress-check"></i> Progress</div>
-          <div class="progress-row">
-            <span>Answered</span>
-            <strong><span id="answered-count">0</span>/<span id="total-count">0</span></strong>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="progress-bar"></div>
-          </div>
-          <div class="progress-row" style="margin-top: 0.65rem; margin-bottom: 0;">
-            <span>Complete</span>
-            <strong id="progress-percent">0%</strong>
-          </div>
-        </section>
-      </aside>
+      const countdownEl = document.getElementById('countdown');
+      const navGrid = document.getElementById('navGrid');
+      const questionsContainer = document.getElementById('questions-container');
+      const swalColors = { confirmButtonColor: '#5b5ce2', cancelButtonColor: '#b42318' };
 
-      <section class="questions-column" id="questions-container">
-        <div class="quiz-card loading-state">
-          <i class="ti ti-loader-2"></i>
-          Loading questions...
-        </div>
-      </section>
-
-      <aside class="sticky-panel nav-panel">
-        <section class="quiz-card">
-          <div class="panel-title"><i class="ti ti-grid-dots"></i> Question List</div>
-          <div class="nav-grid" id="navGrid"></div>
-        </section>
-      </aside>
-    </div>
-  </div>
-</main>
-
-<script>
-
-const token = localStorage.getItem('jwt_token');
-  const userId = localStorage.getItem('user_id');
-  const urlParams = new URLSearchParams(window.location.search);
-  const quizId = urlParams.get('quizId');
-
-  let timeRemaining = 0;
-  let timerInterval = null;
-  let totalQuestions = 0;
-  let quizQuestions = [];
-  let isSubmitting = false;
-
-  const countdownEl = document.getElementById('countdown');
-  const navGrid = document.getElementById('navGrid');
-  const questionsContainer = document.getElementById('questions-container');
-  const swalColors = { confirmButtonColor: '#5b5ce2', cancelButtonColor: '#b42318' };
-
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
-  function authHeaders(json = false) {
-    const headers = { Authorization: `Bearer ${token}` };
-    if (json) headers['Content-Type'] = 'application/json';
-    return headers;
-  }
-
-  function questionTypeLabel(type) {
-    const labels = {
-      SINGLE_CHOICE: 'Single Choice',
-      MULTIPLE_CHOICE: 'Multiple Choice',
-      TRUE_FALSE: 'True/False',
-      ESSAY: 'Essay'
-    };
-    return labels[type] || type || 'Question';
-  }
-
-  function normalizeOptionKey(key, index) {
-    if (/^\d+$/.test(String(key))) return String.fromCharCode(65 + Number(key));
-    return String(key || String.fromCharCode(65 + index));
-  }
-
-  function parseOptions(rawOptions) {
-    if (!rawOptions) return [];
-    try {
-      const parsed = JSON.parse(rawOptions);
-      if (Array.isArray(parsed)) return parsed.map((value, index) => [String(index), value]);
-      if (typeof parsed === 'object' && parsed !== null) return Object.entries(parsed);
-    } catch (error) {
-      return [ ['Ans', rawOptions] ];
-    }
-    return [ ['Ans', rawOptions] ];
-  }
-
-  function setStudentName(name) {
-    const studentName = document.getElementById('studentName');
-    if (studentName && name) studentName.textContent = name;
-  }
-
-  function setupLayoutControls() {
-    const toggleBtn = document.getElementById('toggleBtn');
-    const mobileBtn = document.getElementById('mobileBtn');
-    const overlay = document.getElementById('overlay');
-
-    toggleBtn?.addEventListener('click', () => {
-      if (window.innerWidth >= 992) {
-        document.body.classList.toggle('sidebar-collapsed');
-      } else {
-        document.body.classList.toggle('sidebar-open');
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
       }
-    });
 
-    mobileBtn?.addEventListener('click', () => document.body.classList.add('sidebar-open'));
-    overlay?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
-  }
+      function authHeaders(json = false) {
+        const headers = { Authorization: `Bearer ${token}` };
+        if (json) headers['Content-Type'] = 'application/json';
+        return headers;
+      }
 
-  async function readError(response) {
-    try {
-      const data = await response.json();
-      return data.message || data.error || 'Something went wrong.';
-    } catch (error) {
-      const text = await response.text();
-      return text || 'Something went wrong.';
-    }
-  }
+      function questionTypeLabel(type) {
+        const normalizedType = normalizeQuestionType(type);
+        const labels = {
+          SINGLE_CHOICE: 'Single Choice',
+          MULTIPLE_CHOICE: 'Multiple Choice',
+          TRUE_FALSE: 'True/False',
+          ESSAY: 'Essay'
+        };
+        return labels[normalizedType] || type || 'Question';
+      }
 
-  function requireQuizId() {
-    if (quizId) return true;
-    Swal.fire({
-      icon: 'warning',
-      title: 'Missing quiz ID',
-      text: 'Please choose a quiz from the dashboard before starting.',
-      confirmButtonText: 'Back to My Quizzes',
-      confirmButtonColor: swalColors.confirmButtonColor
-    }).then(() => {
-      window.location.href = '/student/my-quizzes';
-    });
-    return false;
-  }
+      function normalizeOptionKey(key, index) {
+        if (/^\d+$/.test(String(key))) return String.fromCharCode(65 + Number(key));
+        return String(key || String.fromCharCode(65 + index));
+      }
 
-  // Hàm chính: Khởi tạo bài kiểm tra (lấy thông tin quiz và danh sách câu hỏi từ backend)
-  async function initQuiz() {
-    if (!token || !userId) {
-      window.location.href = '/login';
-      return;
-    }
+      function parseOptions(rawOptions) {
+        if (!rawOptions) return [];
+        try {
+          const parsed = JSON.parse(rawOptions);
+          if (Array.isArray(parsed)) return parsed.map((value, index) => [String(index), value]);
+          if (typeof parsed === 'object' && parsed !== null) return Object.entries(parsed);
+        } catch (error) {
+          return [['Ans', rawOptions]];
+        }
+        return [['Ans', rawOptions]];
+      }
 
-    if (!requireQuizId()) return;
-    setStudentName(localStorage.getItem('username') || localStorage.getItem('full_name'));
+      function normalizeQuestionType(type) {
+        return String(type || '').toUpperCase();
+      }
 
-    try {
-      // 1. Kiểm tra xem sinh viên đã làm bài quiz này chưa
-      const attemptsRes = await fetch(`/api/quizzes/attempts/student/${userId}`, { headers: authHeaders() });
-      if (attemptsRes.ok) {
-        const attempts = await attemptsRes.json();
-        const hasAttempt = attempts.some(attempt => String(attempt.quizId) === String(quizId));
-        if (hasAttempt) {
-          await Swal.fire({
-            icon: 'warning',
-            title: 'You already completed this quiz',
-            text: 'This quiz was already submitted, so you cannot retake it.',
-            confirmButtonText: 'Back to My Quizzes',
-            confirmButtonColor: swalColors.confirmButtonColor
-          });
-          window.location.href = '/student/my-quizzes';
-          return;
+      function optionsForQuestion(question) {
+        const type = normalizeQuestionType(question.questionType);
+        const parsedOptions = parseOptions(question.options);
+        if (parsedOptions.length) return parsedOptions;
+        if (type === 'TRUE_FALSE') return [['true', 'True'], ['false', 'False']];
+        return [];
+      }
+
+      function setStudentName(name) {
+        const studentName = document.getElementById('studentName');
+        if (studentName && name) studentName.textContent = name;
+      }
+
+      function setupLayoutControls() {
+        const toggleBtn = document.getElementById('toggleBtn');
+        const mobileBtn = document.getElementById('mobileBtn');
+        const overlay = document.getElementById('overlay');
+
+        toggleBtn?.addEventListener('click', () => {
+          if (window.innerWidth >= 992) {
+            document.body.classList.toggle('sidebar-collapsed');
+          } else {
+            document.body.classList.toggle('sidebar-open');
+          }
+        });
+
+        mobileBtn?.addEventListener('click', () => document.body.classList.add('sidebar-open'));
+        overlay?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+      }
+
+      async function readError(response) {
+        try {
+          const data = await response.json();
+          return data.message || data.error || 'Something went wrong.';
+        } catch (error) {
+          const text = await response.text();
+          return text || 'Something went wrong.';
         }
       }
 
-      // 2. Lấy thông tin cơ bản của quiz (tên, thời gian, ...)
-      const quizRes = await fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() });
-      if (!quizRes.ok) throw new Error('Could not load quiz information.');
-      const quizData = await quizRes.json();
-
-      const title = quizData.title || `Quiz #${quizId}`;
-      const courseName = quizData.courseName || quizData.learningSpaceName || 'Chung';
-      const duration = quizData.durationMinutes || 30;
-
-      document.title = `${title} - FlippedClass`;
-      document.getElementById('hero-course').textContent = courseName;
-      document.getElementById('hero-duration').textContent = `${duration} min`;
-
-      timeRemaining = duration * 60;
-      renderTimer();
-      startTimer(); // Bắt đầu đếm ngược thời gian
-
-      // 3. Lấy danh sách câu hỏi của quiz
-      const questionsRes = await fetch(`/api/quizzes/${quizId}/questions`, { headers: authHeaders() });
-      if (!questionsRes.ok) throw new Error('Could not load question list.');
-      quizQuestions = await questionsRes.json();
-      totalQuestions = quizQuestions.length;
-
-      document.getElementById('hero-total').textContent = `${totalQuestions} questions`;
-      document.getElementById('total-count').textContent = totalQuestions;
-
-      renderQuestions();
-      renderNavGrid();
-      updateProgress();
-    } catch (error) {
-      questionsContainer.innerHTML = `
-        <div class="quiz-card empty-state">
-          <i class="ti ti-alert-circle"></i>
-          ${escapeHtml(error.message)}
-        </div>
-      `;
-    }
-  }
-
-  function renderTimer() {
-    const minutes = Math.floor(timeRemaining / 60);
-    const seconds = timeRemaining % 60;
-    countdownEl.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    countdownEl.classList.toggle('is-warning', timeRemaining <= 300);
-  }
-
-  // Hàm bắt đầu đếm ngược thời gian làm bài
-  function startTimer() {
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      // Nếu hết giờ
-      if (timeRemaining <= 0) {
-        clearInterval(timerInterval);
+      function requireQuizId() {
+        if (quizId) return true;
         Swal.fire({
-          icon: 'info',
-          title: 'Time is up',
-          text: 'The system will automatically submit your quiz.',
-          confirmButtonText: 'OK',
+          icon: 'warning',
+          title: 'Missing quiz ID',
+          text: 'Please choose a quiz from the dashboard before starting.',
+          confirmButtonText: 'Back to My Quizzes',
           confirmButtonColor: swalColors.confirmButtonColor
-        }).then(() => submitQuiz(true)); // Tự động nộp bài
-        return;
+        }).then(() => {
+          window.location.href = '/student/my-quizzes';
+        });
+        return false;
       }
-      timeRemaining -= 1;
-      renderTimer();
-    }, 1000); // Đếm ngược mỗi 1 giây
-  }
 
-  function renderQuestions() {
-    if (!quizQuestions.length) {
-      questionsContainer.innerHTML = `
-        <div class="quiz-card empty-state">
-          <i class="ti ti-notes-off"></i>
-          This quiz has no questions yet.
-        </div>
-      `;
-      return;
-    }
+      // Hàm chính: Khởi tạo bài kiểm tra (lấy thông tin quiz và danh sách câu hỏi từ backend)
+      async function initQuiz() {
+        if (!token || !userId) {
+          window.location.href = '/login';
+          return;
+        }
 
-    questionsContainer.innerHTML = '';
-    quizQuestions.forEach((question, index) => {
-      const questionNumber = index + 1;
-      const options = parseOptions(question.options);
-      const optionsHtml = options.map(([optionKey, optionText], optionIndex) => {
-        const labelKey = normalizeOptionKey(optionKey, optionIndex);
-        return `
-          <label class="answer-option">
-            <input type="radio" name="q${question.id}" value="${escapeHtml(optionKey)}" onchange="markAnswered(${question.id})">
-            <span class="radio-mark"></span>
-            <span class="answer-content">
-              <span class="answer-key">${escapeHtml(labelKey)}.</span>
-              <span>${escapeHtml(optionText)}</span>
-            </span>
-          </label>
+        if (!requireQuizId()) return;
+        setStudentName(localStorage.getItem('username') || localStorage.getItem('full_name'));
+
+        try {
+          // 1. Kiểm tra xem sinh viên đã làm bài quiz này chưa
+          const attemptsRes = await fetch(`/api/quizzes/attempts/student/${userId}`, { headers: authHeaders() });
+          if (attemptsRes.ok) {
+            const attempts = await attemptsRes.json();
+            const hasAttempt = attempts.some(attempt => String(attempt.quizId) === String(quizId));
+            if (hasAttempt) {
+              await Swal.fire({
+                icon: 'warning',
+                title: 'You already completed this quiz',
+                text: 'This quiz was already submitted, so you cannot retake it.',
+                confirmButtonText: 'Back to My Quizzes',
+                confirmButtonColor: swalColors.confirmButtonColor
+              });
+              window.location.href = '/student/my-quizzes';
+              return;
+            }
+          }
+
+          // 2. Lấy thông tin cơ bản của quiz (tên, thời gian, ...)
+          const quizRes = await fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() });
+          if (!quizRes.ok) throw new Error('Could not load quiz information.');
+          const quizData = await quizRes.json();
+
+          const title = quizData.title || `Quiz #${quizId}`;
+          const courseName = quizData.courseName || quizData.learningSpaceName || 'Chung';
+          const duration = quizData.durationMinutes || 30;
+
+          document.title = `${title} - FlippedClass`;
+          document.getElementById('hero-course').textContent = courseName;
+          document.getElementById('hero-duration').textContent = `${duration} min`;
+
+          timeRemaining = duration * 60;
+          renderTimer();
+          startTimer(); // Bắt đầu đếm ngược thời gian
+
+          // 3. Lấy danh sách câu hỏi của quiz
+          const questionsRes = await fetch(`/api/quizzes/${quizId}/questions`, { headers: authHeaders() });
+          if (!questionsRes.ok) throw new Error('Could not load question list.');
+          quizQuestions = await questionsRes.json();
+          totalQuestions = quizQuestions.length;
+
+          document.getElementById('hero-total').textContent = `${totalQuestions} questions`;
+          document.getElementById('total-count').textContent = totalQuestions;
+
+          renderQuestions();
+          renderNavGrid();
+          updateProgress();
+        } catch (error) {
+          questionsContainer.innerHTML = `
+          <div class="quiz-card empty-state">
+            <i class="ti ti-alert-circle"></i>
+            ${escapeHtml(error.message)}
+          </div>
         `;
-      }).join('');
+        }
+      }
 
-      const questionHtml = `
-        <article class="question-card" id="q-card-${question.id}">
-          <div class="q-header">
-            <div class="q-number"><i class="ti ti-circle-number-${Math.min(questionNumber, 9)}"></i> Question ${questionNumber}</div>
-            <div class="q-type">${escapeHtml(questionTypeLabel(question.questionType))} - ${escapeHtml(question.points || 0)} points</div>
+      function renderTimer() {
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        countdownEl.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        countdownEl.classList.toggle('is-warning', timeRemaining <= 300);
+      }
+
+      // Hàm bắt đầu đếm ngược thời gian làm bài
+      function startTimer() {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          // Nếu hết giờ
+          if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            Swal.fire({
+              icon: 'info',
+              title: 'Time is up',
+              text: 'The system will automatically submit your quiz.',
+              confirmButtonText: 'OK',
+              confirmButtonColor: swalColors.confirmButtonColor
+            }).then(() => submitQuiz(true)); // Tự động nộp bài
+            return;
+          }
+          timeRemaining -= 1;
+          renderTimer();
+        }, 1000); // Đếm ngược mỗi 1 giây
+      }
+
+      function renderQuestions() {
+        if (!quizQuestions.length) {
+          questionsContainer.innerHTML = `
+          <div class="quiz-card empty-state">
+            <i class="ti ti-notes-off"></i>
+            This quiz has no questions yet.
           </div>
-          <div class="q-text">${escapeHtml(question.content)}</div>
-          <div class="q-options">${optionsHtml}</div>
-        </article>
-      `;
-      questionsContainer.insertAdjacentHTML('beforeend', questionHtml);
-    });
-  }
+        `;
+          return;
+        }
 
-  function renderNavGrid() {
-    navGrid.innerHTML = '';
-    quizQuestions.forEach((question, index) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'nav-btn';
-      button.id = `nav-btn-${question.id}`;
-      button.textContent = index + 1;
-      button.setAttribute('aria-label', `Go to question ${index + 1}`);
-      button.addEventListener('click', () => scrollToQuestion(question.id));
-      navGrid.appendChild(button);
-    });
-  }
+        questionsContainer.innerHTML = '';
+        quizQuestions.forEach((question, index) => {
+          const questionNumber = index + 1;
+          const type = normalizeQuestionType(question.questionType);
+          const options = optionsForQuestion(question);
+          const inputType = type === 'MULTIPLE_CHOICE' ? 'checkbox' : 'radio';
+          const optionsHtml = type === 'ESSAY'
+            ? `<textarea class="answer-textarea" name="q${question.id}" data-question-id="${question.id}" rows="4" placeholder="Type your answer here..."></textarea>`
+            : options.map(([optionKey, optionText], optionIndex) => {
+              const labelKey = normalizeOptionKey(optionKey, optionIndex);
+              return `
+            <label class="answer-option">
+              <input type="${inputType}" name="q${question.id}" value="${escapeHtml(optionKey)}" data-question-id="${question.id}">
+              <span class="radio-mark"></span>
+              <span class="answer-content">
+                <span class="answer-key">${escapeHtml(labelKey)}.</span>
+                <span>${escapeHtml(optionText)}</span>
+              </span>
+            </label>
+          `;
+            }).join('');
 
-  function markAnswered(questionId) {
-    const navButton = document.getElementById(`nav-btn-${questionId}`);
-    const questionCard = document.getElementById(`q-card-${questionId}`);
-    navButton?.classList.add('answered');
-    questionCard?.classList.add('is-answered');
-    updateProgress();
-  }
+          const questionHtml = `
+          <article class="question-card" id="q-card-${question.id}">
+            <div class="q-header">
+              <div class="q-number"><i class="ti ti-circle-number-${Math.min(questionNumber, 9)}"></i> Question ${questionNumber}</div>
+              <div class="q-type">${escapeHtml(questionTypeLabel(question.questionType))} - ${escapeHtml(question.points || 0)} points</div>
+            </div>
+            <div class="q-text">${escapeHtml(question.content)}</div>
+            <div class="q-options">${optionsHtml}</div>
+          </article>
+        `;
+          questionsContainer.insertAdjacentHTML('beforeend', questionHtml);
+        });
+      }
 
-  function updateProgress() {
-    const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
-    const percent = totalQuestions === 0 ? 0 : Math.round((answeredCount / totalQuestions) * 100);
-    document.getElementById('answered-count').textContent = answeredCount;
-    document.getElementById('total-count').textContent = totalQuestions;
-    document.getElementById('progress-percent').textContent = `${percent}%`;
-    document.getElementById('progress-bar').style.width = `${percent}%`;
-  }
+      function renderNavGrid() {
+        navGrid.innerHTML = '';
+        quizQuestions.forEach((question, index) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'nav-btn';
+          button.id = `nav-btn-${question.id}`;
+          button.textContent = index + 1;
+          button.setAttribute('aria-label', `Go to question ${index + 1}`);
+          button.addEventListener('click', () => scrollToQuestion(question.id));
+          navGrid.appendChild(button);
+        });
+      }
 
-  function scrollToQuestion(questionId) {
-    const questionEl = document.getElementById(`q-card-${questionId}`);
-    if (!questionEl) return;
-    const y = questionEl.getBoundingClientRect().top + window.scrollY - 96;
-    window.scrollTo({ top: y, behavior: 'smooth' });
-  }
+      function markAnswered(questionId) {
+        const answered = isQuestionAnswered(questionId);
+        const navButton = document.getElementById(`nav-btn-${questionId}`);
+        const questionCard = document.getElementById(`q-card-${questionId}`);
+        navButton?.classList.toggle('answered', answered);
+        questionCard?.classList.toggle('is-answered', answered);
+        updateProgress();
+      }
 
-  async function confirmSubmit(autoSubmit, answeredCount) {
-    if (autoSubmit) return true;
-    const isIncomplete = answeredCount < totalQuestions;
-    const result = await Swal.fire({
-      title: isIncomplete ? 'You have unanswered questions' : 'Ready to submit?',
-      text: isIncomplete
-        ? `You answered ${answeredCount}/${totalQuestions} questions. Do you still want to submit?`
-        : 'You answered all questions. Submit now?',
-      icon: isIncomplete ? 'warning' : 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Submit',
-      cancelButtonText: 'Keep Working',
-      confirmButtonColor: swalColors.confirmButtonColor,
-      cancelButtonColor: swalColors.cancelButtonColor
-    });
-    return result.isConfirmed;
-  }
+      function isQuestionAnswered(questionId) {
+        const checked = document.querySelectorAll(`input[name="q${questionId}"]:checked`);
+        if (checked.length) return true;
+        const textarea = document.querySelector(`textarea[name="q${questionId}"]`);
+        return Boolean(textarea && textarea.value.trim());
+      }
 
-  // Hàm nộp bài (Submit Quiz) lên backend để chấm điểm
-  async function submitQuiz(autoSubmit = false) {
-    if (isSubmitting) return; // Tránh bấm nhiều lần
-    
-    // Kiểm tra xem đã trả lời hết chưa, nếu chưa thì hỏi lại
-    const answeredCount = document.querySelectorAll('.nav-btn.answered').length;
-    const shouldSubmit = await confirmSubmit(autoSubmit, answeredCount);
-    if (!shouldSubmit) return;
+      function updateProgress() {
+        quizQuestions.forEach((question) => {
+          const answered = isQuestionAnswered(question.id);
+          document.getElementById(`nav-btn-${question.id}`)?.classList.toggle('answered', answered);
+          document.getElementById(`q-card-${question.id}`)?.classList.toggle('is-answered', answered);
+        });
+        const answeredCount = quizQuestions.filter((question) => isQuestionAnswered(question.id)).length;
+        const percent = totalQuestions === 0 ? 0 : Math.round((answeredCount / totalQuestions) * 100);
+        document.getElementById('answered-count').textContent = answeredCount;
+        document.getElementById('total-count').textContent = totalQuestions;
+        document.getElementById('progress-percent').textContent = `${percent}%`;
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+      }
 
-    // Lấy đáp án người dùng đã chọn
-    const answers = {};
-    quizQuestions.forEach(question => {
-      const selected = document.querySelector(`input[name="q${question.id}"]:checked`);
-      if (selected) answers[question.id] = selected.value;
-    });
+      function scrollToQuestion(questionId) {
+        const questionEl = document.getElementById(`q-card-${questionId}`);
+        if (!questionEl) return;
+        const y = questionEl.getBoundingClientRect().top + window.scrollY - 96;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
 
-    isSubmitting = true;
-    try {
-      // Gửi đáp án lên backend
-      const response = await fetch(`/api/quizzes/${quizId}/attempts`, {
-        method: 'POST',
-        headers: authHeaders(true),
-        body: JSON.stringify({
-          studentId: Number(userId),
-          answers // object chứa các đáp án { questionId: 'đáp án đã chọn' }
-        })
+      async function confirmSubmit(autoSubmit, answeredCount) {
+        if (autoSubmit) return true;
+        const isIncomplete = answeredCount < totalQuestions;
+        const result = await Swal.fire({
+          title: isIncomplete ? 'You have unanswered questions' : 'Ready to submit?',
+          text: isIncomplete
+            ? `You answered ${answeredCount}/${totalQuestions} questions. Do you still want to submit?`
+            : 'You answered all questions. Submit now?',
+          icon: isIncomplete ? 'warning' : 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Submit',
+          cancelButtonText: 'Keep Working',
+          confirmButtonColor: swalColors.confirmButtonColor,
+          cancelButtonColor: swalColors.cancelButtonColor
+        });
+        return result.isConfirmed;
+      }
+
+      // Hàm nộp bài (Submit Quiz) lên backend để chấm điểm
+      async function submitQuiz(autoSubmit = false) {
+        if (isSubmitting) return; // Tránh bấm nhiều lần
+
+        // Kiểm tra xem đã trả lời hết chưa, nếu chưa thì hỏi lại
+        const answeredCount = quizQuestions.filter((question) => isQuestionAnswered(question.id)).length;
+        const shouldSubmit = await confirmSubmit(autoSubmit, answeredCount);
+        if (!shouldSubmit) return;
+
+        // Lấy đáp án người dùng đã chọn
+        const answers = {};
+        quizQuestions.forEach(question => {
+          const type = normalizeQuestionType(question.questionType);
+          if (type === 'ESSAY') {
+            const textarea = document.querySelector(`textarea[name="q${question.id}"]`);
+            const value = textarea?.value.trim();
+            if (value) answers[question.id] = value;
+            return;
+          }
+
+          const selected = [...document.querySelectorAll(`input[name="q${question.id}"]:checked`)]
+            .map((input) => input.value);
+          if (selected.length) answers[question.id] = selected.join(',');
+        });
+
+        isSubmitting = true;
+        try {
+          // Gửi đáp án lên backend
+          const response = await fetch(`/api/quizzes/${quizId}/attempts`, {
+            method: 'POST',
+            headers: authHeaders(true),
+            body: JSON.stringify({
+              studentId: Number(userId),
+              answers // object chứa các đáp án { questionId: 'đáp án đã chọn' }
+            })
+          });
+
+          if (!response.ok) throw new Error(await readError(response));
+          const result = await response.json();
+          clearInterval(timerInterval);
+
+          await Swal.fire({
+            icon: 'success',
+            title: 'Submitted Successfully',
+            html: `
+            <div style="text-align:center; margin-top: 1rem;">
+              <div style="font-size: 3.4rem; font-weight: 900; color: #5b5ce2; line-height: 1;">${escapeHtml(result.score ?? 0)}%</div>
+              <p style="color: #6b7280; margin-top: 0.75rem; font-weight: 700;">Correct Answers: <strong>${escapeHtml(result.correctAnswers ?? 0)} / ${escapeHtml(result.totalQuestions ?? totalQuestions)}</strong></p>
+            </div>
+          `,
+            confirmButtonText: 'Back to My Quizzes',
+            confirmButtonColor: swalColors.confirmButtonColor,
+            allowOutsideClick: false
+          });
+
+          window.location.href = '/student/my-quizzes';
+        } catch (error) {
+          isSubmitting = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Could not submit quiz',
+            text: error.message,
+            confirmButtonText: 'Close',
+            confirmButtonColor: swalColors.confirmButtonColor
+          });
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_id');
+        window.location.href = '/';
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        setupLayoutControls();
+        document.getElementById('submitQuizButton')?.addEventListener('click', () => submitQuiz());
+        questionsContainer.addEventListener('change', (event) => {
+          const questionId = event.target.dataset.questionId;
+          if (questionId) markAnswered(questionId);
+        });
+        questionsContainer.addEventListener('input', (event) => {
+          const questionId = event.target.dataset.questionId;
+          if (questionId) markAnswered(questionId);
+        });
+        initQuiz();
       });
 
-      if (!response.ok) throw new Error(await readError(response));
-      const result = await response.json();
-      clearInterval(timerInterval);
+    </script>
+  </body>
 
-      await Swal.fire({
-        icon: 'success',
-        title: 'Submitted Successfully',
-        html: `
-          <div style="text-align:center; margin-top: 1rem;">
-            <div style="font-size: 3.4rem; font-weight: 900; color: #5b5ce2; line-height: 1;">${escapeHtml(result.score ?? 0)}%</div>
-            <p style="color: #6b7280; margin-top: 0.75rem; font-weight: 700;">Correct Answers: <strong>${escapeHtml(result.correctAnswers ?? 0)} / ${escapeHtml(result.totalQuestions ?? totalQuestions)}</strong></p>
-          </div>
-        `,
-        confirmButtonText: 'Back to My Quizzes',
-        confirmButtonColor: swalColors.confirmButtonColor,
-        allowOutsideClick: false
-      });
-
-      window.location.href = '/student/my-quizzes';
-    } catch (error) {
-      isSubmitting = false;
-      Swal.fire({
-        icon: 'error',
-        title: 'Could not submit quiz',
-        text: error.message,
-        confirmButtonText: 'Close',
-        confirmButtonColor: swalColors.confirmButtonColor
-      });
-    }
-  }
-
-  function logout() {
-    localStorage.removeItem('jwt_token');
-    localStorage.removeItem('user_id');
-    window.location.href = '/';
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    setupLayoutControls();
-    initQuiz();
-  });
-
-</script>
-</body>
-</html>
-
+  </html>

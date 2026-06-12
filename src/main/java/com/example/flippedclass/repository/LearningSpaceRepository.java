@@ -24,6 +24,8 @@ public interface LearningSpaceRepository extends JpaRepository<LearningSpace, Lo
 
     Optional<LearningSpace> findByInviteCodeAndStatus(String inviteCode, LearningSpaceStatus status);
 
+    Optional<LearningSpace> findByInviteCodeIgnoreCaseAndStatus(String inviteCode, LearningSpaceStatus status);
+
     Optional<LearningSpace> findByIdAndStatus(Long id, LearningSpaceStatus status);
 
     @EntityGraph(attributePaths = {"owner"})

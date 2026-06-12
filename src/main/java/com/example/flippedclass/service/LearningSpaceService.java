@@ -16,6 +16,7 @@ public interface LearningSpaceService {
 
     List<LearningSpaceResponse> getPublicSpaces();
 
+    LearningSpaceResponse getSpaceByInviteCode(String inviteCode);
 
     @Transactional
     LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail);

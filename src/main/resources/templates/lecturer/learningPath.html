@@ -12,33 +12,38 @@
         <input type="hidden" id="spaceId" th:value="${spaceId}" />
         
         <div class="container-fluid py-4">
-            <!-- Classroom Style Tabs -->
-            <ul class="nav nav-tabs mb-4 border-bottom-0 gap-3 fw-bold" style="font-size: 0.95rem;">
+            <!-- Tabs -->
+            <ul class="nav page-tabs mb-4">
                 <li class="nav-item">
-                    <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/dashboard" style="transition: color 0.2s;"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
+                    <a class="nav-link" href="/lecturer/dashboard"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active text-primary border-0 border-bottom border-primary border-3 pb-3 px-3" href="#" style="color: #1a73e8 !important; border-color: #1a73e8 !important;">Classwork / Roadmap</a>
+                    <a class="nav-link active" href="#">Classwork / Roadmap</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{/lecturer/space-members(spaceId=${spaceId})}">People</a>
+                    <a class="nav-link" th:href="@{/lecturer/space-members(spaceId=${spaceId})}">People</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/spaces/' + ${spaceId} + '/analytics'}">Analytics</a>
+                    <a class="nav-link" th:href="@{'/lecturer/spaces/' + ${spaceId} + '/analytics'}">Analytics</a>
                 </li>
             </ul>
 
-            <!-- Classroom Banner -->
-            <div class="classroom-banner rounded-4 mb-5 position-relative overflow-hidden shadow-sm" style="background-color: #1a73e8; background: linear-gradient(135deg, #10b981 0%, #047857 100%); height: 240px; display: flex; align-items: flex-end;">
-                <!-- Decorative SVG Pattern -->
-                <div class="position-absolute top-0 end-0 h-100 w-50" style="opacity: 0.15; background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
-                <div class="position-absolute bottom-0 end-0 p-3 opacity-25">
-                    <i class="ti ti-code text-white" style="font-size: 15rem; transform: rotate(-15deg) translateY(30px) translateX(20px);"></i>
+            <!-- Hero Banner -->
+            <div class="classroom-banner mb-5">
+                <!-- Large background icon -->
+                <div class="position-absolute bottom-0 end-0 p-2" style="opacity: 0.12; pointer-events:none;">
+                    <i class="ti ti-circuit-cell text-white" style="font-size: 18rem;"></i>
                 </div>
-                
-                <div class="p-4 p-md-5 z-1 w-100">
-                    <h1 class="fs-1 fw-bold text-white mb-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Java Backend Mastery</h1>
-                    <p class="fs-5 text-white mb-0" style="opacity: 0.9;">ADVANCED SPECIALIZATION / SPRING BOOT 3</p>
+                <div class="banner-content">
+                    <div class="banner-chips">
+                        <span class="banner-chip"><i class="ti ti-cpu"></i> Learning Path</span>
+                        <span class="banner-chip"><i class="ti ti-books"></i>
+                            <span th:text="${paths != null ? paths.size() : 0}">0</span> Modules
+                        </span>
+                        <span class="banner-chip"><i class="ti ti-writing"></i> Roadmap Builder</span>
+                    </div>
+                    <h1 class="mt-2">Learning Roadmap</h1>
+                    <p class="sub">Design &nbsp;/&nbsp; Structure &nbsp;/&nbsp; Publish</p>
                 </div>
             </div>
 
@@ -46,131 +51,132 @@
             <div class="row g-4">
                 <!-- Left Column (Roadmap Stream) — full width -->
                 <div class="col-lg-12">
-                    <!-- Action Buttons -->
-                    <div class="d-flex flex-wrap gap-2 mb-4 align-items-center bg-white p-3 rounded-4 shadow-sm border border-light">
-                        <button class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-semibold d-flex align-items-center gap-2" style="background-color: #1a73e8; border-color: #1a73e8;" data-bs-toggle="modal" data-bs-target="#createModuleModal">
+                    <!-- Action Bar -->
+                    <div class="action-bar">
+                        <button class="btn btn-primary rounded-pill px-4 py-2 fw-semibold d-flex align-items-center gap-2"
+                                data-bs-toggle="modal" data-bs-target="#createModuleModal">
                             <i class="ti ti-plus fs-5"></i> New Module
                         </button>
-                        <button class="btn btn-light rounded-pill px-4 py-2 border shadow-sm fw-semibold text-secondary d-flex align-items-center gap-2" id="btnOpenTrash" data-bs-toggle="modal" data-bs-target="#trashModal">
+                        <button class="btn btn-light rounded-pill px-4 py-2 border fw-semibold text-secondary d-flex align-items-center gap-2"
+                                id="btnOpenTrash" data-bs-toggle="modal" data-bs-target="#trashModal">
                             <i class="ti ti-archive fs-5"></i> Trash
                         </button>
-                        
-                        <div class="ms-auto d-flex gap-2 align-items-center">
-                            <button class="btn btn-danger-subtle text-danger rounded-pill px-4 py-2 shadow-sm fw-semibold border border-danger-subtle d-flex align-items-center gap-2" id="btnDeleteAll">
+                        <div class="ms-auto">
+                            <button class="btn btn-danger-subtle text-danger rounded-pill px-4 py-2 fw-semibold border border-danger-subtle d-flex align-items-center gap-2"
+                                    id="btnDeleteAll">
                                 <i class="ti ti-trash fs-5"></i> Delete All
                             </button>
                         </div>
                     </div>
                     
                     <div id="roadmapContent" class="mb-5">
-                        <div th:if="${paths.empty}" class="text-center py-5 text-muted bg-white rounded-4 shadow-sm border border-light">
-                            <i class="ti ti-map fs-1 d-block mb-3 text-secondary"></i>
-                            <p class="mb-0">No modules created yet.<br>Click "+ New Module" to start building the roadmap.</p>
+                        <!-- Empty state -->
+                        <div th:if="${paths.empty}" class="empty-roadmap">
+                            <div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;">
+                                <i class="ti ti-map-2" style="font-size:2.2rem;color:#4f46e5;"></i>
+                            </div>
+                            <h5 class="fw-bold" style="color:#1e1b4b;">No modules yet</h5>
+                            <p class="text-muted small mb-0">Click <strong>+ New Module</strong> to start building your roadmap.</p>
                         </div>
 
+                        <!-- Roadmap items -->
                         <div th:each="path, iterStat : ${paths}" class="d-flex mb-4 position-relative">
-                            <!-- Timeline Indicator -->
-                            <div class="timeline-indicator d-flex flex-column align-items-center me-4" 
-                                 style="width: 48px; position: relative;">
-                                <div class="badge rounded-circle d-flex align-items-center justify-content-center" 
-                                     th:style="'width: 48px; height: 48px; '
-                                     + 'border: 2px solid ' + (${path.status == 'PUBLISHED'} ? '#e2e8f0' : '#6366f1') + '; '
-                                     + 'background: ' + (${path.status == 'PUBLISHED'} ? 'white' : '#6366f1') + '; '
-                                     + 'color: ' + (${path.status == 'PUBLISHED'} ? '#475569' : 'white') + '; '
-                                     + 'font-size: 1.1rem; font-weight: bold; z-index: 1;'">
+
+                            <!-- Timeline column -->
+                            <div class="timeline-indicator d-flex flex-column align-items-center me-4">
+                                <!-- Step number circle -->
+                                <div th:class="'timeline-node ' + (${path.status == 'PUBLISHED'} ? 'published' : 'in-progress')">
                                     <span th:text="${iterStat.count < 10 ? '0' + iterStat.count : iterStat.count}"></span>
                                 </div>
-                                <div th:if="${!iterStat.last}" 
-                                     class="timeline-line bg-light position-absolute" 
-                                     style="width: 2px; height: calc(100% + 1.5rem); top: 48px; left: 23px; z-index: 0;"></div>
+                                <!-- Connector line -->
+                                <div th:if="${!iterStat.last}"
+                                     class="timeline-line"
+                                     th:style="'height: calc(100% - 52px + 1.5rem);'"></div>
                             </div>
-                            
-                            <!-- Card Content -->   
-                            <div th:class="'card flex-fill shadow-sm rounded-4 ' + (${path.status == 'PUBLISHED'} ? 'border' : 'border-primary')" 
-                                 style="background: white;">
-                                <div class="card-header bg-white border-bottom-0 pt-4 pb-3 px-4 d-flex justify-content-between align-items-start">
+
+                            <!-- Module Card -->
+                            <div th:class="'path-card flex-fill ' + (${path.status != 'PUBLISHED'} ? 'border-primary' : '')">
+
+                                <!-- Top accent bar is handled by CSS ::before -->
+                                <div class="path-card-header d-flex justify-content-between align-items-start">
                                     <div>
-                                        <h5 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
-                                            <i class="ti ti-grid-dots text-muted cursor-pointer fs-5"></i> 
-                                            <span th:text="${path.title}">Title</span>
+                                        <!-- Week chip -->
+                                        <span class="path-week-label">
+                                            <i class="ti ti-calendar-week me-1"></i>
+                                            Week <span th:text="${iterStat.count}">1</span>
+                                            &nbsp;&middot;&nbsp;
+                                            <span th:text="${path.nodes != null ? path.nodes.size() : 0}">0</span> lessons
+                                        </span>
+                                        <!-- Title -->
+                                        <h5 class="card-title d-flex align-items-center gap-2 mt-1">
+                                            <i class="ti ti-grid-dots drag-handle" style="color:#a5b4fc;font-size:1.1rem;"></i>
+                                            <span th:text="${path.title}">Module Title</span>
                                         </h5>
-                                        <p class="text-muted mb-0 small ms-4 ps-2" 
-                                           th:text="${path.description} ?: 'base'">description</p>
+                                        <!-- Desc -->
+                                        <p class="card-desc" th:text="${path.description} ?: ''"></p>
                                     </div>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span th:if="${path.status == 'PUBLISHED'}" 
-                                              class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-bold text-uppercase" 
-                                              style="font-size: 0.7rem; letter-spacing: 0.5px;">Published</span>
-                                        <span th:if="${path.status != 'PUBLISHED'}" 
-                                              class="badge bg-primary text-white rounded-pill px-3 py-1 fw-bold text-uppercase" 
-                                              style="font-size: 0.7rem; letter-spacing: 0.5px;">In Progress</span>
-                                        
-                                        <i class="ti ti-chevron-down text-muted cursor-pointer fs-5"></i>
+
+                                    <!-- Right: badge + menu -->
+                                    <div class="d-flex align-items-center gap-2 ms-3 flex-shrink-0">
+                                        <span th:if="${path.status == 'PUBLISHED'}" class="badge-published">Published</span>
+                                        <span th:if="${path.status != 'PUBLISHED'}" class="badge-in-progress">In Progress</span>
+
                                         <div class="dropdown">
-                                            <button class="btn btn-light btn-sm rounded-circle bg-transparent border-0 p-0" 
-                                                    data-bs-toggle="dropdown">
-                                                <i class="ti ti-dots-vertical text-muted fs-5"></i>
+                                            <button class="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center"
+                                                    data-bs-toggle="dropdown"
+                                                    style="width:34px;height:34px;background:rgba(79,70,229,0.08);color:#6366f1;">
+                                                <i class="ti ti-dots-vertical"></i>
                                             </button>
-                                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2" style="min-width:190px;">
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 edit-path-btn" 
-                                                       href="#" 
-                                                       th:data-id="${path.id}" 
-                                                       th:data-title="${path.title}" 
+                                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 edit-path-btn"
+                                                       href="#"
+                                                       th:data-id="${path.id}"
+                                                       th:data-title="${path.title}"
                                                        th:data-description="${path.description}">
-                                                        <i class="ti ti-pencil"></i> Edit
+                                                        <i class="ti ti-pencil text-indigo"></i> Edit Module
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 text-warning archive-path-btn" 
+                                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 text-warning archive-path-btn"
                                                        href="#" th:data-id="${path.id}">
-                                                        <i class="ti ti-archive"></i> Archive to Trash
+                                                        <i class="ti ti-archive"></i> Archive
                                                     </a>
                                                 </li>
-                                                <li><hr class="dropdown-divider"></li>
+                                                <li><hr class="dropdown-divider my-1"></li>
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 text-danger delete-path-btn" 
+                                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 text-danger delete-path-btn"
                                                        href="#" th:data-id="${path.id}">
-                                                        <i class="ti ti-trash"></i> Delete Permanently
+                                                        <i class="ti ti-trash"></i> Delete
                                                     </a>
                                                 </li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div class="text-center mb-3">
-                                    <span class="text-muted" style="font-size: 0.85rem;">
-                                        Week <span th:text="${iterStat.count}">1</span> &middot; 
-                                        <span th:text="${path.nodes != null ? path.nodes.size() : 0}">0</span> lessons
-                                    </span>
-                                </div>
-                                
-                                <div class="card-body px-4 pb-4 pt-0">
-                                    <div th:if="${path.nodes != null and !path.nodes.empty}" 
-                                         class="nodes-container px-3 px-md-5 mx-lg-5">
+
+                                <!-- Nodes area -->
+                                <div class="card-body px-4 pb-4 pt-2">
+                                    <!-- Has lessons -->
+                                    <div th:if="${path.nodes != null and !path.nodes.empty}" class="nodes-container">
                                         <th:block th:each="node : ${path.nodes}">
                                             <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
                                         </th:block>
                                     </div>
-                                    
-                                    <div th:if="${path.nodes == null or path.nodes.empty}" 
-                                         class="border rounded-4 p-5 mb-4 text-center shadow-sm" 
-                                         style="border-style: dashed !important; background-color: #f8fafc; border-color: #cbd5e1 !important;">
-                                        <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-3" style="width: 64px; height: 64px;">
-                                            <i class="ti ti-folder-open text-primary" style="font-size: 2rem;"></i>
+
+                                    <!-- No lessons yet -->
+                                    <div th:if="${path.nodes == null or path.nodes.empty}" class="module-empty-box mb-3">
+                                        <div class="module-empty-icon">
+                                            <i class="ti ti-layer-difference"></i>
                                         </div>
-                                        <h6 class="fw-bold mb-1" style="color: #334155;">This module is empty</h6>
-                                        <p class="text-muted small mb-0">Click the Add button below to create your first lesson.</p>
+                                        <h6 class="fw-bold mb-1" style="color:#312e81;">Module is empty</h6>
+                                        <p class="text-muted small mb-0">Add your first lesson below.</p>
                                     </div>
-                                    
-                                    <div class="border rounded-4 p-3 text-center shadow-sm create-node-btn mt-2" 
-                                         th:data-pathid="${path.id}" 
-                                         style="border-style: dashed !important; border-color: #cbd5e1 !important; background-color: white; cursor: pointer; transition: all 0.2s;" 
-                                         onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#94a3b8';" 
-                                         onmouseout="this.style.background='white'; this.style.borderColor='#cbd5e1';">
-                                        <span class="fw-bold text-primary d-flex align-items-center justify-content-center gap-2" style="font-size: 0.95rem;">
-                                            <i class="ti ti-plus fs-5"></i> Add New Lesson
+
+                                    <!-- Add lesson button -->
+                                    <div class="create-node-btn mt-2" th:data-pathid="${path.id}">
+                                        <span class="d-flex align-items-center justify-content-center gap-2">
+                                            <i class="ti ti-plus"></i> Add New Lesson
                                         </span>
                                     </div>
                                 </div>
@@ -834,11 +840,6 @@
                                     <div class="mb-3">
                                         <div class="ratio ratio-16x9 rounded-4 overflow-hidden shadow-sm border border-light" style="background: #000;">
                                             ${videoHtml}
-                                        </div>
-                                        <div class="text-end mt-2">
-                                            <button class="btn btn-link text-danger text-decoration-none p-0 small fw-semibold delete-item-btn" data-itemid="${item.id}">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
                                         </div>
                                     </div>`;
                                     } else if (item.itemType === 'PDF') {
