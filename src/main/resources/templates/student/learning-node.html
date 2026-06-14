@@ -477,6 +477,11 @@
       ]);
 
       if (!nodeResponse.ok) {
+        if (nodeResponse.status === 401 || nodeResponse.status === 403) {
+          if (typeof window.logout === 'function') window.logout();
+          else window.location.href = '/login';
+          return;
+        }
         throw new Error(await readError(nodeResponse));
       }
 
@@ -487,6 +492,60 @@
         : [];
 
       renderNodePage(node, sortedItems);
+
+      // Log interaction automatically
+      if (node.learningPathId) {
+          const studentId = localStorage.getItem('user_id');
+          if (studentId) {
+              const sendLog = (type, summary) => {
+                  fetch('/api/evaluations/interactions', {
+                      method: 'POST',
+                      headers: authHeaders(true),
+                      body: JSON.stringify({
+                          studentId: parseInt(studentId),
+                          learningPathId: parseInt(node.learningPathId),
+                          interactionType: type,
+                          summary: summary
+                      })
+                  }).catch(err => console.error("Could not log interaction", err));
+              };
+
+              const videoEl = pageRoot.querySelector('video.video-player');
+              const iframeEl = pageRoot.querySelector('iframe.video-player');
+
+              if (videoEl) {
+                  let maxWatched = 0;
+                  let lastLogged = 0;
+                  
+                  videoEl.addEventListener('timeupdate', () => {
+                      if (videoEl.currentTime > maxWatched) maxWatched = videoEl.currentTime;
+                  });
+                  
+                  const logVideo = () => {
+                      // Only log if they made at least 5 seconds of new progress
+                      if (maxWatched - lastLogged > 5) {
+                          lastLogged = maxWatched;
+                          const duration = videoEl.duration || 0;
+                          const mWatched = Math.floor(maxWatched / 60);
+                          const sWatched = Math.floor(maxWatched % 60);
+                          const mTotal = Math.floor(duration / 60);
+                          const sTotal = Math.floor(duration % 60);
+                          const watchedStr = `${mWatched}:${sWatched.toString().padStart(2, '0')}`;
+                          const totalStr = duration ? `${mTotal}:${sTotal.toString().padStart(2, '0')}` : '??:??';
+                          
+                          sendLog('VIDEO_WATCH', `Watched video in node: ${node.title} (${watchedStr} / ${totalStr})`);
+                      }
+                  };
+                  
+                  videoEl.addEventListener('pause', logVideo);
+                  videoEl.addEventListener('ended', logVideo);
+              } else if (iframeEl) {
+                  sendLog('VIDEO_WATCH', `Opened external/YouTube video in node: ${node.title}`);
+              } else {
+                  sendLog('NODE_VIEW', `Viewed node materials: ${node.title}`);
+              }
+          }
+      }
     } catch (error) {
       renderError('Could not load node', error.message || 'Please try again later.');
     }

@@ -90,11 +90,6 @@
           <i class="ti ti-clipboard-list"></i><span class="nav-text">Eval Sessions</span>
         </a>
       </li>
-      <li>
-        <a class="nav-link" href="/lecturer/grading" data-nav-path="/lecturer/grading">
-          <i class="ti ti-pencil-star"></i><span class="nav-text">Grading</span>
-        </a>
-      </li>
     </ul>
     
     <div class="p-3 mt-auto w-100">
@@ -135,8 +130,26 @@
       }
     });
 
+    function checkAuth() {
+      const token = localStorage.getItem('jwt_token');
+      if (!token) {
+        window.location.href = '/signin';
+        return;
+      }
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (!payload.roles || (!payload.roles.includes('MENTOR') && !payload.roles.includes('ROLE_MENTOR') && !payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
+          window.location.href = '/signin';
+        }
+      } catch (e) {
+        window.location.href = '/signin';
+      }
+    }
+    checkAuth();
+
     function logout() {
       localStorage.removeItem('jwt_token');
+      localStorage.removeItem('user_id');
       window.location.href = '/signin';
     }
 
@@ -153,6 +166,12 @@
           matched = true;
         }
       });
+      // Special case for Evaluate Student
+      if (path.startsWith('/lecturer/grading') || path.startsWith('/lecturer/evaluation-sessions')) {
+         $('.sidebar .nav-link').removeClass('active');
+         $('.sidebar .nav-link[data-nav-path="/lecturer/evaluation-sessions"]').addClass('active');
+         matched = true;
+      }
       // Fallback
       if (!matched) {
         $('.sidebar .nav-link[data-nav-path="/lecturer/dashboard"]').addClass('active');

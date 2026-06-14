@@ -15,9 +15,27 @@
   <!-- AUTHENTICATION GUARD -->
   <script>
     /* --- Inlined from student-auth.js --- */
-    if (!localStorage.getItem('jwt_token')) {
-      window.location.href = '/login';
-    }
+    (function() {
+      const token = localStorage.getItem('jwt_token');
+      if (!token) {
+        window.location.href = '/login';
+      } else {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const now = Math.floor(Date.now() / 1000);
+          if (payload.exp && payload.exp < now) {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user_id');
+            window.location.href = '/login';
+          } else if (!payload.roles || (!payload.roles.includes('STUDENT') && !payload.roles.includes('ROLE_STUDENT'))) {
+            // Token không phải của Student (có thể do login bằng tab khác) -> force login
+            window.location.href = '/login';
+          }
+        } catch (e) {
+          window.location.href = '/login';
+        }
+      }
+    })();
 
   </script>
   <script>
@@ -971,6 +989,11 @@
         headers: authHeaders()
       });
       if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          if (typeof window.logout === 'function') window.logout();
+          else window.location.href = '/login';
+          return;
+        }
         const errText = await res.text();
         throw new Error(`Could not load dashboard data: ${res.status} ${errText}`);
       }

@@ -275,7 +275,9 @@ const token = localStorage.getItem('jwt_token');
   const state = {
     quizzes: [],
     search: '',
-    status: 'all'
+    status: 'all',
+    currentPage: 1,
+    itemsPerPage: 6
   };
 
   const quizGrid = document.getElementById('quizGrid');
@@ -358,6 +360,7 @@ const token = localStorage.getItem('jwt_token');
 
   function renderQuizzes() {
     const quizzes = filteredQuizzes();
+    
     if (!quizzes.length) {
       quizGrid.innerHTML = `
         <div class="empty-card" style="grid-column: 1 / -1;">
@@ -365,10 +368,20 @@ const token = localStorage.getItem('jwt_token');
           No matching quizzes found.
         </div>
       `;
+      renderPaginationControls(0, 0);
       return;
     }
 
-    quizGrid.innerHTML = quizzes.map(quiz => {
+    const totalItems = quizzes.length;
+    const totalPages = Math.ceil(totalItems / state.itemsPerPage) || 1;
+    if (state.currentPage > totalPages) state.currentPage = totalPages;
+    if (state.currentPage < 1) state.currentPage = 1;
+    
+    const startIndex = (state.currentPage - 1) * state.itemsPerPage;
+    const endIndex = startIndex + state.itemsPerPage;
+    const paginated = quizzes.slice(startIndex, endIndex);
+
+    quizGrid.innerHTML = paginated.map(quiz => {
       const isCompleted = Boolean(quiz.isCompleted);
       const statusText = isCompleted ? 'Completed' : 'To Do';
       const statusIcon = isCompleted ? 'ti-circle-check' : 'ti-alert-circle';
@@ -393,6 +406,42 @@ const token = localStorage.getItem('jwt_token');
         </article>
       `;
     }).join('');
+    
+    renderPaginationControls(totalItems, totalPages);
+  }
+
+  function goToPage(page) {
+    state.currentPage = page;
+    renderQuizzes();
+    document.getElementById('quizGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  window.goToPage = goToPage;
+
+  function renderPaginationControls(totalItems, totalPages) {
+    let wrap = document.getElementById('paginationWrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'paginationWrap';
+      wrap.className = 'd-flex justify-content-center mt-4 mb-5 w-100';
+      wrap.style.gridColumn = '1 / -1';
+      document.getElementById('quizGrid').after(wrap);
+    }
+    
+    if (totalPages <= 1) {
+      wrap.innerHTML = '';
+      return;
+    }
+    
+    let html = `<nav aria-label="Page navigation"><ul class="pagination pagination-lg m-0">`;
+    html += `<li class="page-item ${state.currentPage === 1 ? 'disabled' : ''}"><a class="page-link fw-bold" href="javascript:void(0)" onclick="goToPage(${state.currentPage - 1})">Previous</a></li>`;
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<li class="page-item ${state.currentPage === i ? 'active' : ''}"><a class="page-link fw-bold" href="javascript:void(0)" onclick="goToPage(${i})">${i}</a></li>`;
+    }
+    html += `<li class="page-item ${state.currentPage === totalPages ? 'disabled' : ''}"><a class="page-link fw-bold" href="javascript:void(0)" onclick="goToPage(${state.currentPage + 1})">Next</a></li>`;
+    html += `</ul></nav>`;
+    
+    wrap.innerHTML = html;
   }
 
   async function loadMyQuizzes() {
@@ -403,7 +452,14 @@ const token = localStorage.getItem('jwt_token');
 
     try {
       const response = await fetch(`/api/students/${userId}/dashboard`, { headers: authHeaders() });
-      if (!response.ok) throw new Error('Could not load quiz list.');
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          if (typeof window.logout === 'function') window.logout();
+          else window.location.href = '/login';
+          return;
+        }
+        throw new Error('Could not load quiz list.');
+      }
       const data = await response.json();
       setStudentName(data.user);
       state.quizzes = flattenQuizzes(data);
@@ -427,11 +483,13 @@ const token = localStorage.getItem('jwt_token');
 
   searchInput.addEventListener('input', () => {
     state.search = searchInput.value;
+    state.currentPage = 1;
     renderQuizzes();
   });
 
   statusFilter.addEventListener('change', () => {
     state.status = statusFilter.value;
+    state.currentPage = 1;
     renderQuizzes();
   });
 
