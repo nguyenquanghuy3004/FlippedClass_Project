@@ -59,7 +59,7 @@ public class LearningSpaceController {
         learningSpaceService.archiveLearningSpace(id);
         return ResponseEntity.ok(new MessageResponse("Lưu trữ thành công "));
     }
-
+    /////////
     @PostMapping("/join")
     public ResponseEntity<JoinLearningSpaceResponse>joinLearningSpace(@RequestBody JoinLearningSpaceRequest request){
         return ResponseEntity.ok(learningSpaceService.joinLearningSpace(request));
@@ -70,5 +70,15 @@ public class LearningSpaceController {
     public ResponseEntity<?> updateLearingSpace(@PathVariable Long id, @RequestBody LearningSpace spaceDetail){
          LearningSpace update =  learningSpaceService.updateLearningSpace(id, spaceDetail);
             return ResponseEntity.ok(update);
+    }
+
+    @GetMapping("/public")
+    public ResponseEntity<List<LearningSpaceResponse>> getPublicSpaces() {
+        return ResponseEntity.ok(learningSpaceService.getPublicSpaces());
+    }
+
+    @GetMapping("/invite-code/{inviteCode}")
+    public ResponseEntity<LearningSpaceResponse> getSpaceByInviteCode(@PathVariable String inviteCode) {
+        return ResponseEntity.ok(learningSpaceService.getSpaceByInviteCode(inviteCode));
     }
 }

@@ -59,7 +59,7 @@ public class FileStorageService {
 
     public String storePdf(MultipartFile file){
         if(file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File video không được để trống");
+            throw new IllegalArgumentException("File không được để trống");
         }
             try{
                 Path uploadPath = Path.of("uploads/pdfs").toAbsolutePath().normalize();

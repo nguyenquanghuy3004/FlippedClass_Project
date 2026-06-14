@@ -20,12 +20,14 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.example.flippedclass.enums.AuthProvider;
 import com.example.flippedclass.enums.RoleName;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,21 +38,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    RoleRepository roleRepository;
-    @Autowired
-    StudentProfileRepository studentProfileRepository;
-    @Autowired
-    PasswordEncoder encoder;
-    @Autowired
-    JwtUtils jwtUtils;
-    @Autowired
+
+ private final  AuthenticationManager authenticationManager;
+
+    private final   UserRepository userRepository;
+
+    private final RoleRepository roleRepository;
+
+    private final StudentProfileRepository studentProfileRepository;
+
+    private final PasswordEncoder encoder;
+
+    private final JwtUtils jwtUtils;
+
     ValidateChangePass validate;
 
     @Value("${flippedclass.app.googleClientId}")
@@ -58,7 +61,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JwtResponse authenticateUser(LoginRequest loginRequest){
+
         String identifier = loginRequest.getEmail() != null ? loginRequest.getEmail() : loginRequest.getUsername();
+
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(identifier, loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -77,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
     }
     @Override
     public MessageResponse registerUser(SignupRequest signUpRequest) {
+
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             throw new IllegalArgumentException("Username is already taken!");
         }
@@ -157,12 +163,12 @@ public class AuthServiceImpl implements AuthService {
                 userRepository.save(user);
             }
         }
-        // Sinh JWT từ username
-        String jwt = jwtUtils.generateJwtTokenFromUsername(user.getUsername());
-
         List<String> roles = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(Collectors.toList());
+                
+        // Sinh JWT từ username
+        String jwt = jwtUtils.generateJwtTokenFromUsername(user.getUsername(), roles);
         // Check xem đã hoàn thành profile
         boolean isProfileComplete = (user.getStudentProfile() != null);
         return new GoogleJwtResponse(

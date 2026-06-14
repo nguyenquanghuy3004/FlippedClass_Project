@@ -9,4 +9,6 @@ import java.util.List;
 
 public interface CourseDocumentRepository extends JpaRepository<CourseDocument, Long> {
     List<CourseDocument> findByLearningPathId(Long learningPathId);
+
+    List<CourseDocument> findTop8ByLearningPath_LearningSpace_IdInOrderByCreatedAtDesc(List<Long> learningSpaceIds);
 }

@@ -1,5 +1,6 @@
 package com.example.flippedclass.service.impl;
 
+import com.example.flippedclass.dto.StudentProgressDTO;
 import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.NodeProgress;
 import com.example.flippedclass.entity.User;
@@ -32,9 +33,11 @@ public class NodeProgressServiceImpl implements NodeProgressService {
     public NodeProgress getOrCreateProgress (Long studentId, Long nodeId) {
 
         return nodeProgressRepository.findByStudentIdAndLearningNodeId(studentId, nodeId).orElseGet(() -> {
-            User student = userRepository.findById(studentId).orElseThrow(() -> new IllegalArgumentException("Student not found"));
+            User student = userRepository.findById(studentId)
+                    .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
-            LearningNode node = learningNodeRepository.findById(nodeId).orElseThrow(() -> new IllegalArgumentException("Lesson node found"));
+            LearningNode node = learningNodeRepository.findById(nodeId)
+                    .orElseThrow(() -> new IllegalArgumentException("Lesson node found"));
 
             NodeProgress newProgress = NodeProgress.builder()
                     .student(student)
@@ -74,4 +77,26 @@ public class NodeProgressServiceImpl implements NodeProgressService {
     public NodeProgress getProgress(Long studentId, Long nodeId){
         return nodeProgressRepository.findByStudentIdAndLearningNodeId(studentId,nodeId).orElseGet(null);
     }
+
+    @Override
+    public StudentProgressDTO calculateProgress(Long studentId, Long spaceId){
+        long totalNodes = learningNodeRepository.countTotalNodesBySpaceId(spaceId);
+
+        if(totalNodes == 0){
+            return  StudentProgressDTO.builder()
+                    .totalNodes(0L)
+                    .completeNodes(0L)
+                    .progressPercenteage(0.0).build();
+        }
+        long completedNodes = nodeProgressRepository.countCompletedNodesByStudentAndASpace(studentId, spaceId);
+            double percentage = ((double) completedNodes / totalNodes ) * 100.0;
+
+
+            percentage = Math.round(percentage * 100.0) / 100.0;
+
+            return StudentProgressDTO.builder()
+                    .totalNodes(totalNodes)
+                    .completeNodes(completedNodes)
+                    .progressPercenteage(percentage).build();
+        }
 }

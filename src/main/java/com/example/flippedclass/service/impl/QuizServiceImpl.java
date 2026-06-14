@@ -363,11 +363,16 @@ public class QuizServiceImpl implements QuizService {
     }
 
     private QuizAttemptResponse toAttemptResponse(QuizAttempt a) {
+        String name = a.getStudent().getFullName();
+        if (name == null || name.trim().isEmpty()) {
+            name = a.getStudent().getUsername();
+        }
+        
         return QuizAttemptResponse.builder()
                 .id(a.getId())
                 .quizId(a.getQuiz().getId())
                 .studentId(a.getStudent().getId())
-                .studentName(a.getStudent().getFullName())
+                .studentName(name)
                 .score(a.getScore())
                 .totalQuestions(a.getTotalQuestions())
                 .correctAnswers(a.getCorrectAnswers())

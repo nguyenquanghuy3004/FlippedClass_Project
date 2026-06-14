@@ -26,6 +26,7 @@ public class EvaluationServiceImpl implements EvaluationService {
     private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final LearningPathRepository learningPathRepository;
+    private final LearningSpaceMemberRepository learningSpaceMemberRepository;
 
     public EvaluationServiceImpl(EvaluationSessionRepository sessionRepository,
                                  EvaluationCriterionRepository criterionRepository,
@@ -33,7 +34,8 @@ public class EvaluationServiceImpl implements EvaluationService {
                                  GradeEntryRepository gradeEntryRepository,
                                  UserRepository userRepository,
                                  StudentProfileRepository studentProfileRepository,
-                                 LearningPathRepository learningPathRepository) {
+                                 LearningPathRepository learningPathRepository,
+                                 LearningSpaceMemberRepository learningSpaceMemberRepository) {
         this.sessionRepository = sessionRepository;
         this.criterionRepository = criterionRepository;
         this.interactionLogRepository = interactionLogRepository;
@@ -41,6 +43,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         this.userRepository = userRepository;
         this.studentProfileRepository = studentProfileRepository;
         this.learningPathRepository = learningPathRepository;
+        this.learningSpaceMemberRepository = learningSpaceMemberRepository;
     }
 
     @Override
@@ -163,6 +166,31 @@ public class EvaluationServiceImpl implements EvaluationService {
     }
 
     @Override
+    public List<LearningPathResponse> getLearningPathsForLecturer(Long lecturerId) {
+        return learningPathRepository.findByLecturer_Id(lecturerId)
+                .stream()
+                .map(lp -> LearningPathResponse.builder()
+                        .id(lp.getId())
+                        .title(lp.getTitle())
+                        .description(lp.getDescription())
+                        .learningSpaceId(lp.getLearningSpace().getId())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public List<UserResponse> getStudentsForSession(Long sessionId) {
+        EvaluationSession session = findSession(sessionId);
+        Long spaceId = session.getLearningPath().getLearningSpace().getId();
+        Long lecturerId = session.getLearningPath().getLecturer().getId();
+        return learningSpaceMemberRepository.findByLearningSpaceId(spaceId).stream()
+                .filter(m -> m.getRole().name().equals("STUDENT") || m.getRole().name().equals("MEMBER"))
+                .filter(m -> !m.getUser().getId().equals(lecturerId))
+                .map(m -> UserServiceImpl.toResponse(m.getUser()))
+                .toList();
+    }
+
+    @Override
     public InteractionLogResponse addInteractionLog(CreateInteractionLogRequest request) {
         User student = UserServiceImpl.findUser(userRepository, request.getStudentId());
         LearningPath path = learningPathRepository.findById(request.getLearningPathId())
@@ -232,6 +260,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         return EvaluationSessionResponse.builder()
                 .id(session.getId())
                 .learningPathId(session.getLearningPath().getId())
+                .learningPathTitle(session.getLearningPath().getTitle())
                 .lecturerId(session.getLecturer().getId())
                 .lecturerName(session.getLecturer().getFullName())
                 .title(session.getTitle())

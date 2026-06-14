@@ -1,17 +1,19 @@
 package com.example.flippedclass.controller;
 
+import com.example.flippedclass.service.LearningPathService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class TemplateController {
 
     @GetMapping("/")
     public String index() {
-        return "redirect:/login";
+        return "homePage";
     }
 
     @GetMapping("/inventory")
@@ -59,6 +61,11 @@ public class TemplateController {
         return "lecturer/quiz-builder";
     }
 
+    @GetMapping("/lecturer/quizzes/{id}/statistics")
+    public String quizStatistics() {
+        return "lecturer/quiz-statistics";
+    }
+
     @GetMapping("/student/dashboard")
     public String studentDashboard() {
         return "student/student-dashboard";
@@ -94,13 +101,19 @@ public class TemplateController {
         return "lecturer/evaluation-sessions";
     }
 
+    @GetMapping("/lecturer/evaluation-sessions/{sessionId}/students")
+    public String evaluationStudents(@PathVariable Long sessionId, Model model) {
+        model.addAttribute("sessionId", sessionId);
+        return "lecturer/evaluation-students";
+    }
+
     @GetMapping("/lecturer/dashboard")
     public String lecturerDashboard() {
         return "lecturer/dashboard";
     }
 
     @Autowired
-    private com.example.flippedclass.service.LearningPathService learningPathService;
+    private LearningPathService learningPathService;
 
     @GetMapping("/lecturer/space/{spaceId}")
     public String learningPath(@PathVariable Long spaceId, Model model) {
@@ -111,5 +124,17 @@ public class TemplateController {
             model.addAttribute("paths", java.util.Collections.emptyList());
         }
         return "lecturer/learningPath";
+    }
+
+    @GetMapping("/lecturer/space-members")
+    public String spaceMembers(@RequestParam("spaceId") Long spaceId, Model model) {
+        model.addAttribute("spaceId", spaceId);
+        return "lecturer/space-members";
+    }
+
+    @GetMapping("/lecturer/spaces/{spaceId}/analytics")
+    public String learningAnalytics(@PathVariable Long spaceId, Model model) {
+        model.addAttribute("spaceId", spaceId);
+        return "lecturer/learning-analytics";
     }
 }

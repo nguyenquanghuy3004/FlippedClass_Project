@@ -2,6 +2,7 @@ package com.example.flippedclass.repository;
 
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.VisibilityType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,6 +24,8 @@ public interface LearningSpaceRepository extends JpaRepository<LearningSpace, Lo
 
     Optional<LearningSpace> findByInviteCodeAndStatus(String inviteCode, LearningSpaceStatus status);
 
+    Optional<LearningSpace> findByInviteCodeIgnoreCaseAndStatus(String inviteCode, LearningSpaceStatus status);
+
     Optional<LearningSpace> findByIdAndStatus(Long id, LearningSpaceStatus status);
 
     @EntityGraph(attributePaths = {"owner"})
@@ -34,6 +37,8 @@ public interface LearningSpaceRepository extends JpaRepository<LearningSpace, Lo
     Page<LearningSpace> findByStatus(LearningSpaceStatus status, Pageable pageable);
     
     int countByOwnerId(Long ownerId);
+
+    List<LearningSpace> findByVisibilityAndStatus(VisibilityType visibility, LearningSpaceStatus status);
 
 
 

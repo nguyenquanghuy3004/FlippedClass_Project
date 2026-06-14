@@ -2,7 +2,10 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
 <head>
     <title>Manage Learning Spaces</title>
-    <link rel="stylesheet" crossorigin th:href="@{/assets/css/dashboard.css}">
+    <th:block layout:fragment="head">
+        <link rel="stylesheet" crossorigin th:href="@{/assets/css/dashboard.css}">
+        <link rel="stylesheet" th:href="@{/assets/css/lecturer-LearningSpace.css}">
+    </th:block>
 </head>
 <body>
     <div layout:fragment="content">
@@ -76,3 +79,5 @@
     </th:block>
 </body>
 </html>
+
+

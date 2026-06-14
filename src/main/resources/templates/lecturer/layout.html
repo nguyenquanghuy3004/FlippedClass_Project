@@ -14,25 +14,9 @@
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <!-- FontAwesome for fallback -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <style>
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #f8f9fc;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 3px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" th:href="@{/assets/css/lecturer-layout.css}">
+  <th:block layout:fragment="head"></th:block>
 </head>
 
 <body>
@@ -78,22 +62,36 @@
 
   <!-- SIDEBAR -->
   <aside id="sidebar" class="sidebar d-flex flex-column">
-    <div class="logo-area">
-      <a href="#" class="d-inline-flex">
-        <i class="fa-solid fa-chalkboard-user text-success fs-3"></i>
-        <span class="logo-text ms-2 fw-bold text-success fs-4"> FCMS Lecture</span>
+    <div class="logo-area py-3 px-4 mb-3 border-bottom" style="border-color: rgba(0,0,0,0.05) !important;">
+      <a href="#" class="d-flex align-items-center text-decoration-none">
+        <div class="d-flex align-items-center justify-content-center rounded-3 me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);">
+          <i class="fa-solid fa-chalkboard-user text-white fs-5"></i>
+        </div>
+        <span class="logo-text fw-bolder fs-5 text-nowrap" style="white-space: nowrap; background: linear-gradient(135deg, #0f172a 0%, #334155 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; font-family: 'Inter', sans-serif;">
+          FCMS <span style="font-weight: 500; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Lecture</span>
+        </span>
       </a>
     </div>
     <ul class="nav flex-column mb-auto">
       <li class="px-4 py-2"><small class="nav-text">Workspace</small></li>
       <li>
-        <a class="nav-link active" href="/lecturer/dashboard">
+        <a class="nav-link" href="/lecturer/dashboard" data-nav-path="/lecturer/dashboard">
           <i class="ti ti-box-seam"></i><span class="nav-text">My Spaces</span>
         </a>
       </li>
       <li>
-        <a class="nav-link" href="/lecturer/quizzes">
+        <a class="nav-link" href="/lecturer/quizzes" data-nav-path="/lecturer/quizzes">
           <i class="ti ti-checklist"></i><span class="nav-text">My Quizzes</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="/lecturer/evaluation-sessions" data-nav-path="/lecturer/evaluation-sessions">
+          <i class="ti ti-clipboard-list"></i><span class="nav-text">Eval Sessions</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="/lecturer/grading" data-nav-path="/lecturer/grading">
+          <i class="ti ti-pencil-star"></i><span class="nav-text">Grading</span>
         </a>
       </li>
     </ul>
@@ -124,11 +122,12 @@
   </main>
 
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     // Setup AJAX to include JWT token if stored in localStorage
     $.ajaxSetup({
       beforeSend: function (xhr) {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('jwt_token');
         if (token) {
           xhr.setRequestHeader('Authorization', 'Bearer ' + token);
         }
@@ -136,11 +135,33 @@
     });
 
     function logout() {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      localStorage.removeItem('jwt_token');
+      window.location.href = '/signin';
     }
+
+    // Auto-highlight active sidebar menu item
+    $(document).ready(function() {
+      const path = window.location.pathname;
+      $('.sidebar .nav-link').removeClass('active');
+      
+      let matched = false;
+      $('.sidebar .nav-link').each(function() {
+        const navPath = $(this).attr('data-nav-path');
+        if (navPath && path.startsWith(navPath)) {
+          $(this).addClass('active');
+          matched = true;
+        }
+      });
+      // Fallback
+      if (!matched) {
+        $('.sidebar .nav-link[data-nav-path="/lecturer/dashboard"]').addClass('active');
+      }
+    });
   </script>
   <th:block layout:fragment="scripts"></th:block>
 </body>
 
 </html>
+
+
+

@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Học node - FlippedClass</title>
+  <title>Learning Node - FlippedClass</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
@@ -10,543 +10,130 @@
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 
-  <script>
+  <script type="text/javascript">
     if (!localStorage.getItem('jwt_token')) {
       window.location.href = '/login';
     }
   </script>
+  <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <script>
+/* --- Inlined from student-user-menu.js --- */
+(function () {
+  const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
 
-  <style>
-    @import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&display=swap");
+  function storedUser() {
+    return {
+      fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
+      username: localStorage.getItem('username') || '',
+      avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
+    };
+  }
 
-    :root {
-      --fc-primary: #5bc760;
-      --fc-primary-dark: #2f855a;
-      --fc-primary-soft: #e8f8ea;
-      --fc-primary-pale: #f4fbf5;
-      --fc-text: #1f2937;
-      --fc-muted: #6b7280;
-      --fc-background: #f7faf8;
-      --fc-border: #e5e7eb;
-      --fc-danger: #b42318;
-      --fc-shadow-sm: 0 10px 24px rgba(31, 41, 55, 0.08);
-      --fc-shadow-md: 0 22px 55px rgba(31, 41, 55, 0.14);
-      --bs-primary: #2f855a;
-      --bs-primary-rgb: 47, 133, 90;
-      --bs-success: #5bc760;
-      --bs-success-rgb: 91, 199, 96;
+  function normalizeUser(user = {}) {
+    const stored = storedUser();
+    return {
+      name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
+      username: user.username || stored.username || '',
+      avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
+    };
+  }
+
+  function setStudentMenuUser(user = {}) {
+    const normalized = normalizeUser(user);
+
+    if (normalized.name && normalized.name !== 'Student') {
+      localStorage.setItem('full_name', normalized.name);
+    }
+    if (normalized.username) {
+      localStorage.setItem('username', normalized.username);
+    }
+    if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
+      localStorage.setItem('avatar_url', normalized.avatarUrl);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    document.querySelectorAll('[data-user-name]').forEach((element) => {
+      element.textContent = normalized.name;
+    });
+    document.querySelectorAll('[data-user-avatar]').forEach((image) => {
+      image.src = normalized.avatarUrl;
+      image.onerror = () => {
+        image.onerror = null;
+        image.src = defaultAvatarUrl;
+      };
+    });
 
-    body {
-      min-height: 100vh;
-      margin: 0;
-      color: var(--fc-text);
-      background:
-        radial-gradient(circle at top left, rgba(91, 199, 96, 0.18), transparent 30rem),
-        radial-gradient(circle at bottom right, rgba(47, 133, 90, 0.12), transparent 28rem),
-        linear-gradient(180deg, #ffffff 0%, var(--fc-background) 48%, #ffffff 100%);
-      font-family: "Lexend", "Trebuchet MS", sans-serif;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-    }
+    const topbarName = document.getElementById('studentName');
+    if (topbarName) topbarName.textContent = normalized.name;
+  }
 
-    a {
-      color: inherit;
-    }
+  function studentLogout() {
+    ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
+      localStorage.removeItem(key);
+    });
+    window.location.href = '/';
+  }
 
-    .lesson-topbar {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.9rem clamp(1rem, 3vw, 2rem);
-      border-bottom: 1px solid rgba(229, 231, 235, 0.9);
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: var(--fc-shadow-sm);
-      backdrop-filter: blur(18px);
-    }
+  async function refreshStudentMenuUser() {
+    const token = localStorage.getItem('jwt_token');
+    const userId = localStorage.getItem('user_id');
+    if (!token || !userId) return;
 
-    .brand-link,
-    .back-link,
-    .student-chip {
-      display: inline-flex;
-      align-items: center;
-      text-decoration: none;
+    try {
+      const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) return;
+      const user = await response.json();
+      setStudentMenuUser(user);
+    } catch (error) {
+      console.warn('Could not load user menu profile.', error);
     }
+  }
 
-    .brand-link {
-      gap: 0.65rem;
-      min-width: max-content;
-      font-size: 1.15rem;
-      font-weight: 900;
-      letter-spacing: -0.04em;
-    }
-
-    .brand-mark {
-      width: 40px;
-      height: 40px;
-      display: grid;
-      place-items: center;
-      border-radius: 14px;
-      color: #ffffff;
-      background: linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary));
-      box-shadow: 0 12px 24px rgba(47, 133, 90, 0.18);
-    }
-
-    .brand-link span span {
-      color: var(--fc-primary-dark);
-    }
-
-    .topbar-spacer {
-      flex: 1;
-    }
-
-    .back-link {
-      gap: 0.45rem;
-      padding: 0.62rem 1rem;
-      border: 1px solid rgba(229, 231, 235, 0.95);
-      border-radius: 999px;
-      color: var(--fc-primary-dark);
-      background: #ffffff;
-      font-size: 0.86rem;
-      font-weight: 900;
-      box-shadow: 0 8px 18px rgba(31, 41, 55, 0.06);
-    }
-
-    .back-link:hover {
-      color: #ffffff;
-      background: var(--fc-primary-dark);
-    }
-
-    .student-chip {
-      gap: 0.6rem;
-      padding: 0.35rem 0.8rem 0.35rem 0.4rem;
-      border: 1px solid rgba(229, 231, 235, 0.95);
-      border-radius: 999px;
-      background: #ffffff;
-      font-size: 0.86rem;
-      font-weight: 850;
-      box-shadow: 0 8px 18px rgba(31, 41, 55, 0.06);
-    }
-
-    .student-chip img {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      object-fit: cover;
-    }
-
-    .lesson-shell {
-      width: min(1500px, calc(100% - 2rem));
-      margin: 1.4rem auto 2.2rem;
-    }
-
-    .lesson-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(310px, 390px);
-      gap: 1rem;
-      align-items: start;
-    }
-
-    .player-column,
-    .side-column {
-      min-width: 0;
-    }
-
-    .node-hero,
-    .content-card,
-    .side-card {
-      border: 1px solid rgba(229, 231, 235, 0.92);
-      background: rgba(255, 255, 255, 0.96);
-      box-shadow: var(--fc-shadow-sm);
-    }
-
-    .node-hero {
-      display: grid;
-      gap: 0.7rem;
-      margin-bottom: 1rem;
-      padding: 1rem 1.15rem;
-      border-radius: 28px;
-      background:
-        radial-gradient(circle at 15% 20%, rgba(91, 199, 96, 0.14), transparent 16rem),
-        #ffffff;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      width: max-content;
-      color: var(--fc-primary-dark);
-      font-size: 0.76rem;
-      font-weight: 950;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .node-title {
-      margin: 0;
-      color: var(--fc-text);
-      font-size: clamp(1.45rem, 3vw, 2.65rem);
-      font-weight: 950;
-      letter-spacing: -0.06em;
-      line-height: 1.05;
-    }
-
-    .node-description {
-      max-width: 860px;
-      margin: 0;
-      color: var(--fc-muted);
-      font-size: 0.96rem;
-      font-weight: 650;
-      line-height: 1.65;
-    }
-
-    .meta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.55rem;
-    }
-
-    .soft-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      border: 1px solid rgba(229, 231, 235, 0.9);
-      border-radius: 999px;
-      padding: 0.42rem 0.7rem;
-      color: var(--fc-primary-dark);
-      background: #ffffff;
-      font-size: 0.78rem;
-      font-weight: 900;
-    }
-
-    .video-shell {
-      overflow: hidden;
-      border-radius: 30px;
-      background: #101820;
-      box-shadow: var(--fc-shadow-md);
-    }
-
-    .video-frame {
-      overflow: hidden;
-      aspect-ratio: 16 / 9;
-      background:
-        radial-gradient(circle at 25% 20%, rgba(91, 199, 96, 0.34), transparent 13rem),
-        linear-gradient(135deg, #13251d, #0f172a);
-    }
-
-    .video-frame video,
-    .video-frame iframe {
-      width: 100%;
-      height: 100%;
-      display: block;
-      border: 0;
-      object-fit: cover;
-    }
-
-    .empty-video,
-    .empty-box {
-      display: grid;
-      place-items: center;
-      min-height: 300px;
-      padding: 1.3rem;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.82);
-      font-weight: 800;
-      line-height: 1.55;
-    }
-
-    .empty-video i,
-    .empty-box i {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-size: 2.35rem;
-    }
-
-    .player-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-      align-items: center;
-      padding: 0.85rem;
-      background: #ffffff;
-    }
-
-    .server-pill {
-      border: 0;
-      border-radius: 14px;
-      padding: 0.58rem 1rem;
-      color: var(--fc-muted);
-      background: #eef5f0;
-      font-size: 0.84rem;
-      font-weight: 850;
-    }
-
-    .server-pill.active {
-      color: var(--fc-primary-dark);
-      background: rgba(91, 199, 96, 0.24);
-    }
-
-    .content-card {
-      margin-top: 1rem;
-      padding: 1rem;
-      border-radius: 26px;
-    }
-
-    .content-card h2,
-    .side-card h2 {
-      margin: 0;
-      color: var(--fc-text);
-      font-size: 1.05rem;
-      font-weight: 950;
-      letter-spacing: -0.035em;
-    }
-
-    .content-card p {
-      margin: 0.55rem 0 0;
-      color: var(--fc-muted);
-      font-size: 0.93rem;
-      font-weight: 650;
-      line-height: 1.65;
-    }
-
-    .side-column {
-      position: sticky;
-      top: 5.6rem;
-      display: grid;
-      gap: 1rem;
-    }
-
-    .side-card {
-      overflow: hidden;
-      border-radius: 28px;
-    }
-
-    .side-card-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.8rem;
-      align-items: flex-start;
-      padding: 1rem;
-      border-bottom: 1px solid var(--fc-border);
-      background: #ffffff;
-    }
-
-    .side-card-header p {
-      margin: 0.2rem 0 0;
-      color: var(--fc-muted);
-      font-size: 0.78rem;
-      font-weight: 750;
-    }
-
-    .resource-list,
-    .comment-list {
-      display: grid;
-      gap: 0.7rem;
-      padding: 1rem;
-    }
-
-    .resource-item {
-      display: grid;
-      grid-template-columns: 42px minmax(0, 1fr) auto;
-      gap: 0.7rem;
-      align-items: center;
-      border: 1px solid rgba(229, 231, 235, 0.95);
-      border-radius: 18px;
-      padding: 0.75rem;
-      background: #ffffff;
-      color: inherit;
-      text-decoration: none;
-      transition: transform 170ms ease, border-color 170ms ease, background 170ms ease;
-    }
-
-    .resource-item:hover {
-      transform: translateX(2px);
-      border-color: rgba(91, 199, 96, 0.34);
-      background: var(--fc-primary-soft);
-    }
-
-    .resource-icon {
-      width: 42px;
-      height: 42px;
-      display: grid;
-      place-items: center;
-      border-radius: 15px;
-      color: var(--fc-primary-dark);
-      background: var(--fc-primary-soft);
-      font-size: 1.2rem;
-    }
-
-    .resource-title,
-    .comment-author {
-      display: block;
-      margin: 0;
-      color: var(--fc-text);
-      font-size: 0.88rem;
-      font-weight: 950;
-      line-height: 1.35;
-    }
-
-    .resource-meta,
-    .comment-text {
-      display: block;
-      margin: 0.18rem 0 0;
-      color: var(--fc-muted);
-      font-size: 0.76rem;
-      font-weight: 750;
-      line-height: 1.45;
-    }
-
-    .comment-item {
-      border: 1px solid rgba(229, 231, 235, 0.95);
-      border-radius: 18px;
-      padding: 0.85rem;
-      background: #ffffff;
-    }
-
-    .comment-compose {
-      display: grid;
-      gap: 0.65rem;
-      padding: 0 1rem 1rem;
-    }
-
-    .comment-compose textarea {
-      width: 100%;
-      min-height: 94px;
-      resize: vertical;
-      padding: 0.85rem;
-      border: 1px solid rgba(229, 231, 235, 0.95);
-      border-radius: 18px;
-      color: var(--fc-text);
-      font-size: 0.86rem;
-      font-weight: 750;
-      outline: none;
-    }
-
-    .comment-compose textarea:focus {
-      border-color: rgba(91, 199, 96, 0.45);
-      box-shadow: 0 0 0 4px rgba(91, 199, 96, 0.12);
-    }
-
-    .comment-compose button {
-      justify-self: end;
-      border: 0;
-      border-radius: 999px;
-      padding: 0.7rem 1.05rem;
-      color: #ffffff;
-      background: var(--fc-primary-dark);
-      font-size: 0.82rem;
-      font-weight: 950;
-    }
-
-    .comment-compose button:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    .empty-light {
-      display: grid;
-      place-items: center;
-      min-height: 160px;
-      margin: 1rem;
-      padding: 1rem;
-      border: 1px dashed rgba(47, 133, 90, 0.24);
-      border-radius: 20px;
-      color: var(--fc-muted);
-      background: rgba(232, 248, 234, 0.48);
-      text-align: center;
-      font-size: 0.84rem;
-      font-weight: 800;
-      line-height: 1.45;
-    }
-
-    .empty-light i {
-      display: block;
-      margin-bottom: 0.45rem;
-      color: var(--fc-primary-dark);
-      font-size: 1.7rem;
-    }
-
-    .loading-state,
-    .error-state {
-      display: grid;
-      place-items: center;
-      min-height: 420px;
-      border: 1px solid rgba(229, 231, 235, 0.92);
-      border-radius: 30px;
-      background: rgba(255, 255, 255, 0.95);
-      box-shadow: var(--fc-shadow-sm);
-      text-align: center;
-      color: var(--fc-muted);
-      font-weight: 850;
-    }
-
-    .error-state h1 {
-      margin: 0.6rem 0 0.35rem;
-      color: var(--fc-text);
-      font-size: 1.5rem;
-      font-weight: 950;
-      letter-spacing: -0.045em;
-    }
-
-    .error-state i,
-    .loading-state i {
-      color: var(--fc-primary-dark);
-      font-size: 2.6rem;
-    }
-
-    @media (max-width: 1080px) {
-      .lesson-layout {
-        grid-template-columns: 1fr;
+  function closeAllMenus(exceptMenu = null) {
+    document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
+      if (menu !== exceptMenu) {
+        menu.classList.remove('is-open');
+        menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
       }
+    });
+  }
 
-      .side-column {
-        position: static;
-      }
-    }
+  function initStudentUserMenus() {
+    setStudentMenuUser();
+    refreshStudentMenuUser();
 
-    @media (max-width: 720px) {
-      .lesson-topbar {
-        align-items: flex-start;
-        flex-wrap: wrap;
-      }
+    document.querySelectorAll('[data-user-menu]').forEach((menu) => {
+      const toggle = menu.querySelector('[data-user-menu-toggle]');
+      const logoutButton = menu.querySelector('[data-user-logout]');
 
-      .brand-link {
-        width: 100%;
-      }
+      toggle?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const shouldOpen = !menu.classList.contains('is-open');
+        closeAllMenus(menu);
+        menu.classList.toggle('is-open', shouldOpen);
+        toggle.setAttribute('aria-expanded', String(shouldOpen));
+      });
 
-      .lesson-shell {
-        width: min(100% - 1rem, 1500px);
-        margin-top: 0.75rem;
-      }
+      logoutButton?.addEventListener('click', studentLogout);
+    });
 
-      .node-hero,
-      .side-card,
-      .content-card,
-      .video-shell {
-        border-radius: 22px;
-      }
+    document.addEventListener('click', () => closeAllMenus());
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAllMenus();
+    });
+  }
 
-      .student-chip {
-        display: none;
-      }
+  window.setStudentMenuUser = setStudentMenuUser;
+  window.studentLogout = studentLogout;
+  if (!window.logout) window.logout = studentLogout;
 
-      .player-controls {
-        align-items: stretch;
-      }
+  document.addEventListener('DOMContentLoaded', initStudentUserMenus);
+})();
 
-      .server-pill {
-        flex: 1;
-      }
-    }
-  </style>
+</script>
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
 </head>
 
 <body>
@@ -557,48 +144,48 @@
   </a>
   <a id="backLink" class="back-link" th:href="@{/student/learning-spaces}">
     <i class="ti ti-arrow-left"></i>
-    Về roadmap
+    Back to roadmap
   </a>
   <div class="topbar-spacer"></div>
   <a class="back-link" th:href="@{/student/my-quizzes}">
     <i class="ti ti-brain"></i>
-    My quiz
+    My Quizzes
   </a>
-  <div class="dropdown">
-    <div class="student-chip" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-      <img th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
-      <span id="studentName">Sinh viên</span>
-    </div>
-    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
-      <li><a class="dropdown-item text-danger fw-bold py-2" href="javascript:void(0)" onclick="logout()"><i class="ti ti-logout me-2"></i>Đăng xuất</a></li>
-    </ul>
+  <div class="student-user-menu topbar-user-menu" data-user-menu>
+  <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+    <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
+    <span class="student-menu-info">
+      <span id="studentName" class="student-menu-name" data-user-name>Student</span>
+      <span class="student-menu-role">Student</span>
+    </span>
+    <i class="ti ti-chevron-down student-menu-chevron"></i>
+  </button>
+  <div class="student-menu-panel" role="menu">
+    <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+    <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
   </div>
+</div>
 </header>
 
 <main class="lesson-shell">
   <div id="pageRoot" class="loading-state">
     <div>
       <i class="ti ti-loader-2"></i>
-      <p class="mt-3 mb-0">Đang tải nội dung node...</p>
+      <p class="mt-3 mb-0">Loading node content...</p>
     </div>
   </div>
 </main>
 
 <script>
-  const token = localStorage.getItem('jwt_token');
+/* --- Inlined from student-learning-node.js --- */
+const token = localStorage.getItem('jwt_token');
   const urlParams = new URLSearchParams(window.location.search);
   const pathNodeMatch = window.location.pathname.match(/\/student\/learning-nodes\/(\d+)/);
   const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
   const pageRoot = document.getElementById('pageRoot');
   const studentName = document.getElementById('studentName');
 
-  studentName.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Sinh viên';
-
-  function logout() {
-    localStorage.removeItem('jwt_token');
-    localStorage.removeItem('user_id');
-    window.location.href = '/';
-  }
+  studentName.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Student';
 
   function authHeaders(includeJson = true) {
     const headers = { Authorization: `Bearer ${token}` };
@@ -617,7 +204,7 @@
 
   async function readError(response) {
     const text = await response.text();
-    if (!text) return 'Có lỗi xảy ra. Vui lòng thử lại.';
+    if (!text) return 'Something went wrong. Please try again.';
     try {
       const json = JSON.parse(text);
       return json.message || json.error || text;
@@ -634,6 +221,15 @@
     return item.fullUrl || item.url || '';
   }
 
+  const resourceLogoSources = {
+    DOC: '/uploads/anh/1200x630wa.jpg',
+    VIDEO: '/uploads/anh/R.jpg',
+    YOUTUBE: '/uploads/anh/OIP.jpg',
+    PDF: '/uploads/anh/pdf-file-download-symbols-format-for-texts-vector.jpg',
+    GOOGLE_DRIVE: '/uploads/anh/Google-Drive-Logo-2020-present.jpg'
+  };
+
+  // Hàm hỗ trợ: Chuyển đổi link video YouTube thường thành dạng link nhúng (embed) để có thể xem trực tiếp trên web
   function youtubeEmbedUrl(url) {
     const value = String(url || '');
     const watchMatch = value.match(/[?&]v=([^&]+)/);
@@ -645,36 +241,36 @@
 
   function statusLabel(status) {
     const labels = {
-      ACTIVE: 'Đang học',
-      DRAFT: 'Bản nháp',
-      LOCKED: 'Chưa mở',
-      UNLOCKED: 'Đã mở',
-      ARCHIVED: 'Lưu trữ',
-      DELETED: 'Đã xóa'
+      ACTIVE: 'Active',
+      DRAFT: 'Draft',
+      LOCKED: 'Locked',
+      UNLOCKED: 'Unlocked',
+      ARCHIVED: 'Archived',
+      DELETED: 'Deleted'
     };
-    return labels[status] || status || 'Chưa rõ';
+    return labels[status] || status || 'Unknown';
   }
 
   function nodeTypeLabel(type) {
     const labels = {
-      LESSON: 'Bài học',
+      LESSON: 'Lesson',
       VIDEO: 'Video',
-      PRACTICE: 'Thực hành',
+      PRACTICE: 'Practice',
       QUIZ: 'Quiz',
-      REVIEW: 'Ôn tập'
+      REVIEW: 'Review'
     };
     return labels[type] || type || 'Node';
   }
 
   function resourceTypeLabel(type) {
     const labels = {
-      PDF: 'Tài liệu PDF',
-      CODE: 'Mã nguồn',
+      PDF: 'Document PDF',
+      CODE: 'Source Code',
       QUIZ: 'Quiz',
-      DISCUSSION: 'Thảo luận',
+      DISCUSSION: 'Discussion',
       VIDEO: 'Video'
     };
-    return labels[normalizeItemType(type)] || 'Tài nguyên';
+    return labels[normalizeItemType(type)] || 'Resource';
   }
 
   function resourceIcon(type) {
@@ -686,6 +282,41 @@
       VIDEO: 'ti-video'
     };
     return icons[normalizeItemType(type)] || 'ti-file';
+  }
+
+  function resourceLogo(item) {
+    const type = normalizeItemType(item?.itemType);
+    const url = itemUrl(item).toLowerCase();
+    const title = String(item?.title || '').toLowerCase();
+    const sourceText = `${url} ${title}`;
+
+    if (sourceText.includes('youtube') || sourceText.includes('youtu.be')) {
+      return resourceLogoSources.YOUTUBE;
+    }
+    if (sourceText.includes('drive.google')) {
+      return resourceLogoSources.GOOGLE_DRIVE;
+    }
+    if (type === 'PDF' || sourceText.includes('.pdf')) {
+      return resourceLogoSources.PDF;
+    }
+    if (type === 'VIDEO' || /\.(mp4|webm|mov|avi|mkv)(?:$|[?#])/.test(url) || sourceText.includes('video')) {
+      return resourceLogoSources.VIDEO;
+    }
+    if (sourceText.includes('.doc') || sourceText.includes('docx') || sourceText.includes('document')) {
+      return resourceLogoSources.DOC;
+    }
+    return '';
+  }
+
+  function resourceIconTemplate(item) {
+    const logo = resourceLogo(item);
+    if (logo) {
+      return `
+      <span class="resource-icon resource-icon-image">
+        <img class="resource-logo-img" src="${escapeHtml(logo)}" alt="${escapeHtml(resourceTypeLabel(item?.itemType))} logo" loading="lazy">
+      </span>`;
+    }
+    return `<span class="resource-icon"><i class="ti ${resourceIcon(item?.itemType)}"></i></span>`;
   }
 
   function emptyLightTemplate(icon, message) {
@@ -705,7 +336,7 @@
         <div class="empty-video">
           <div>
             <i class="ti ti-video-off"></i>
-            Giảng viên chưa thêm video cho node này.
+            Your instructor has not added a video for this node yet.
           </div>
         </div>`;
     }
@@ -713,7 +344,7 @@
     const url = itemUrl(video);
     const embedUrl = youtubeEmbedUrl(url);
     const player = embedUrl
-      ? `<iframe src="${escapeHtml(embedUrl)}" title="${escapeHtml(video.title || node.title || 'Video bài học')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+      ? `<iframe src="${escapeHtml(embedUrl)}" title="${escapeHtml(video.title || node.title || 'Lesson Video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
       : `<video controls preload="metadata" src="${escapeHtml(url)}"></video>`;
 
     return `<div class="video-frame">${player}</div>`;
@@ -725,7 +356,7 @@
       ? `/student/take-quiz?quizId=${encodeURIComponent(item.quizId)}`
       : itemUrl(item);
     const body = `
-      <span class="resource-icon"><i class="ti ${resourceIcon(item.itemType)}"></i></span>
+      ${resourceIconTemplate(item)}
       <span>
         <span class="resource-title">${escapeHtml(item.title || resourceTypeLabel(item.itemType))}</span>
         <span class="resource-meta">${escapeHtml(resourceTypeLabel(item.itemType))}</span>
@@ -739,7 +370,7 @@
 
   function resourcesTemplate(items) {
     const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
-    if (!resources.length) return emptyLightTemplate('ti-folder-off', 'Chưa có resource riêng cho node này.');
+    if (!resources.length) return emptyLightTemplate('ti-folder-off', 'No resources have been added for this node yet.');
     return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
   }
 
@@ -748,17 +379,17 @@
     const body = discussions.length
       ? `<div class="comment-list">${discussions.map((item) => `
           <div class="comment-item">
-            <span class="comment-author">${escapeHtml(item.title || 'Thảo luận')}</span>
-            <span class="comment-text">${escapeHtml(item.content || 'Giảng viên đã mở chủ đề thảo luận cho node này.')}</span>
+            <span class="comment-author">${escapeHtml(item.title || 'Discussion')}</span>
+            <span class="comment-text">${escapeHtml(item.content || 'Your instructor opened a discussion topic for this node.')}</span>
           </div>
         `).join('')}</div>`
-      : emptyLightTemplate('ti-message-off', 'Chưa có bình luận hoặc chủ đề thảo luận.');
+      : emptyLightTemplate('ti-message-off', 'No comments or discussion topics yet.');
 
     return `
       ${body}
       <div class="comment-compose">
-        <textarea placeholder="Viết bình luận hoặc câu hỏi của bạn..."></textarea>
-        <button type="button" disabled>Gửi bình luận</button>
+        <textarea placeholder="Write a comment or question..."></textarea>
+        <button type="button" disabled>Send Comment</button>
       </div>`;
   }
 
@@ -769,11 +400,13 @@
         <i class="ti ti-alert-circle"></i>
         <h1>${escapeHtml(title)}</h1>
         <p class="mb-4">${escapeHtml(message)}</p>
-        <a class="back-link" href="/student/learning-spaces"><i class="ti ti-arrow-left"></i> Về roadmap</a>
+        <a class="back-link" href="/student/learning-spaces"><i class="ti ti-arrow-left"></i> Back to Roadmap</a>
       </div>`;
   }
 
+  // Hàm hiển thị giao diện toàn bộ nội dung của bài học (node)
   function renderNodePage(node, items) {
+    // Phân loại các tài liệu đính kèm (items) thành: tài nguyên (tài liệu/code), bình luận, và video
     const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
     const discussions = items.filter((item) => normalizeItemType(item.itemType) === 'DISCUSSION');
     const videoCount = items.some((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item)) ? 1 : 0;
@@ -782,30 +415,30 @@
     pageRoot.innerHTML = `
       <section class="player-column">
         <section class="node-hero">
-          <span class="eyebrow"><i class="ti ti-player-play"></i> Không gian học node</span>
-          <h1 class="node-title">${escapeHtml(node.title || 'Node bài học')}</h1>
-          <p class="node-description">${escapeHtml(node.content || 'Giảng viên chưa thêm nội dung mô tả cho node này.')}</p>
+          <span class="eyebrow"><i class="ti ti-player-play"></i> Learning Spaces node</span>
+          <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
+          <p class="node-description">${escapeHtml(node.content || 'Your instructor has not added a description for this node yet.')}</p>
           <div class="meta-row">
             <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
             <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
-            <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Có video' : 'Chưa có video'}</span>
+            <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Video available' : 'No video'}</span>
             <span class="soft-chip"><i class="ti ti-folder-open"></i>${resources.length} resource</span>
-            <span class="soft-chip"><i class="ti ti-messages"></i>${discussions.length} bình luận</span>
+            <span class="soft-chip"><i class="ti ti-messages"></i>${discussions.length} comments</span>
           </div>
         </section>
 
         <section class="video-shell">
           ${videoTemplate(node, items)}
           <div class="player-controls">
-            <button class="server-pill active" type="button">Video bài học</button>
+            <button class="server-pill active" type="button">Lesson Video</button>
             <button class="server-pill" type="button">${resources.length} resource</button>
-            <button class="server-pill" type="button">${discussions.length} bình luận</button>
+            <button class="server-pill" type="button">${discussions.length} comments</button>
           </div>
         </section>
 
         <section class="content-card">
-          <h2>Nội dung node</h2>
-          <p>${escapeHtml(node.content || 'Nội dung chi tiết sẽ được giảng viên cập nhật sau.')}</p>
+          <h2>Node Content</h2>
+          <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
         </section>
       </section>
 
@@ -814,7 +447,7 @@
           <div class="side-card-header">
             <div>
               <h2>Resources</h2>
-              <p>Tài liệu, source code hoặc quiz của node.</p>
+              <p>Documents, source code, or quizzes for this node.</p>
             </div>
             <span class="soft-chip">${resources.length}</span>
           </div>
@@ -824,8 +457,8 @@
         <section class="side-card">
           <div class="side-card-header">
             <div>
-              <h2>Bình luận</h2>
-              <p>Thảo luận và câu hỏi liên quan đến node.</p>
+              <h2>Comments</h2>
+              <p>Discussions and questions related to this node.</p>
             </div>
             <span class="soft-chip">${discussions.length}</span>
           </div>
@@ -834,13 +467,15 @@
       </aside>`;
   }
 
+  // Hàm chính: Tải thông tin của bài học (node) và các tài liệu/item liên quan từ backend
   async function loadNodePage() {
     if (!nodeId) {
-      renderError('Thiếu nodeId', 'Không tìm thấy node cần mở. Vui lòng quay lại roadmap và chọn lại node.');
+      renderError('Missing nodeId', 'Could not find the node to open. Please return to the roadmap and select a node again.');
       return;
     }
 
     try {
+      // Gọi đồng thời 2 API: lấy chi tiết node và lấy các item (tài liệu/video) thuộc node đó
       const [nodeResponse, itemsResponse] = await Promise.all([
         fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}`, { headers: authHeaders(false) }),
         fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}/items`, { headers: authHeaders(false) })
@@ -852,17 +487,21 @@
 
       const node = await nodeResponse.json();
       const items = itemsResponse.ok ? await itemsResponse.json() : [];
+      // Sắp xếp các tài liệu theo thứ tự (position)
       const sortedItems = Array.isArray(items)
         ? [...items].sort((a, b) => (a.position || 0) - (b.position || 0))
         : [];
 
+      // Hiển thị nội dung ra giao diện
       renderNodePage(node, sortedItems);
     } catch (error) {
-      renderError('Không tải được node', error.message || 'Vui lòng thử lại sau.');
+      renderError('Could not load node', error.message || 'Please try again later.');
     }
   }
 
   loadNodePage();
+
 </script>
 </body>
 </html>
+

@@ -1,67 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
 
 <head>
   <meta charset="UTF-8" />
   <title>Quiz Builder - FlippedClass</title>
-  <meta name="description" content="Build questions for your quiz">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
-  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
-  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
-  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
-  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  <link rel="stylesheet" th:href="@{/assets/css/quiz-builder.css}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <th:block layout:fragment="head">
+    <link rel="stylesheet" th:href="@{/assets/css/quiz-builder.css}">
+  </th:block>
 </head>
 
 <body>
-  <div id="overlay" class="overlay"></div>
-
-  <div class="toast-wrap" id="toastWrap"></div>
-
-  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
-    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
-      <i class="ti ti-layout-sidebar-left-expand"></i>
-    </button>
-    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
-      <i class="ti ti-layout-sidebar-left-expand"></i>
-    </button>
-    <div>
-      <ul class="list-unstyled d-flex align-items-center mb-0 gap-2">
-        <li id="userDisplay" style="font-size:0.85rem;font-weight:600;color:#374151;"></li>
-        <li>
-          <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="logout()" style="font-weight:600;">
-            <i class="ti ti-logout me-1"></i>Sign out
-          </button>
-        </li>
-      </ul>
-    </div>
-  </nav>
-
-  <aside id="sidebar" class="sidebar d-flex flex-column">
-    <div class="logo-area">
-      <a href="/lecturer/dashboard" class="d-inline-flex">
-        <i class="fa-solid fa-chalkboard-user text-success fs-3"></i>
-        <span class="logo-text ms-2 fw-bold text-success fs-4"> FCMS Lecture</span>
-      </a>
-    </div>
-    <ul class="nav flex-column mb-auto">
-      <li class="px-4 py-2"><small class="nav-text">Workspace</small></li>
-      <li>
-        <a class="nav-link" href="/lecturer/dashboard">
-          <i class="ti ti-box-seam"></i><span class="nav-text">My Spaces</span>
-        </a>
-      </li>
-      <li>
-        <a class="nav-link active" href="/lecturer/quizzes">
-          <i class="ti ti-checklist"></i><span class="nav-text">My Quizzes</span>
-        </a>
-      </li>
-    </ul>
-  </aside>
-
-  <main id="content" class="content py-10">
+  <div layout:fragment="content">
     <div class="container-fluid">
 
       <div class="builder-topbar">
@@ -240,8 +189,7 @@
         </div>
       </div>
 
-    </div>
-  </main>
+      <!-- Closed divs moved to the bottom -->
 
   <div class="modal-overlay" id="bankModal" style="display:none; z-index: 1050; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
     <div class="modal-box" style="background: white; border-radius: 12px; width: 90%; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column;">
@@ -263,10 +211,15 @@
       </div>
     </div>
   </div>
+  
+  <div class="toast-wrap" id="toastWrap"></div>
 
+    </div> <!-- closes container-fluid -->
+  </div> <!-- closes layout:fragment="content" -->
+  <th:block layout:fragment="scripts">
   <script>
     const TOKEN_KEY = 'jwt_token';
-    const USER_KEY = 'currentUser';
+    const USER_KEY = 'currentUser_mentor';
     function getToken() { return localStorage.getItem(TOKEN_KEY); }
     function getUser() { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch (e) { return null; } }
     function authHeaders() {
@@ -278,7 +231,7 @@
     function logout() {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
-      localStorage.removeItem('user_id');
+      localStorage.removeItem('user_id_mentor');
       window.location.href = '/signin';
     }
 
@@ -729,6 +682,9 @@
       }
     }
   </script>
+  </th:block>
 </body>
 
 </html>
+
+
