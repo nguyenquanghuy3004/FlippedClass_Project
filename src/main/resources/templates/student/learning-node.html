@@ -663,6 +663,37 @@ const token = localStorage.getItem('jwt_token');
           <h2>Node Content</h2>
           <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
         </section>
+
+        <!-- START: LESSON SUMMARY UI -->
+        <section class="summary-card" style="margin-top: 1.5rem;">
+          <div class="summary-card-header">
+            <h2 class="summary-title">
+              <i class="ti ti-notebook"></i> Lesson Summary
+            </h2>
+            <span id="summaryStatus" class="summary-status">
+              <i class="ti ti-check"></i> Saved successfully
+            </span>
+          </div>
+
+          <form id="summaryForm" class="summary-form">
+            <div>
+              <label for="keyTakeaways" class="summary-label">📚 Key takeaways from the lesson</label>
+              <textarea id="keyTakeaways" class="summary-textarea" placeholder="Record the important knowledge you learned from the lesson..." required></textarea>
+            </div>
+
+            <div>
+              <label for="questions" class="summary-label">❓ Concepts you didn't understand</label>
+              <textarea id="questions" class="summary-textarea" placeholder="Record any content you are still wondering about or didn't understand..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+              <button type="submit" id="saveSummaryBtn" class="btn-primary">
+                <i class="ti ti-device-floppy"></i> Save Summary
+              </button>
+            </div>
+          </form>
+        </section>
+        <!-- END: LESSON SUMMARY UI -->
       </section>
 
       <aside class="side-column">
@@ -692,6 +723,54 @@ const token = localStorage.getItem('jwt_token');
           </div>
         </section>
       </aside>`;
+
+    // --- START: HANDLE SUMMARY SUBMIT ---
+    const summaryForm = document.getElementById('summaryForm');
+    const saveSummaryBtn = document.getElementById('saveSummaryBtn');
+    const summaryStatus = document.getElementById('summaryStatus');
+
+    if (summaryForm && saveSummaryBtn && summaryStatus) {
+      summaryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const keyTakeaways = document.getElementById('keyTakeaways').value;
+        const questions = document.getElementById('questions').value;
+        
+        const summaryJson = JSON.stringify({
+            keyTakeaways: keyTakeaways,
+            confusingPoints: questions
+        });
+
+        // Loading effect
+        saveSummaryBtn.disabled = true;
+        saveSummaryBtn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Saving...';
+
+        try {
+          const response = await fetch('/api/lesson-summaries', {
+            method: 'POST',
+            headers: authHeaders(true),
+            body: JSON.stringify({
+              learningNodeId: nodeId,
+              summaryContent: summaryJson
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(await readError(response));
+          }
+
+          // Show success state
+          summaryStatus.classList.add('show');
+          setTimeout(() => summaryStatus.classList.remove('show'), 3500);
+        } catch (err) {
+          alert('Failed to save summary: ' + err.message);
+        } finally {
+          saveSummaryBtn.disabled = false;
+          saveSummaryBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Summary';
+        }
+      });
+    }
+    // --- END: HANDLE SUMMARY SUBMIT ---
   }
 
   // Hàm chính: Tải thông tin của bài học (node) và các tài liệu/item liên quan từ backend

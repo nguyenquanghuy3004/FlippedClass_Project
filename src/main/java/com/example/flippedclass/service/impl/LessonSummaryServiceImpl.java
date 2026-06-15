@@ -7,17 +7,17 @@ import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.LessonSummary;
 import com.example.flippedclass.entity.User;
 import com.example.flippedclass.enums.SummaryStatus;
-import com.example.flippedclass.service.ProgressEvaluationService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.example.flippedclass.repository.LearningNodeRepository;
 import com.example.flippedclass.repository.LessonSummaryRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.LessonSummaryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,10 +25,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LessonSummaryServiceImpl implements LessonSummaryService {
 
-    private  LessonSummaryRepository lessonSummaryRepository;
-    private  LearningNodeRepository learningNodeRepository;
-    private  UserRepository userRepository;
-    private  ProgressEvaluationService progressEvaluationService;
+    private final LessonSummaryRepository lessonSummaryRepository;
+    private final LearningNodeRepository learningNodeRepository;
+    private final UserRepository userRepository;
 
 
     @Override
@@ -39,18 +38,25 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
         User student = userRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        LessonSummary summary = LessonSummary.builder()
-                .learningNode(learningNode)
-                .student(student)
-                .summaryContent(request.getSummaryContent())
-                .status(SummaryStatus.SUBMITTED)
-                .submittedAt(LocalDateTime.now())
-                .build();
+        Optional<LessonSummary> existingSummaryOpt = lessonSummaryRepository.findByLearningNodeIdAndStudentId(learningNode.getId(), student.getId());
+        LessonSummary summary;
+        
+        if (existingSummaryOpt.isPresent()) {
+            summary = existingSummaryOpt.get();
+            summary.setSummaryContent(request.getSummaryContent());
+            summary.setStatus(SummaryStatus.SUBMITTED);
+            summary.setSubmittedAt(LocalDateTime.now());
+        } else {
+            summary = LessonSummary.builder()
+                    .learningNode(learningNode)
+                    .student(student)
+                    .summaryContent(request.getSummaryContent())
+                    .status(SummaryStatus.SUBMITTED)
+                    .submittedAt(LocalDateTime.now())
+                    .build();
+        }
 
         summary = lessonSummaryRepository.save(summary);
-
-        // MỚI: Gọi đánh giá tiến độ sau khi lưu
-        progressEvaluationService.evaluateNodeCompletion(student.getId(), learningNode.getId());
 
         return mapToResponse(summary);
     }
