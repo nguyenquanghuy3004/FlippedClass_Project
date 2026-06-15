@@ -1,81 +1,87 @@
 /* =====================================================
-   lecturer-learningNode.css
-   CSS cho trang Lecturer > Learning Node (Lesson card)
-   Dùng bởi: lecturer/learningNode.html (fragment)
+   lecturer-learningNode.css  —  Sleek Modern Tech Design
    ===================================================== */
 
-/* --- Node Card Container --- */
+/* ── Node Card ── */
 .node-card {
+    background: #fff;
     border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background-color: #f8f9fa;
-    margin-bottom: 0.75rem;
-    transition: background-color 0.2s;
+    border-radius: 12px;
+    margin-bottom: 0.6rem;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    position: relative;
 }
 
 .node-card:hover {
-    background-color: #f1f5f9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
 }
 
-/* --- Node Icon Circle --- */
+/* ── Node Icon Circle ── */
 .node-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #10b981;
-    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #475569;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(16,185,129,0.3);
     font-size: 1.1rem;
+    border: 1px solid #e2e8f0;
 }
 
-/* --- Node Options Button --- */
+/* ── Node Options Button ── */
 .node-options-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
     background: transparent;
-    color: #6b7280;
-    transition: background-color 0.15s;
+    color: #94a3b8;
+    transition: background-color 0.15s, color 0.15s;
 }
 
 .node-options-btn:hover {
     background-color: #f1f5f9;
+    color: #475569;
 }
 
-/* --- Node Items Container --- */
+/* ── Node Items Container ── */
 .node-items-container {
     margin-top: 0.75rem;
 }
 
-/* --- Placeholder Box (dashed border, empty state) --- */
+/* ── Placeholder Box ── */
 .node-placeholder {
-    height: 120px;
-    border: 2px dashed #cbd5e1;
-    border-radius: 16px;
-    background: white;
+    height: 80px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    background: #f8fafc;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     color: #94a3b8;
+    font-size: 0.8rem;
+    font-weight: 500;
+    gap: 0.3rem;
 }
 
-/* --- Video embed ratio box --- */
+.node-placeholder i { font-size: 1.25rem; }
+
+/* ── Video embed ── */
 .node-video-wrap {
     aspect-ratio: 16 / 9;
-    border-radius: 16px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-    border: 1px solid #f1f5f9;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
     background: #000;
 }
 
@@ -86,24 +92,34 @@
     border: none;
 }
 
-/* --- PDF document row --- */
+/* ── PDF document row ── */
 .node-doc-row {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: white;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    background: #f8fafc;
+    transition: background-color 0.15s;
+}
+
+.node-doc-row:hover {
+    background: #f1f5f9;
 }
 
 .node-doc-icon {
-    padding: 0.5rem;
-    background: rgba(239,68,68,0.1);
+    padding: 0.4rem;
+    background: #fee2e2;
     color: #ef4444;
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
+    flex-shrink: 0;
 }
+
+/* ── Misc ── */
+.cursor-pointer { cursor: pointer; }
+.drag-handle    { cursor: grab; }
+.drag-handle:active { cursor: grabbing; }

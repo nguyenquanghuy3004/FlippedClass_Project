@@ -140,6 +140,25 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
             .toList();
     }
 
+    @Override
+    public LearningSpaceResponse getSpaceByInviteCode(String inviteCode) {
+        String normalizedInviteCode = inviteCode == null ? "" : inviteCode.trim();
+        LearningSpace learningSpace = learningSpaceRepository.findByInviteCodeIgnoreCaseAndStatus(normalizedInviteCode, LearningSpaceStatus.ACTIVE)
+                .orElseThrow(() -> new IllegalArgumentException("Mã mời không hợp lệ hoặc lớp đã bị xóa"));
+
+        return LearningSpaceResponse.builder()
+                .id(learningSpace.getId())
+                .name(learningSpace.getName())
+                .description(learningSpace.getDescription())
+                .inviteCode(learningSpace.getInviteCode())
+                .visibility(learningSpace.getVisibility())
+                .ownerId(learningSpace.getOwner().getId())
+                .ownerUsername(learningSpace.getOwner().getUsername())
+                .createdAt(learningSpace.getCreatedAt())
+                .status(learningSpace.getStatus())
+                .build();
+    }
+
     @Transactional
     @Override
     public LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail){
@@ -170,8 +189,10 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
         LearningSpace learningSpace;
 
-        if (request.getInviteCode() != null && !request.getInviteCode().trim().isEmpty()) {
-            learningSpace = learningSpaceRepository.findByInviteCodeAndStatus(request.getInviteCode(), LearningSpaceStatus.ACTIVE)
+        String inviteCode = request.getInviteCode() == null ? "" : request.getInviteCode().trim();
+
+        if (!inviteCode.isEmpty()) {
+            learningSpace = learningSpaceRepository.findByInviteCodeIgnoreCaseAndStatus(inviteCode, LearningSpaceStatus.ACTIVE)
                     .orElseThrow(() -> new IllegalArgumentException("Mã mời không hợp lệ hoặc lớp đã bị xóa"));
         } else if (request.getSpaceId() != null) {
             learningSpace = learningSpaceRepository.findByIdAndStatus(request.getSpaceId(), LearningSpaceStatus.ACTIVE)
