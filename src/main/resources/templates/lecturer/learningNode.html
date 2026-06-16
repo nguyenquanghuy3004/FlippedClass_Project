@@ -8,7 +8,8 @@
                 <div class="d-flex justify-content-between align-items-center">
 
                     <!-- Left: icon + title -->
-                    <div class="d-flex align-items-center gap-3">
+                    <a class="d-flex align-items-center gap-3 text-decoration-none" 
+                       th:href="@{'/lecturer/learning-nodes/' + ${node.id} + '/preview'}">
                         <!-- Icon: shape depends on type -->
                         <div class="node-icon">
                             <i th:class="'ti fs-5 '
@@ -20,14 +21,15 @@
                         </div>
                         <div>
                             <span class="fw-semibold" th:text="${node.title}"
-                                  style="font-size:0.92rem;color:#334155;letter-spacing:0.1px;">Node Title</span>
+                                  style="font-size:0.92rem;color:#334155;letter-spacing:0.1px;transition:color 0.2s;"
+                                  onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'">Node Title</span>
                             <!-- Type tag -->
                             <span class="ms-2 badge rounded-pill"
                                   th:text="${node.nodeType}"
                                   style="font-size:0.65rem;font-weight:600;letter-spacing:0.5px;
                                          background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;"></span>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Right: options menu -->
                     <div class="dropdown">
@@ -53,7 +55,7 @@
                                     <i class="ti ti-trash"></i> Delete Lesson
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider my-1"></li>
+
                             <li th:if="${node.nodeType == 'VIDEO'}">
                                 <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-video-btn"
                                    href="#" th:data-nodeid="${node.id}">

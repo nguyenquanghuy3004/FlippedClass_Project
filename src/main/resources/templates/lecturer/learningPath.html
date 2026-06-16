@@ -798,11 +798,13 @@
                                 headers: { 'Authorization': 'Bearer ' + token }
                             }).then(res => {
                                 if (res.ok) window.location.reload();
-                                else Swal.fire('Lỗi!', 'Lỗi khi xóa file', 'error');
+                                else Swal.fire('Error!', 'Lỗi xóa file', 'error');
                             });
                         }
                     });
                 });
+
+
 
                 // -------------------------------------------------------------------
                 // Lấy và hiển thị động danh sách các item (file) trong bài học

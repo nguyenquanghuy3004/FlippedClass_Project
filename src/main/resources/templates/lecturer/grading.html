@@ -193,7 +193,7 @@
 
       // Student Info
       if(data.student) {
-        document.getElementById('studentName').innerText = `${data.student.firstName} ${data.student.lastName}`;
+        document.getElementById('studentName').innerText = data.student.fullName || data.student.username;
         document.getElementById('studentRoll').innerText = data.student.username;
       }
 

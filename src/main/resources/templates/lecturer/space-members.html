@@ -124,7 +124,6 @@
 
             // Hàm thăng cấp thành viên lên Supporter
             function promote(memberId) {
-                if(!confirm('Promote this member to Supporter?')) return;
                 $.ajax({
                     url: `/api/spaces/${spaceId}/members/${memberId}/promote`,
                     method: 'POST',
@@ -139,7 +138,6 @@
 
             // Hàm giáng cấp Supporter xuống Member thường
             function demote(memberId) {
-                if(!confirm('Demote this supporter to Member?')) return;
                 $.ajax({
                     url: `/api/spaces/${spaceId}/members/${memberId}/demote`,
                     method: 'POST',

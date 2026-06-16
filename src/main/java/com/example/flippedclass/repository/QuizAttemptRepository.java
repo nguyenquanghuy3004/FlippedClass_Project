@@ -28,4 +28,9 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
     boolean existsPassedAttemptForNode(@Param("studentId") Long studentId,
                                        @Param("nodeId") Long nodeId,
                                        @Param("minScore") BigDecimal minScore);
+
+    @Query("SELECT COALESCE(AVG(qa.score), 0) FROM QuizAttempt qa " +
+           "WHERE qa.student.id = :studentId " +
+           "AND qa.quiz.learningNode.learningPath.learningSpace.id = :spaceId")
+    BigDecimal findAverageScoreByStudentAndSpace(@Param("studentId") Long studentId, @Param("spaceId") Long spaceId);
 }

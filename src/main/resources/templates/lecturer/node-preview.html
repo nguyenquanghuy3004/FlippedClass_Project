@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Learning Node - FlippedClass</title>
+  <title>Preview Node - Lecturer Moderation</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
@@ -17,154 +17,27 @@
   </script>
   <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
-  <script>
-/* --- Inlined from student-user-menu.js --- */
-(function () {
-  const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
-
-  function storedUser() {
-    return {
-      fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
-      username: localStorage.getItem('username') || '',
-      avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
-    };
-  }
-
-  function normalizeUser(user = {}) {
-    const stored = storedUser();
-    return {
-      name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
-      username: user.username || stored.username || '',
-      avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
-    };
-  }
-
-  function setStudentMenuUser(user = {}) {
-    const normalized = normalizeUser(user);
-
-    if (normalized.name && normalized.name !== 'Student') {
-      localStorage.setItem('full_name', normalized.name);
-    }
-    if (normalized.username) {
-      localStorage.setItem('username', normalized.username);
-    }
-    if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
-      localStorage.setItem('avatar_url', normalized.avatarUrl);
-    }
-
-    document.querySelectorAll('[data-user-name]').forEach((element) => {
-      element.textContent = normalized.name;
-    });
-    document.querySelectorAll('[data-user-avatar]').forEach((image) => {
-      image.src = normalized.avatarUrl;
-      image.onerror = () => {
-        image.onerror = null;
-        image.src = defaultAvatarUrl;
-      };
-    });
-
-    const topbarName = document.getElementById('studentName');
-    if (topbarName) topbarName.textContent = normalized.name;
-  }
-
-  function studentLogout() {
-    ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
-      localStorage.removeItem(key);
-    });
-    window.location.href = '/';
-  }
-
-  async function refreshStudentMenuUser() {
-    const token = localStorage.getItem('jwt_token');
-    const userId = localStorage.getItem('user_id');
-    if (!token || !userId) return;
-
-    try {
-      const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!response.ok) return;
-      const user = await response.json();
-      setStudentMenuUser(user);
-    } catch (error) {
-      console.warn('Could not load user menu profile.', error);
-    }
-  }
-
-  function closeAllMenus(exceptMenu = null) {
-    document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
-      if (menu !== exceptMenu) {
-        menu.classList.remove('is-open');
-        menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
-      }
-    });
-  }
-
-  function initStudentUserMenus() {
-    setStudentMenuUser();
-    refreshStudentMenuUser();
-
-    document.querySelectorAll('[data-user-menu]').forEach((menu) => {
-      const toggle = menu.querySelector('[data-user-menu-toggle]');
-      const logoutButton = menu.querySelector('[data-user-logout]');
-
-      toggle?.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const shouldOpen = !menu.classList.contains('is-open');
-        closeAllMenus(menu);
-        menu.classList.toggle('is-open', shouldOpen);
-        toggle.setAttribute('aria-expanded', String(shouldOpen));
-      });
-
-      logoutButton?.addEventListener('click', studentLogout);
-    });
-
-    document.addEventListener('click', () => closeAllMenus());
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closeAllMenus();
-    });
-  }
-
-  window.setStudentMenuUser = setStudentMenuUser;
-  window.studentLogout = studentLogout;
-  if (!window.logout) window.logout = studentLogout;
-
-  document.addEventListener('DOMContentLoaded', initStudentUserMenus);
-})();
-
-</script>
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/node-preview.css}">
 </head>
 
 <body>
 <header class="lesson-topbar">
   <a class="brand-link" th:href="@{/}">
     <span class="brand-mark"><i class="ti ti-school"></i></span>
-    <span>Flipped<span>Class</span></span>
+    <span>Flipped<span>Class</span> (Lecturer)</span>
   </a>
-  <a id="backLink" class="back-link" th:href="@{/student/learning-spaces}">
+  <a id="backLink" class="back-link" href="javascript:history.back()">
     <i class="ti ti-arrow-left"></i>
     Back to roadmap
   </a>
   <div class="topbar-spacer"></div>
-  <a class="back-link" th:href="@{/student/my-quizzes}">
-    <i class="ti ti-brain"></i>
-    My Quizzes
-  </a>
-  <div class="student-user-menu topbar-user-menu" data-user-menu>
-  <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
-    <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
-    <span class="student-menu-info">
-      <span id="studentName" class="student-menu-name" data-user-name>Student</span>
-      <span class="student-menu-role">Student</span>
-    </span>
-    <i class="ti ti-chevron-down student-menu-chevron"></i>
-  </button>
-  <div class="student-menu-panel" role="menu">
-    <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
-    <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
+  <div class="student-user-menu topbar-user-menu">
+      <div class="d-flex align-items-center gap-2">
+          <img class="rounded-circle border" th:src="@{/assets/images/avatar-1.jpg}" style="width: 35px; height: 35px; object-fit: cover;" alt="Avatar">
+          <span class="fw-bold" style="color: #1e293b;">Lecturer View</span>
+      </div>
   </div>
-</div>
 </header>
 
 <main class="lesson-shell">
@@ -177,15 +50,11 @@
 </main>
 
 <script>
-/* --- Inlined from student-learning-node.js --- */
-﻿const token = localStorage.getItem('jwt_token');
+  const token = localStorage.getItem('jwt_token');
   const urlParams = new URLSearchParams(window.location.search);
-  const pathNodeMatch = window.location.pathname.match(/\/student\/learning-nodes\/(\d+)/);
+  const pathNodeMatch = window.location.pathname.match(/\/lecturer\/learning-nodes\/(\d+)\/preview/);
   const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
   const pageRoot = document.getElementById('pageRoot');
-  const studentName = document.getElementById('studentName');
-
-  studentName.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Student';
 
   function authHeaders(includeJson = true) {
     const headers = { Authorization: `Bearer ${token}` };
@@ -221,14 +90,6 @@
     return item.fullUrl || item.url || '';
   }
 
-  const resourceLogoSources = {
-    DOC: '/uploads/anh/1200x630wa.jpg',
-    VIDEO: '/uploads/anh/R.jpg',
-    YOUTUBE: '/uploads/anh/OIP.jpg',
-    PDF: '/uploads/anh/pdf-file-download-symbols-format-for-texts-vector.jpg',
-    GOOGLE_DRIVE: '/uploads/anh/Google-Drive-Logo-2020-present.jpg'
-  };
-
   function youtubeEmbedUrl(url) {
     const value = String(url || '');
     const watchMatch = value.match(/[?&]v=([^&]+)/);
@@ -238,84 +99,13 @@
     return id ? `https://www.youtube.com/embed/${id}` : '';
   }
 
-  function statusLabel(status) {
-    const labels = {
-      ACTIVE: 'Active',
-      DRAFT: 'Draft',
-      LOCKED: 'Locked',
-      UNLOCKED: 'Unlocked',
-      ARCHIVED: 'Archived',
-      DELETED: 'Deleted'
-    };
-    return labels[status] || status || 'Unknown';
-  }
-
-  function nodeTypeLabel(type) {
-    const labels = {
-      LESSON: 'Lesson',
-      VIDEO: 'Video',
-      PRACTICE: 'Practice',
-      QUIZ: 'Quiz',
-      REVIEW: 'Review'
-    };
-    return labels[type] || type || 'Node';
-  }
-
-  function resourceTypeLabel(type) {
-    const labels = {
-      PDF: 'Document PDF',
-      CODE: 'Source Code',
-      QUIZ: 'Quiz',
-      DISCUSSION: 'Discussion',
-      VIDEO: 'Video'
-    };
-    return labels[normalizeItemType(type)] || 'Resource';
-  }
+  function statusLabel(status) { return status || 'Unknown'; }
+  function nodeTypeLabel(type) { return type || 'Node'; }
+  function resourceTypeLabel(type) { return normalizeItemType(type) || 'Resource'; }
 
   function resourceIcon(type) {
-    const icons = {
-      PDF: 'ti-file-type-pdf',
-      CODE: 'ti-code',
-      QUIZ: 'ti-brain',
-      DISCUSSION: 'ti-message-circle',
-      VIDEO: 'ti-video'
-    };
+    const icons = { PDF: 'ti-file-type-pdf', CODE: 'ti-code', QUIZ: 'ti-brain', VIDEO: 'ti-video' };
     return icons[normalizeItemType(type)] || 'ti-file';
-  }
-
-  function resourceLogo(item) {
-    const type = normalizeItemType(item?.itemType);
-    const url = itemUrl(item).toLowerCase();
-    const title = String(item?.title || '').toLowerCase();
-    const sourceText = `${url} ${title}`;
-
-    if (sourceText.includes('youtube') || sourceText.includes('youtu.be')) {
-      return resourceLogoSources.YOUTUBE;
-    }
-    if (sourceText.includes('drive.google')) {
-      return resourceLogoSources.GOOGLE_DRIVE;
-    }
-    if (type === 'PDF' || sourceText.includes('.pdf')) {
-      return resourceLogoSources.PDF;
-    }
-    if (type === 'VIDEO' || /\.(mp4|webm|mov|avi|mkv)(?:$|[?#])/.test(url) || sourceText.includes('video')) {
-      return resourceLogoSources.VIDEO;
-    }
-    if (sourceText.includes('.doc') || sourceText.includes('docx') || sourceText.includes('document')) {
-      return resourceLogoSources.DOC;
-    }
-    return '';
-  }
-
-  function resourceIconTemplate(item) {
-    const logo = resourceLogo(item);
-    if (logo) {
-      return `
-      <span class="resource-icon resource-icon-image">
-        <img class="resource-logo-img" src="${escapeHtml(logo)}" alt="${escapeHtml(resourceTypeLabel(item?.itemType))} logo" loading="lazy">
-      </span>`;
-    }
-    return `<span class="resource-icon"><i class="ti ${resourceIcon(item?.itemType)}"></i></span>`;
   }
 
   function emptyLightTemplate(icon, message) {
@@ -330,46 +120,51 @@
 
   function videoTemplate(node, items) {
     const video = items.find((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item));
-    if (!video) {
-      return `
-        <div class="empty-video">
-          <div>
-            <i class="ti ti-video-off"></i>
-            Your instructor has not added a video for this node yet.
-          </div>
-        </div>`;
+    
+    if (video) {
+        const url = itemUrl(video);
+        const embedUrl = youtubeEmbedUrl(url);
+        const player = embedUrl
+          ? `<iframe src="${escapeHtml(embedUrl)}" title="${escapeHtml(video.title || node.title || 'Lesson Video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+          : `<video controls preload="metadata" src="${escapeHtml(url)}"></video>`;
+        return `<div class="video-frame">${player}</div>`;
+    }
+    
+    const pdf = items.find((item) => normalizeItemType(item.itemType) === 'PDF' && itemUrl(item));
+    if (pdf) {
+        const url = itemUrl(pdf);
+        // Embed PDF inside the frame
+        return `<div class="video-frame" style="height: 600px; padding-bottom: 0;"><iframe src="${escapeHtml(url)}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" title="${escapeHtml(pdf.title || node.title || 'Document')}"></iframe></div>`;
     }
 
-    const url = itemUrl(video);
-    const embedUrl = youtubeEmbedUrl(url);
-    const player = embedUrl
-      ? `<iframe src="${escapeHtml(embedUrl)}" title="${escapeHtml(video.title || node.title || 'Lesson Video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
-      : `<video controls preload="metadata" src="${escapeHtml(url)}"></video>`;
-
-    return `<div class="video-frame">${player}</div>`;
+    return `
+      <div class="empty-video">
+        <div>
+          <i class="ti ti-video-off"></i>
+          No video or document found for this lesson.
+        </div>
+      </div>`;
   }
 
   function resourceItemTemplate(item) {
     const type = normalizeItemType(item.itemType);
-    const url = type === 'QUIZ' && item.quizId
-      ? `/student/take-quiz?quizId=${encodeURIComponent(item.quizId)}`
-      : itemUrl(item);
+    const url = itemUrl(item);
     const body = `
-      ${resourceIconTemplate(item)}
+      <span class="resource-icon"><i class="ti ${resourceIcon(type)}"></i></span>
       <span>
-        <span class="resource-title">${escapeHtml(item.title || resourceTypeLabel(item.itemType))}</span>
-        <span class="resource-meta">${escapeHtml(resourceTypeLabel(item.itemType))}</span>
+        <span class="resource-title">${escapeHtml(item.title || resourceTypeLabel(type))}</span>
+        <span class="resource-meta">${escapeHtml(resourceTypeLabel(type))}</span>
       </span>
       <i class="ti ti-arrow-up-right text-primary"></i>`;
 
     return url
-      ? `<a class="resource-item" href="${escapeHtml(url)}" ${type === 'QUIZ' ? '' : 'target="_blank" rel="noopener"'}>${body}</a>`
+      ? `<a class="resource-item" href="${escapeHtml(url)}" target="_blank" rel="noopener">${body}</a>`
       : `<div class="resource-item">${body}</div>`;
   }
 
   function resourcesTemplate(items) {
     const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
-    if (!resources.length) return emptyLightTemplate('ti-folder-off', 'No resources have been added for this node yet.');
+    if (!resources.length) return emptyLightTemplate('ti-folder-off', 'No resources.');
     return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
   }
 
@@ -381,14 +176,14 @@
          </div>
       </div>
       <div class="comment-compose mt-3">
-        <textarea id="discussion-input" placeholder="Write a comment or question..."></textarea>
-        <button id="discussion-submit" type="button" onclick="submitDiscussion()">Send Comment</button>
+        <textarea id="discussion-input" placeholder="Post a new announcement or comment..."></textarea>
+        <button id="discussion-submit" type="button" onclick="submitDiscussion()">Post</button>
       </div>`;
   }
   
   function renderDiscussionTree(discussions) {
     if (!discussions || discussions.length === 0) {
-      return emptyLightTemplate('ti-message-off', 'No comments or questions yet. Be the first to ask!');
+      return emptyLightTemplate('ti-message-off', 'No comments or questions yet.');
     }
     
     let html = '<div class="comment-list" style="max-height: 500px; overflow-y: auto; padding-right: 10px;">';
@@ -418,6 +213,17 @@
      }
 
      const avatar = d.authorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.authorName)}&background=random`;
+
+     let moderationButtons = '';
+     if (!isReply) {
+         moderationButtons = `
+             <button class="moderation-btn solve-btn me-1" onclick="toggleSolved(${d.id})" title="Mark as Solved"><i class="ti ti-check"></i> Solved</button>
+             <button class="moderation-btn pin-btn me-1" onclick="togglePin(${d.id})" title="Pin/Unpin"><i class="ti ti-pin"></i> Pin</button>
+         `;
+     }
+     moderationButtons += `
+         <button class="moderation-btn delete-btn" onclick="deleteDiscussion(${d.id})" title="Delete"><i class="ti ti-trash"></i> Delete</button>
+     `;
 
      const isTooDeep = depth >= 3;
 
@@ -453,6 +259,9 @@
                                     <i class="ti ti-message-circle-2"></i> Reply
                                 </button>
                             </div>
+                            <div class="d-flex gap-1">
+                                ${moderationButtons}
+                            </div>
                         </div>
 
                         <!-- Reply Form -->
@@ -477,28 +286,34 @@
      `;
   }
   
-  function showReplyForm(id) {
-      document.getElementById('reply-form-' + id).classList.remove('d-none');
+  function showReplyForm(id) { document.getElementById('reply-form-' + id).classList.remove('d-none'); }
+  function hideReplyForm(id) { document.getElementById('reply-form-' + id).classList.add('d-none'); }
+
+  async function toggleSolved(id) {
+      await fetch(`/api/nodes/${nodeId}/discussions/${id}/solved`, { method: 'PUT', headers: authHeaders(false) });
+      loadDiscussions();
   }
-  function hideReplyForm(id) {
-      document.getElementById('reply-form-' + id).classList.add('d-none');
+  async function togglePin(id) {
+      await fetch(`/api/nodes/${nodeId}/discussions/${id}/pin`, { method: 'PUT', headers: authHeaders(false) });
+      loadDiscussions();
+  }
+  async function deleteDiscussion(id) {
+      await fetch(`/api/nodes/${nodeId}/discussions/${id}`, { method: 'DELETE', headers: authHeaders(false) });
+      loadDiscussions();
   }
 
   async function loadDiscussions() {
       const container = document.getElementById('discussion-container');
       if (!container) return;
       try {
-          const res = await fetch(\`/api/nodes/\${nodeId}/discussions\`, { headers: authHeaders(false) });
+          const res = await fetch(`/api/nodes/${nodeId}/discussions`, { headers: authHeaders(false) });
           if (res.ok) {
               const discussions = await res.json();
               container.innerHTML = renderDiscussionTree(discussions);
-              // Update comments count on UI
               const countSpans = document.querySelectorAll('.discussions-count');
               countSpans.forEach(el => el.textContent = discussions.length + ' comments');
           }
-      } catch (e) {
-          console.error('Failed to load discussions', e);
-      }
+      } catch (e) { console.error(e); }
   }
 
   async function submitDiscussion(parentId = null) {
@@ -511,7 +326,7 @@
       if (parentId) payload.parentId = parentId;
       
       try {
-          const res = await fetch(\`/api/nodes/\${nodeId}/discussions\`, {
+          const res = await fetch(`/api/nodes/${nodeId}/discussions`, {
               method: 'POST',
               headers: authHeaders(true),
               body: JSON.stringify(payload)
@@ -520,12 +335,8 @@
               inputEl.value = '';
               if (parentId) hideReplyForm(parentId);
               loadDiscussions();
-          } else {
-              alert(await readError(res));
-          }
-      } catch (e) {
-          alert('Failed to send comment');
-      }
+          } else { alert(await readError(res)); }
+      } catch (e) { alert('Failed to send comment'); }
   }
 
   function renderError(title, message) {
@@ -535,7 +346,7 @@
         <i class="ti ti-alert-circle"></i>
         <h1>${escapeHtml(title)}</h1>
         <p class="mb-4">${escapeHtml(message)}</p>
-        <a class="back-link" href="/student/learning-spaces"><i class="ti ti-arrow-left"></i> Back to Roadmap</a>
+        <a class="back-link" href="javascript:history.back()"><i class="ti ti-arrow-left"></i> Back to Roadmap</a>
       </div>`;
   }
 
@@ -547,14 +358,11 @@
     pageRoot.innerHTML = `
       <section class="player-column">
         <section class="node-hero">
-          <span class="eyebrow"><i class="ti ti-player-play"></i> Learning Spaces node</span>
+          <span class="eyebrow"><i class="ti ti-eye"></i> Lecturer Preview Mode</span>
           <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
-          <p class="node-description">${escapeHtml(node.content || 'Your instructor has not added a description for this node yet.')}</p>
+          <p class="node-description">${escapeHtml(node.content || 'No description.')}</p>
           <div class="meta-row">
             <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-            <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
-            <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Video available' : 'No video'}</span>
-            <span class="soft-chip"><i class="ti ti-folder-open"></i>${resources.length} resource</span>
             <span class="soft-chip discussions-count"><i class="ti ti-messages"></i>0 comments</span>
           </div>
         </section>
@@ -570,7 +378,7 @@
 
         <section class="content-card">
           <h2>Node Content</h2>
-          <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
+          <p>${escapeHtml(node.content || 'No additional content.')}</p>
         </section>
       </section>
 
@@ -578,19 +386,23 @@
         <section class="side-card">
           <div class="side-card-header">
             <div>
-              <h2>Comments & Q&A</h2>
-              <p>Discussions and questions related to this node.</p>
+              <h2>Moderation & Q&A</h2>
+              <p>Reply to students, pin important answers, or mark questions as solved.</p>
             </div>
-            <span class="soft-chip"><i class="ti ti-message-circle"></i></span>
+            <span class="soft-chip"><i class="ti ti-shield-check text-primary"></i></span>
           </div>
           ${commentsTemplate()}
         </section>
-      </aside>`;
+      </aside>
+      
+      <!-- Hidden file input for uploading resources -->
+      <input type="file" id="hiddenResourceInput" accept=".pdf,.doc,.docx,.ppt,.pptx" style="display:none;" onchange="uploadResource(this)">
+      `;
   }
 
   async function loadNodePage() {
     if (!nodeId) {
-      renderError('Missing nodeId', 'Could not find the node to open. Please return to the roadmap and select a node again.');
+      renderError('Missing nodeId', 'Could not find the node to preview.');
       return;
     }
 
@@ -600,22 +412,63 @@
         fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}/items`, { headers: authHeaders(false) })
       ]);
 
-      if (!nodeResponse.ok) {
-        throw new Error(await readError(nodeResponse));
-      }
+      if (!nodeResponse.ok) throw new Error(await readError(nodeResponse));
 
       const node = await nodeResponse.json();
       const items = itemsResponse.ok ? await itemsResponse.json() : [];
-      const sortedItems = Array.isArray(items)
-        ? [...items].sort((a, b) => (a.position || 0) - (b.position || 0))
-        : [];
-
-      renderNodePage(node, sortedItems);
-      // Load actual discussions from API
+      
+      renderNodePage(node, items);
       loadDiscussions();
     } catch (error) {
       renderError('Could not load node', error.message || 'Please try again later.');
     }
+  }
+
+  // Handle resource upload
+  async function uploadResource(input) {
+      if (!input.files || input.files.length === 0) return;
+      const file = input.files[0];
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Basic loading indicator
+      input.value = ''; // Reset input
+      const btn = document.querySelector('.side-card-header .btn-outline-primary');
+      if (btn) btn.innerHTML = '<i class="ti ti-loader ti-spin"></i>';
+
+      try {
+          // 1. Upload file
+          const uploadRes = await fetch(`/api/learning-nodes/${nodeId}/items/upload-document`, {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + token },
+              body: formData
+          });
+          if (!uploadRes.ok) throw new Error("Lỗi tải file lên server");
+          
+          const uploadData = await uploadRes.json();
+          const fileUrl = uploadData.url;
+          
+          // 2. Save item to node
+          const saveRes = await fetch(`/api/learning-nodes/${nodeId}/items`, {
+              method: 'POST',
+              headers: authHeaders(true),
+              body: JSON.stringify({
+                  title: file.name,
+                  itemType: 'PDF',
+                  url: fileUrl,
+                  learningNodeId: nodeId
+              })
+          });
+          
+          if (!saveRes.ok) throw new Error("Lỗi lưu thông tin file vào bài học");
+          
+          // 3. Reload page to show new resource
+          loadNodePage();
+      } catch (err) {
+          alert(err.message);
+          if (btn) btn.innerHTML = '<i class="ti ti-upload"></i>';
+      }
   }
 
   loadNodePage();
@@ -623,4 +476,3 @@
 </script>
 </body>
 </html>
-
