@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <script>
     if (!localStorage.getItem('jwt_token')) window.location.href = '/login';
   </script>
@@ -27,13 +28,19 @@
     
     <div class="topbar-spacer"></div>
 
-    <div class="student-user-menu topbar-user-menu">
-      <div class="d-flex align-items-center gap-2">
-        <img class="rounded-circle border" th:src="@{/assets/images/avatar-1.jpg}"
-          style="width: 35px; height: 35px; object-fit: cover;" alt="Avatar">
-        <span class="fw-bold" style="color: #1e293b;">Lecturer View</span>
+      <div class="student-user-menu topbar-user-menu" data-user-menu>
+        <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+          <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Lecturer avatar">
+          <span class="student-menu-info">
+            <span class="student-menu-name" data-user-name>Lecturer View</span>
+          </span>
+          <i class="ti ti-chevron-down student-menu-chevron ms-1"></i>
+        </button>
+        <div class="student-menu-panel" role="menu">
+          <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+          <button class="student-menu-item student-menu-item-danger" type="button" onclick="logout()" role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
+        </div>
       </div>
-    </div>
   </header>
 
   <div id="mainContent">
@@ -89,10 +96,6 @@
       const dateStr = s.submittedAt ? new Date(s.submittedAt).toLocaleString('vi-VN') : '—';
       const reviewedStr = s.reviewedAt ? new Date(s.reviewedAt).toLocaleString('vi-VN') : '—';
 
-      // Update back button
-      if (s.learningNodeId) {
-        document.getElementById('backBtn').href = `/lecturer/learning-nodes/${s.learningNodeId}/preview`;
-      }
       // Update topbar title
       const titleEl = document.getElementById('topbarTitle');
       if (titleEl) titleEl.textContent = s.studentName ? `Reviewing: ${s.studentName}` : 'Review Summary';
@@ -190,7 +193,7 @@
               </label>
               <textarea id="feedbackInput" class="feedback-textarea"
                 placeholder="Provide detailed, constructive feedback on the student's understanding..."
-              >${escapeHtml(s.lecturerFeedback || '')}</textarea>
+              ></textarea>
               <div id="successMsg" style="display:none;" class="alert-success">
                 <i class="ti ti-circle-check"></i> Feedback submitted successfully!
               </div>
@@ -229,7 +232,9 @@
           btn.style.background = '';
           btn.innerHTML = '<i class="ti ti-send"></i> Update Feedback';
           document.getElementById('successMsg').style.display = 'none';
-        }, 2500);
+          // Reload the page content to update the Previous Feedback section
+          loadAndRender();
+        }, 1500);
       } catch (e) {
         alert(e.message);
         btn.disabled = false;
@@ -237,7 +242,32 @@
       }
     }
 
+    // Load initial data
     loadAndRender();
+
+    // User Menu Toggle Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-user-menu]').forEach((menu) => {
+        const toggle = menu.querySelector('[data-user-menu-toggle]');
+        toggle?.addEventListener('click', (event) => {
+          event.stopPropagation();
+          const shouldOpen = !menu.classList.contains('is-open');
+          document.querySelectorAll('[data-user-menu].is-open').forEach(m => m.classList.remove('is-open'));
+          menu.classList.toggle('is-open', shouldOpen);
+          toggle.setAttribute('aria-expanded', String(shouldOpen));
+        });
+      });
+      document.addEventListener('click', () => {
+        document.querySelectorAll('[data-user-menu].is-open').forEach(m => m.classList.remove('is-open'));
+      });
+    });
+
+    function logout() {
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('username');
+      window.location.href = '/signin';
+    }
   </script>
 </body>
 

@@ -74,6 +74,12 @@
         </div>
     </div>
 
+    <div layout:fragment="sidebar-bottom" class="p-3">
+        <button class="btn btn-primary w-100 rounded d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createSpaceModal" style="background-color: #6366f1; border-color: #6366f1; padding: 0.6rem;">
+            <i class="ti ti-plus fs-5"></i> New Space
+        </button>
+    </div>
+
     <th:block layout:fragment="scripts">
         <th:block th:replace="~{lecturer/LearningSpace :: learningSpaceScripts}"></th:block>
     </th:block>
