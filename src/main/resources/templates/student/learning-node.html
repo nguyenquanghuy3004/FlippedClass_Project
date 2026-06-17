@@ -178,7 +178,8 @@
 
 <script>
 /* --- Inlined from student-learning-node.js --- */
-﻿const token = localStorage.getItem('jwt_token');
+const token = localStorage.getItem('jwt_token');
+  const userId = localStorage.getItem('user_id');
   const urlParams = new URLSearchParams(window.location.search);
   const pathNodeMatch = window.location.pathname.match(/\/student\/learning-nodes\/(\d+)/);
   const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
@@ -229,6 +230,7 @@
     GOOGLE_DRIVE: '/uploads/anh/Google-Drive-Logo-2020-present.jpg'
   };
 
+  // Hàm hỗ trợ: Chuyển đổi link video YouTube thường thành dạng link nhúng (embed) để có thể xem trực tiếp trên web
   function youtubeEmbedUrl(url) {
     const value = String(url || '');
     const watchMatch = value.match(/[?&]v=([^&]+)/);
@@ -373,160 +375,246 @@
     return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
   }
 
-  function commentsTemplate() {
-    return `
-      <div id="discussion-container" class="mt-3">
-         <div class="empty-light">
-            <div><i class="ti ti-loader-2 ti-spin"></i> Loading discussions...</div>
-         </div>
-      </div>
-      <div class="comment-compose mt-3">
-        <textarea id="discussion-input" placeholder="Write a comment or question..."></textarea>
-        <button id="discussion-submit" type="button" onclick="submitDiscussion()">Send Comment</button>
-      </div>`;
-  }
-  
-  function renderDiscussionTree(discussions) {
-    if (!discussions || discussions.length === 0) {
-      return emptyLightTemplate('ti-message-off', 'No comments or questions yet. Be the first to ask!');
+  let currentComments = [];
+
+  async function loadComments() {
+    const container = document.getElementById('nodeCommentsContainer');
+    const badge = document.getElementById('commentsCountBadge');
+    if (!container) return;
+
+    try {
+      const response = await fetch(`/api/learning-nodes/${nodeId}/comments?userId=${userId}`, { headers: authHeaders(false) });
+      if (response.status === 403) {
+        container.innerHTML = emptyLightTemplate('ti-lock', 'You do not have permission to comment in this class.');
+        if (badge) badge.textContent = '0';
+        return;
+      }
+      if (!response.ok) throw new Error(await readError(response));
+      
+      currentComments = await response.json();
+      renderCommentsUI();
+    } catch (err) {
+      container.innerHTML = emptyLightTemplate('ti-alert-circle', err.message || 'Could not load comments.');
     }
-    
-    let html = '<div class="comment-list" style="max-height: 500px; overflow-y: auto; padding-right: 10px;">';
-    discussions.forEach(d => {
-       html += renderDiscussionItem(d, false, 0);
-    });
-    html += '</div>';
+  }
+
+  function formatTime(dateString) {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderCommentItem(comment, isReply = false, rootId = null) {
+    const isOwner = String(comment.userId) === String(userId);
+    const defaultAvt = '/assets/images/avatar-1.jpg';
+    const avatar = comment.avatarUrl || defaultAvt;
+    const author = comment.fullName || 'Student';
+    const time = formatTime(comment.createdAt);
+    const currentRootId = rootId || comment.id;
+    const safeAuthor = author.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+    let html = `
+      <div class="comment-item ${isReply ? 'comment-reply' : ''}" style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <img src="${escapeHtml(avatar)}" alt="avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='${defaultAvt}'">
+        <div style="flex: 1; background: #f8f9fa; border-radius: 8px; padding: 10px 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+            <strong style="font-size: 0.9rem; color: #1e293b;">${escapeHtml(author)}</strong>
+            <span style="font-size: 0.75rem; color: #64748b;">${escapeHtml(time)}</span>
+          </div>
+          <div style="font-size: 0.875rem; color: #334155; margin-bottom: 8px; white-space: pre-wrap;" id="comment-content-${comment.id}">${escapeHtml(comment.content)}</div>
+          
+          <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #64748b;">
+            <button type="button" onclick="openReplyBox(${currentRootId}, '${safeAuthor}')" style="border:none; background:none; color:#64748b; cursor:pointer; padding:0;">Reply</button>
+            ${isOwner ? `<button type="button" onclick="toggleEditForm(${comment.id})" style="border:none; background:none; color:#64748b; cursor:pointer; padding:0;">Edit</button>` : ''}
+            ${isOwner ? `<button type="button" onclick="deleteComment(${comment.id})" style="border:none; background:none; color:#ef4444; cursor:pointer; padding:0;">Delete</button>` : ''}
+          </div>
+
+          <!-- Edit Form -->
+          <div id="edit-form-${comment.id}" style="display: none; margin-top: 8px;">
+            <textarea id="edit-input-${comment.id}" class="form-control" style="width: 100%; border-radius: 6px; padding: 8px; border: 1px solid #e2e8f0; font-size: 0.875rem; margin-bottom: 8px;" rows="2"></textarea>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" onclick="submitEdit(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #3b82f6; color: white; border: none; cursor: pointer;">Save</button>
+              <button type="button" onclick="toggleEditForm(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
+            </div>
+          </div>
+
+          <!-- Reply Form -->
+          ${!isReply ? `
+          <div id="reply-form-${comment.id}" style="display: none; margin-top: 12px;">
+            <textarea id="reply-input-${comment.id}" placeholder="Write a reply..." class="form-control" style="width: 100%; border-radius: 6px; padding: 8px; border: 1px solid #e2e8f0; font-size: 0.875rem; margin-bottom: 8px;" rows="2"></textarea>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" onclick="submitReply(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #3b82f6; color: white; border: none; cursor: pointer;">Reply</button>
+              <button type="button" onclick="toggleReplyForm(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    if (!isReply && comment.replies && comment.replies.length > 0) {
+      html += `<div style="padding-left: 32px; border-left: 2px solid #e2e8f0; margin-left: 16px; margin-bottom: 16px;">`;
+      comment.replies.forEach(reply => {
+        html += renderCommentItem(reply, true, comment.id);
+      });
+      html += `</div>`;
+    }
+
     return html;
   }
-  
-  function renderDiscussionItem(d, isReply, depth = 0) {
-     const isPinned = d.pinned ? `<span class="badge bg-warning-subtle text-warning ms-2" style="font-size: 0.6rem;"><i class="ti ti-pin"></i> Pinned</span>` : '';
-     const isSolved = d.status === 'SOLVED' ? `<span class="badge bg-success-subtle text-success ms-2" style="font-size: 0.6rem;"><i class="ti ti-check"></i> Solved</span>` : '';
-     
-     const roleBadge = d.authorRole === 'LECTURER' ? `<span class="badge bg-primary-subtle text-primary ms-2" style="font-size: 0.6rem;">Lecturer</span>` : 
-                       (d.authorRole === 'SUPPORTER' ? `<span class="badge bg-info-subtle text-info ms-2" style="font-size: 0.6rem;">Supporter</span>` : '');
 
-     const dateStr = new Date(d.createdAt).toLocaleString();
-     
-     let repliesHtml = '';
-     if (d.replies && d.replies.length > 0) {
-         repliesHtml = `<div class="replies-container">`;
-         d.replies.forEach(r => {
-             repliesHtml += renderDiscussionItem(r, true, depth + 1);
-         });
-         repliesHtml += `</div>`;
-     }
+  function renderCommentsUI() {
+    const container = document.getElementById('nodeCommentsContainer');
+    const badge = document.getElementById('commentsCountBadge');
+    if (!container) return;
 
-     const avatar = d.authorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.authorName)}&background=random`;
+    let totalCount = currentComments.length;
+    currentComments.forEach(c => totalCount += (c.replies ? c.replies.length : 0));
+    if (badge) badge.textContent = totalCount;
 
-     const isTooDeep = depth >= 3;
+    let body = '';
+    if (currentComments.length === 0) {
+      body = emptyLightTemplate('ti-message-off', 'No comments yet. Be the first to start a discussion!');
+    } else {
+      body = `<div class="comment-list" style="max-height: 400px; overflow-y: auto; padding-right: 8px;">
+        ${currentComments.map(c => renderCommentItem(c, false)).join('')}
+      </div>`;
+    }
 
-     return `
-        <div class="comment-node mt-3">
-            <div class="d-flex align-items-stretch gap-2">
-                ${(isTooDeep && isReply) ? '' : `
-                <!-- Left Avatar & Thread Column -->
-                <div class="d-flex flex-column align-items-center">
-                    <img src="${avatar}" class="rounded-circle border border-2 border-white shadow-sm" style="width: 32px; height: 32px; object-fit: cover; z-index: 1;">
-                    ${(d.replies && d.replies.length > 0) ? `<div class="thread-line mt-1" style="width: 2px; background-color: #e2e8f0; flex-grow: 1; border-radius: 2px; min-height: 20px;"></div>` : ''}
-                </div>
-                `}
+    container.innerHTML = `
+      ${body}
+      <div class="comment-compose" style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+        <textarea id="rootCommentInput" placeholder="Write a comment or question..." style="width: 100%; border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1; font-size: 0.875rem; resize: vertical; margin-bottom: 8px;" rows="3"></textarea>
+        <button type="button" onclick="submitRootComment()" id="rootCommentBtn" style="width: 100%; padding: 8px; border-radius: 6px; background: #2563eb; color: white; border: none; font-weight: 500; cursor: pointer; transition: background 0.2s;">Send Comment</button>
+      </div>
+    `;
 
-                <!-- Right Content Column -->
-                <div class="flex-grow-1" style="min-width: 0;">
-                    <!-- Main Box -->
-                    <div class="comment-content ${isReply ? '' : 'p-3 bg-white border rounded-3 shadow-sm'}" style="${d.pinned ? 'border-left: 4px solid #f59e0b !important;' : ''} ${isTooDeep && isReply ? 'border-left: 2px solid #e2e8f0; padding-left: 10px;' : ''}">
-                        <div class="d-flex align-items-center justify-content-between mb-1">
-                            <div class="d-flex align-items-center flex-wrap gap-1">
-                                <span class="fw-bold text-dark" style="font-size: 0.9rem;">${escapeHtml(d.authorName)}</span>
-                                ${roleBadge}
-                                ${isPinned}
-                                ${isSolved}
-                                <span class="text-muted ms-2" style="font-size: 0.75rem;"><i class="ti ti-clock me-1"></i>${dateStr}</span>
-                            </div>
-                        </div>
-                        <div class="comment-text text-dark mt-2" style="white-space: pre-wrap; word-break: break-word; font-size: 0.95rem; line-height: 1.5; color: #334155;">${escapeHtml(d.content)}</div>
-                        
-                        <div class="comment-actions mt-2 d-flex align-items-center justify-content-between">
-                            <div>
-                                <button class="btn btn-sm p-0 bg-transparent border-0 text-primary d-flex align-items-center gap-1" style="font-size: 0.8rem; font-weight: 600;" onclick="showReplyForm(${d.id})">
-                                    <i class="ti ti-message-circle-2"></i> Reply
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Reply Form -->
-                        <div id="reply-form-${d.id}" class="mt-3 d-none">
-                            <div class="d-flex gap-2 align-items-start">
-                                <div class="flex-grow-1">
-                                    <textarea id="reply-input-${d.id}" class="form-control form-control-sm border-secondary-subtle" rows="2" placeholder="Write a reply..." style="resize: none; border-radius: 8px;"></textarea>
-                                    <div class="d-flex justify-content-end gap-2 mt-2">
-                                        <button class="btn btn-light btn-sm rounded-pill px-3" onclick="hideReplyForm(${d.id})">Cancel</button>
-                                        <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="submitDiscussion(${d.id})">Post Reply</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Nested Replies Container -->
-                    ${repliesHtml}
-                </div>
-            </div>
-        </div>
-     `;
-  }
-  
-  function showReplyForm(id) {
-      document.getElementById('reply-form-' + id).classList.remove('d-none');
-  }
-  function hideReplyForm(id) {
-      document.getElementById('reply-form-' + id).classList.add('d-none');
+    const input = document.getElementById('rootCommentInput');
+    const btn = document.getElementById('rootCommentBtn');
+    if (input && btn) {
+      input.addEventListener('input', () => {
+        btn.disabled = input.value.trim().length === 0;
+        btn.style.opacity = btn.disabled ? '0.6' : '1';
+      });
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+    }
   }
 
-  async function loadDiscussions() {
-      const container = document.getElementById('discussion-container');
-      if (!container) return;
-      try {
-          const res = await fetch(\`/api/nodes/\${nodeId}/discussions\`, { headers: authHeaders(false) });
-          if (res.ok) {
-              const discussions = await res.json();
-              container.innerHTML = renderDiscussionTree(discussions);
-              // Update comments count on UI
-              const countSpans = document.querySelectorAll('.discussions-count');
-              countSpans.forEach(el => el.textContent = discussions.length + ' comments');
-          }
-      } catch (e) {
-          console.error('Failed to load discussions', e);
+  window.toggleReplyForm = function(id) {
+    const form = document.getElementById(`reply-form-${id}`);
+    if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  };
+
+  window.openReplyBox = function(rootId, mentionName) {
+    const form = document.getElementById(`reply-form-${rootId}`);
+    const input = document.getElementById(`reply-input-${rootId}`);
+    if (form && input) {
+      form.style.display = 'block';
+      if (mentionName && !input.value.includes(`@${mentionName}`)) {
+        input.value = `@${mentionName} ${input.value}`;
       }
-  }
+      // Put cursor at the end
+      input.focus();
+      const val = input.value;
+      input.value = '';
+      input.value = val;
+    }
+  };
 
-  async function submitDiscussion(parentId = null) {
-      const inputId = parentId ? 'reply-input-' + parentId : 'discussion-input';
-      const inputEl = document.getElementById(inputId);
-      const content = inputEl.value.trim();
-      if (!content) return;
-      
-      const payload = { content: content };
-      if (parentId) payload.parentId = parentId;
-      
-      try {
-          const res = await fetch(\`/api/nodes/\${nodeId}/discussions\`, {
-              method: 'POST',
-              headers: authHeaders(true),
-              body: JSON.stringify(payload)
-          });
-          if (res.ok) {
-              inputEl.value = '';
-              if (parentId) hideReplyForm(parentId);
-              loadDiscussions();
-          } else {
-              alert(await readError(res));
-          }
-      } catch (e) {
-          alert('Failed to send comment');
+  window.toggleEditForm = function(id) {
+    const form = document.getElementById(`edit-form-${id}`);
+    const contentDiv = document.getElementById(`comment-content-${id}`);
+    const input = document.getElementById(`edit-input-${id}`);
+    
+    if (form && contentDiv && input) {
+      if (form.style.display === 'none') {
+        form.style.display = 'block';
+        contentDiv.style.display = 'none';
+        input.value = contentDiv.textContent;
+      } else {
+        form.style.display = 'none';
+        contentDiv.style.display = 'block';
       }
-  }
+    }
+  };
+
+  window.submitRootComment = async function() {
+    const input = document.getElementById('rootCommentInput');
+    const content = input.value.trim();
+    if (!content) return;
+
+    const btn = document.getElementById('rootCommentBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch(`/api/learning-nodes/${nodeId}/comments?userId=${userId}`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ content })
+      });
+      if (!res.ok) throw new Error(await readError(res));
+      await loadComments();
+    } catch(err) {
+      alert(err.message || 'Could not post comment');
+    } finally {
+      if(btn) {
+        btn.disabled = false;
+        btn.textContent = 'Send Comment';
+      }
+    }
+  };
+
+  window.submitReply = async function(parentId) {
+    const input = document.getElementById(`reply-input-${parentId}`);
+    const content = input?.value.trim();
+    if (!content) return;
+
+    try {
+      const res = await fetch(`/api/learning-nodes/${nodeId}/comments/${parentId}/replies?userId=${userId}`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ content })
+      });
+      if (!res.ok) throw new Error(await readError(res));
+      await loadComments();
+    } catch(err) {
+      alert(err.message || 'Could not post reply');
+    }
+  };
+
+  window.submitEdit = async function(commentId) {
+    const input = document.getElementById(`edit-input-${commentId}`);
+    const content = input?.value.trim();
+    if (!content) return;
+
+    try {
+      const res = await fetch(`/api/comments/${commentId}?userId=${userId}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ content })
+      });
+      if (!res.ok) throw new Error(await readError(res));
+      await loadComments();
+    } catch(err) {
+      alert(err.message || 'Could not update comment');
+    }
+  };
+
+  window.deleteComment = async function(commentId) {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    try {
+      const res = await fetch(`/api/comments/${commentId}?userId=${userId}`, {
+        method: 'DELETE',
+        headers: authHeaders(false)
+      });
+      if (!res.ok) throw new Error(await readError(res));
+      await loadComments();
+    } catch(err) {
+      alert(err.message || 'Could not delete comment');
+    }
+  };
 
   function renderError(title, message) {
     pageRoot.className = 'error-state';
@@ -539,8 +627,11 @@
       </div>`;
   }
 
+  // Hàm hiển thị giao diện toàn bộ nội dung của bài học (node)
   function renderNodePage(node, items) {
-    const resources = items.filter((item) => normalizeItemType(item.itemType) !== 'VIDEO');
+    // Phân loại các tài liệu đính kèm (items) thành: tài nguyên (tài liệu/code), bình luận, và video
+    const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
+    const discussions = items.filter((item) => normalizeItemType(item.itemType) === 'DISCUSSION');
     const videoCount = items.some((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item)) ? 1 : 0;
 
     pageRoot.className = 'lesson-layout';
@@ -555,7 +646,7 @@
             <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
             <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Video available' : 'No video'}</span>
             <span class="soft-chip"><i class="ti ti-folder-open"></i>${resources.length} resource</span>
-            <span class="soft-chip discussions-count"><i class="ti ti-messages"></i>0 comments</span>
+            <span class="soft-chip"><i class="ti ti-messages"></i>${discussions.length} comments</span>
           </div>
         </section>
 
@@ -564,7 +655,7 @@
           <div class="player-controls">
             <button class="server-pill active" type="button">Lesson Video</button>
             <button class="server-pill" type="button">${resources.length} resource</button>
-            <button class="server-pill discussions-count" type="button">0 comments</button>
+            <button class="server-pill" type="button">${discussions.length} comments</button>
           </div>
         </section>
 
@@ -572,22 +663,117 @@
           <h2>Node Content</h2>
           <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
         </section>
+
+        <!-- START: LESSON SUMMARY UI -->
+        <section class="summary-card" style="margin-top: 1.5rem;">
+          <div class="summary-card-header">
+            <h2 class="summary-title">
+              <i class="ti ti-notebook"></i> Lesson Summary
+            </h2>
+            <span id="summaryStatus" class="summary-status">
+              <i class="ti ti-check"></i> Saved successfully
+            </span>
+          </div>
+
+          <form id="summaryForm" class="summary-form">
+            <div>
+              <label for="keyTakeaways" class="summary-label">📚 Key takeaways from the lesson</label>
+              <textarea id="keyTakeaways" class="summary-textarea" placeholder="Record the important knowledge you learned from the lesson..." required></textarea>
+            </div>
+
+            <div>
+              <label for="questions" class="summary-label">❓ Concepts you didn't understand</label>
+              <textarea id="questions" class="summary-textarea" placeholder="Record any content you are still wondering about or didn't understand..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+              <button type="submit" id="saveSummaryBtn" class="btn-primary">
+                <i class="ti ti-device-floppy"></i> Save Summary
+              </button>
+            </div>
+          </form>
+        </section>
+        <!-- END: LESSON SUMMARY UI -->
       </section>
 
       <aside class="side-column">
         <section class="side-card">
           <div class="side-card-header">
             <div>
-              <h2>Comments & Q&A</h2>
+              <h2>Resources</h2>
+              <p>Documents, source code, or quizzes for this node.</p>
+            </div>
+            <span class="soft-chip">${resources.length}</span>
+          </div>
+          ${resourcesTemplate(items)}
+        </section>
+
+        <section class="side-card">
+          <div class="side-card-header">
+            <div>
+              <h2>Comments</h2>
               <p>Discussions and questions related to this node.</p>
             </div>
-            <span class="soft-chip"><i class="ti ti-message-circle"></i></span>
+            <span class="soft-chip" id="commentsCountBadge">0</span>
           </div>
-          ${commentsTemplate()}
+          <div id="nodeCommentsContainer">
+            <div class="empty-light">
+              <div><i class="ti ti-loader-2"></i> Loading comments...</div>
+            </div>
+          </div>
         </section>
       </aside>`;
+
+    // --- START: HANDLE SUMMARY SUBMIT ---
+    const summaryForm = document.getElementById('summaryForm');
+    const saveSummaryBtn = document.getElementById('saveSummaryBtn');
+    const summaryStatus = document.getElementById('summaryStatus');
+
+    if (summaryForm && saveSummaryBtn && summaryStatus) {
+      summaryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const keyTakeaways = document.getElementById('keyTakeaways').value;
+        const questions = document.getElementById('questions').value;
+        
+        const summaryJson = JSON.stringify({
+            keyTakeaways: keyTakeaways,
+            confusingPoints: questions
+        });
+
+        // Loading effect
+        saveSummaryBtn.disabled = true;
+        saveSummaryBtn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Saving...';
+
+        try {
+          const response = await fetch('/api/lesson-summaries', {
+            method: 'POST',
+            headers: authHeaders(true),
+            body: JSON.stringify({
+              learningNodeId: nodeId,
+              summaryContent: summaryJson
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(await readError(response));
+          }
+
+          // Show success state
+          summaryStatus.classList.add('show');
+          setTimeout(() => summaryStatus.classList.remove('show'), 3500);
+        } catch (err) {
+          alert('Failed to save summary: ' + err.message);
+        } finally {
+          saveSummaryBtn.disabled = false;
+          saveSummaryBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Summary';
+        }
+      });
+    }
+    // --- END: HANDLE SUMMARY SUBMIT ---
   }
 
+  // Hàm chính: Tải thông tin của bài học (node) và các tài liệu/item liên quan từ backend
   async function loadNodePage() {
     if (!nodeId) {
       renderError('Missing nodeId', 'Could not find the node to open. Please return to the roadmap and select a node again.');
@@ -595,6 +781,7 @@
     }
 
     try {
+      // Gọi đồng thời 2 API: lấy chi tiết node và lấy các item (tài liệu/video) thuộc node đó
       const [nodeResponse, itemsResponse] = await Promise.all([
         fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}`, { headers: authHeaders(false) }),
         fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}/items`, { headers: authHeaders(false) })
@@ -606,13 +793,14 @@
 
       const node = await nodeResponse.json();
       const items = itemsResponse.ok ? await itemsResponse.json() : [];
+      // Sắp xếp các tài liệu theo thứ tự (position)
       const sortedItems = Array.isArray(items)
         ? [...items].sort((a, b) => (a.position || 0) - (b.position || 0))
         : [];
 
+      // Hiển thị nội dung ra giao diện
       renderNodePage(node, sortedItems);
-      // Load actual discussions from API
-      loadDiscussions();
+      loadComments();
     } catch (error) {
       renderError('Could not load node', error.message || 'Please try again later.');
     }

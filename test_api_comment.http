@@ -1,0 +1,26 @@
+@token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJUaGFuaE5WSEUxOTQ0MzAiLCJyb2xlcyI6WyJTVFVERU5UIl0sImlhdCI6MTc4MTI1ODEwNiwiZXhwIjoxNzgxMjYxNzA2fQ.8G7YKY9FCqa-8PZQIsJ7REOUBTUitcIV_wvWAForO2k
+POST http://localhost:8080/api/learning-nodes/5/comments?userId=3
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "Em chưa hiểu về vòng lặp FOR ạ",
+
+
+}
+### Reply comment
+POST http://localhost:8080/api/learning-nodes/5/comments/1/replies?userId=5
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "Bạn xem lại phút 12:30 nhé"
+}
+### Edit own comment
+PUT http://localhost:8080/api/comments/1?userId=3
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "Em chưa hiểu đoạn Bean Lifecycle ạ"
+}

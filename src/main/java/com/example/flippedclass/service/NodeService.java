@@ -3,7 +3,6 @@ package com.example.flippedclass.service;
 import com.example.flippedclass.dto.request.NodeRequest;
 import com.example.flippedclass.dto.response.NodeResponse;
 import com.example.flippedclass.entity.LearningNode;
-import com.example.flippedclass.entity.NodeProgress;
 
 import java.util.List;
 

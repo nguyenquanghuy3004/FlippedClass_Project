@@ -59,7 +59,7 @@ public class LearningSpaceController {
         learningSpaceService.archiveLearningSpace(id);
         return ResponseEntity.ok(new MessageResponse("Lưu trữ thành công "));
     }
-
+    /////////
     @PostMapping("/join")
     public ResponseEntity<JoinLearningSpaceResponse>joinLearningSpace(@RequestBody JoinLearningSpaceRequest request){
         return ResponseEntity.ok(learningSpaceService.joinLearningSpace(request));

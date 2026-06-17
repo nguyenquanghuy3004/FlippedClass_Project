@@ -1,8 +1,7 @@
 package com.example.flippedclass.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -11,7 +10,6 @@ import jakarta.persistence.OneToOne;
 @Entity
 @Table(name = "students")
 public class Student {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

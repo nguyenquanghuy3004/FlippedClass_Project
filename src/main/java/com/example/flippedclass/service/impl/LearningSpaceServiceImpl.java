@@ -142,7 +142,8 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
     @Override
     public LearningSpaceResponse getSpaceByInviteCode(String inviteCode) {
-        LearningSpace learningSpace = learningSpaceRepository.findByInviteCodeAndStatus(inviteCode, LearningSpaceStatus.ACTIVE)
+        String normalizedInviteCode = inviteCode == null ? "" : inviteCode.trim();
+        LearningSpace learningSpace = learningSpaceRepository.findByInviteCodeIgnoreCaseAndStatus(normalizedInviteCode, LearningSpaceStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("Mã mời không hợp lệ hoặc lớp đã bị xóa"));
 
         return LearningSpaceResponse.builder()
@@ -188,8 +189,10 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
         LearningSpace learningSpace;
 
-        if (request.getInviteCode() != null && !request.getInviteCode().trim().isEmpty()) {
-            learningSpace = learningSpaceRepository.findByInviteCodeAndStatus(request.getInviteCode(), LearningSpaceStatus.ACTIVE)
+        String inviteCode = request.getInviteCode() == null ? "" : request.getInviteCode().trim();
+
+        if (!inviteCode.isEmpty()) {
+            learningSpace = learningSpaceRepository.findByInviteCodeIgnoreCaseAndStatus(inviteCode, LearningSpaceStatus.ACTIVE)
                     .orElseThrow(() -> new IllegalArgumentException("Mã mời không hợp lệ hoặc lớp đã bị xóa"));
         } else if (request.getSpaceId() != null) {
             learningSpace = learningSpaceRepository.findByIdAndStatus(request.getSpaceId(), LearningSpaceStatus.ACTIVE)
