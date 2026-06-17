@@ -79,6 +79,14 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
 
     @Override
     @Transactional(readOnly = true)
+    public LessonSummaryResponse getSummaryById(Long id) {
+        LessonSummary summary = lessonSummaryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lesson summary not found"));
+        return mapToResponse(summary);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<LessonSummaryResponse> getSummariesByLearningNode(Long learningNodeId) {
         return lessonSummaryRepository.findByLearningNodeId(learningNodeId).stream()
                 .map(this::mapToResponse)

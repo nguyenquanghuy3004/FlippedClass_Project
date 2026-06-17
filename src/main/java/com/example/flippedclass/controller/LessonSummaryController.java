@@ -34,6 +34,11 @@ public class LessonSummaryController {
         return ResponseEntity.ok(lessonSummaryService.getSummariesByLearningNode(nodeId));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<LessonSummaryResponse> getSummaryById(@PathVariable Long id) {
+        return ResponseEntity.ok(lessonSummaryService.getSummaryById(id));
+    }
+
     @PutMapping("/{id}/feedback")
     public ResponseEntity<LessonSummaryResponse> provideFeedback(
             @PathVariable Long id,

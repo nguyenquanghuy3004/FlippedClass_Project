@@ -39,10 +39,12 @@
             <div>
               <h4 class="fw-bold mb-1" id="studentName">Student Name</h4>
               <div class="text-muted fs-7 mb-2" id="studentRoll">Roll Number</div>
-              <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="openProfileModal()">
-                <i class="ti ti-id"></i> View Full Profile
-              </button>
-            </div>
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-3 d-none" id="analyticsStats">
+                <div class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 border"><i class="ti ti-chart-pie me-1"></i> <span id="statProgress">0%</span> Progress</div>
+                <div class="badge bg-success-subtle text-success rounded-pill px-3 py-2 border"><i class="ti ti-check me-1"></i> <span id="statCompleted">0/0</span> Nodes</div>
+                <div class="badge bg-warning-subtle text-warning rounded-pill px-3 py-2 border"><i class="ti ti-star me-1"></i> <span id="statQuiz">0</span> Quiz Avg</div>
+              </div>
+              </div>
           </div>
 
           <h5 class="fw-bold mb-3"><i class="ti ti-history text-primary"></i> 20 Recent Interactions</h5>
@@ -195,6 +197,14 @@
       if(data.student) {
         document.getElementById('studentName').innerText = data.student.fullName || data.student.username;
         document.getElementById('studentRoll').innerText = data.student.username;
+      }
+
+      // Analytics Stats from URL
+      if (urlParams.has('progress')) {
+        document.getElementById('analyticsStats').classList.remove('d-none');
+        document.getElementById('statProgress').innerText = urlParams.get('progress') + '%';
+        document.getElementById('statCompleted').innerText = `${urlParams.get('completed') || 0}/${urlParams.get('total') || 0}`;
+        document.getElementById('statQuiz').innerText = urlParams.get('quiz') || '0';
       }
 
       // Interactions Timeline

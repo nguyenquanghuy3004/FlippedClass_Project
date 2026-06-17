@@ -143,4 +143,10 @@ public class TemplateController {
         model.addAttribute("spaceId", spaceId);
         return "lecturer/learning-analytics";
     }
+
+    @GetMapping("/lecturer/summaries/{summaryId}/review")
+    public String summaryReview(@PathVariable Long summaryId, Model model) {
+        model.addAttribute("summaryId", summaryId);
+        return "lecturer/summary-review";
+    }
 }
