@@ -163,6 +163,8 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
             .major(profile.getMajor())
             .className(profile.getClassName())
             .enrollmentYear(profile.getEnrollmentYear())
+            .phoneNumber(profile.getPhoneNumber())
+            .bio(profile.getBio())
             .build();
     }
 }

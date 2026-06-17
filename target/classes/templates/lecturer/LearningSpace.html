@@ -563,6 +563,21 @@
                         }
                     });
                 });
+
+                // Fallback dropdown toggle for cloned elements
+                $(document).on('click', '.card-options-top', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const menu = $(this).next('.dropdown-menu');
+                    $('.dropdown-menu').not(menu).removeClass('show');
+                    menu.toggleClass('show');
+                });
+
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('.card-options-top').length) {
+                        $('.dropdown-menu').removeClass('show');
+                    }
+                });
             });
         </script>
     </th:block>
