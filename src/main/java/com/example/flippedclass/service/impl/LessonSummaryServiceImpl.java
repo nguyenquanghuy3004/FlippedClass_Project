@@ -25,10 +25,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LessonSummaryServiceImpl implements LessonSummaryService {
 
-    private  LessonSummaryRepository lessonSummaryRepository;
-    private  LearningNodeRepository learningNodeRepository;
-    private  UserRepository userRepository;
-    private  ProgressEvaluationService progressEvaluationService;
+    private final LessonSummaryRepository lessonSummaryRepository;
+    private final LearningNodeRepository learningNodeRepository;
+    private final UserRepository userRepository;
+    private final ProgressEvaluationService progressEvaluationService;
 
 
     @Override
