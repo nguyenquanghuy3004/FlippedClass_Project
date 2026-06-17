@@ -82,12 +82,19 @@ textarea,
   font-weight: 500 !important;
 }
 
-/* Active Menu links get Bold weight (700) */
-.sidebar .nav-link.active,
-.sidebar .nav-link.active .nav-text {
-  font-weight: 700 !important;
+/* Active sidebar links must override Bootstrap utility classes on every student page. */
+.sidebar .nav-link.active {
+  color: var(--fc-primary-dark, #25227a) !important;
+  background: var(--fc-primary-soft, rgba(37, 34, 122, 0.14)) !important;
+  box-shadow: inset 0 0 0 1px rgba(9, 11, 79, 0.12);
+  font-weight: 800 !important;
 }
 
+.sidebar .nav-link.active i,
+.sidebar .nav-link.active .nav-text {
+  color: inherit !important;
+  font-weight: 800 !important;
+}
 /* 2. FONT SIZE CONFIGURATION - Scaling down oversized fonts */
 .hero h1,
 .page-title,

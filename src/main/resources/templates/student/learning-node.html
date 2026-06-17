@@ -383,7 +383,7 @@ const token = localStorage.getItem('jwt_token');
     if (!container) return;
 
     try {
-      const response = await fetch(`/api/learning-nodes/${nodeId}/comments?userId=${userId}`, { headers: authHeaders(false) });
+      const response = await fetch(`/api/nodes/${nodeId}/discussions`, { headers: authHeaders(false) });
       if (response.status === 403) {
         container.innerHTML = emptyLightTemplate('ti-lock', 'You do not have permission to comment in this class.');
         if (badge) badge.textContent = '0';
@@ -405,10 +405,10 @@ const token = localStorage.getItem('jwt_token');
   }
 
   function renderCommentItem(comment, isReply = false, rootId = null) {
-    const isOwner = String(comment.userId) === String(userId);
+    const isOwner = String(comment.authorId) === String(userId);
     const defaultAvt = '/assets/images/avatar-1.jpg';
-    const avatar = comment.avatarUrl || defaultAvt;
-    const author = comment.fullName || 'Student';
+    const avatar = comment.authorAvatar || defaultAvt;
+    const author = comment.authorName || 'Student';
     const time = formatTime(comment.createdAt);
     const currentRootId = rootId || comment.id;
     const safeAuthor = author.replace(/'/g, "\\'").replace(/"/g, '&quot;');
@@ -425,17 +425,10 @@ const token = localStorage.getItem('jwt_token');
           
           <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #64748b;">
             <button type="button" onclick="openReplyBox(${currentRootId}, '${safeAuthor}')" style="border:none; background:none; color:#64748b; cursor:pointer; padding:0;">Reply</button>
-            ${isOwner ? `<button type="button" onclick="toggleEditForm(${comment.id})" style="border:none; background:none; color:#64748b; cursor:pointer; padding:0;">Edit</button>` : ''}
             ${isOwner ? `<button type="button" onclick="deleteComment(${comment.id})" style="border:none; background:none; color:#ef4444; cursor:pointer; padding:0;">Delete</button>` : ''}
           </div>
 
-          <!-- Edit Form -->
           <div id="edit-form-${comment.id}" style="display: none; margin-top: 8px;">
-            <textarea id="edit-input-${comment.id}" class="form-control" style="width: 100%; border-radius: 6px; padding: 8px; border: 1px solid #e2e8f0; font-size: 0.875rem; margin-bottom: 8px;" rows="2"></textarea>
-            <div style="display: flex; gap: 8px;">
-              <button type="button" onclick="submitEdit(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #3b82f6; color: white; border: none; cursor: pointer;">Save</button>
-              <button type="button" onclick="toggleEditForm(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
-            </div>
           </div>
 
           <!-- Reply Form -->
@@ -549,7 +542,7 @@ const token = localStorage.getItem('jwt_token');
     btn.textContent = 'Sending...';
 
     try {
-      const res = await fetch(`/api/learning-nodes/${nodeId}/comments?userId=${userId}`, {
+      const res = await fetch(`/api/nodes/${nodeId}/discussions`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({ content })
@@ -572,10 +565,10 @@ const token = localStorage.getItem('jwt_token');
     if (!content) return;
 
     try {
-      const res = await fetch(`/api/learning-nodes/${nodeId}/comments/${parentId}/replies?userId=${userId}`, {
+      const res = await fetch(`/api/nodes/${nodeId}/discussions`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content, parentId })
       });
       if (!res.ok) throw new Error(await readError(res));
       await loadComments();
@@ -605,7 +598,7 @@ const token = localStorage.getItem('jwt_token');
   window.deleteComment = async function(commentId) {
     if (!confirm('Are you sure you want to delete this comment?')) return;
     try {
-      const res = await fetch(`/api/comments/${commentId}?userId=${userId}`, {
+      const res = await fetch(`/api/nodes/${nodeId}/discussions/${commentId}`, {
         method: 'DELETE',
         headers: authHeaders(false)
       });

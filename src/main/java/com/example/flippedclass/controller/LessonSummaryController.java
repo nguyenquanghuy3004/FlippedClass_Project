@@ -28,4 +28,16 @@ public class LessonSummaryController {
         LessonSummaryResponse response = lessonSummaryService.submitSummary(request);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/learning-node/{nodeId}")
+    public ResponseEntity<java.util.List<LessonSummaryResponse>> getSummariesByNode(@PathVariable Long nodeId) {
+        return ResponseEntity.ok(lessonSummaryService.getSummariesByLearningNode(nodeId));
+    }
+
+    @PutMapping("/{id}/feedback")
+    public ResponseEntity<LessonSummaryResponse> provideFeedback(
+            @PathVariable Long id,
+            @Valid @RequestBody com.example.flippedclass.dto.request.FeedbackSummaryRequest request) {
+        return ResponseEntity.ok(lessonSummaryService.provideFeedback(id, request));
+    }
 }

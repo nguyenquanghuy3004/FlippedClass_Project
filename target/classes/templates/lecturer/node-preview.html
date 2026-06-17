@@ -534,7 +534,7 @@
       const container = document.getElementById('summaries-container');
       if (!container) return;
       try {
-          const res = await fetch(`/api/summaries/learning-node/${nodeId}`, { headers: authHeaders(false) });
+          const res = await fetch(`/api/lesson-summaries/learning-node/${nodeId}`, { headers: authHeaders(false) });
           if (!res.ok) throw new Error("Failed to load summaries");
           globalSummaries = await res.json();
           renderSummaries(globalSummaries);
@@ -612,7 +612,7 @@
       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
       
       try {
-          const res = await fetch(`/api/summaries/${id}/feedback`, {
+          const res = await fetch(`/api/lesson-summaries/${id}/feedback`, {
               method: 'PUT',
               headers: authHeaders(true),
               body: JSON.stringify({ lecturerFeedback: feedback })

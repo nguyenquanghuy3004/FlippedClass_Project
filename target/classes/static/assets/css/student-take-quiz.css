@@ -236,7 +236,7 @@ a {
 .content {
   min-height: 100vh;
   margin-left: var(--sidebar-width);
-  padding: 1.6rem 1.6rem 2rem;
+  padding: calc(var(--topbar-height) + 1.2rem) 1.6rem 2rem;
   transition: margin-left 180ms ease;
 }
 
@@ -602,8 +602,13 @@ a {
   background: var(--fc-primary-pale);
 }
 
-.answer-option input[type="radio"] {
+.answer-option input[type="radio"],
+.answer-option input[type="checkbox"] {
   display: none;
+}
+
+.answer-option input[type="checkbox"]+.radio-mark {
+  border-radius: 7px;
 }
 
 .radio-mark {
@@ -628,13 +633,36 @@ a {
   transition: transform 160ms ease;
 }
 
-.answer-option input[type="radio"]:checked+.radio-mark {
+.answer-option input[type="radio"]:checked+.radio-mark,
+.answer-option input[type="checkbox"]:checked+.radio-mark {
   border-color: var(--fc-primary-dark);
   background: var(--fc-primary-soft);
 }
 
-.answer-option input[type="radio"]:checked+.radio-mark::after {
+.answer-option input[type="radio"]:checked+.radio-mark::after,
+.answer-option input[type="checkbox"]:checked+.radio-mark::after {
   transform: scale(1);
+}
+
+.answer-textarea {
+  width: 100%;
+  min-height: 128px;
+  resize: vertical;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(229, 231, 235, 0.95);
+  border-radius: 18px;
+  background: #ffffff;
+  color: var(--fc-text);
+  font: inherit;
+  line-height: 1.55;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.answer-textarea:focus {
+  border-color: rgba(91, 92, 226, 0.42);
+  background: var(--fc-primary-pale);
+  box-shadow: 0 0 0 0.25rem rgba(91, 92, 226, 0.14);
 }
 
 .answer-content {

@@ -534,7 +534,7 @@
       const container = document.getElementById('summaries-container');
       if (!container) return;
       try {
-          const res = await fetch(`/api/summaries/learning-node/${nodeId}`, { headers: authHeaders(false) });
+          const res = await fetch(`/api/lesson-summaries/learning-node/${nodeId}`, { headers: authHeaders(false) });
           if (!res.ok) throw new Error("Failed to load summaries");
           globalSummaries = await res.json();
           renderSummaries(globalSummaries);
@@ -543,7 +543,36 @@
       }
   }
 
-  function renderSummaries(summaries) {
+  function parseSummaryContent(raw) {
+      try {
+          const obj = JSON.parse(raw);
+          return obj;
+      } catch {
+          return { keyTakeaways: raw, confusingPoints: '' };
+      }
+  }
+
+  function formatSummaryHtml(raw) {
+      const parsed = parseSummaryContent(raw);
+      let html = '';
+      if (parsed.keyTakeaways) {
+          html += `<div class="mb-2"><span class="fw-bold" style="font-size:0.8rem;color:#2563eb;">📚 Key Takeaways:</span><div style="font-size:0.85rem;color:#334155;margin-top:2px;white-space:pre-wrap;">${escapeHtml(parsed.keyTakeaways)}</div></div>`;
+      }
+      if (parsed.confusingPoints) {
+          html += `<div><span class="fw-bold" style="font-size:0.8rem;color:#f59e0b;">❓ Confusing Points:</span><div style="font-size:0.85rem;color:#334155;margin-top:2px;white-space:pre-wrap;">${escapeHtml(parsed.confusingPoints)}</div></div>`;
+      }
+      return html || escapeHtml(raw);
+  }
+
+  function formatSummaryText(raw) {
+      const parsed = parseSummaryContent(raw);
+      let text = '';
+      if (parsed.keyTakeaways) text += '📚 Key Takeaways:\n' + parsed.keyTakeaways;
+      if (parsed.confusingPoints) text += '\n\n❓ Confusing Points:\n' + parsed.confusingPoints;
+      return text.trim() || raw;
+  }
+
+function renderSummaries(summaries) {
       const container = document.getElementById('summaries-container');
       if (!summaries || summaries.length === 0) {
           container.innerHTML = `<div class="text-center text-muted py-5"><i class="ti ti-ghost fs-1 d-block mb-2"></i>No summaries submitted yet.</div>`;
@@ -566,9 +595,9 @@
                 </div>
                 <span class="badge ${badgeClass} rounded-pill">${badgeText}</span>
               </div>
-              <p class="text-dark mb-3" style="font-size: 0.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                ${escapeHtml(s.summaryContent)}
-              </p>
+              <div class="mb-3">
+                ${formatSummaryHtml(s.summaryContent)}
+              </div>
               <button class="btn btn-sm btn-primary w-100 rounded-pill" onclick="openFeedbackModal(${s.id})">
                 ${isReviewed ? 'Update Feedback' : 'Review & Grade'}
               </button>
@@ -586,7 +615,7 @@
       
       document.getElementById('feedbackSummaryId').value = id;
       document.getElementById('feedbackStudentName').innerText = summary.studentName || 'Student';
-      document.getElementById('feedbackContent').innerText = summary.summaryContent || '';
+      document.getElementById('feedbackContent').innerHTML = formatSummaryHtml(summary.summaryContent || '');
       document.getElementById('feedbackInput').value = summary.lecturerFeedback || '';
       document.getElementById('feedbackStatus').innerHTML = summary.status === 'REVIEWED' 
         ? '<span class="badge bg-success-subtle text-success"><i class="ti ti-check"></i> Reviewed</span>' 
@@ -612,7 +641,7 @@
       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
       
       try {
-          const res = await fetch(`/api/summaries/${id}/feedback`, {
+          const res = await fetch(`/api/lesson-summaries/${id}/feedback`, {
               method: 'PUT',
               headers: authHeaders(true),
               body: JSON.stringify({ lecturerFeedback: feedback })
