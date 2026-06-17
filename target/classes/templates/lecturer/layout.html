@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+  <meta charset="UTF-8" />
+  <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">FCMS Mentor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+  <link rel="manifest" th:href="@{/assets/site.webmanifest}">
+
+  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
+  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  <!-- FontAwesome for fallback -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" th:href="@{/assets/css/lecturer-layout.css}">
+  <th:block layout:fragment="head"></th:block>
+</head>
+
+<body>
+  <div id="overlay" class="overlay"></div>
+  <!-- TOPBAR -->
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+
+    <!-- MOBILE -->
+    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <div>
+      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
+        <!-- Dropdown -->
+        <li class="ms-3 dropdown">
+          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="avatar avatar-sm rounded-circle" />
+          </a>
+          FCMS Mentor
+          <div class="dropdown-menu dropdown-menu-end p-0" style="min-width: 200px;">
+            <div>
+              <div class="d-flex gap-3 align-items-center border-dashed border-bottom px-3 py-3">
+                <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="avatar avatar-md rounded-circle" />
+                <div>
+                  <h4 class="mb-0 small">Mentor User</h4>
+                  <p class="mb-0 small">@mentor</p>
+                </div>
+              </div>
+              <div class="p-3 d-flex flex-column gap-1 small lh-lg">
+                <a href="#!" class="text-danger" onclick="logout()">
+                  <span><i class="ti ti-logout me-2"></i>Log out</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar d-flex flex-column">
+    <div class="logo-area py-3 px-4 mb-3 border-bottom" style="border-color: rgba(0,0,0,0.05) !important;">
+      <a href="#" class="d-flex align-items-center text-decoration-none">
+        <div class="d-flex align-items-center justify-content-center rounded-3 me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);">
+          <i class="fa-solid fa-chalkboard-user text-white fs-5"></i>
+        </div>
+        <span class="logo-text fw-bolder fs-5 text-nowrap" style="white-space: nowrap; background: linear-gradient(135deg, #0f172a 0%, #334155 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; font-family: 'Inter', sans-serif;">
+          FCMS <span style="font-weight: 500; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Lecture</span>
+        </span>
+      </a>
+    </div>
+    <ul class="nav flex-column mb-auto">
+      <li class="px-4 py-2"><small class="nav-text">Workspace</small></li>
+      <li>
+        <a class="nav-link" href="/lecturer/dashboard" data-nav-path="/lecturer/dashboard">
+          <i class="ti ti-box-seam"></i><span class="nav-text">My Spaces</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="/lecturer/quizzes" data-nav-path="/lecturer/quizzes">
+          <i class="ti ti-checklist"></i><span class="nav-text">My Quizzes</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="/lecturer/evaluation-sessions" data-nav-path="/lecturer/evaluation-sessions">
+          <i class="ti ti-clipboard-list"></i><span class="nav-text">Eval Sessions</span>
+        </a>
+      </li>
+    </ul>
+    
+    <div class="p-3 mt-auto w-100">
+      <button class="btn btn-primary w-100 rounded d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createSpaceModal" style="background-color: #6366f1; border-color: #6366f1; padding: 0.6rem;">
+        <i class="ti ti-plus fs-5"></i> New Space
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main id="content" class="content py-10">
+    <div class="container-fluid">
+
+      <div layout:fragment="content">
+        <!-- Dynamic Content goes here -->
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <footer class="text-center py-2 mt-6 text-secondary ">
+            <p class="mb-0">FCMS Mentor Workspace. Powered by InApp Theme</p>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // Setup AJAX to include JWT token if stored in localStorage
+    $.ajaxSetup({
+      beforeSend: function (xhr) {
+        const token = localStorage.getItem('jwt_token');
+        if (token) {
+          xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        }
+      }
+    });
+
+    function checkAuth() {
+      const token = localStorage.getItem('jwt_token');
+      if (!token) {
+        window.location.href = '/signin';
+        return;
+      }
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (!payload.roles || (!payload.roles.includes('MENTOR') && !payload.roles.includes('ROLE_MENTOR') && !payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
+          window.location.href = '/signin';
+        }
+      } catch (e) {
+        window.location.href = '/signin';
+      }
+    }
+    checkAuth();
+
+    function logout() {
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('user_id');
+      window.location.href = '/signin';
+    }
+
+    // Auto-highlight active sidebar menu item
+    $(document).ready(function() {
+      const path = window.location.pathname;
+      $('.sidebar .nav-link').removeClass('active');
+      
+      let matched = false;
+      $('.sidebar .nav-link').each(function() {
+        const navPath = $(this).attr('data-nav-path');
+        if (navPath && path.startsWith(navPath)) {
+          $(this).addClass('active');
+          matched = true;
+        }
+      });
+      // Special case for Evaluate Student
+      if (path.startsWith('/lecturer/grading') || path.startsWith('/lecturer/evaluation-sessions')) {
+         $('.sidebar .nav-link').removeClass('active');
+         $('.sidebar .nav-link[data-nav-path="/lecturer/evaluation-sessions"]').addClass('active');
+         matched = true;
+      }
+      // Fallback
+      if (!matched) {
+        $('.sidebar .nav-link[data-nav-path="/lecturer/dashboard"]').addClass('active');
+      }
+    });
+  </script>
+  <th:block layout:fragment="scripts"></th:block>
+</body>
+
+</html>
+
+
+
