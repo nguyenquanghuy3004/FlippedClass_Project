@@ -810,36 +810,42 @@
     });
   }
 
-  function renderNotifications(quizzes) {
+  function renderNotifications(quizzes, comments = []) {
     const badge = document.getElementById('notificationBadge');
     const summary = document.getElementById('notificationSummary');
     const list = document.getElementById('notificationList');
     const pending = quizzes.filter((quiz) => !quiz.isCompleted);
+    const totalCount = pending.length + comments.length;
 
     if (badge) {
-      badge.textContent = pending.length;
-      badge.classList.toggle('d-none', pending.length === 0);
+      badge.textContent = totalCount;
+      badge.classList.toggle('d-none', totalCount === 0);
     }
 
     if (summary) {
-      summary.textContent = pending.length
-              ? `You have ${pending.length} quizzes to do.`
-              : 'No new notifications.';
+      if (totalCount > 0) {
+        summary.textContent = `You have ${totalCount} notifications.`;
+      } else {
+        summary.textContent = 'No new notifications.';
+      }
     }
 
     if (!list) return;
 
-    if (!pending.length) {
+    if (totalCount === 0) {
       list.innerHTML = `
           <div class="text-center text-muted py-4 px-3">
             <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
-            <h6 class="fw-bold text-dark mt-3 mb-1">No pending quizzes</h6>
-            <p class="small fw-semibold mb-0">All open quizzes are complete or no new quizzes are available.</p>
+            <h6 class="fw-bold text-dark mt-3 mb-1">No pending notifications</h6>
+            <p class="small fw-semibold mb-0">All open quizzes are complete and no new replies are available.</p>
           </div>`;
       return;
     }
 
-    const items = pending.slice(0, 5).map((quiz) => `
+    const allItems = [];
+
+    pending.forEach(quiz => {
+      allItems.push(`
         <a class="notification-item" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}">
           <div class="d-flex gap-3 align-items-start">
             <span class="stat-icon-bg flex-shrink-0" style="width: 42px; height: 42px; border-radius: 14px; font-size: 1.25rem;">
@@ -851,13 +857,31 @@
               <span class="small text-primary fw-bold">Start Quiz</span>
             </div>
           </div>
-        </a>`).join('');
+        </a>`);
+    });
 
-    const more = pending.length > 5
-            ? `<a class="notification-item text-center fw-bold text-primary" href="/student/dashboard#myQuizSection">View ${pending.length - 5} more quizzes</a>`
-            : '';
+    comments.forEach(comment => {
+      const roadmapUrl = (comment.spaceId && comment.nodeId) 
+        ? `/student/learning-node?nodeId=${encodeURIComponent(comment.nodeId)}&spaceId=${encodeURIComponent(comment.spaceId)}` 
+        : '#';
+      allItems.push(`
+        <a class="notification-item" href="${roadmapUrl}">
+          <div class="d-flex gap-3 align-items-start">
+            <span class="stat-icon-bg flex-shrink-0 bg-info-subtle text-info" style="width: 42px; height: 42px; border-radius: 14px; font-size: 1.25rem;">
+              <i class="ti ti-message-circle"></i>
+            </span>
+            <div class="min-w-0">
+              <h6 class="fw-bold mb-1">Reply from ${escapeHtml(comment.replierName || 'Someone')}</h6>
+              <p class="small text-muted fw-semibold mb-1 text-truncate">${escapeHtml(comment.content || 'New reply')}</p>
+              <span class="small text-info fw-bold">View Reply</span>
+            </div>
+          </div>
+        </a>`);
+    });
 
-    list.innerHTML = items + more;
+    const displayItems = allItems.join('');
+
+    list.innerHTML = displayItems;
   }
 
   function documentTypeLabel(type) {
@@ -1060,7 +1084,7 @@
     renderStats(learningSpaces, quizzes);
     renderLearningSpaces(learningSpaces);
     renderQuizAccordion(learningSpaces);
-    renderNotifications(quizzes);
+    renderNotifications(quizzes, dashboard.commentNotifications || []);
     renderRecentDocuments(documents);
     
     // Once dashboard (and joined spaces) are loaded, load public spaces
