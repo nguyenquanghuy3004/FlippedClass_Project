@@ -166,7 +166,7 @@
         <li><a class="nav-link" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i
               class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
         <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i
-              class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
+              class="ti ti-books fs-5"></i><span class="nav-text">Learning Space</span></a></li>
         <li><a class="nav-link active" href="/student/my-quizzes" data-nav-key="my-quiz" aria-current="page"><i
               class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
         <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span
@@ -186,6 +186,7 @@
             <div class="student-menu-panel" role="menu">
               <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i
                   class="ti ti-help-circle"></i><span>Help</span></a>
+              <button class="student-menu-item" type="button" data-bs-toggle="modal" data-bs-target="#profileDetailModal" role="menuitem"><i class="ti ti-user-edit"></i><span>Edit Profile</span></button>
               <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i
                   class="ti ti-logout"></i><span>Logout</span></button>
             </div>
