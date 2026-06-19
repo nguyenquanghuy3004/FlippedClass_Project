@@ -18,6 +18,7 @@ import com.example.flippedclass.service.LessonSummaryService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,10 +26,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LessonSummaryServiceImpl implements LessonSummaryService {
 
-    private  LessonSummaryRepository lessonSummaryRepository;
-    private  LearningNodeRepository learningNodeRepository;
-    private  UserRepository userRepository;
-    private  ProgressEvaluationService progressEvaluationService;
+    private final LessonSummaryRepository lessonSummaryRepository;
+    private final LearningNodeRepository learningNodeRepository;
+    private final UserRepository userRepository;
+    private final ProgressEvaluationService progressEvaluationService;
 
 
     @Override
@@ -39,19 +40,27 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
         User student = userRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        LessonSummary summary = LessonSummary.builder()
-                .learningNode(learningNode)
-                .student(student)
-                .summaryContent(request.getSummaryContent())
-                .status(SummaryStatus.SUBMITTED)
-                .submittedAt(LocalDateTime.now())
-                .build();
+        Optional<LessonSummary> existingSummaryOpt = lessonSummaryRepository.findByLearningNodeIdAndStudentId(learningNode.getId(), student.getId());
+        LessonSummary summary;
+
+        if (existingSummaryOpt.isPresent()) {
+            summary = existingSummaryOpt.get();
+            summary.setSummaryContent(request.getSummaryContent());
+            summary.setStatus(SummaryStatus.SUBMITTED);
+            summary.setSubmittedAt(LocalDateTime.now());
+        } else {
+            summary = LessonSummary.builder()
+                    .learningNode(learningNode)
+                    .student(student)
+                    .summaryContent(request.getSummaryContent())
+                    .status(SummaryStatus.SUBMITTED)
+                    .submittedAt(LocalDateTime.now())
+                    .build();
+        }
 
         summary = lessonSummaryRepository.save(summary);
-
         // MỚI: Gọi đánh giá tiến độ sau khi lưu
         progressEvaluationService.evaluateNodeCompletion(student.getId(), learningNode.getId());
-
         return mapToResponse(summary);
     }
 
@@ -65,6 +74,14 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
         summary.setReviewedAt(LocalDateTime.now());
         
         summary = lessonSummaryRepository.save(summary);
+        return mapToResponse(summary);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LessonSummaryResponse getSummaryById(Long id) {
+        LessonSummary summary = lessonSummaryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lesson summary not found"));
         return mapToResponse(summary);
     }
 

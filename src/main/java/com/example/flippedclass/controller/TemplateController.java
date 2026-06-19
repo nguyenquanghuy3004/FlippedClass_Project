@@ -126,6 +126,12 @@ public class TemplateController {
         return "lecturer/learningPath";
     }
 
+    @GetMapping("/lecturer/learning-nodes/{nodeId}/preview")
+    public String lecturerNodePreview(@PathVariable Long nodeId, Model model) {
+        model.addAttribute("nodeId", nodeId);
+        return "lecturer/node-preview";
+    }
+
     @GetMapping("/lecturer/space-members")
     public String spaceMembers(@RequestParam("spaceId") Long spaceId, Model model) {
         model.addAttribute("spaceId", spaceId);
@@ -136,5 +142,11 @@ public class TemplateController {
     public String learningAnalytics(@PathVariable Long spaceId, Model model) {
         model.addAttribute("spaceId", spaceId);
         return "lecturer/learning-analytics";
+    }
+
+    @GetMapping("/lecturer/summaries/{summaryId}/review")
+    public String summaryReview(@PathVariable Long summaryId, Model model) {
+        model.addAttribute("summaryId", summaryId);
+        return "lecturer/summary-review";
     }
 }

@@ -1,0 +1,337 @@
+/* =====================================================
+   lecturer-learningPath.css  —  Sleek Modern Tech Design
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* ── Root tokens ── */
+:root {
+  --indigo:        #6366f1;
+  --indigo-dark:   #4f46e5;
+  --indigo-glow:   rgba(99, 102, 241, 0.2);
+  --cyan-accent:   #06b6d4;
+  --slate-900:     #0f172a;
+  --slate-800:     #1e293b;
+  --slate-100:     #f1f5f9;
+  --slate-50:      #f8fafc;
+  --glass-bg:      rgba(255, 255, 255, 0.85);
+  --glass-border:  rgba(255, 255, 255, 0.6);
+  --card-shadow:   0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0,0,0,0.02);
+  --card-shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --bg-page:       #f8fafc;
+  --text-primary:  #0f172a;
+  --text-muted:    #64748b;
+  --radius-card:   16px;
+}
+
+#content { background: var(--bg-page) !important; }
+
+/* ══════════════════════════════════════════
+   HERO BANNER (Dark, Sleek Tech)
+══════════════════════════════════════════ */
+.classroom-banner {
+  border-radius: var(--radius-card);
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #2b2e83 0%, #6352c5 50%, #d6679b 100%);
+  box-shadow: 0 12px 30px rgba(99, 82, 197, 0.25);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Subtle accent glow */
+.classroom-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 60%);
+  border-radius: 50%;
+  transform: translate(30%, -30%);
+}
+
+/* Tech grid overlay */
+.classroom-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+  padding: 0 3rem;
+  width: 100%;
+}
+
+.banner-chips {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.banner-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  letter-spacing: 0.5px;
+}
+
+.classroom-banner h1 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.classroom-banner p.sub {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════
+   TABS & ACTION BAR
+══════════════════════════════════════════ */
+.page-tabs {
+  font-size: 0.9rem;
+  font-weight: 500;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.page-tabs .nav-link {
+  color: var(--text-muted);
+  padding: 0.5rem 0.2rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s;
+}
+
+.page-tabs .nav-link:hover { color: var(--slate-900); }
+
+.page-tabs .nav-link.active {
+  color: var(--indigo);
+  border-bottom-color: var(--indigo);
+  font-weight: 600;
+}
+
+.action-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid #e2e8f0;
+}
+
+.action-bar .btn-primary {
+  background: var(--indigo);
+  border: none;
+  box-shadow: 0 4px 12px var(--indigo-glow);
+  font-weight: 600;
+}
+.action-bar .btn-primary:hover {
+  background: var(--indigo-dark);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+}
+
+/* ══════════════════════════════════════════
+   TIMELINE
+══════════════════════════════════════════ */
+.timeline-indicator {
+  width: 48px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.timeline-line {
+  width: 2px;
+  position: absolute;
+  top: 48px;
+  left: 23px;
+  z-index: 0;
+  background: #e2e8f0;
+}
+
+.timeline-node {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  z-index: 1;
+  position: relative;
+  background: #fff;
+}
+
+.timeline-node.published {
+  border: 2px solid #cbd5e1;
+  color: #64748b;
+}
+
+.timeline-node.in-progress {
+  border: 2px solid var(--indigo);
+  color: var(--indigo);
+  background: #e0e7ff;
+}
+
+/* ══════════════════════════════════════════
+   MODULE CARD
+══════════════════════════════════════════ */
+.path-card {
+  border-radius: var(--radius-card);
+  background: #fff;
+  box-shadow: var(--card-shadow);
+  border: 1px solid #e2e8f0;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  overflow: hidden;
+}
+
+.path-card:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+.path-card.border-primary {
+  border-color: #cbd5e1 !important; /* Muted border for un-published */
+}
+
+/* Header */
+.path-card-header {
+  padding: 1.25rem 1.5rem 0.75rem;
+  background: #fff;
+}
+
+/* Week label */
+.path-week-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+/* Card title */
+.path-card .card-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.path-card .card-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+
+/* Status badges */
+.badge-published {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.badge-in-progress {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════════
+   CREATE NODE BTN
+══════════════════════════════════════════ */
+.create-node-btn {
+  border: 1px dashed #cbd5e1 !important;
+  border-radius: 12px !important;
+  background: #f8fafc !important;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.75rem !important;
+  margin-top: 0.5rem;
+}
+
+.create-node-btn:hover {
+  border-color: #94a3b8 !important;
+  background: #f1f5f9 !important;
+}
+
+.create-node-btn span {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+/* ══════════════════════════════════════════
+   EMPTY STATES
+══════════════════════════════════════════ */
+.empty-roadmap {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #fff;
+  border-radius: var(--radius-card);
+  border: 1px dashed #cbd5e1;
+}
+
+.module-empty-box {
+  border: 1px dashed #cbd5e1 !important;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.module-empty-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  color: #64748b;
+}
+
+.cursor-pointer { cursor: pointer; }
+.drag-handle    { cursor: grab; }

@@ -9,10 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface LessonSummaryRepository extends JpaRepository<LessonSummary, Long> {
-    
     List<LessonSummary> findByLearningNodeId(Long learningNodeId);
-    
     List<LessonSummary> findByStudentId(Long studentId);
-    
     Optional<LessonSummary> findByStudentIdAndLearningNodeId(Long studentId, Long learningNodeId);
+    Optional<LessonSummary> findByLearningNodeIdAndStudentId(Long learningNodeId, Long studentId);
 }

@@ -1,50 +1,48 @@
 package com.example.flippedclass.controller;
 
-import com.example.flippedclass.dto.request.FeedbackSummaryRequest;
 import com.example.flippedclass.dto.request.SubmitSummaryRequest;
 import com.example.flippedclass.dto.response.LessonSummaryResponse;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
-import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import com.example.flippedclass.service.impl.UserDetailsImpl;
 import com.example.flippedclass.service.LessonSummaryService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@Validated
 @RestController
-@RequestMapping("/api/summaries")
+@RequestMapping("/api/lesson-summaries")
+@RequiredArgsConstructor
 public class LessonSummaryController {
 
     private final LessonSummaryService lessonSummaryService;
 
-    public LessonSummaryController(LessonSummaryService lessonSummaryService) {
-        this.lessonSummaryService = lessonSummaryService;
-    }
-
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public LessonSummaryResponse submitSummary(@Valid @RequestBody SubmitSummaryRequest request) {
-        return lessonSummaryService.submitSummary(request);
-    }
-
-    @PutMapping("/{id}/feedback")
-    public LessonSummaryResponse provideFeedback(
-            @PathVariable("id") @Positive(message = "id must be a positive number") Long id,
-            @Valid @RequestBody FeedbackSummaryRequest request) {
-        return lessonSummaryService.provideFeedback(id, request);
+    public ResponseEntity<LessonSummaryResponse> submitSummary(
+            @Valid @RequestBody SubmitSummaryRequest request,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        
+        // Ensure student ID is set from the authenticated user
+        request.setStudentId(userDetails.getId());
+        
+        LessonSummaryResponse response = lessonSummaryService.submitSummary(request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/learning-node/{nodeId}")
-    public List<LessonSummaryResponse> getSummariesByLearningNode(
-            @PathVariable("nodeId") @Positive(message = "nodeId must be a positive number") Long nodeId) {
-        return lessonSummaryService.getSummariesByLearningNode(nodeId);
+    public ResponseEntity<java.util.List<LessonSummaryResponse>> getSummariesByNode(@PathVariable Long nodeId) {
+        return ResponseEntity.ok(lessonSummaryService.getSummariesByLearningNode(nodeId));
     }
 
-    @GetMapping("/student/{studentId}")
-    public List<LessonSummaryResponse> getSummariesByStudent(
-            @PathVariable("studentId") @Positive(message = "studentId must be a positive number") Long studentId) {
-        return lessonSummaryService.getSummariesByStudent(studentId);
+    @GetMapping("/{id}")
+    public ResponseEntity<LessonSummaryResponse> getSummaryById(@PathVariable Long id) {
+        return ResponseEntity.ok(lessonSummaryService.getSummaryById(id));
+    }
+
+    @PutMapping("/{id}/feedback")
+    public ResponseEntity<LessonSummaryResponse> provideFeedback(
+            @PathVariable Long id,
+            @Valid @RequestBody com.example.flippedclass.dto.request.FeedbackSummaryRequest request) {
+        return ResponseEntity.ok(lessonSummaryService.provideFeedback(id, request));
     }
 }

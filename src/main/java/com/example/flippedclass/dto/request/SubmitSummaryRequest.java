@@ -2,19 +2,23 @@ package com.example.flippedclass.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SubmitSummaryRequest {
-    @NotNull(message = "learningNodeId is required")
-    @Positive(message = "learningNodeId must be a positive number")
+    @NotNull(message = "Learning node ID is required")
     private Long learningNodeId;
-
-    @NotNull(message = "studentId is required")
-    @Positive(message = "studentId must be a positive number")
+    
+    // We get studentId from JWT directly in the controller to ensure security,
+    // but keeping it here if the existing service expects it.
     private Long studentId;
-
-    @NotBlank(message = "summaryContent is required")
+    
+    @NotBlank(message = "Summary content is required")
     private String summaryContent;
 }

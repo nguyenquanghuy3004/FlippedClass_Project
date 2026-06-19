@@ -9,6 +9,7 @@ import java.util.List;
 public interface LessonSummaryService {
     LessonSummaryResponse submitSummary(SubmitSummaryRequest request);
     LessonSummaryResponse provideFeedback(Long id, FeedbackSummaryRequest request);
+    LessonSummaryResponse getSummaryById(Long id);
     List<LessonSummaryResponse> getSummariesByLearningNode(Long learningNodeId);
     List<LessonSummaryResponse> getSummariesByStudent(Long studentId);
 }

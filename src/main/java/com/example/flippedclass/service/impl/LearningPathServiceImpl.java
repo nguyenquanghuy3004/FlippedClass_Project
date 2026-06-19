@@ -160,6 +160,7 @@ public class LearningPathServiceImpl implements LearningPathService {
                     .title(node.getTitle())
                     .description(node.getDescription())
                     .learningPathId(path.getId())
+                    .learningSpaceId(path.getLearningSpace() != null ? path.getLearningSpace().getId() : null)
                     .status(node.getStatus())
                     .nodeType(node.getNodeType())
                     .createdAt(node.getCreatedAt())
