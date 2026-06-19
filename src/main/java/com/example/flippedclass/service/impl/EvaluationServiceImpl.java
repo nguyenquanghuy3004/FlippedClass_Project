@@ -174,6 +174,7 @@ public class EvaluationServiceImpl implements EvaluationService {
                         .title(lp.getTitle())
                         .description(lp.getDescription())
                         .learningSpaceId(lp.getLearningSpace().getId())
+                        .learningSpaceTitle(lp.getLearningSpace().getName())
                         .build())
                 .toList();
     }

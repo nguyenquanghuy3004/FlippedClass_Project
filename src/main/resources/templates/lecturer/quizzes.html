@@ -231,9 +231,13 @@
     }
 
     let allQuizzes = [];
+    let currentFilteredQuizzes = [];
     let pendingDeleteId = null;
     let pendingDeleteHasAttempts = false;
     let availableNodes = [];
+    
+    let currentPage = 1;
+    const itemsPerPage = 6;
 
     // --- Khởi tạo: Tải danh sách quiz và node khi trang tải xong ---
     document.addEventListener('DOMContentLoaded', async () => {
@@ -289,9 +293,11 @@
         }
         if (!res.ok) throw new Error();
         allQuizzes = await res.json();
+        currentFilteredQuizzes = [...allQuizzes];
+        currentPage = 1;
         updateStats(allQuizzes);
         populateSpaceFilter(allQuizzes);
-        renderQuizzes(allQuizzes);
+        renderPaginatedQuizzes();
       } catch (e) {
         toast('Failed to load quizzes', true);
       } finally {
@@ -325,14 +331,62 @@
       const status = document.getElementById('statusFilter').value;
       const diff = document.getElementById('diffFilter').value;
       const space = document.getElementById('spaceFilter').value;
-      const filtered = allQuizzes.filter(q => {
+      currentFilteredQuizzes = allQuizzes.filter(q => {
         const matchText = q.title.toLowerCase().includes(term) || (q.courseName || '').toLowerCase().includes(term);
         const matchStatus = status === 'ALL' || (status === 'ACTIVE' ? q.active : !q.active);
         const matchDiff = diff === 'ALL' || q.difficulty === diff;
         const matchSpace = space === 'ALL' || (q.learningSpaceName || 'Uncategorized') === space;
         return matchText && matchStatus && matchDiff && matchSpace;
       });
-      renderQuizzes(filtered);
+      currentPage = 1;
+      renderPaginatedQuizzes();
+    }
+
+    function renderPaginatedQuizzes() {
+      const totalItems = currentFilteredQuizzes.length;
+      const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+      
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+      
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginated = currentFilteredQuizzes.slice(startIndex, endIndex);
+      
+      renderQuizzes(paginated);
+      renderPaginationControls(totalItems, totalPages);
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      renderPaginatedQuizzes();
+      // Scroll to top of quiz container smoothly
+      document.getElementById('quizContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderPaginationControls(totalItems, totalPages) {
+      let wrap = document.getElementById('paginationWrap');
+      if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.id = 'paginationWrap';
+        wrap.className = 'd-flex justify-content-center mt-5 mb-3';
+        document.getElementById('quizContainer').after(wrap);
+      }
+      
+      if (totalPages <= 1) {
+        wrap.innerHTML = '';
+        return;
+      }
+      
+      let html = `<nav aria-label="Page navigation"><ul class="pagination pagination-lg">`;
+      html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link fw-bold" href="javascript:void(0)" onclick="goToPage(${currentPage - 1})">Previous</a></li>`;
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<li class="page-item ${currentPage === i ? 'active' : ''}"><a class="page-link fw-bold" href="javascript:void(0)" onclick="goToPage(${i})">${i}</a></li>`;
+      }
+      html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><a class="page-link fw-bold" href="javascript:void(0)" onclick="goToPage(${currentPage + 1})">Next</a></li>`;
+      html += `</ul></nav>`;
+      
+      wrap.innerHTML = html;
     }
 
     function diffChip(d) {
