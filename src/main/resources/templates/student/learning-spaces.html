@@ -527,7 +527,7 @@
 
       comments.forEach(comment => {
         const roadmapUrl = (comment.spaceId && comment.nodeId) 
-          ? `/student/learning-node?nodeId=${encodeURIComponent(comment.nodeId)}&spaceId=${encodeURIComponent(comment.spaceId)}` 
+          ? `/student/learning-node?nodeId=${encodeURIComponent(comment.nodeId)}&spaceId=${encodeURIComponent(comment.spaceId)}&commentId=${encodeURIComponent(comment.id)}` 
           : '#';
         allItems.push(`
       <a class="notification-item" href="${roadmapUrl}">

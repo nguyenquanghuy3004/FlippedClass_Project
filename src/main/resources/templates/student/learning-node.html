@@ -499,6 +499,25 @@ const token = localStorage.getItem('jwt_token');
       btn.disabled = true;
       btn.style.opacity = '0.6';
     }
+
+    const targetCommentId = urlParams.get('commentId');
+    if (targetCommentId && !window.hasScrolledToComment) {
+      window.hasScrolledToComment = true;
+      setTimeout(() => {
+        const commentEl = document.getElementById(`comment-content-${targetCommentId}`);
+        if (commentEl) {
+          commentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const parentBox = commentEl.parentElement;
+          if (parentBox) {
+            parentBox.style.transition = 'background-color 1.5s ease-in-out';
+            parentBox.style.backgroundColor = '#e0f2fe';
+            setTimeout(() => {
+              parentBox.style.backgroundColor = '#f8f9fa';
+            }, 3000);
+          }
+        }
+      }, 500);
+    }
   }
 
   window.toggleReplyForm = function(id) {
