@@ -134,6 +134,10 @@
 
 </script>
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+  <!-- Monaco Editor & JetBrains Mono -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -440,6 +444,21 @@ const token = localStorage.getItem('jwt_token');
           <h2>Node Content</h2>
           <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
         </section>
+
+        <!-- Code Editor Section (IDE) -->
+        <section class="ide-card dark-mode" style="margin-top: 2rem; background-color: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; margin: 0;"><i class="ti ti-code"></i> Code Editor</h2>
+            <button id="btnRunCode" class="btn btn-success" style="background-color: #2ea043; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: background-color 0.2s;"><i class="ti ti-player-play"></i> Run Code</button>
+          </div>
+          
+          <div id="editor" style="height: 400px; border: 1px solid #444; border-radius: 4px; overflow: hidden;"></div>
+          
+          <div class="mt-3" style="margin-top: 20px;">
+            <h5 style="color: #aaa; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; font-size: 0.9rem;">Terminal Output:</h5>
+            <pre id="terminalOutput" style="background-color: #000; color: #00ff00; padding: 15px; border-radius: 4px; height: 150px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; border: 1px solid #333; margin: 0; white-space: pre-wrap; word-wrap: break-word;">> Chờ chạy lệnh...</pre>
+          </div>
+        </section>
       </section>
 
       <aside class="side-column">
@@ -494,9 +513,77 @@ const token = localStorage.getItem('jwt_token');
 
       // Hiển thị nội dung ra giao diện
       renderNodePage(node, sortedItems);
+      
+      // Khởi tạo Monaco Editor
+      initMonacoEditor();
     } catch (error) {
       renderError('Could not load node', error.message || 'Please try again later.');
     }
+  }
+
+  let myCodeEditor; // Biến toàn cục để lưu instance của editor
+
+  function initMonacoEditor() {
+    const editorDiv = document.getElementById('editor');
+    if (!editorDiv) return;
+
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+
+    require(['vs/editor/editor.main'], function() {
+        myCodeEditor = monaco.editor.create(editorDiv, {
+            value: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n}",
+            language: "java",
+            theme: "vs-dark",     // Giao diện nền đen chuẩn Dev
+            automaticLayout: true,
+            fontSize: 14,
+            minimap: { enabled: false } // Tắt cái bản đồ nhỏ bên phải cho gọn
+        });
+    });
+
+    document.getElementById('btnRunCode').addEventListener('click', async function() {
+        const terminal = document.getElementById('terminalOutput');
+        const btn = document.getElementById('btnRunCode');
+        
+        terminal.innerText = "> Đang biên dịch code. Vui lòng đợi...";
+        terminal.style.color = "#aaa";
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Running...';
+        
+        // Lấy nội dung code đang gõ
+        const codeString = myCodeEditor.getValue();
+
+        try {
+            const response = await fetch('/api/compiler/execute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ script: codeString })
+            });
+            
+            const result = await response.json();
+            
+            // Phục hồi UI
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.innerHTML = '<i class="ti ti-player-play"></i> Run Code';
+
+            // JDoodle trả về Output ở trường "output"
+            if (result.output) {
+                terminal.style.color = response.ok ? "#00ff00" : "#ff4444";
+                terminal.innerText = "> " + result.output;
+            } else {
+                terminal.style.color = "#ff4444";
+                terminal.innerText = "> Lỗi Server Compiler: " + JSON.stringify(result);
+            }
+        } catch (error) {
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.innerHTML = '<i class="ti ti-player-play"></i> Run Code';
+            
+            terminal.style.color = "#ff4444";
+            terminal.innerText = "> Lỗi kết nối đến Backend: " + error.message;
+        }
+    });
   }
 
   loadNodePage();
