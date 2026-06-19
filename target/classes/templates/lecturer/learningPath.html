@@ -389,15 +389,18 @@
                         },
                         body: JSON.stringify({ title: title, description: desc })
                     })
-                    .then(res => {
-                        if (!res.ok) throw new Error("Failed to create module");
+                    .then(async res => {
+                        if (!res.ok) {
+                            const errData = await res.json().catch(() => ({}));
+                            throw new Error(errData.message || "Failed to create module");
+                        }
                         return res.json();
                     })
                     .then(data => {
                         window.location.reload();
                     })
                     .catch(err => {
-                        errorDiv.text(err.message).show();
+                        $('#createModuleError').text(err.message).show();
                         btn.prop('disabled', false).text('Create Module');
                     });
                 });
@@ -422,15 +425,18 @@
                         },
                         body: JSON.stringify({ title: title, description: desc })
                     })
-                    .then(res => {
-                        if (!res.ok) throw new Error("Failed to update module");
+                    .then(async res => {
+                        if (!res.ok) {
+                            const errData = await res.json().catch(() => ({}));
+                            throw new Error(errData.message || "Failed to update module");
+                        }
                         return res.json();
                     })
                     .then(data => {
                         window.location.reload();
                     })
                     .catch(err => {
-                        errorDiv.text(err.message).show();
+                        $('#editModuleError').text(err.message).show();
                         btn.prop('disabled', false).text('Save Changes');
                     });
                 });
@@ -723,7 +729,7 @@
                             window.location.reload();
                         })
                         .catch(err => {
-                            errorDiv.text(err.message).show();
+                            $('#addYoutubeError').text(err.message).show();
                             btn.prop('disabled', false).text('Add Video');
                         });
                 });
