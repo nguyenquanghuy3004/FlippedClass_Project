@@ -355,6 +355,7 @@
       loadDiscussions();
     }
 
+    let currentDiscussions = null;
     async function loadDiscussions() {
       const container = document.getElementById('discussion-container');
       if (!container) return;
@@ -362,9 +363,12 @@
         const res = await fetch(`/api/nodes/${nodeId}/discussions`, { headers: authHeaders(false) });
         if (res.ok) {
           const discussions = await res.json();
-          container.innerHTML = renderDiscussionTree(discussions);
-          const countSpans = document.querySelectorAll('.discussions-count');
-          countSpans.forEach(el => el.textContent = discussions.length + ' comments');
+          if (JSON.stringify(currentDiscussions) !== JSON.stringify(discussions)) {
+            currentDiscussions = discussions;
+            container.innerHTML = renderDiscussionTree(discussions);
+            const countSpans = document.querySelectorAll('.discussions-count');
+            countSpans.forEach(el => el.textContent = discussions.length + ' comments');
+          }
         }
       } catch (e) { console.error(e); }
     }
@@ -493,6 +497,11 @@
         if (!nodeResponse.ok) throw new Error(await readError(nodeResponse));
 
         const node = await nodeResponse.json();
+      
+      const currentSpaceId = urlParams.get('spaceId');
+      if (!currentSpaceId && node.spaceId) {
+          document.getElementById('backLink').href = `/lecturer/space/${node.spaceId}`;
+      }
         const items = itemsResponse.ok ? await itemsResponse.json() : [];
 
         renderNodePage(node, items);
@@ -682,6 +691,28 @@
     }
 
     loadNodePage();
+
+    // --- POLLING LOGIC cho Discussion ---
+    function shouldPausePolling() {
+      const rootInput = document.getElementById('discussion-input');
+      if (rootInput && (document.activeElement === rootInput || rootInput.value.trim().length > 0)) return true;
+
+      const replyInputs = document.querySelectorAll('textarea[id^="reply-input-"]');
+      for (let input of replyInputs) {
+        if (document.activeElement === input || input.value.trim().length > 0) return true;
+      }
+
+      const feedbackModalEl = document.getElementById('feedbackModal');
+      if (feedbackModalEl && feedbackModalEl.classList.contains('show')) return true;
+
+      return false;
+    }
+
+    setInterval(() => {
+      if (!shouldPausePolling()) {
+        loadDiscussions();
+      }
+    }, 2000);
 
   </script>
 </body>

@@ -422,7 +422,7 @@ const token = localStorage.getItem('jwt_token');
             <span style="font-size: 0.75rem; color: #64748b;">${escapeHtml(time)}</span>
           </div>
           <div style="font-size: 0.875rem; color: #334155; margin-bottom: 8px; white-space: pre-wrap;" id="comment-content-${comment.id}">${escapeHtml(comment.content)}</div>
-          
+
           <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #64748b;">
             <button type="button" onclick="openReplyBox(${currentRootId}, '${safeAuthor}')" style="border:none; background:none; color:#64748b; cursor:pointer; padding:0;">Reply</button>
             ${isOwner ? `<button type="button" onclick="deleteComment(${comment.id})" style="border:none; background:none; color:#ef4444; cursor:pointer; padding:0;">Delete</button>` : ''}
@@ -519,7 +519,7 @@ const token = localStorage.getItem('jwt_token');
     const form = document.getElementById(`edit-form-${id}`);
     const contentDiv = document.getElementById(`comment-content-${id}`);
     const input = document.getElementById(`edit-input-${id}`);
-    
+
     if (form && contentDiv && input) {
       if (form.style.display === 'none') {
         form.style.display = 'block';
@@ -725,10 +725,10 @@ const token = localStorage.getItem('jwt_token');
     if (summaryForm && saveSummaryBtn && summaryStatus) {
       summaryForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const keyTakeaways = document.getElementById('keyTakeaways').value;
         const questions = document.getElementById('questions').value;
-        
+
         const summaryJson = JSON.stringify({
             keyTakeaways: keyTakeaways,
             confusingPoints: questions
