@@ -4,12 +4,8 @@ import com.example.flippedclass.dto.request.CreateLearningSpaceRequest;
 import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
 import com.example.flippedclass.dto.response.JoinLearningSpaceResponse;
 import com.example.flippedclass.dto.response.LearningSpaceResponse;
-import com.example.flippedclass.entity.LearningSpace;
-import com.example.flippedclass.entity.LearningSpaceMember;
-import com.example.flippedclass.entity.User;
-import com.example.flippedclass.repository.LearningSpaceMemberRepository;
-import com.example.flippedclass.repository.LearningSpaceRepository;
-import com.example.flippedclass.repository.UserRepository;
+import com.example.flippedclass.entity.*;
+import com.example.flippedclass.repository.*;
 import com.example.flippedclass.service.LearningSpaceService;
 import com.example.flippedclass.service.InviteCodeGenerator;
 import com.example.flippedclass.util.ValidateJoinLearningSpace;
@@ -20,6 +16,7 @@ import com.example.flippedclass.enums.MemberStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -31,11 +28,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LearningSpaceServiceImpl implements LearningSpaceService {
 
-    private  final  LearningSpaceRepository learningSpaceRepository;
+    private final LearningSpaceRepository learningSpaceRepository;
     private final LearningSpaceMemberRepository memberRepository;
     private final UserRepository userRepository;
     private final InviteCodeGenerator inviteCodeGenerator;
     private final ValidateJoinLearningSpace validateJoinLearningSpace;
+    private final LearningNodeRepository learningNodeRepository;
+    private final LearningNodeItemRepository learningNodeItemRepository;
+    private final QuizRepository quizRepository;
+    private final QuizQuestionRepository quizQuestionRepository;
+    private final CourseDocumentServiceImpl courseDocumentServicel;
+    private final LearningPathRepository learningPathRepository;
+    private final CourseDocumentRepository courseDocumentRepository;
 
 
     private User getCurrentUser() {
@@ -78,7 +82,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         learningSpace.setVisibility(request.getVisibility());
         learningSpace.setOwner(owner);
         learningSpace.setInviteCode(inviteCode);
-        
+
         LearningSpace savedSpace = learningSpaceRepository.save(learningSpace);
 
         // tạo luôn OWNER trong bảng member (không bắt buộc spec join, nhưng nên có)
@@ -107,7 +111,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     public List<LearningSpaceResponse> getMySpaces() {
         User currentUser = getCurrentUser();
         List<LearningSpace> spaces = learningSpaceRepository.findByOwnerId(currentUser.getId());
-        
+
         return spaces.stream().map(space -> LearningSpaceResponse.builder()
                 .id(space.getId())
                 .name(space.getName())
@@ -124,20 +128,20 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Override
     public List<LearningSpaceResponse> getPublicSpaces() {
         return learningSpaceRepository
-            .findByVisibilityAndStatus(VisibilityType.PUBLIC, LearningSpaceStatus.ACTIVE)
-            .stream()
-            .map(space -> LearningSpaceResponse.builder()
-                .id(space.getId())
-                .name(space.getName())
-                .description(space.getDescription())
-                .inviteCode(space.getInviteCode())
-                .ownerId(space.getOwner().getId())
-                .ownerUsername(space.getOwner().getUsername())
-                .visibility(space.getVisibility())
-                .createdAt(space.getCreatedAt())
-                .status(space.getStatus())
-                .build())
-            .toList();
+                .findByVisibilityAndStatus(VisibilityType.PUBLIC, LearningSpaceStatus.ACTIVE)
+                .stream()
+                .map(space -> LearningSpaceResponse.builder()
+                        .id(space.getId())
+                        .name(space.getName())
+                        .description(space.getDescription())
+                        .inviteCode(space.getInviteCode())
+                        .ownerId(space.getOwner().getId())
+                        .ownerUsername(space.getOwner().getUsername())
+                        .visibility(space.getVisibility())
+                        .createdAt(space.getCreatedAt())
+                        .status(space.getStatus())
+                        .build())
+                .toList();
     }
 
     @Override
@@ -161,7 +165,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
     @Transactional
     @Override
-    public LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail){
+    public LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail) {
         LearningSpace space = learningSpaceRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy Learning Space hoặc đã bị xóa"));
 
         // ADMIN bypass kiểm tra owner
@@ -179,14 +183,10 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     }
 
 
-
-
+    // joint class
     @Override
     @Transactional
     public JoinLearningSpaceResponse joinLearningSpace(JoinLearningSpaceRequest request) {
-        // Validate request
-        // validateJoinLearningSpace.validate(request); // Commenting out as it might require inviteCode. You can update the validator logic.
-
         LearningSpace learningSpace;
 
         String inviteCode = request.getInviteCode() == null ? "" : request.getInviteCode().trim();
@@ -227,6 +227,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         return response;
     }
 
+    // delete learning Space
     @Override
     @Transactional
     public void deleteLearningSpace(Long id) {
@@ -246,8 +247,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         learningSpaceRepository.save(learningSpace);
     }
 
-
-
+    // restore learning Space
     @Override
     @Transactional
     public void restoreLearningSpace(Long id) {
@@ -270,6 +270,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         learningSpaceRepository.save(learningSpace);
     }
 
+    // Archive learning Space
     @Override
     @Transactional
     public void archiveLearningSpace(Long id) {
@@ -293,4 +294,128 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     }
 
 
+    // clone learning Space
+    @Override
+    @Transactional
+    public LearningSpaceResponse cloneSpace(Long sourseSpaceId, String newName) {
+        LearningSpace soureSpace = learningSpaceRepository.findById(sourseSpaceId)
+                .orElseThrow(() -> new IllegalArgumentException("Original space not found"));
+
+        LearningSpace newSpace = new LearningSpace();
+        newSpace.setName(newName);
+        newSpace.setDescription(soureSpace.getDescription());
+        newSpace.setVisibility(soureSpace.getVisibility());
+        newSpace.setStatus(LearningSpaceStatus.ACTIVE);
+        newSpace.setOwner(getCurrentUser());
+        newSpace.setInviteCode(inviteCodeGenerator.generateInviteCode());
+
+        LearningSpace saveSpace = learningSpaceRepository.save(newSpace);
+
+        // Tạo OWNER trong bảng member
+        LearningSpaceMember ownerMember = new LearningSpaceMember();
+        ownerMember.setLearningSpace(saveSpace);
+        ownerMember.setUser(getCurrentUser());
+        ownerMember.setRole(MemberRole.OWNER);
+        ownerMember.setStatus(MemberStatus.ACTIVE);
+        memberRepository.save(ownerMember);
+
+        List<LearningPath> sourcePath = learningPathRepository.findByLearningSpace_IdOrderByPositionAsc(sourseSpaceId);
+
+        for (LearningPath path : sourcePath) {
+            LearningPath newPath = new LearningPath();
+
+            newPath.setTitle(path.getTitle());
+            newPath.setDescription(path.getDescription());
+            newPath.setPosition(path.getPosition());
+            newPath.setEstimatedDurationHours(path.getEstimatedDurationHours());
+            newPath.setVisibility(path.getVisibility());
+            newPath.setStatus(path.getStatus());
+            newPath.setLecturer(getCurrentUser());
+            newPath.setLearningSpace(saveSpace);
+
+            LearningPath savePath = learningPathRepository.save(newPath);
+
+
+            for (CourseDocument sDoc : path.getCourseDocuments()) {
+                CourseDocument nDoc = new CourseDocument();
+
+                nDoc.setTitle(sDoc.getTitle());
+                nDoc.setDescription(sDoc.getDescription());
+                nDoc.setDocumentType(sDoc.getDocumentType());
+                nDoc.setUrl(sDoc.getUrl());
+                nDoc.setLearningPath(savePath);
+                courseDocumentRepository.save(nDoc);
+            }
+
+            for (LearningNode node : path.getNodes()) {
+                LearningNode newNode = new LearningNode();
+
+                newNode.setTitle(node.getTitle());
+                newNode.setDescription(node.getDescription());
+                newNode.setContent(node.getContent());
+                newNode.setNodeType(node.getNodeType());
+                newNode.setStatus(node.getStatus());
+                newNode.setDisplayOrder(node.getDisplayOrder());
+                newNode.setEstimatedMinutes(node.getEstimatedMinutes());
+                newNode.setLearningPath(savePath);
+
+                LearningNode saveNode = learningNodeRepository.save(newNode);
+
+                for (LearningNodeItem nodeItem : node.getItems()) {
+                    LearningNodeItem newItem = new LearningNodeItem();
+
+                    newItem.setTitle(nodeItem.getTitle());
+                    newItem.setItemType(nodeItem.getItemType());
+                    newItem.setUrl(nodeItem.getUrl());
+                    newItem.setContent(nodeItem.getContent());
+                    newItem.setPosition(nodeItem.getPosition());
+                    newItem.setLearningNode(saveNode);
+                    learningNodeItemRepository.save(newItem);
+                }
+
+                for (Quiz quiz : node.getQuizzes()) {
+                    Quiz newQuiz = new Quiz();
+
+                    newQuiz.setTitle(quiz.getTitle());
+                    newQuiz.setDescription(quiz.getDescription());
+                    newQuiz.setDurationMinutes(quiz.getDurationMinutes());
+                    newQuiz.setActive(quiz.isActive());
+                    newQuiz.setPassScore(quiz.getPassScore());
+                    newQuiz.setDifficulty(quiz.getDifficulty());
+                    newQuiz.setThumbnailUrl(quiz.getThumbnailUrl());
+                    newQuiz.setLecturer(getCurrentUser());
+                    newQuiz.setLearningNode(saveNode);
+
+                    Quiz savedQuiz = quizRepository.save(newQuiz);
+                    // Copy câu hỏi của Quiz (Phải viết query riêng vì Quiz không map trực tiếp Questions trong Entity)
+                    List<QuizQuestion> sourceQuestions = quizQuestionRepository.findByQuizId(quiz.getId());
+
+                    for (QuizQuestion question : sourceQuestions) {
+                        QuizQuestion newQuestion = new QuizQuestion();
+
+                        newQuestion.setContent(question.getContent());
+                        newQuestion.setOptions(question.getOptions());
+                        newQuestion.setCorrectAnswer(question.getCorrectAnswer());
+                        newQuestion.setPoints(question.getPoints());
+                        newQuestion.setQuestionType(question.getQuestionType());
+                        newQuestion.setSortOrder(question.getSortOrder());
+                        newQuestion.setQuiz(savedQuiz);
+                        quizQuestionRepository.save(newQuestion);
+
+                    }
+                }
+            }
+        }
+        return LearningSpaceResponse.builder()
+                .id(saveSpace.getId())
+                .name(saveSpace.getName())
+                .description(saveSpace.getDescription())
+                .inviteCode(saveSpace.getInviteCode())
+                .visibility(saveSpace.getVisibility())
+                .ownerId(saveSpace.getOwner().getId())
+                .ownerUsername(saveSpace.getOwner().getUsername())
+                .createdAt(saveSpace.getCreatedAt())
+                .status(saveSpace.getStatus())
+                .build();
+    }
 }
