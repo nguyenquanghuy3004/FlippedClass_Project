@@ -40,4 +40,22 @@ public class DashboardLearningSpaceResponse {
         response.quizzes = quizzes;
         return response;
     }
+
+    public static DashboardLearningSpaceResponse fromPublicSpace(LearningSpace space, List<QuizResponse> quizzes) {
+        DashboardLearningSpaceResponse response = new DashboardLearningSpaceResponse();
+        response.id = space.getId();
+        response.name = space.getName();
+        response.description = space.getDescription();
+        response.ownerId = space.getOwner() == null ? null : space.getOwner().getId();
+        response.inviteCode = space.getInviteCode();
+        response.status = space.getStatus() == null ? null : space.getStatus().name();
+        response.visibility = space.getVisibility() == null ? null : space.getVisibility().name();
+        response.memberRole = "MEMBER";
+        response.memberStatus = "ACTIVE";
+        response.joinedAt = space.getCreatedAt();
+        response.createdAt = space.getCreatedAt();
+        response.updatedAt = space.getUpdatedAt();
+        response.quizzes = quizzes;
+        return response;
+    }
 }

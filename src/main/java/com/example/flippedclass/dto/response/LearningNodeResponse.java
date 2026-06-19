@@ -14,7 +14,8 @@ public class LearningNodeResponse {
     private String title;
     private String description;
     private Long learningPathId;
-    private Long learningSpaceId;
+    private Long spaceId;
+//    private Double positionY;
     private String status;
     private String nodeType;
     private String content;

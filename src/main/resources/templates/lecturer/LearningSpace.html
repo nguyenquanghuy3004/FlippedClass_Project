@@ -230,6 +230,8 @@
                 // Hàm lấy danh sách Learning Space của giảng viên từ API
                 function fetchSpaces() {
                     fetch('/api/learning-spaces/my-spaces', {
+                        method: 'GET',
+                        cache: 'no-store',
                         headers: {
                             'Authorization': 'Bearer ' + token
                         }
@@ -305,6 +307,7 @@
                                 }
 
                                 clone.querySelector('.delete-space-btn').dataset.id = space.id;
+                                clone.querySelector('.delete-space-btn').dataset.status = status;
 
                                 grid.appendChild(clone);
                             });
@@ -540,6 +543,13 @@
                 // Delete Space (Xóa tạm vào thùng rác)
                 $(document).on('click', '.delete-space-btn', function (e) {
                     e.preventDefault();
+                    
+                    const status = $(this).data('status');
+                    if (status === 'ARCHIVE') {
+                        Swal.fire('Cảnh báo!', 'Không thể xóa Không gian học tập đang bị lưu trữ. Vui lòng mở lưu trữ (Unarchive) trước khi xóa.', 'warning');
+                        return;
+                    }
+
                     Swal.fire({
                         title: 'Delete Space?',
                         text: "Are you sure you want to delete this space?",
@@ -563,6 +573,8 @@
                         }
                     });
                 });
+
+
             });
         </script>
     </th:block>

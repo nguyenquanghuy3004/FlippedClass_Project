@@ -14,6 +14,7 @@ import java.util.List;
 public class LearningPathResponse {
     private Long id;
     private Long learningSpaceId;
+    private String learningSpaceTitle;
     private Long lecturerId;
     private String lecturerName;
     private String title;

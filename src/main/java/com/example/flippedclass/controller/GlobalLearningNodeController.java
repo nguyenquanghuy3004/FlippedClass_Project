@@ -50,7 +50,7 @@ public class GlobalLearningNodeController {
                         .id(node.getId())
                         .title(node.getTitle())
                         .learningPathId(node.getLearningPath() != null ? node.getLearningPath().getId() : null)
-                        .learningSpaceId((node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null) ? node.getLearningPath().getLearningSpace().getId() : null)
+                        .spaceId((node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null) ? node.getLearningPath().getLearningSpace().getId() : null)
                         .status(node.getStatus())
                         .nodeType(node.getNodeType())
                         .content(node.getContent() != null ? node.getContent() : node.getDescription())

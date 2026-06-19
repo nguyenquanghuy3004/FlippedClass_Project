@@ -24,9 +24,17 @@ public class StudentProfile {
     @Column(nullable = false, unique = true)
     private String studentCode;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String className;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String major;
 
     private Integer enrollmentYear;
+
+    @Column(length = 20)
+    private String phoneNumber;
+
+    @Column(columnDefinition = "NVARCHAR(1000)")
+    private String bio;
 }

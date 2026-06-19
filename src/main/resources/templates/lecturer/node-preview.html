@@ -33,19 +33,13 @@
       Back to roadmap
     </a>
     <div class="topbar-spacer"></div>
-      <div class="student-user-menu topbar-user-menu" data-user-menu>
-        <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
-          <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Lecturer avatar">
-          <span class="student-menu-info">
-            <span class="student-menu-name" data-user-name>Lecturer View</span>
-          </span>
-          <i class="ti ti-chevron-down student-menu-chevron ms-1"></i>
-        </button>
-        <div class="student-menu-panel" role="menu">
-          <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
-          <button class="student-menu-item student-menu-item-danger" type="button" onclick="logout()" role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
-        </div>
+    <div class="student-user-menu topbar-user-menu">
+      <div class="d-flex align-items-center gap-2">
+        <img class="rounded-circle border" th:src="@{/assets/images/avatar-1.jpg}"
+          style="width: 35px; height: 35px; object-fit: cover;" alt="Avatar">
+        <span class="fw-bold" style="color: #1e293b;">Lecturer View</span>
       </div>
+    </div>
   </header>
 
   <main class="lesson-shell">
@@ -361,6 +355,7 @@
       loadDiscussions();
     }
 
+    let currentDiscussions = null;
     async function loadDiscussions() {
       const container = document.getElementById('discussion-container');
       if (!container) return;
@@ -368,9 +363,12 @@
         const res = await fetch(`/api/nodes/${nodeId}/discussions`, { headers: authHeaders(false) });
         if (res.ok) {
           const discussions = await res.json();
-          container.innerHTML = renderDiscussionTree(discussions);
-          const countSpans = document.querySelectorAll('.discussions-count');
-          countSpans.forEach(el => el.textContent = discussions.length + ' comments');
+          if (JSON.stringify(currentDiscussions) !== JSON.stringify(discussions)) {
+            currentDiscussions = discussions;
+            container.innerHTML = renderDiscussionTree(discussions);
+            const countSpans = document.querySelectorAll('.discussions-count');
+            countSpans.forEach(el => el.textContent = discussions.length + ' comments');
+          }
         }
       } catch (e) { console.error(e); }
     }
@@ -405,7 +403,7 @@
         <i class="ti ti-alert-circle"></i>
         <h1>${escapeHtml(title)}</h1>
         <p class="mb-4">${escapeHtml(message)}</p>
-        <a class="back-link" href="/lecturer/learning-spaces"><i class="ti ti-arrow-left"></i> Back to Spaces</a>
+        <a class="back-link" href="javascript:history.back()"><i class="ti ti-arrow-left"></i> Back to Roadmap</a>
       </div>`;
     }
 
@@ -499,12 +497,12 @@
         if (!nodeResponse.ok) throw new Error(await readError(nodeResponse));
 
         const node = await nodeResponse.json();
-        if (!itemsResponse.ok) throw new Error(await readError(itemsResponse));
-        const items = await itemsResponse.json();
-
-        if (node.learningSpaceId) {
-          document.getElementById('backLink').href = `/lecturer/space/${node.learningSpaceId}`;
-        }
+      
+      const currentSpaceId = urlParams.get('spaceId');
+      if (!currentSpaceId && node.spaceId) {
+          document.getElementById('backLink').href = `/lecturer/space/${node.spaceId}`;
+      }
+        const items = itemsResponse.ok ? await itemsResponse.json() : [];
 
         renderNodePage(node, items);
         loadDiscussions();
@@ -694,29 +692,28 @@
 
     loadNodePage();
 
-    // User Menu Toggle Logic
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('[data-user-menu]').forEach((menu) => {
-        const toggle = menu.querySelector('[data-user-menu-toggle]');
-        toggle?.addEventListener('click', (event) => {
-          event.stopPropagation();
-          const shouldOpen = !menu.classList.contains('is-open');
-          document.querySelectorAll('[data-user-menu].is-open').forEach(m => m.classList.remove('is-open'));
-          menu.classList.toggle('is-open', shouldOpen);
-          toggle.setAttribute('aria-expanded', String(shouldOpen));
-        });
-      });
-      document.addEventListener('click', () => {
-        document.querySelectorAll('[data-user-menu].is-open').forEach(m => m.classList.remove('is-open'));
-      });
-    });
+    // --- POLLING LOGIC cho Discussion ---
+    function shouldPausePolling() {
+      const rootInput = document.getElementById('discussion-input');
+      if (rootInput && (document.activeElement === rootInput || rootInput.value.trim().length > 0)) return true;
 
-    function logout() {
-      localStorage.removeItem('jwt_token');
-      localStorage.removeItem('role');
-      localStorage.removeItem('username');
-      window.location.href = '/signin';
+      const replyInputs = document.querySelectorAll('textarea[id^="reply-input-"]');
+      for (let input of replyInputs) {
+        if (document.activeElement === input || input.value.trim().length > 0) return true;
+      }
+
+      const feedbackModalEl = document.getElementById('feedbackModal');
+      if (feedbackModalEl && feedbackModalEl.classList.contains('show')) return true;
+
+      return false;
     }
+
+    setInterval(() => {
+      if (!shouldPausePolling()) {
+        loadDiscussions();
+      }
+    }, 2000);
+
   </script>
 </body>
 
