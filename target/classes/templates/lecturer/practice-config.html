@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Preview Node - Lecturer Moderation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <script type="text/javascript">
+    if (!localStorage.getItem('jwt_token')) {
+      window.location.href = '/login';
+    }
+  </script>
+  <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/node-preview.css}">
+</head>
+
+<body>
+  <header class="lesson-topbar">
+    <a class="brand-link" th:href="@{/}">
+      <span class="brand-mark"><i class="ti ti-school"></i></span>
+      <span>Flipped<span>Class</span> (Lecturer)</span>
+    </a>
+    <a id="backLink" class="back-link" href="javascript:history.back()">
+      <i class="ti ti-arrow-left"></i>
+      Back to roadmap
+    </a>
+    <div class="topbar-spacer"></div>
+    <div class="student-user-menu topbar-user-menu">
+      <div class="d-flex align-items-center gap-2">
+        <img class="rounded-circle border" th:src="@{/assets/images/avatar-1.jpg}"
+          style="width: 35px; height: 35px; object-fit: cover;" alt="Avatar">
+        <span class="fw-bold" style="color: #1e293b;">Lecturer View</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="lesson-shell">
+    <div id="pageRoot" class="loading-state">
+      <div>
+        <i class="ti ti-loader-2"></i>
+        <p class="mt-3 mb-0">Loading node content...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Feedback Modal -->
+  <div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+          <h4 class="modal-title fw-bold">Review Summary</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0 text-primary" id="feedbackStudentName">Student Name</h5>
+            <div id="feedbackStatus"></div>
+          </div>
+          <div class="bg-light p-3 rounded-3 mb-4 border"
+            style="font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word;"
+            id="feedbackContent">
+            ...
+          </div>
+          <div class="form-group">
+            <label class="form-label fw-bold"><i class="ti ti-message-circle-2 text-success"></i> Lecturer
+              Feedback</label>
+            <textarea id="feedbackInput" class="form-control rounded-3 bg-light border-0" rows="4"
+              placeholder="Write your constructive feedback here..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+          <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" id="btnSubmitFeedback"
+            onclick="submitFeedback()">Submit Feedback</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const token = localStorage.getItem('jwt_token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const pathNodeMatch = window.location.pathname.match(/\/lecturer\/learning-nodes\/(\d+)\/preview/);
+    const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
+    const pageRoot = document.getElementById('pageRoot');
+
+    function authHeaders(includeJson = true) {
+      const headers = { Authorization: `Bearer ${token}` };
+      if (includeJson) headers['Content-Type'] = 'application/json';
+      return headers;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    async function readError(response) {
+      const text = await response.text();
+      if (!text) return 'Something went wrong. Please try again.';
+      try {
+        const json = JSON.parse(text);
+        return json.message || json.error || text;
+      } catch {
+        return text;
+      }
+    }
+
+    function normalizeItemType(type) {
+      return String(type || '').toUpperCase();
+    }
+
+    function itemUrl(item) {
+      return item.fullUrl || item.url || '';
+    }
+
+    function youtubeEmbedUrl(url) {
+      const value = String(url || '');
+      const watchMatch = value.match(/[?&]v=([^&]+)/);
+      const shortMatch = value.match(/youtu\.be\/([^?&]+)/);
+      const embedMatch = value.match(/youtube\.com\/embed\/([^?&]+)/);
+      const id = watchMatch?.[1] || shortMatch?.[1] || embedMatch?.[1];
+      return id ? `https://www.youtube.com/embed/${id}` : '';
+    }
+
+    function statusLabel(status) { return status || 'Unknown'; }
+    function nodeTypeLabel(type) { return type || 'Node'; }
+    function resourceTypeLabel(type) { return normalizeItemType(type) || 'Resource'; }
+
+    function resourceIcon(type) {
+      const icons = { PDF: 'ti-file-type-pdf', CODE: 'ti-code', QUIZ: 'ti-brain', VIDEO: 'ti-video' };
+      return icons[normalizeItemType(type)] || 'ti-file';
+    }
+
+    function emptyLightTemplate(icon, message) {
+      return `
+      <div class="empty-light">
+        <div>
+          <i class="ti ${icon}"></i>
+          ${escapeHtml(message)}
+        </div>
+      </div>`;
+    }
+
+    function videoTemplate(node, items) {
+      const video = items.find((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item));
+
+      if (video) {
+        const url = itemUrl(video);
+        const embedUrl = youtubeEmbedUrl(url);
+        const player = embedUrl
+          ? `<iframe src="${escapeHtml(embedUrl)}" title="${escapeHtml(video.title || node.title || 'Lesson Video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+          : `<video controls preload="metadata" src="${escapeHtml(url)}"></video>`;
+        return `<div class="video-frame">${player}</div>`;
+      }
+
+      const pdf = items.find((item) => normalizeItemType(item.itemType) === 'PDF' && itemUrl(item));
+      if (pdf) {
+        const url = itemUrl(pdf);
+        // Embed PDF inside the frame
+        return `<div class="video-frame" style="height: 600px; padding-bottom: 0;"><iframe src="${escapeHtml(url)}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" title="${escapeHtml(pdf.title || node.title || 'Document')}"></iframe></div>`;
+      }
+
+      return `
+      <div class="empty-video">
+        <div>
+          <i class="ti ti-video-off"></i>
+          No video or document found for this lesson.
+        </div>
+      </div>`;
+    }
+
+    function resourceItemTemplate(item) {
+      const type = normalizeItemType(item.itemType);
+      const url = itemUrl(item);
+      const body = `
+      <span class="resource-icon"><i class="ti ${resourceIcon(type)}"></i></span>
+      <span>
+        <span class="resource-title">${escapeHtml(item.title || resourceTypeLabel(type))}</span>
+        <span class="resource-meta">${escapeHtml(resourceTypeLabel(type))}</span>
+      </span>
+      <i class="ti ti-arrow-up-right text-primary"></i>`;
+
+      return url
+        ? `<a class="resource-item" href="${escapeHtml(url)}" target="_blank" rel="noopener">${body}</a>`
+        : `<div class="resource-item">${body}</div>`;
+    }
+
+    function resourcesTemplate(items) {
+      const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
+      if (!resources.length) return emptyLightTemplate('ti-folder-off', 'No resources.');
+      return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
+    }
+
+    function commentsTemplate() {
+      return `
+      <div id="discussion-container" class="mt-3">
+         <div class="empty-light">
+            <div><i class="ti ti-loader-2 ti-spin"></i> Loading discussions...</div>
+         </div>
+      </div>
+      <div class="comment-compose" style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+        <textarea id="discussion-input" placeholder="Write a comment or question..." style="width: 100%; border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1; font-size: 0.875rem; resize: vertical; margin-bottom: 8px;" rows="3"></textarea>
+        <button id="discussion-submit" type="button" onclick="submitDiscussion()" style="width: 100%; padding: 8px; border-radius: 6px; background: #818cf8; color: white; border: none; font-weight: 500; cursor: pointer; transition: background 0.2s;">Send Comment</button>
+      </div>`;
+    }
+
+    function renderDiscussionTree(discussions) {
+      if (!discussions || discussions.length === 0) {
+        return emptyLightTemplate('ti-message-off', 'No comments or questions yet.');
+      }
+
+      let html = '<div class="comment-list" style="max-height: 500px; overflow-y: auto; padding-right: 10px;">';
+      discussions.forEach(d => {
+        html += renderDiscussionItem(d, false, null);
+      });
+      html += '</div>';
+
+      // Setup button enable/disable logic based on input
+      setTimeout(() => {
+        const input = document.getElementById('discussion-input');
+        const btn = document.getElementById('discussion-submit');
+        if (input && btn) {
+          input.addEventListener('input', () => {
+            btn.disabled = input.value.trim().length === 0;
+            btn.style.background = btn.disabled ? '#a5b4fc' : '#6366f1';
+          });
+          btn.disabled = input.value.trim().length === 0;
+          btn.style.background = btn.disabled ? '#a5b4fc' : '#6366f1';
+        }
+      }, 100);
+
+      return html;
+    }
+
+    function renderDiscussionItem(d, isReply = false, rootId = null) {
+      const isPinned = d.pinned ? `<span class="badge bg-warning-subtle text-warning ms-2" style="font-size: 0.6rem;"><i class="ti ti-pin"></i> Pinned</span>` : '';
+      const isSolved = d.status === 'SOLVED' ? `<span class="badge bg-success-subtle text-success ms-2" style="font-size: 0.6rem;"><i class="ti ti-check"></i> Solved</span>` : '';
+
+      const roleBadge = d.authorRole === 'LECTURER' ? `<span class="badge bg-primary-subtle text-primary ms-2" style="font-size: 0.6rem;">Lecturer</span>` :
+        (d.authorRole === 'SUPPORTER' ? `<span class="badge bg-info-subtle text-info ms-2" style="font-size: 0.6rem;">Supporter</span>` : '');
+
+      const dateStr = new Date(d.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      const defaultAvt = '/assets/images/avatar-1.jpg';
+      const avatar = d.authorAvatar || defaultAvt;
+      const author = d.authorName || 'Student';
+      const safeAuthor = author.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const currentRootId = rootId || d.id;
+
+      let moderationButtons = '';
+      if (!isReply) {
+        moderationButtons = `
+             <button onclick="toggleSolved(${d.id})" title="Mark as Solved" style="border:none; background:none; color:#10b981; cursor:pointer; padding:0; margin-right: 8px;">Solved</button>
+             <button onclick="togglePin(${d.id})" title="Pin/Unpin" style="border:none; background:none; color:#f59e0b; cursor:pointer; padding:0; margin-right: 8px;">Pin</button>
+         `;
+      }
+      moderationButtons += `
+         <button onclick="deleteDiscussion(${d.id})" title="Delete" style="border:none; background:none; color:#ef4444; cursor:pointer; padding:0;">Delete</button>
+      `;
+
+      let html = `
+      <div class="comment-item ${isReply ? 'comment-reply' : ''}" style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <img src="${escapeHtml(avatar)}" alt="avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='${defaultAvt}'">
+        <div style="flex: 1; background: #f8f9fa; border-radius: 8px; padding: 10px 14px; ${d.pinned ? 'border-left: 3px solid #f59e0b;' : ''}">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+            <div>
+              <strong style="font-size: 0.9rem; color: #1e293b;">${escapeHtml(author)}</strong>
+              ${roleBadge}
+              ${isPinned}
+              ${isSolved}
+            </div>
+            <span style="font-size: 0.75rem; color: #64748b;">${escapeHtml(dateStr)}</span>
+          </div>
+          <div style="font-size: 0.875rem; color: #334155; margin-bottom: 8px; white-space: pre-wrap;" id="comment-content-${d.id}">${escapeHtml(d.content)}</div>
+          
+          <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #64748b; justify-content: space-between;">
+            <div>
+              <button type="button" onclick="openReplyBox(${currentRootId}, '${safeAuthor}')" style="border:none; background:none; color:#3b82f6; cursor:pointer; padding:0; font-weight: 500;">Reply</button>
+            </div>
+            <div>
+              ${moderationButtons}
+            </div>
+          </div>
+
+          <!-- Reply Form -->
+          ${!isReply ? `
+          <div id="reply-form-${d.id}" style="display: none; margin-top: 12px;">
+            <textarea id="reply-input-${d.id}" placeholder="Write a reply..." class="form-control" style="width: 100%; border-radius: 6px; padding: 8px; border: 1px solid #e2e8f0; font-size: 0.875rem; margin-bottom: 8px;" rows="2"></textarea>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" onclick="submitDiscussion(${d.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #3b82f6; color: white; border: none; cursor: pointer;">Reply</button>
+              <button type="button" onclick="hideReplyForm(${d.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+      `;
+
+      if (!isReply && d.replies && d.replies.length > 0) {
+        html += `<div style="padding-left: 32px; border-left: 2px solid #e2e8f0; margin-left: 16px; margin-bottom: 16px;">`;
+        d.replies.forEach(r => {
+          html += renderDiscussionItem(r, true, d.id);
+        });
+        html += `</div>`;
+      }
+
+      return html;
+    }
+
+    window.openReplyBox = function (rootId, mentionName) {
+      const form = document.getElementById(`reply-form-${rootId}`);
+      const input = document.getElementById(`reply-input-${rootId}`);
+      if (form && input) {
+        form.style.display = 'block';
+        if (mentionName && !input.value.includes(`@${mentionName}`)) {
+          input.value = `@${mentionName} ${input.value}`;
+        }
+        input.focus();
+        const val = input.value;
+        input.value = '';
+        input.value = val;
+      }
+    };
+
+    window.hideReplyForm = function (id) {
+      const form = document.getElementById(`reply-form-${id}`);
+      if (form) form.style.display = 'none';
+    };
+
+
+    async function toggleSolved(id) {
+      await fetch(`/api/nodes/${nodeId}/discussions/${id}/solved`, { method: 'PUT', headers: authHeaders(false) });
+      loadDiscussions();
+    }
+    async function togglePin(id) {
+      await fetch(`/api/nodes/${nodeId}/discussions/${id}/pin`, { method: 'PUT', headers: authHeaders(false) });
+      loadDiscussions();
+    }
+    async function deleteDiscussion(id) {
+      await fetch(`/api/nodes/${nodeId}/discussions/${id}`, { method: 'DELETE', headers: authHeaders(false) });
+      loadDiscussions();
+    }
+
+    let currentDiscussions = null;
+    async function loadDiscussions() {
+      const container = document.getElementById('discussion-container');
+      if (!container) return;
+      try {
+        const res = await fetch(`/api/nodes/${nodeId}/discussions`, { headers: authHeaders(false) });
+        if (res.ok) {
+          const discussions = await res.json();
+          if (JSON.stringify(currentDiscussions) !== JSON.stringify(discussions)) {
+            currentDiscussions = discussions;
+            container.innerHTML = renderDiscussionTree(discussions);
+            const countSpans = document.querySelectorAll('.discussions-count');
+            countSpans.forEach(el => el.textContent = discussions.length + ' comments');
+          }
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    async function submitDiscussion(parentId = null) {
+      const inputId = parentId ? 'reply-input-' + parentId : 'discussion-input';
+      const inputEl = document.getElementById(inputId);
+      const content = inputEl.value.trim();
+      if (!content) return;
+
+      const payload = { content: content };
+      if (parentId) payload.parentId = parentId;
+
+      try {
+        const res = await fetch(`/api/nodes/${nodeId}/discussions`, {
+          method: 'POST',
+          headers: authHeaders(true),
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          inputEl.value = '';
+          if (parentId) hideReplyForm(parentId);
+          loadDiscussions();
+        } else { alert(await readError(res)); }
+      } catch (e) { alert('Failed to send comment'); }
+    }
+
+    function renderError(title, message) {
+      pageRoot.className = 'error-state';
+      pageRoot.innerHTML = `
+      <div>
+        <i class="ti ti-alert-circle"></i>
+        <h1>${escapeHtml(title)}</h1>
+        <p class="mb-4">${escapeHtml(message)}</p>
+        <a class="back-link" href="javascript:history.back()"><i class="ti ti-arrow-left"></i> Back to Roadmap</a>
+      </div>`;
+    }
+
+    function renderNodePage(node, items) {
+      if (node.nodeType === 'PRACTICE') {
+        pageRoot.className = 'practice-layout';
+        pageRoot.style.display = 'grid';
+        pageRoot.style.gridTemplateColumns = '1.2fr 1.8fr';
+        pageRoot.style.gap = '24px';
+        pageRoot.style.height = 'calc(100vh - 70px)';
+        pageRoot.style.padding = '24px';
+
+        pageRoot.innerHTML = `
+        <!-- CỘT TRÁI: ĐỀ BÀI -->
+        <section class="left-pane" style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: space-between;">
+            <div style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+              <i class="ti ti-file-description" style="color: #6366f1; font-size: 1.2rem;"></i> Problem Description
+            </div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.7rem;">Edit Mode</span>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column;">
+            <textarea id="problemDescriptionInput" class="form-control" style="flex: 1; width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; resize: none; font-size: 0.95rem; line-height: 1.6; padding: 12px;" placeholder="Viết mô tả bài toán bằng Markdown..."></textarea>
+          </div>
+        </section>
+
+        <!-- CỘT PHẢI: STARTER CODE -->
+        <section class="right-pane" style="background: #1e1e1e; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+          <div style="padding: 12px 20px; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between;">
+             <div style="color: #e5e5e5; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                <i class="ti ti-code" style="color: #6366f1; font-size: 1.1rem;"></i> Starter Code Template
+             </div>
+             <button id="btnSaveLab" class="btn btn-primary btn-sm rounded-pill fw-bold" style="padding: 4px 16px;"><i class="ti ti-device-floppy"></i> Save Lab Config</button>
+          </div>
+          <div id="editor" style="flex: 1; width: 100%;"></div>
+        </section>
+        `;
+        
+        document.getElementById('problemDescriptionInput').value = node.content || '';
+
+        // Initialize Monaco Editor
+        require(['vs/editor/editor.main'], function() {
+            const editorDiv = document.getElementById('editor');
+            if (editorDiv) {
+                const starterCode = node.starterCode || "public class Main {\n    public static void main(String[] args) {\n        // Viết code mẫu tại đây...\n    }\n}";
+                
+                window.myCodeEditor = monaco.editor.create(editorDiv, {
+                    value: starterCode,
+                    language: "java",
+                    theme: "vs-dark",
+                    automaticLayout: true,
+                    fontSize: 14,
+                    minimap: { enabled: false }
+                });
+            }
+        });
+
+        // Save Logic
+        document.getElementById('btnSaveLab').addEventListener('click', async function() {
+            const btn = this;
+            const content = document.getElementById('problemDescriptionInput').value;
+            const starterCode = window.myCodeEditor ? window.myCodeEditor.getValue() : '';
+            
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+            btn.disabled = true;
+
+            try {
+                // Determine spaceId
+                const spaceIdParams = urlParams.get('spaceId');
+                const spaceId = node.learningSpaceId || spaceIdParams || '1'; // Fallback
+                
+                const res = await fetch(`/api/learning-spaces/${spaceId}/learning-paths/${node.learningPathId}/learning-nodes/${node.id}`, {
+                    method: 'PUT',
+                    headers: authHeaders(true),
+                    body: JSON.stringify({
+                        title: node.title,
+                        description: node.description,
+                        nodeType: node.nodeType,
+                        content: content,
+                        starterCode: starterCode
+                    })
+                });
+                if (!res.ok) throw new Error(await readError(res));
+                
+                // Show success
+                btn.innerHTML = '<i class="ti ti-check"></i> Saved!';
+                btn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
+                    btn.classList.replace('btn-success', 'btn-primary');
+                    btn.disabled = false;
+                }, 2000);
+                
+            } catch (err) {
+                alert("Lỗi khi lưu Lab: " + err.message);
+                btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
+                btn.disabled = false;
+            }
+        });
+
+        return; // Dừng việc render UI bình thường
+      }
+
+      const resources = items.filter((item) => normalizeItemType(item.itemType) !== 'VIDEO');
+      const videoCount = items.some((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item)) ? 1 : 0;
+
+      pageRoot.className = 'lesson-layout';
+      pageRoot.innerHTML = `
+      <section class="player-column">
+        <section class="node-hero">
+          <span class="eyebrow"><i class="ti ti-eye"></i> Lecturer Preview Mode</span>
+          <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
+          <p class="node-description">${escapeHtml(node.content || 'No description.')}</p>
+          <div class="meta-row">
+            <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+            <span class="soft-chip discussions-count"><i class="ti ti-messages"></i>0 comments</span>
+          </div>
+        </section>
+
+        <section class="video-shell">
+          ${videoTemplate(node, items)}
+          <div class="player-controls">
+            <button class="server-pill active" type="button">Lesson Video</button>
+            <button class="server-pill" type="button">${resources.length} resource</button>
+            <button class="server-pill discussions-count" type="button">0 comments</button>
+          </div>
+        </section>
+      </section>
+
+      <aside class="side-column d-flex flex-column" style="max-height: 100vh;">
+        <ul class="nav nav-pills mb-3" id="side-tabs" role="tablist" style="background: white; padding: 0.5rem; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-shrink: 0;">
+          <li class="nav-item flex-grow-1 text-center" role="presentation">
+            <button class="nav-link active w-100 rounded-pill py-2" id="tab-qa" data-bs-toggle="pill" data-bs-target="#pane-qa" type="button" role="tab" style="font-size: 0.9rem; font-weight: 600;"><i class="ti ti-messages"></i> Q&A</button>
+          </li>
+          <li class="nav-item flex-grow-1 text-center" role="presentation">
+            <button class="nav-link w-100 rounded-pill py-2" id="tab-summaries" data-bs-toggle="pill" data-bs-target="#pane-summaries" type="button" role="tab" style="font-size: 0.9rem; font-weight: 600;"><i class="ti ti-checklist"></i> Submissions</button>
+          </li>
+        </ul>
+        <div class="tab-content flex-grow-1 d-flex flex-column" id="side-tabs-content" style="min-height: 0;">
+          <div class="tab-pane fade show active h-100" id="pane-qa" role="tabpanel">
+            <div class="d-flex flex-column h-100" style="min-height: 0;">
+              <section class="side-card d-flex flex-column" style="min-height: 0; flex: 1;">
+                <div class="side-card-header flex-shrink-0">
+                  <div>
+                    <h2>Moderation & Q&A</h2>
+                    <p>Reply to students, pin important answers, or mark questions as solved.</p>
+                  </div>
+                  <span class="soft-chip"><i class="ti ti-shield-check text-primary"></i></span>
+                </div>
+                ${commentsTemplate()}
+              </section>
+            </div>
+          </div>
+          <div class="tab-pane fade h-100" id="pane-summaries" role="tabpanel">
+            <div class="d-flex flex-column h-100" style="min-height: 0;">
+              <section class="side-card d-flex flex-column" style="min-height: 0; flex: 1;">
+                <div class="side-card-header flex-shrink-0">
+                  <div>
+                    <h2>Student Submissions</h2>
+                    <p>Review and grade lesson summaries.</p>
+                  </div>
+                  <span class="soft-chip"><i class="ti ti-checklist text-primary"></i></span>
+                </div>
+                <div id="summaries-container" style="overflow-y: auto; flex: 1; height: 100%; padding: 0.75rem;">
+                  <div class="text-center text-muted py-4"><i class="ti ti-loader ti-spin"></i> Loading...</div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Hidden file input for uploading resources -->
+      <input type="file" id="hiddenResourceInput" accept=".pdf,.doc,.docx,.ppt,.pptx" style="display:none;" onchange="uploadResource(this)">
+      `;
+    }
+
+    async function loadNodePage() {
+      if (!nodeId) {
+        renderError('Missing nodeId', 'Could not find the node to preview.');
+        return;
+      }
+
+      try {
+        const [nodeResponse, itemsResponse] = await Promise.all([
+          fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}`, { headers: authHeaders(false) }),
+          fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}/items`, { headers: authHeaders(false) })
+        ]);
+
+        if (!nodeResponse.ok) throw new Error(await readError(nodeResponse));
+
+        const node = await nodeResponse.json();
+      
+      const currentSpaceId = urlParams.get('spaceId');
+      if (!currentSpaceId && node.spaceId) {
+          document.getElementById('backLink').href = `/lecturer/space/${node.spaceId}`;
+      }
+        const items = itemsResponse.ok ? await itemsResponse.json() : [];
+
+        renderNodePage(node, items);
+        loadDiscussions();
+        loadSummaries();
+      } catch (error) {
+        renderError('Could not load node', error.message || 'Please try again later.');
+      }
+    }
+
+    // Handle resource upload
+    async function uploadResource(input) {
+      if (!input.files || input.files.length === 0) return;
+      const file = input.files[0];
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Basic loading indicator
+      input.value = ''; // Reset input
+      const btn = document.querySelector('.side-card-header .btn-outline-primary');
+      if (btn) btn.innerHTML = '<i class="ti ti-loader ti-spin"></i>';
+
+      try {
+        // 1. Upload file
+        const uploadRes = await fetch(`/api/learning-nodes/${nodeId}/items/upload-document`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        });
+        if (!uploadRes.ok) throw new Error("Lỗi tải file lên server");
+
+        const uploadData = await uploadRes.json();
+        const fileUrl = uploadData.url;
+
+        // 2. Save item to node
+        const saveRes = await fetch(`/api/learning-nodes/${nodeId}/items`, {
+          method: 'POST',
+          headers: authHeaders(true),
+          body: JSON.stringify({
+            title: file.name,
+            itemType: 'PDF',
+            url: fileUrl,
+            learningNodeId: nodeId
+          })
+        });
+
+        if (!saveRes.ok) throw new Error("Lỗi lưu thông tin file vào bài học");
+
+        // 3. Reload page to show new resource
+        loadNodePage();
+      } catch (err) {
+        alert(err.message);
+        if (btn) btn.innerHTML = '<i class="ti ti-upload"></i>';
+      }
+    }
+
+    let globalSummaries = [];
+
+    async function loadSummaries() {
+      const container = document.getElementById('summaries-container');
+      if (!container) return;
+      try {
+        const res = await fetch(`/api/lesson-summaries/learning-node/${nodeId}`, { headers: authHeaders(false) });
+        if (!res.ok) throw new Error("Failed to load summaries");
+        globalSummaries = await res.json();
+        renderSummaries(globalSummaries);
+      } catch (e) {
+        container.innerHTML = `<div class="alert alert-danger mx-3 mt-3">Failed to load submissions.</div>`;
+      }
+    }
+
+    function parseSummaryContent(raw) {
+      try {
+        const obj = JSON.parse(raw);
+        return obj;
+      } catch {
+        return { keyTakeaways: raw, confusingPoints: '' };
+      }
+    }
+
+    function formatSummaryHtml(raw) {
+      const parsed = parseSummaryContent(raw);
+      let html = '';
+      if (parsed.keyTakeaways) {
+        html += `<div class="mb-2"><span class="fw-bold" style="font-size:0.8rem;color:#2563eb;">📚 Key Takeaways:</span><div style="font-size:0.85rem;color:#334155;margin-top:2px;white-space:pre-wrap;">${escapeHtml(parsed.keyTakeaways)}</div></div>`;
+      }
+      if (parsed.confusingPoints) {
+        html += `<div><span class="fw-bold" style="font-size:0.8rem;color:#f59e0b;">❓ Confusing Points:</span><div style="font-size:0.85rem;color:#334155;margin-top:2px;white-space:pre-wrap;">${escapeHtml(parsed.confusingPoints)}</div></div>`;
+      }
+      return html || escapeHtml(raw);
+    }
+
+    function formatSummaryText(raw) {
+      const parsed = parseSummaryContent(raw);
+      let text = '';
+      if (parsed.keyTakeaways) text += '📚 Key Takeaways:\n' + parsed.keyTakeaways;
+      if (parsed.confusingPoints) text += '\n\n❓ Confusing Points:\n' + parsed.confusingPoints;
+      return text.trim() || raw;
+    }
+
+    function renderSummaries(summaries) {
+      const container = document.getElementById('summaries-container');
+      if (!summaries || summaries.length === 0) {
+        container.innerHTML = `<div class="text-center text-muted py-5"><i class="ti ti-ghost fs-1 d-block mb-2"></i>No summaries submitted yet.</div>`;
+        return;
+      }
+
+      let html = '';
+      summaries.forEach(s => {
+        const isReviewed = s.status === 'REVIEWED';
+        const badgeClass = isReviewed ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning';
+        const badgeText = isReviewed ? '<i class="ti ti-check"></i> Reviewed' : '<i class="ti ti-clock"></i> Pending';
+        const dateStr = new Date(s.submittedAt).toLocaleString();
+
+        html += `
+            <div class="p-3 bg-white rounded-3 mb-2 border shadow-sm">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <h6 class="fw-bold mb-0" style="font-size:0.875rem;"><i class="ti ti-user-circle text-primary"></i> ${escapeHtml(s.studentName || 'Student')}</h6>
+                  <div class="text-muted" style="font-size: 0.7rem;">${dateStr}</div>
+                </div>
+                <span class="badge ${badgeClass} rounded-pill">${badgeText}</span>
+              </div>
+              <div class="mb-2" style="font-size:0.82rem;">
+                ${formatSummaryHtml(s.summaryContent)}
+              </div>
+              <a href="/lecturer/summaries/${s.id}/review" class="btn btn-sm btn-primary w-100 rounded-pill text-white text-decoration-none d-flex align-items-center justify-content-center gap-1" style="padding:6px 0;">
+                <i class="ti ti-arrow-right"></i> ${isReviewed ? 'Update Feedback' : 'Review & Grade'}
+              </a>
+            </div>
+          `;
+      });
+      container.innerHTML = html;
+    }
+
+    let feedbackModal = null;
+
+    function openFeedbackModal(id) {
+      const summary = globalSummaries.find(s => s.id === id);
+      if (!summary) return;
+
+      document.getElementById('feedbackSummaryId').value = id;
+      document.getElementById('feedbackStudentName').innerText = summary.studentName || 'Student';
+      document.getElementById('feedbackContent').innerHTML = formatSummaryHtml(summary.summaryContent || '');
+      document.getElementById('feedbackInput').value = summary.lecturerFeedback || '';
+      document.getElementById('feedbackStatus').innerHTML = summary.status === 'REVIEWED'
+        ? '<span class="badge bg-success-subtle text-success"><i class="ti ti-check"></i> Reviewed</span>'
+        : '<span class="badge bg-warning-subtle text-warning"><i class="ti ti-clock"></i> Pending</span>';
+
+      if (!feedbackModal) {
+        feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+      }
+      feedbackModal.show();
+    }
+
+    async function submitFeedback() {
+      const id = document.getElementById('feedbackSummaryId').value;
+      const feedback = document.getElementById('feedbackInput').value.trim();
+      const btn = document.getElementById('btnSubmitFeedback');
+
+      if (!feedback) {
+        alert("Please enter feedback before submitting.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
+
+      try {
+        const res = await fetch(`/api/lesson-summaries/${id}/feedback`, {
+          method: 'PUT',
+          headers: authHeaders(true),
+          body: JSON.stringify({ lecturerFeedback: feedback })
+        });
+
+        if (!res.ok) throw new Error("Failed to submit feedback");
+
+        await loadSummaries();
+        feedbackModal.hide();
+      } catch (e) {
+        alert(e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Submit Feedback';
+      }
+    }
+
+    loadNodePage();
+
+    // --- POLLING LOGIC cho Discussion ---
+    function shouldPausePolling() {
+      const rootInput = document.getElementById('discussion-input');
+      if (rootInput && (document.activeElement === rootInput || rootInput.value.trim().length > 0)) return true;
+
+      const replyInputs = document.querySelectorAll('textarea[id^="reply-input-"]');
+      for (let input of replyInputs) {
+        if (document.activeElement === input || input.value.trim().length > 0) return true;
+      }
+
+      const feedbackModalEl = document.getElementById('feedbackModal');
+      if (feedbackModalEl && feedbackModalEl.classList.contains('show')) return true;
+
+      return false;
+    }
+
+    setInterval(() => {
+      if (!shouldPausePolling()) {
+        loadDiscussions();
+      }
+    }, 2000);
+
+  </script>
+</body>
+
+</html>
