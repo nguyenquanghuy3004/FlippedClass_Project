@@ -15,6 +15,7 @@
       window.location.href = '/login';
     }
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
   <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <script>
@@ -178,6 +179,7 @@
 
 <script>
 /* --- Inlined from student-learning-node.js --- */
+let myCodeEditor; // Biến toàn cục để lưu instance của editor
 const token = localStorage.getItem('jwt_token');
   const userId = localStorage.getItem('user_id');
   const urlParams = new URLSearchParams(window.location.search);
@@ -627,95 +629,223 @@ const token = localStorage.getItem('jwt_token');
     const discussions = items.filter((item) => normalizeItemType(item.itemType) === 'DISCUSSION');
     const videoCount = items.some((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item)) ? 1 : 0;
 
-    pageRoot.className = 'lesson-layout';
-    pageRoot.innerHTML = `
-      <section class="player-column">
-        <section class="node-hero">
-          <span class="eyebrow"><i class="ti ti-player-play"></i> Learning Spaces node</span>
-          <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
-          <p class="node-description">${escapeHtml(node.content || 'Your instructor has not added a description for this node yet.')}</p>
-          <div class="meta-row">
-            <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-            <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
-            <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Video available' : 'No video'}</span>
-            <span class="soft-chip"><i class="ti ti-folder-open"></i>${resources.length} resource</span>
-            <span class="soft-chip"><i class="ti ti-messages"></i>${discussions.length} comments</span>
-          </div>
-        </section>
+    if (node.nodeType === 'PRACTICE') {
+      pageRoot.className = 'lesson-layout practice-layout';
+      pageRoot.innerHTML = `
+        <style>
+          .practice-layout { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr) !important; align-items: stretch !important; }
+          .practice-left-col { display: flex; flex-direction: column; gap: 1rem; max-height: calc(100vh - 80px); overflow-y: auto; padding-right: 0.5rem; }
+          .practice-left-col::-webkit-scrollbar { width: 6px; }
+          .practice-left-col::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+          .practice-right-col { height: calc(100vh - 80px); position: sticky; top: 1rem; }
+        </style>
+        
+        <!-- Cột Trái: Đề Bài (Problem Description) -->
+        <section class="player-column practice-left-col">
+          <section class="node-hero" style="margin-bottom: 0;">
+            <span class="eyebrow" style="color: var(--fc-accent);"><i class="ti ti-code"></i> Coding Practice</span>
+            <h1 class="node-title">${escapeHtml(node.title || 'Practice Problem')}</h1>
+            <div class="meta-row mt-2">
+              <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+              <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
+            </div>
+          </section>
 
-        <section class="video-shell">
-          ${videoTemplate(node, items)}
-          <div class="player-controls">
-            <button class="server-pill active" type="button">Lesson Video</button>
-            <button class="server-pill" type="button">${resources.length} resource</button>
-            <button class="server-pill" type="button">${discussions.length} comments</button>
-          </div>
-        </section>
-
-        <section class="content-card">
-          <h2>Node Content</h2>
-          <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
-        </section>
-
-        <!-- START: LESSON SUMMARY UI -->
-        <section class="summary-card" style="margin-top: 1.5rem;">
-          <div class="summary-card-header">
-            <h2 class="summary-title">
-              <i class="ti ti-notebook"></i> Lesson Summary
+          <section class="content-card" style="margin-top: 0; flex: 1;">
+            <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+              <i class="ti ti-file-description" style="color: var(--fc-primary);"></i> Problem Description
             </h2>
-            <span id="summaryStatus" class="summary-status">
-              <i class="ti ti-check"></i> Saved successfully
-            </span>
-          </div>
-
-          <form id="summaryForm" class="summary-form">
-            <div>
-              <label for="keyTakeaways" class="summary-label">📚 Key takeaways from the lesson</label>
-              <textarea id="keyTakeaways" class="summary-textarea" placeholder="Record the important knowledge you learned from the lesson..." required></textarea>
+            <div style="font-size: 0.95rem; line-height: 1.6; color: #334155;">
+              ${node.content ? node.content : '<p class="text-muted">No specific problem description provided.</p>'}
             </div>
-
-            <div>
-              <label for="questions" class="summary-label">❓ Concepts you didn't understand</label>
-              <textarea id="questions" class="summary-textarea" placeholder="Record any content you are still wondering about or didn't understand..."></textarea>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
-              <button type="submit" id="saveSummaryBtn" class="btn-primary">
-                <i class="ti ti-device-floppy"></i> Save Summary
-              </button>
-            </div>
-          </form>
-        </section>
-        <!-- END: LESSON SUMMARY UI -->
-      </section>
-
-      <aside class="side-column">
-        <section class="side-card">
-          <div class="side-card-header">
-            <div>
-              <h2>Resources</h2>
-              <p>Documents, source code, or quizzes for this node.</p>
-            </div>
-            <span class="soft-chip">${resources.length}</span>
-          </div>
-          ${resourcesTemplate(items)}
+          </section>
         </section>
 
-        <section class="side-card">
-          <div class="side-card-header">
-            <div>
-              <h2>Comments</h2>
-              <p>Discussions and questions related to this node.</p>
+        <!-- Cột Phải: Online IDE -->
+        <aside class="side-column practice-right-col">
+          <section class="content-card" style="margin-top: 0; background-color: #1e1e1e; border: 1px solid #333; height: 100%; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-radius: 16px;">
+            
+            <!-- Toolbar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #2d2d2d; border-bottom: 1px solid #444;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="ti ti-brand-java" style="color: #ed8b00; font-size: 1.3rem;"></i>
+                    <span style="color: #fff; font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">Main.java</span>
+                </div>
+                <button id="btnRunCode" class="btn btn-success" style="background-color: #28a745; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                    <i class="ti ti-player-play-filled" style="font-size: 0.9rem;"></i> Run Code
+                </button>
             </div>
-            <span class="soft-chip" id="commentsCountBadge">0</span>
-          </div>
-          <div id="nodeCommentsContainer">
-            <div class="empty-light">
-              <div><i class="ti ti-loader-2"></i> Loading comments...</div>
+            
+            <!-- Code Editor Area -->
+            <div id="editor" style="flex: 1; width: 100%; min-height: 300px;"></div>
+            
+            <!-- Terminal Output -->
+            <div style="border-top: 1px solid #444; background: #000; height: 35%;">
+                <div style="padding: 6px 12px; background: #1a1a1a; border-bottom: 1px solid #333; color: #aaa; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px;">
+                    <i class="ti ti-terminal"></i> Console Output
+                </div>
+                <pre id="terminalOutput" style="background-color: #000; color: #00ff00; padding: 12px; margin: 0; height: calc(100% - 30px); overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border: none;">> Ready for execution...</pre>
             </div>
-          </div>
+          </section>
+        </aside>
+      `;
+    } else {
+      // Giao diện Bài học Lý thuyết / Video bình thường
+      pageRoot.className = 'lesson-layout';
+      pageRoot.innerHTML = `
+        <section class="player-column">
+          <section class="node-hero">
+            <span class="eyebrow"><i class="ti ti-player-play"></i> Learning Spaces node</span>
+            <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
+            <p class="node-description">${escapeHtml(node.content || 'Your instructor has not added a description for this node yet.')}</p>
+            <div class="meta-row">
+              <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+              <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
+              <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Video available' : 'No video'}</span>
+              <span class="soft-chip"><i class="ti ti-folder-open"></i>${resources.length} resource</span>
+              <span class="soft-chip"><i class="ti ti-messages"></i>${discussions.length} comments</span>
+            </div>
+          </section>
+
+          <section class="video-shell">
+            ${videoTemplate(node, items)}
+            <div class="player-controls">
+              <button class="server-pill active" type="button">Lesson Video</button>
+              <button class="server-pill" type="button">${resources.length} resource</button>
+              <button class="server-pill" type="button">${discussions.length} comments</button>
+            </div>
+          </section>
+
+          <section class="content-card">
+            <h2>Node Content</h2>
+            <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
+          </section>
+
+          <!-- START: LESSON SUMMARY UI -->
+          <section class="summary-card" style="margin-top: 1.5rem;">
+            <div class="summary-card-header">
+              <h2 class="summary-title">
+                <i class="ti ti-notebook"></i> Lesson Summary
+              </h2>
+              <span id="summaryStatus" class="summary-status">
+                <i class="ti ti-check"></i> Saved successfully
+              </span>
+            </div>
+
+            <form id="summaryForm" class="summary-form">
+              <div>
+                <label for="keyTakeaways" class="summary-label">📚 Key takeaways from the lesson</label>
+                <textarea id="keyTakeaways" class="summary-textarea" placeholder="Record the important knowledge you learned from the lesson..." required></textarea>
+              </div>
+
+              <div>
+                <label for="questions" class="summary-label">❓ Concepts you didn't understand</label>
+                <textarea id="questions" class="summary-textarea" placeholder="Record any content you are still wondering about or didn't understand..."></textarea>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                <button type="submit" id="saveSummaryBtn" class="btn-primary">
+                  <i class="ti ti-device-floppy"></i> Save Summary
+                </button>
+              </div>
+            </form>
+          </section>
+          <!-- END: LESSON SUMMARY UI -->
         </section>
-      </aside>`;
+
+        <aside class="side-column">
+          <section class="side-card">
+            <div class="side-card-header">
+              <div>
+                <h2>Resources</h2>
+                <p>Documents, source code, or quizzes for this node.</p>
+              </div>
+              <span class="soft-chip">${resources.length}</span>
+            </div>
+            ${resourcesTemplate(items)}
+          </section>
+
+          <section class="side-card">
+            <div class="side-card-header">
+              <div>
+                <h2>Comments</h2>
+                <p>Discussions and questions related to this node.</p>
+              </div>
+              <span class="soft-chip" id="commentsCountBadge">0</span>
+            </div>
+            <div id="nodeCommentsContainer">
+              <div class="empty-light">
+                <div><i class="ti ti-loader-2"></i> Loading comments...</div>
+              </div>
+            </div>
+          </section>
+        </aside>`;
+    }
+
+    // --- START: INIT MONACO EDITOR ---
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+        const editorDiv = document.getElementById('editor');
+        if (editorDiv) {
+            const storageKey = 'saved_code_node_' + nodeId;
+            const savedCode = localStorage.getItem(storageKey);
+            const defaultCode = "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n}";
+
+            myCodeEditor = monaco.editor.create(editorDiv, {
+                value: savedCode !== null ? savedCode : defaultCode,
+                language: "java",
+                theme: "vs-dark",
+                automaticLayout: true,
+                fontSize: 14,
+                minimap: { enabled: false }
+            });
+
+            // Auto-save: Tự động lưu vào trình duyệt mỗi khi gõ
+            myCodeEditor.onDidChangeModelContent(function() {
+                localStorage.setItem(storageKey, myCodeEditor.getValue());
+            });
+
+            // Backup save: Lưu lại trước khi trình duyệt bị F5 hoặc tắt
+            window.addEventListener('beforeunload', function() {
+                if (typeof myCodeEditor !== 'undefined') {
+                    localStorage.setItem(storageKey, myCodeEditor.getValue());
+                }
+            });
+        }
+    });
+    
+    const btnRunCode = document.getElementById('btnRunCode');
+    if (btnRunCode) {
+        btnRunCode.addEventListener('click', function() {
+            const terminal = document.getElementById('terminalOutput');
+            terminal.innerText = "> Đang biên dịch code. Vui lòng đợi Backend API...";
+            
+            if (typeof myCodeEditor !== 'undefined') {
+                const codeString = myCodeEditor.getValue();
+                
+                fetch('/api/compiler/execute', {
+                    method: 'POST',
+                    headers: authHeaders(), // Hàm này tự động chèn JWT Token của sinh viên vào
+                    body: JSON.stringify({ script: codeString })
+                })
+                .then(res => res.json())
+                .then(result => {
+                    // JDoodle trả về kết quả console ở trường "output"
+                    if (result.output) {
+                        terminal.innerText = "> " + result.output;
+                    } else if (result.error) {
+                        terminal.innerText = "> Lỗi Server Compiler: " + result.error;
+                    } else {
+                        terminal.innerText = "> " + JSON.stringify(result);
+                    }
+                })
+                .catch(err => {
+                    terminal.innerText = "> Lỗi mạng hoặc mất kết nối Backend: " + err.message;
+                });
+            }
+        });
+    }
+    // --- END: INIT MONACO EDITOR ---
 
     // --- START: HANDLE SUMMARY SUBMIT ---
     const summaryForm = document.getElementById('summaryForm');
