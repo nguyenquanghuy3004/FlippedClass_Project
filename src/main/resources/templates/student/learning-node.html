@@ -163,6 +163,7 @@
   </button>
   <div class="student-menu-panel" role="menu">
     <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+    <button class="student-menu-item" type="button" data-bs-toggle="modal" data-bs-target="#profileDetailModal" role="menuitem"><i class="ti ti-user-edit"></i><span>Edit Profile</span></button>
     <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
   </div>
 </div>
@@ -493,6 +494,25 @@ const token = localStorage.getItem('jwt_token');
       });
       btn.disabled = true;
       btn.style.opacity = '0.6';
+    }
+
+    const targetCommentId = urlParams.get('commentId');
+    if (targetCommentId && !window.hasScrolledToComment) {
+      window.hasScrolledToComment = true;
+      setTimeout(() => {
+        const commentEl = document.getElementById(`comment-content-${targetCommentId}`);
+        if (commentEl) {
+          commentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const parentBox = commentEl.parentElement;
+          if (parentBox) {
+            parentBox.style.transition = 'background-color 1.5s ease-in-out';
+            parentBox.style.backgroundColor = '#e0f2fe';
+            setTimeout(() => {
+              parentBox.style.backgroundColor = '#f8f9fa';
+            }, 3000);
+          }
+        }
+      }, 500);
     }
   }
 
@@ -920,6 +940,23 @@ const token = localStorage.getItem('jwt_token');
       const sortedItems = Array.isArray(items)
         ? [...items].sort((a, b) => (a.position || 0) - (b.position || 0))
         : [];
+
+      // Tự động chuyển hướng nếu node chứa bài Quiz
+      const quizItem = sortedItems.find(i => String(i.itemType || '').toUpperCase() === 'QUIZ');
+      if (quizItem && quizItem.quizId) {
+        window.location.replace(`/student/take-quiz?quizId=${encodeURIComponent(quizItem.quizId)}`);
+        return;
+      }
+
+      // Tự động chuyển hướng nếu node là dạng Reading/Document (chỉ có tài liệu đọc)
+      const hasVideo = sortedItems.some(i => String(i.itemType || '').toUpperCase() === 'VIDEO');
+      if (!hasVideo) {
+        const docItem = sortedItems.find(i => ['PDF', 'DOC', 'DOCUMENT'].includes(String(i.itemType || '').toUpperCase()) && (i.fullUrl || i.url));
+        if (docItem) {
+          window.location.replace(docItem.fullUrl || docItem.url);
+          return;
+        }
+      }
 
       // Hiển thị nội dung ra giao diện
       renderNodePage(node, sortedItems);
