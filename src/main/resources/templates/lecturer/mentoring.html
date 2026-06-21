@@ -17,11 +17,16 @@
                 <p class="text-muted mb-0">Manage supporters and assign mentoring pairs.</p>
             </div>
             <div>
-                <button class="btn btn-primary rounded-pill shadow-sm" onclick="autoMatchPairs()">
+                <button class="btn btn-primary rounded-pill shadow-sm" onclick="autoMatchPairs()" id="autoMatchBtn" style="display:none;">
                     <i class="ti ti-wand"></i> Auto Match Pairs
                 </button>
             </div>
         </div>
+
+        <!-- Space Selection Tabs -->
+        <ul class="nav nav-pills mb-4 border-bottom pb-3" id="spaceTabs">
+            <!-- Tabs will be loaded here via JS -->
+        </ul>
 
         <div id="loader" class="text-center py-5 d-none">
             <div class="spinner-border text-primary" role="status">
@@ -75,14 +80,64 @@
 
 <th:block layout:fragment="scripts">
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const spaceId = urlParams.get('spaceId') || 1; // Defaulting to 1 for demo if missing
+        let currentSpaceId = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            loadStudents();
+            loadMySpaces();
         });
 
+        async function loadMySpaces() {
+            try {
+                const token = localStorage.getItem('jwt_token');
+                const response = await fetch(`/api/learning-spaces/my-spaces`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Failed to load spaces');
+                const spaces = await response.json();
+                
+                const tabsContainer = document.getElementById('spaceTabs');
+                tabsContainer.innerHTML = '';
+                
+                if (spaces.length === 0) {
+                    tabsContainer.innerHTML = '<li class="nav-item"><span class="nav-link disabled">Chưa có lớp học nào</span></li>';
+                    document.getElementById('mentoringContent').innerHTML = '<div class="col-12 text-center text-muted py-5">Vui lòng tạo lớp học trước.</div>';
+                    return;
+                }
+
+                spaces.forEach((space, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'nav-item me-2 mb-2';
+                    const a = document.createElement('a');
+                    a.className = `nav-link px-4 rounded-pill ${index === 0 ? 'active shadow-sm' : 'bg-light text-dark border'}`;
+                    a.href = 'javascript:void(0)';
+                    a.innerText = space.name || `Class ${space.id}`;
+                    a.onclick = () => selectSpace(space.id, a);
+                    li.appendChild(a);
+                    tabsContainer.appendChild(li);
+                });
+
+                document.getElementById('autoMatchBtn').style.display = 'block';
+                currentSpaceId = spaces[0].id;
+                loadStudents();
+            } catch (error) {
+                console.error(error);
+                alert("Lỗi khi tải danh sách lớp học.");
+            }
+        }
+
+        function selectSpace(spaceId, element) {
+            currentSpaceId = spaceId;
+            document.querySelectorAll('#spaceTabs .nav-link').forEach(el => {
+                el.classList.remove('active', 'shadow-sm');
+                el.classList.add('bg-light', 'text-dark', 'border');
+            });
+            element.classList.remove('bg-light', 'text-dark', 'border');
+            element.classList.add('active', 'shadow-sm');
+            loadStudents();
+        }
+
         async function loadStudents() {
+            if (!currentSpaceId) return;
             const loader = document.getElementById('loader');
             const content = document.getElementById('mentoringContent');
             
@@ -91,7 +146,7 @@
 
             try {
                 const token = localStorage.getItem('jwt_token');
-                const response = await fetch(`/api/learning-spaces/${spaceId}/mentoring/students`, {
+                const response = await fetch(`/api/learning-spaces/${currentSpaceId}/mentoring/students`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
@@ -177,7 +232,7 @@
             
             try {
                 const token = localStorage.getItem('jwt_token');
-                const response = await fetch(`/api/learning-spaces/${spaceId}/mentoring/promote/${studentId}`, {
+                const response = await fetch(`/api/learning-spaces/${currentSpaceId}/mentoring/promote/${studentId}`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -205,7 +260,7 @@
             
             try {
                 const token = localStorage.getItem('jwt_token');
-                const response = await fetch(`/api/learning-spaces/${spaceId}/mentoring/auto-match`, {
+                const response = await fetch(`/api/learning-spaces/${currentSpaceId}/mentoring/auto-match`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
