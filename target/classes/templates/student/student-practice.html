@@ -195,6 +195,7 @@
     const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
     const pageRoot = document.getElementById('pageRoot');
     const studentName = document.getElementById('studentName');
+    let currentNode = null;
 
     studentName.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Student';
 
@@ -727,14 +728,23 @@
         <!-- Cột Trái: Đề Bài (Problem Description) -->
         <section class="lc-left-pane">
           <div class="lc-tabs-header">
-            <div class="lc-tab active"><i class="ti ti-file-description" style="color: #007bff;"></i> Description</div>
-            <div class="lc-tab"><i class="ti ti-bulb"></i> Editorial</div>
-            <div class="lc-tab"><i class="ti ti-flask"></i> Solutions</div>
-            <div class="lc-tab"><i class="ti ti-history"></i> Submissions</div>
+            <div class="lc-tab active" data-target="lc-desc-pane"><i class="ti ti-file-description" style="color: #007bff;"></i> Description</div>
+            <div class="lc-tab" data-target="lc-editorial-pane"><i class="ti ti-bulb"></i> Editorial</div>
+            <div class="lc-tab" data-target="lc-solutions-pane"><i class="ti ti-flask"></i> Solutions</div>
           </div>
-          <div class="lc-content">
+          <div class="lc-content lc-pane-content" id="lc-desc-pane">
             <h1>${escapeHtml(node.title || 'Practice Problem')}</h1>
-            ${node.content ? node.content : '<p class="text-muted">No specific problem description provided.</p>'}
+            <div style="white-space: pre-wrap;">${node.content ? escapeHtml(node.content) : '<p class="text-muted">No specific problem description provided.</p>'}</div>
+          </div>
+          <div class="lc-content lc-pane-content" id="lc-editorial-pane" style="display:none;">
+            <p class="text-muted">Editorial is not available yet.</p>
+          </div>
+          <div class="lc-content lc-pane-content" id="lc-solutions-pane" style="display:none;">
+            <div class="text-center" style="padding-top: 40px; color: #8c8c8c;">
+                <i class="ti ti-lock" style="font-size: 3rem; opacity: 0.5;"></i>
+                <h4 class="mt-3">Solution Locked</h4>
+                <p>You must get an <strong>Accepted</strong> submission to view the instructor's solution.</p>
+            </div>
           </div>
         </section>
 
@@ -817,8 +827,6 @@
           </div>
         </aside>
       `;
-    }
-
       // --- START: INIT MONACO EDITOR ---
       require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
@@ -840,6 +848,20 @@
               automaticLayout: true,
               fontSize: 14,
               minimap: { enabled: false }
+            });
+
+            // Tab switching logic for Left Pane
+            const tabs = document.querySelectorAll('.lc-tab');
+            const panes = document.querySelectorAll('.lc-pane-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const targetId = tab.getAttribute('data-target');
+                    panes.forEach(pane => {
+                        pane.style.display = pane.id === targetId ? 'block' : 'none';
+                    });
+                });
             });
 
             // Auto-save
@@ -1008,6 +1030,17 @@
                         }
 
                         container.innerHTML = html;
+
+                        // Unlock Solution if allPassed
+                        if (result.allPassed && currentNode) {
+                            const solutionsPane = document.getElementById('lc-solutions-pane');
+                            if (solutionsPane) {
+                                const solutionContent = currentNode.solutionCode 
+                                    ? `<pre style="background: #2d2d2d; color: #fff; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${escapeHtml(currentNode.solutionCode)}</code></pre>` 
+                                    : '<p class="text-muted">No solution provided by the instructor.</p>';
+                                solutionsPane.innerHTML = `<h3>Instructor's Solution</h3><p class="text-success"><i class="ti ti-check"></i> You have unlocked the solution!</p>${solutionContent}`;
+                            }
+                        }
                     })
                     .catch(err => {
                         container.innerHTML = `
@@ -1017,7 +1050,9 @@
                             </div>
                         `;
                     })
-                    .finally(() => btnSubmitCode.disabled = false);
+                    .finally(() => {
+                        btnSubmitCode.disabled = false;
+                    });
                 }
             });
         }
@@ -1092,6 +1127,7 @@
         }
 
         const node = await nodeResponse.json();
+        currentNode = node;
         const items = itemsResponse.ok ? await itemsResponse.json() : [];
         // Sắp xếp các tài liệu theo thứ tự (position)
         const sortedItems = Array.isArray(items)

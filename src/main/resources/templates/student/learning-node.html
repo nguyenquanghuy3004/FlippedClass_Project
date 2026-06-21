@@ -665,7 +665,7 @@
           <section class="node-hero">
             <span class="eyebrow"><i class="ti ti-player-play"></i> Learning Spaces node</span>
             <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
-            <p class="node-description">${escapeHtml(node.content || 'Your instructor has not added a description for this node yet.')}</p>
+            <p class="node-description" style="white-space: pre-wrap;">${escapeHtml(node.content || 'Your instructor has not added a description for this node yet.')}</p>
             <div class="meta-row">
               <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
               <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
@@ -686,7 +686,7 @@
 
           <section class="content-card">
             <h2>Node Content</h2>
-            <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
+            <p style="white-space: pre-wrap;">${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
           </section>
 
           <!-- START: LESSON SUMMARY UI -->

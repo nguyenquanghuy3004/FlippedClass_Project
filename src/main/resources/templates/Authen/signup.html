@@ -15,85 +15,88 @@
 
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  <link rel="stylesheet" th:href="@{/css/auth.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/auth.css}">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
-<body class="bg-light">
-<div class="container d-flex align-items-center justify-content-center min-vh-100 py-4">
-  <div class="card shadow-sm border-0" style="max-width:480px; width:100%;">
-    <div class="card-body p-4 p-sm-5">
-      <div class="text-center mb-4">
-        <a href="/" class="mb-2 d-inline-flex align-items-center text-decoration-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#198754"
-               class="bi bi-mortarboard-fill me-2" viewBox="0 0 16 16">
-            <path
-                    d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z" />
-            <path
-                    d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z" />
-          </svg>
-          <span class="h4 mb-0 fw-bold text-success">FlippedClass</span>
-        </a>
-        <h1 class="card-title h4 fw-bold mt-3">Đăng ký tài khoản mới</h1>
+<body class="auth-fullbg">
+<div class="auth-fullbg-overlay"></div>
+<div class="auth-center-wrap">
+  <div class="auth-glass-card" style="width: 480px; max-width: 90vw;">
+    <div class="text-center mb-4">
+      <a href="/" class="mb-2 d-inline-flex align-items-center text-decoration-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-mortarboard-fill me-2" viewBox="0 0 16 16">
+          <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z"/>
+          <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z"/>
+        </svg>
+        <span class="auth-glass-logo">FlippedClass</span>
+      </a>
+      <p class="auth-glass-sub text-center mb-4">Create a new account</p>
+    </div>
+
+    <form id="signupForm" class="needs-validation" novalidate>
+
+      <div class="mb-3">
+        <label for="fullName" class="auth-glass-label">Full Name <span class="text-danger">*</span></label>
+        <input id="fullName" type="text" class="auth-glass-input" placeholder="e.g. John Doe" required>
+        <div class="invalid-feedback">Please enter your full name.</div>
       </div>
 
-      <form id="signupForm" class="needs-validation mt-3" novalidate>
-
-        <div class="mb-3">
-          <label for="fullName" class="form-label small fw-bold">Họ và tên <span class="text-danger">*</span></label>
-          <input id="fullName" type="text" class="form-control" placeholder="Nguyễn Văn A" required>
-          <div class="invalid-feedback">Vui lòng nhập họ tên của bạn.</div>
-        </div>
-
-        <div class="mb-3">
-          <label for="username" class="form-label small fw-bold">Tên đăng nhập <span
-                  class="text-danger">*</span></label>
-          <input id="username" type="text" class="form-control" placeholder="Tên viết liền không dấu, VD: nvana"
-                 required minlength="3">
-          <div class="invalid-feedback">Tên đăng nhập tối thiểu 3 ký tự.</div>
-        </div>
-
-        <div class="mb-3">
-          <label for="email" class="form-label small fw-bold">Địa chỉ Email <span class="text-danger">*</span></label>
-          <input id="email" type="email" class="form-control" placeholder="name@gamil.com" required>
-          <div class="invalid-feedback">Vui lòng nhập một email hợp lệ.</div>
-        </div>
-
-        <div class="mb-3">
-          <label for="password" class="form-label small fw-bold">Mật khẩu <span class="text-danger">*</span></label>
-          <input id="password" type="password" class="form-control" placeholder="Tạo mật khẩu" required minlength="6">
-          <div class="invalid-feedback">Tối thiểu 6 ký tự.</div>
-        </div>
-
-        <div class="mb-3">
-          <label for="confirmPassword" class="form-label small fw-bold">Xác nhận mật khẩu <span
-                  class="text-danger">*</span></label>
-          <input id="confirmPassword" type="password" class="form-control" placeholder="Nhập lại mật khẩu" required>
-          <div class="invalid-feedback">Mật khẩu không khớp.</div>
-        </div>
-
-        <div id="errorMsg" class="text-danger small mb-3 text-center fw-bold" style="display: none;"></div>
-        <div id="successMsg" class="text-success small mb-3 text-center fw-bold" style="display: none;"></div>
-
-        <button class="btn btn-success w-100 mb-3 fw-bold" type="submit">Đăng ký</button>
-
-        <div class="text-center text-muted small mb-3">Hoặc đăng ký bằng</div>
-
-        <div id="g_id_onload"
-             data-client_id="790885197434-tj8p3el3prc6n6fakj3udbuoqml6dpq1.apps.googleusercontent.com"
-             data-context="signup" data-ux_mode="popup" data-callback="handleGoogleLogin" data-auto_prompt="false">
-        </div>
-
-        <div class="g_id_signin d-flex justify-content-center w-100 mb-3" data-type="standard"
-             data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large"
-             data-logo_alignment="left">
-        </div>
-
-      </form>
-
-      <div class="text-center mt-3 small text-muted">
-        Đã có tài khoản? <a href="/login" class="text-success fw-bold text-decoration-none">Đăng nhập </a>
+      <div class="mb-3">
+        <label for="username" class="auth-glass-label">Username <span class="text-danger">*</span></label>
+        <input id="username" type="text" class="auth-glass-input" placeholder="No spaces, e.g. johndoe" required minlength="3">
+        <div class="invalid-feedback">Username must be at least 3 characters.</div>
       </div>
+
+      <div class="mb-3">
+        <label for="email" class="auth-glass-label">Email Address <span class="text-danger">*</span></label>
+        <input id="email" type="email" class="auth-glass-input" placeholder="name@example.com" required>
+        <div class="invalid-feedback">Please enter a valid email address.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="auth-glass-label">Password <span class="text-danger">*</span></label>
+        <div class="position-relative">
+          <input id="password" type="password" class="auth-glass-input" placeholder="Create a password" required minlength="6" style="padding-right: 45px;">
+          <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none text-muted" tabindex="-1" onclick="togglePassword('password', this)" style="padding: 0 12px; z-index: 5;">
+            <i class="ti ti-eye fs-5" style="color: rgba(100,100,100,0.5);"></i>
+          </button>
+          <div class="invalid-feedback">Password must be at least 6 characters.</div>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="confirmPassword" class="auth-glass-label">Confirm Password <span class="text-danger">*</span></label>
+        <div class="position-relative">
+          <input id="confirmPassword" type="password" class="auth-glass-input" placeholder="Confirm your password" required style="padding-right: 45px;">
+          <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none text-muted" tabindex="-1" onclick="togglePassword('confirmPassword', this)" style="padding: 0 12px; z-index: 5;">
+            <i class="ti ti-eye fs-5" style="color: rgba(100,100,100,0.5);"></i>
+          </button>
+          <div class="invalid-feedback">Passwords do not match.</div>
+        </div>
+      </div>
+
+      <div id="errorMsg" class="auth-msg auth-msg-error" style="display: none;"></div>
+      <div id="successMsg" class="auth-msg auth-msg-success" style="display: none; color: #10b981; font-weight: 500; font-size: 0.9rem; text-align: center; margin-bottom: 15px;"></div>
+
+      <button class="auth-glass-btn" type="submit">Sign Up</button>
+
+      <div class="auth-glass-divider">Or sign up with</div>
+
+      <div id="g_id_onload"
+           data-client_id="790885197434-tj8p3el3prc6n6fakj3udbuoqml6dpq1.apps.googleusercontent.com"
+           data-context="signup" data-ux_mode="popup" data-callback="handleGoogleLogin" data-auto_prompt="false">
+      </div>
+
+      <div class="g_id_signin d-flex justify-content-center w-100 mb-3" data-type="standard"
+           data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large"
+           data-logo_alignment="left">
+      </div>
+
+    </form>
+
+    <div class="text-center mt-3 auth-glass-footer">
+      Already have an account? <a href="/login">Sign In here.</a>
     </div>
   </div>
 </div>
@@ -102,7 +105,7 @@
   document.getElementById('confirmPassword').addEventListener('input', function () {
     const password = document.getElementById('password').value;
     if (this.value !== password) {
-      this.setCustomValidity('Mật khẩu không khớp.');
+      this.setCustomValidity('Passwords do not match.');
     } else {
       this.setCustomValidity('');
     }
@@ -124,16 +127,24 @@
     errorMsg.style.display = 'none';
     successMsg.style.display = 'none';
 
-    if (!fullName || !username || !email || !password || (password !== confirmPassword)) {
-      // Trigger browser default validation UI if needed, or simply return
+    if (!this.checkValidity()) {
+      e.stopPropagation();
+      this.classList.add('was-validated');
       if (password !== confirmPassword) {
-        errorMsg.textContent = 'Mật khẩu xác nhận không khớp.';
+        errorMsg.textContent = 'Passwords do not match.';
         errorMsg.style.display = 'block';
       }
       return;
     }
+    this.classList.add('was-validated');
 
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Đang xử lý...';
+    if (password !== confirmPassword) {
+      errorMsg.textContent = 'Passwords do not match.';
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
     btn.disabled = true;
 
     fetch('/api/auth/signup', {
@@ -150,12 +161,12 @@
     })
             .then(response => {
               if (!response.ok) {
-                return response.json().then(err => { throw new Error(err.message || 'Đăng ký thất bại.'); });
+                return response.json().then(err => { throw new Error(err.message || 'Registration failed.'); });
               }
               return response.json();
             })
             .then(data => {
-              successMsg.textContent = 'Đăng ký thành công! Đang chuyển hướng tới trang Đăng nhập...';
+              successMsg.textContent = 'Registration successful! Redirecting to Sign In...';
               successMsg.style.display = 'block';
               setTimeout(() => {
                 window.location.href = '/login';
@@ -164,7 +175,7 @@
             .catch(error => {
               errorMsg.textContent = error.message;
               errorMsg.style.display = 'block';
-              btn.innerHTML = 'Đăng ký';
+              btn.innerHTML = 'Sign Up';
               btn.disabled = false;
             });
   });
@@ -184,7 +195,7 @@
     })
             .then(res => {
               if (!res.ok) {
-                throw new Error('Đăng nhập Google thất bại.');
+                throw new Error('Google sign up failed.');
               }
               return res.json();
             })
@@ -211,6 +222,20 @@
               errorMsg.textContent = error.message;
               errorMsg.style.display = 'block';
             });
+  }
+
+  function togglePassword(inputId, btnElement) {
+    const input = document.getElementById(inputId);
+    const icon = btnElement.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('ti-eye');
+      icon.classList.add('ti-eye-off');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('ti-eye-off');
+      icon.classList.add('ti-eye');
+    }
   }
 </script>
 

@@ -13,5 +13,6 @@ public class  CreateLearningNodeRequest {
     private String solutionCode;
     private Long learningPathId;
     private String nodeType;
+    private Long prerequisiteNodeId;
 }
 

@@ -788,9 +788,9 @@
 
       return `
       <article class="path-card">
-        <header class="path-header">
+        <header class="path-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#timeline-${path.id || index}" aria-expanded="true" aria-controls="timeline-${path.id || index}" onclick="const i=this.querySelector('.chevron-toggle'); if(i.classList.contains('ti-chevron-down')){i.classList.replace('ti-chevron-down','ti-chevron-right')}else{i.classList.replace('ti-chevron-right','ti-chevron-down')}">
           <div>
-            <span class="path-kicker">Course ${index + 1}</span>
+            <span class="path-kicker">Course ${index + 1} <i class="ti ti-chevron-down chevron-toggle" style="margin-left: 6px; font-weight: bold;"></i></span>
             <h3 class="path-title">${escapeHtml(path.title || 'Untitled Course')}</h3>
           </div>
           <div class="path-progress">
@@ -801,7 +801,7 @@
             <div class="small text-muted fw-semibold mt-2">${nodes.length} node</div>
           </div>
         </header>
-        <div class="node-timeline">
+        <div class="node-timeline collapse show" id="timeline-${path.id || index}">
           ${nodes.length ? nodes.map((node, nodeIndex) => nodeTemplate(node, nodeIndex)).join('') : emptyNodesTemplate()}
         </div>
       </article>`;
@@ -812,19 +812,23 @@
         nodeId: node.id,
         spaceId: state.selectedSpaceId || ''
       });
+      const isLocked = node.status === 'LOCKED';
+      const linkProps = isLocked 
+          ? `style="opacity: 0.6; cursor: not-allowed; background-color: #f1f5f9;" onclick="event.preventDefault(); Swal.fire('Locked', 'Please complete the prerequisite lesson first.', 'warning');"`
+          : `href="/student/learning-node?${params.toString()}"`;
 
       return `
-      <a class="node-card" href="/student/learning-node?${params.toString()}">
-        <div class="node-index">${index + 1}</div>
+      <a class="node-card" ${linkProps}>
+        <div class="node-index" ${isLocked ? 'style="background-color: #cbd5e1; color: #64748b;"' : ''}>${index + 1}</div>
         <div>
           <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
-          <p class="node-content">${escapeHtml(node.content || 'Click to open this node learning page.')}</p>
+          <p class="node-content" style="white-space: pre-wrap;">${isLocked ? 'Complete the prerequisite lesson to unlock.' : escapeHtml(node.content || 'Click to open this node learning page.')}</p>
         </div>
         <div class="node-badges">
           <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-          <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
+          <span class="soft-chip"><i class="ti ${isLocked ? 'ti-lock' : 'ti-lock-open'}"></i>${isLocked ? 'Locked' : escapeHtml(statusLabel(node.status))}</span>
         </div>
-        <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
+        <span class="node-open" aria-hidden="true"><i class="ti ${isLocked ? 'ti-lock' : 'ti-arrow-up-right'}"></i></span>
       </a>`;
     }
 

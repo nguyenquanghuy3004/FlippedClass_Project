@@ -21,6 +21,7 @@ public class LearningNodeResponse {
     private String content;
     private String starterCode;
     private String solutionCode;
+    private Long prerequisiteNodeId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

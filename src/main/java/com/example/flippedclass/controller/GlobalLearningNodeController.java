@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.flippedclass.service.LocalCompilerService;
 import com.example.flippedclass.dto.response.LearningNodeResponse;
+import com.example.flippedclass.repository.NodeConnectionRepository;
+import com.example.flippedclass.repository.NodeProgressRepository;
+import com.example.flippedclass.service.impl.UserDetailsImpl;
+import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.flippedclass.dto.request.SubmitCodeRequest;
 import com.example.flippedclass.dto.request.TestCaseDTO;
@@ -41,6 +47,12 @@ public class GlobalLearningNodeController {
     @Autowired
     private LearningNodeRepository learningNodeRepository;
 
+    @Autowired
+    private NodeConnectionRepository nodeConnectionRepository;
+
+    @Autowired
+    private NodeProgressRepository nodeProgressRepository;
+
     @PreAuthorize("hasAuthority('MENTOR')")
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getAllNodesForDropdown() {
@@ -61,9 +73,28 @@ public class GlobalLearningNodeController {
     }
 
     @GetMapping("/{nodeId}")
-    public ResponseEntity<LearningNodeResponse> getNodeDetail(@PathVariable Long nodeId) {
-        return learningNodeRepository.findById(nodeId)
-                .map(node -> ResponseEntity.ok(LearningNodeResponse.builder()
+    public ResponseEntity<LearningNodeResponse> getNodeDetail(@PathVariable Long nodeId, Authentication authentication) {
+        LearningNode node = learningNodeRepository.findById(nodeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Node not found"));
+
+        Long prereqId = null;
+        var connections = nodeConnectionRepository.findByTargetNodeId(nodeId);
+        if (!connections.isEmpty()) {
+            prereqId = connections.get(0).getSourceNode().getId();
+        }
+
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
+            boolean isStudent = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("STUDENT"));
+            if (isStudent && prereqId != null) {
+                var progress = nodeProgressRepository.findByStudentIdAndLearningNodeId(userDetails.getId(), prereqId).orElse(null);
+                if (progress == null || !progress.getStatus().name().equals("COMPLETED")) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn chưa hoàn thành bài học trước đó!");
+                }
+            }
+        }
+
+        return ResponseEntity.ok(LearningNodeResponse.builder()
                         .id(node.getId())
                         .title(node.getTitle())
                         .learningPathId(node.getLearningPath() != null ? node.getLearningPath().getId() : null)
@@ -73,10 +104,10 @@ public class GlobalLearningNodeController {
                         .content(node.getContent() != null ? node.getContent() : node.getDescription())
                         .starterCode(node.getStarterCode())
                         .solutionCode(node.getSolutionCode())
+                        .prerequisiteNodeId(prereqId)
                         .createdAt(node.getCreatedAt())
                         .updatedAt(node.getUpdatedAt())
-                        .build()))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                        .build());
     }
 
     @Autowired
@@ -120,13 +151,14 @@ public class GlobalLearningNodeController {
 
     @PostMapping("/{nodeId}/submit-code")
     public ResponseEntity<?> submitCode(@PathVariable Long nodeId, @RequestBody SubmitCodeRequest request) {
-        if (!learningNodeRepository.existsById(nodeId)) {
+        LearningNode node = learningNodeRepository.findById(nodeId).orElse(null);
+        if (node == null) {
             return ResponseEntity.notFound().build();
         }
 
         List<TestCase> testCases = testCaseRepository.findByLearningNodeIdOrderByCreatedAtAsc(nodeId);
         if (testCases.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Bài học chưa cấu hình Test Cases."));
+            return ResponseEntity.badRequest().body(Map.of("message", "No Test Cases have been configured for this node."));
         }
 
         String studentCode = request.getCode();
@@ -159,7 +191,7 @@ public class GlobalLearningNodeController {
                 TestResultResponse.TestCaseResult result = TestResultResponse.TestCaseResult.builder()
                         .testCaseId(tc.getId())
                         .passed(passed)
-                        .hidden(tc.getIsHidden())
+                        .hidden(tc.getIsHidden() != null ? tc.getIsHidden() : false)
                         .points(points)
                         .build();
                         

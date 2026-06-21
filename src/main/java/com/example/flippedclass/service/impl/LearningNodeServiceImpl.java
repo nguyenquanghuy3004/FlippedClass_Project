@@ -21,6 +21,12 @@ public class LearningNodeServiceImpl implements LearningNodeService {
     @Autowired
     private LearningPathRepository learningPathRepository;
 
+    @Autowired
+    private com.example.flippedclass.repository.NodeConnectionRepository nodeConnectionRepository;
+    
+    @Autowired
+    private com.example.flippedclass.repository.LearningSpaceRepository learningSpaceRepository;
+
     @Override
     public LearningNodeResponse createLearningNode(Long pathId, CreateLearningNodeRequest request) {
         LearningPath learningPath = learningPathRepository.findById(pathId)
@@ -36,20 +42,18 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
         LearningNode savedNode = learningNodeRepository.save(node);
 
-        return LearningNodeResponse.builder()
-                .id(savedNode.getId())
-                .title(savedNode.getTitle())
-                .description(savedNode.getDescription())
-                .learningPathId(learningPath.getId())
-                .learningSpaceId(learningPath.getLearningSpace() != null ? learningPath.getLearningSpace().getId() : null)
-                .status(savedNode.getStatus())
-                .nodeType(savedNode.getNodeType())
-                .content(savedNode.getContent())
-                .starterCode(savedNode.getStarterCode())
-                .solutionCode(savedNode.getSolutionCode())
-                .createdAt(savedNode.getCreatedAt())
-                .updatedAt(savedNode.getUpdatedAt())
-                .build();
+        Long prereqId = null;
+        if (request.getPrerequisiteNodeId() != null) {
+            com.example.flippedclass.entity.NodeConnection conn = new com.example.flippedclass.entity.NodeConnection();
+            conn.setLearningPath(learningPath);
+            conn.setTargetNode(savedNode);
+            conn.setSourceNode(learningNodeRepository.findById(request.getPrerequisiteNodeId()).orElseThrow());
+            conn.setConditionType("COMPLETED");
+            nodeConnectionRepository.save(conn);
+            prereqId = request.getPrerequisiteNodeId();
+        }
+
+        return buildResponse(savedNode, prereqId);
     }
 
     @Override
@@ -58,6 +62,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         if(!learningNodeRepository.existsById(nodeId)){
             throw new IllegalArgumentException("Không tìm thấy bài học");
         }
+        nodeConnectionRepository.deleteByTargetNodeId(nodeId);
         learningNodeRepository.deleteById(nodeId);
     }
 
@@ -86,6 +91,22 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
         LearningNode savedNode = learningNodeRepository.save(node);
 
+        nodeConnectionRepository.deleteByTargetNodeId(nodeId);
+        Long prereqId = null;
+        if (request.getPrerequisiteNodeId() != null) {
+            com.example.flippedclass.entity.NodeConnection conn = new com.example.flippedclass.entity.NodeConnection();
+            conn.setLearningPath(node.getLearningPath());
+            conn.setTargetNode(savedNode);
+            conn.setSourceNode(learningNodeRepository.findById(request.getPrerequisiteNodeId()).orElseThrow());
+            conn.setConditionType("COMPLETED");
+            nodeConnectionRepository.save(conn);
+            prereqId = request.getPrerequisiteNodeId();
+        }
+
+        return buildResponse(savedNode, prereqId);
+    }
+
+    private LearningNodeResponse buildResponse(LearningNode savedNode, Long prereqId) {
         return LearningNodeResponse.builder()
                 .id(savedNode.getId())
                 .title(savedNode.getTitle())
@@ -97,6 +118,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .content(savedNode.getContent())
                 .starterCode(savedNode.getStarterCode())
                 .solutionCode(savedNode.getSolutionCode())
+                .prerequisiteNodeId(prereqId)
                 .createdAt(savedNode.getCreatedAt())
                 .updatedAt(savedNode.getUpdatedAt())
                 .build();

@@ -124,7 +124,7 @@ public class TemplateController {
     public String learningPath(@PathVariable Long spaceId, Model model) {
         model.addAttribute("spaceId", spaceId);
         try {
-            model.addAttribute("paths", learningPathService.getLearningPath(spaceId));
+            model.addAttribute("paths", learningPathService.getLearningPath(spaceId, null));
         } catch(Exception e) {
             model.addAttribute("paths", java.util.Collections.emptyList());
         }

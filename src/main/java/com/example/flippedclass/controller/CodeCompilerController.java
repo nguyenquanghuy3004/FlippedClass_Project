@@ -24,7 +24,7 @@ public class CodeCompilerController {
             String output = localCompilerService.executeJavaCode(script, stdin);
             return ResponseEntity.ok(Map.of("output", output));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Lỗi Server Compiler: " + e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of("error", "Server Compiler Error: " + e.getMessage()));
         }
     }
 }
