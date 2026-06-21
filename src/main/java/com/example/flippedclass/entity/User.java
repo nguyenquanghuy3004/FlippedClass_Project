@@ -64,4 +64,8 @@ public class User {
     @Column
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Builder.Default
+    private Integer contributionPoints = 0;
 }

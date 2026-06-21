@@ -61,6 +61,16 @@ public class TemplateController {
         return "lecturer/quiz-builder";
     }
 
+    @GetMapping("/lecturer/mentoring")
+    public String peerMentoring() {
+        return "lecturer/mentoring";
+    }
+
+    @GetMapping("/supporter/dashboard")
+    public String supporterDashboard() {
+        return "supporter/dashboard";
+    }
+
     @GetMapping("/lecturer/quizzes/{id}/statistics")
     public String quizStatistics() {
         return "lecturer/quiz-statistics";

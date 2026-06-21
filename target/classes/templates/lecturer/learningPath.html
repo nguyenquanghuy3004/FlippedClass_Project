@@ -26,6 +26,9 @@
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{'/lecturer/spaces/' + ${spaceId} + '/analytics'}">Analytics</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{'/lecturer/mentoring?spaceId=' + ${spaceId}}"><i class="ti ti-users me-1"></i> Peer Mentoring</a>
+                </li>
             </ul>
 
             <!-- Hero Banner -->

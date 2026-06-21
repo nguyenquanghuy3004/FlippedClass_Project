@@ -38,7 +38,7 @@ public class QuizController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @Operation(summary = "Create a new quiz")
     public QuizResponse create(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
@@ -47,7 +47,7 @@ public class QuizController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @Operation(summary = "Update an existing quiz")
     public QuizResponse update(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
@@ -58,7 +58,7 @@ public class QuizController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @Operation(summary = "Delete a quiz")
     public void delete(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
@@ -67,7 +67,7 @@ public class QuizController {
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @Operation(summary = "Get current lecturer's quizzes")
     public List<QuizResponse> getMyQuizzes(@AuthenticationPrincipal UserDetailsImpl currentUser) {
         return quizService.getByLecturer(currentUser.getId());
@@ -75,7 +75,7 @@ public class QuizController {
 
     @PostMapping("/{quizId}/questions")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @Operation(summary = "Add a question to a quiz")
     public QuizQuestionResponse addQuestion(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
@@ -85,7 +85,7 @@ public class QuizController {
     }
 
     @PutMapping("/questions/{id}")
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @Operation(summary = "Update a question")
     public QuizQuestionResponse updateQuestion(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
@@ -96,7 +96,7 @@ public class QuizController {
 
     @DeleteMapping("/questions/{questionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @Operation(summary = "Delete a question")
     public void deleteQuestion(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
@@ -152,7 +152,7 @@ public class QuizController {
     }
 
     @GetMapping("/{quizId}/statistics")
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @Operation(summary = "Get quiz statistics")
     public QuizStatisticsResponse getStatistics(
             @PathVariable("quizId") @Positive(message = "quizId must be a positive number") Long quizId) {
@@ -169,7 +169,7 @@ public class QuizController {
     }
 
     @GetMapping("/{quizId}/attempts")
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @Operation(summary = "Get all attempts for a quiz")
     public List<QuizAttemptResponse> getAttempts(
             @PathVariable("quizId") @Positive(message = "quizId must be a positive number") Long quizId) {

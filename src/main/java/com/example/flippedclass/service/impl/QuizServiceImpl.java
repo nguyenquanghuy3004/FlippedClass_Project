@@ -45,6 +45,7 @@ public class QuizServiceImpl implements QuizService {
     private final LearningNodeRepository learningNodeRepository;
     private final com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository;
     private final QuizValidator quizValidator;
+    private final com.example.flippedclass.repository.LearningSpaceMemberRepository memberRepository;
 
     public QuizServiceImpl(QuizRepository quizRepository,
                            QuizQuestionRepository questionRepository,
@@ -52,7 +53,8 @@ public class QuizServiceImpl implements QuizService {
                            UserRepository userRepository,
                            LearningNodeRepository learningNodeRepository,
                            com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository,
-                           QuizValidator quizValidator) {
+                           QuizValidator quizValidator,
+                           com.example.flippedclass.repository.LearningSpaceMemberRepository memberRepository) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.attemptRepository = attemptRepository;
@@ -60,11 +62,20 @@ public class QuizServiceImpl implements QuizService {
         this.learningNodeRepository = learningNodeRepository;
         this.interactionLogRepository = interactionLogRepository;
         this.quizValidator = quizValidator;
+        this.memberRepository = memberRepository;
     }
 
     @Override
     public QuizResponse createForCurrentUser(Long currentUserId, CreateQuizRequest request) {
         User lecturer = UserServiceImpl.findUser(userRepository, currentUserId);
+        
+        // Security check for STUDENTs: Must be a SUPPORTER in at least one space
+        if (lecturer.getRoles().stream().noneMatch(r -> r.getName() == com.example.flippedclass.enums.RoleName.MENTOR || r.getName() == com.example.flippedclass.enums.RoleName.ADMIN)) {
+            if (!memberRepository.existsByUser_IdAndRole(lecturer.getId(), com.example.flippedclass.enums.MemberRole.SUPPORTER)) {
+                throw new IllegalArgumentException("Chỉ những sinh viên được thăng cấp (Supporter) mới có quyền tạo Quiz.");
+            }
+        }
+        
         LearningNode node = learningNodeRepository.findById(request.getLearningNodeId())
                 .orElseThrow(() -> new NotFoundException("Learning node not found: " + request.getLearningNodeId()));
 

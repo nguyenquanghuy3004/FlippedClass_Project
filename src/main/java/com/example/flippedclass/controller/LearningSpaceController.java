@@ -23,7 +23,7 @@ public class LearningSpaceController {
     @Autowired
     private LearningSpaceService learningSpaceService;
 
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @PostMapping
     @Transactional
     public ResponseEntity<LearningSpaceResponse> createLearningSpace(@Valid @RequestBody CreateLearningSpaceRequest request) {
@@ -31,7 +31,7 @@ public class LearningSpaceController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('MENTOR')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @GetMapping("/my-spaces")
     public ResponseEntity<List<LearningSpaceResponse>> getMySpaces() {
         return ResponseEntity.ok(learningSpaceService.getMySpaces());

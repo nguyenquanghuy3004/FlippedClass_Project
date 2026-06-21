@@ -69,6 +69,13 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
         User owner = getCurrentUser();
 
+        // Security check for STUDENTs: Must be a SUPPORTER in at least one space
+        if (owner.getRoles().stream().noneMatch(r -> r.getName() == com.example.flippedclass.enums.RoleName.MENTOR || r.getName() == com.example.flippedclass.enums.RoleName.ADMIN)) {
+            if (!memberRepository.existsByUser_IdAndRole(owner.getId(), MemberRole.SUPPORTER)) {
+                throw new IllegalArgumentException("Chỉ những sinh viên được thăng cấp (Supporter) mới có quyền tạo Learning Space.");
+            }
+        }
+
         // Create Entity and save
         String inviteCode = inviteCodeGenerator.generateUniqueInviteCode();
 
