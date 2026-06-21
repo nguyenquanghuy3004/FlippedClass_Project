@@ -184,8 +184,10 @@
     </div>
   </main>
 
+  <script src="/assets/js/student-practice-ui.js"></script>
   <script>
     /* --- Inlined from student-learning-node.js --- */
+    let myCodeEditor; // Biến toàn cục để lưu instance của editor
     const token = localStorage.getItem('jwt_token');
     const userId = localStorage.getItem('user_id');
     const urlParams = new URLSearchParams(window.location.search);
@@ -647,108 +649,382 @@
       </div>`;
     }
 
-    // Hàm hiển thị giao diện toàn bộ nội dung của bài học (node)
+    // Hàm hiển thị giao diện Practice Node
     function renderNodePage(node, items) {
-      // Phân loại các tài liệu đính kèm (items) thành: tài nguyên (tài liệu/code), bình luận, và video
-      const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
-      const discussions = items.filter((item) => normalizeItemType(item.itemType) === 'DISCUSSION');
-      const videoCount = items.some((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item)) ? 1 : 0;
+        const shell = document.querySelector('.lesson-shell');
+        if (shell) {
+            shell.style.maxWidth = 'none';
+            shell.style.width = '100%';
+            shell.style.padding = '0';
+            shell.style.margin = '0';
+        }
+        const topbar = document.querySelector('.lesson-topbar');
+        if (topbar) {
+            topbar.style.maxWidth = 'none';
+            topbar.style.width = '100%';
+        }
+        document.body.style.overflow = 'hidden';
 
-      if (node.nodeType === 'PRACTICE') {
-        window.location.replace('/student/learning-nodes/' + encodeURIComponent(nodeId) + '/practice');
-        return;
-      }
-        // Giao diện Bài học Lý thuyết / Video bình thường
-        pageRoot.className = 'lesson-layout';
+        pageRoot.className = 'lesson-layout practice-layout';
+        pageRoot.style.padding = '0';
+        pageRoot.style.gap = '0';
+        pageRoot.style.background = '#f8fafc';
+
+        setTimeout(() => {
+          initMonaco(node.starterCode);
+        }, 100);
+
         pageRoot.innerHTML = `
-        <section class="player-column">
-          <section class="node-hero">
-            <span class="eyebrow"><i class="ti ti-player-play"></i> Learning Spaces node</span>
-            <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
-            <p class="node-description">${escapeHtml(node.content || 'Your instructor has not added a description for this node yet.')}</p>
-            <div class="meta-row">
-              <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-              <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
-              <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Video available' : 'No video'}</span>
-              <span class="soft-chip"><i class="ti ti-folder-open"></i>${resources.length} resource</span>
-              <span class="soft-chip"><i class="ti ti-messages"></i>${discussions.length} comments</span>
-            </div>
-          </section>
-
-          <section class="video-shell">
-            ${videoTemplate(node, items)}
-            <div class="player-controls">
-              <button class="server-pill active" type="button">Lesson Video</button>
-              <button class="server-pill" type="button">${resources.length} resource</button>
-              <button class="server-pill" type="button">${discussions.length} comments</button>
-            </div>
-          </section>
-
-          <section class="content-card">
-            <h2>Node Content</h2>
-            <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
-          </section>
-
-          <!-- START: LESSON SUMMARY UI -->
-          <section class="summary-card" style="margin-top: 1.5rem;">
-            <div class="summary-card-header">
-              <h2 class="summary-title">
-                <i class="ti ti-notebook"></i> Lesson Summary
-              </h2>
-              <span id="summaryStatus" class="summary-status">
-                <i class="ti ti-check"></i> Saved successfully
-              </span>
-            </div>
-
-            <form id="summaryForm" class="summary-form">
-              <div>
-                <label for="keyTakeaways" class="summary-label">📚 Key takeaways from the lesson</label>
-                <textarea id="keyTakeaways" class="summary-textarea" placeholder="Record the important knowledge you learned from the lesson..." required></textarea>
-              </div>
-
-              <div>
-                <label for="questions" class="summary-label">❓ Concepts you didn't understand</label>
-                <textarea id="questions" class="summary-textarea" placeholder="Record any content you are still wondering about or didn't understand..."></textarea>
-              </div>
-
-              <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
-                <button type="submit" id="saveSummaryBtn" class="btn-primary">
-                  <i class="ti ti-device-floppy"></i> Save Summary
-                </button>
-              </div>
-            </form>
-          </section>
-          <!-- END: LESSON SUMMARY UI -->
+        <style>
+          /* Clean, light-themed LeetCode style CSS */
+          .practice-layout { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr) !important; align-items: stretch !important; height: calc(100vh - 65px); gap: 8px !important; padding: 8px !important; background: #f0f0f0 !important; }
+          
+          /* Left Pane */
+          .lc-left-pane { background: #fff; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+          .lc-tabs-header { display: flex; gap: 16px; padding: 0 16px; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
+          .lc-tab { padding: 12px 4px; font-size: 0.85rem; font-weight: 500; color: #5c5c5c; cursor: pointer; border-bottom: 2px solid transparent; }
+          .lc-tab.active { color: #2cbb5d; border-bottom-color: #2cbb5d; }
+          .lc-tab i { margin-right: 6px; font-size: 1rem; vertical-align: middle; }
+          .lc-content { padding: 20px; overflow-y: auto; flex: 1; font-size: 0.95rem; color: #262626; line-height: 1.6; }
+          .lc-content h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; color: #262626; }
+          
+          /* Markdown styling similar to Leetcode */
+          .lc-content pre { background: #f7f9fa !important; border: 1px solid #e5e7eb !important; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; margin-bottom: 16px; white-space: pre-wrap; color: #262626 !important; }
+          .lc-content code { background: #f7f9fa; padding: 2px 6px; border-radius: 4px; color: #262626; font-size: 0.85rem; }
+          
+          /* Right Pane Wrapper */
+          .lc-right-pane { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
+          
+          /* Editor Top Bar */
+          .lc-editor-card { background: #fff; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+          .lc-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #fafafa; border-bottom: 1px solid #f0f0f0; position: relative; }
+          .lc-toolbar-left { display: flex; align-items: center; gap: 12px; }
+          .lc-lang-select { background: #f2f3f4; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; color: #262626; cursor: pointer; }
+          
+          /* Top Central Run/Submit buttons */
+          .lc-toolbar-center { display: flex; align-items: center; gap: 8px; position: absolute; left: 50%; transform: translateX(-50%); }
+          .btn-lc-run { background: #f2f3f4; color: #3c3c3c; border: none; padding: 5px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+          .btn-lc-run:hover { background: #e5e7eb; }
+          .btn-lc-submit { background: #2cbb5d; color: #fff; border: none; padding: 5px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+          .btn-lc-submit:hover { background: #23994c; }
+          
+          /* Terminal Bottom Bar */
+          .lc-terminal-card { background: #fff; border-radius: 8px; display: flex; flex-direction: column; height: 35vh; min-height: 250px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: height 0.3s ease, min-height 0.3s ease; }
+          .lc-terminal-card.collapsed { height: 40px !important; min-height: 40px !important; }
+          .lc-term-tabs { display: flex; padding: 0 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; justify-content: space-between; align-items: center; }
+          .lc-term-tab { padding: 8px 12px; font-size: 0.8rem; font-weight: 500; color: #5c5c5c; border: none; background: transparent; cursor: pointer; border-bottom: 2px solid transparent; }
+          .lc-term-tab.active { color: #262626; border-bottom-color: #262626; }
+          .lc-term-toggle { background: transparent; border: none; color: #5c5c5c; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
+          .lc-term-toggle:hover { background: #e5e7eb; color: #262626; }
+          
+          /* Input/Output areas */
+          .lc-io-box { flex: 1; display: flex; flex-direction: column; padding: 12px; }
+          .lc-io-label { font-size: 0.8rem; font-weight: 600; color: #5c5c5c; margin-bottom: 6px; }
+          .lc-io-input { flex: 1; background: #f7f9fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #262626; outline: none; resize: none; }
+          .lc-io-output { flex: 1; background: #f7f9fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #262626; overflow-y: auto; margin: 0; white-space: pre-wrap; }
+        </style>
+        
+        <!-- Cột Trái: Đề Bài (Problem Description) -->
+        <section class="lc-left-pane">
+          <div class="lc-tabs-header">
+            <div class="lc-tab active"><i class="ti ti-file-description" style="color: #007bff;"></i> Description</div>
+            <div class="lc-tab"><i class="ti ti-bulb"></i> Editorial</div>
+            <div class="lc-tab"><i class="ti ti-flask"></i> Solutions</div>
+            <div class="lc-tab"><i class="ti ti-history"></i> Submissions</div>
+          </div>
+          <div class="lc-content">
+            <h1>${escapeHtml(node.title || 'Practice Problem')}</h1>
+            ${node.content ? node.content : '<p class="text-muted">No specific problem description provided.</p>'}
+          </div>
         </section>
 
-        <aside class="side-column">
-          <section class="side-card">
-            <div class="side-card-header">
-              <div>
-                <h2>Resources</h2>
-                <p>Documents, source code, or quizzes for this node.</p>
-              </div>
-              <span class="soft-chip">${resources.length}</span>
+        <!-- Cột Phải: Online IDE & Terminal -->
+        <aside class="lc-right-pane">
+          
+          <!-- Code Editor Area -->
+          <div class="lc-editor-card">
+            <!-- Toolbar -->
+            <div class="lc-toolbar">
+                <div class="lc-toolbar-left">
+                    <div style="display:flex;align-items:center;gap:6px;color:#2cbb5d;font-size:0.85rem;font-weight:600;">
+                        <i class="ti ti-code"></i> Code
+                    </div>
+                    <select class="lc-lang-select">
+                        <option>Java</option>
+                    </select>
+                    <span style="font-size: 0.8rem; color: #8c8c8c; margin-left: 8px;">Auto</span>
+                </div>
+                
+                <div class="lc-toolbar-center">
+                    <button id="btnRunCode" class="btn-lc-run">
+                        <i class="ti ti-player-play-filled"></i> Run
+                    </button>
+                    <button id="btnSubmitCode" class="btn-lc-submit">
+                        <i class="ti ti-cloud-upload"></i> Submit
+                    </button>
+                </div>
+                
+                <div style="display:flex; gap: 8px; color: #8c8c8c; cursor:pointer;">
+                    <i class="ti ti-settings"></i>
+                    <i class="ti ti-maximize"></i>
+                </div>
             </div>
-            ${resourcesTemplate(items)}
-          </section>
+            
+            <div id="editor" style="flex: 1; width: 100%; min-height: 300px;"></div>
+          </div>
+          
+          <!-- Terminal & Test Results -->
+          <div class="lc-terminal-card" id="terminalCard">
+             <div class="lc-term-tabs" role="tablist">
+                <div style="display: flex; gap: 16px;">
+                    <button class="lc-term-tab active" id="console-tab" data-bs-toggle="tab" data-bs-target="#console-pane" type="button" role="tab">
+                        <i class="ti ti-square-check text-success"></i> Testcase
+                    </button>
+                    <button class="lc-term-tab" id="test-result-tab" data-bs-toggle="tab" data-bs-target="#test-result-pane" type="button" role="tab">
+                        <i class="ti ti-terminal text-primary"></i> Test Result
+                    </button>
+                </div>
+                <button class="lc-term-toggle" id="btnToggleTerminal" title="Toggle Terminal">
+                    <i class="ti ti-chevron-down" id="terminalToggleIcon" style="font-size: 1.1rem;"></i>
+                </button>
+             </div>
+             
+             <div class="tab-content" id="terminalContent" style="flex: 1; overflow: hidden; display: flex;">
+                <!-- CONSOLE PANE -->
+                <div class="tab-pane fade show active" id="console-pane" role="tabpanel" style="flex: 1; padding: 0;">
+                    <div style="display: flex; height: 100%;">
+                        <div class="lc-io-box">
+                            <div class="lc-io-label">Custom Input (stdin)</div>
+                            <textarea id="customInput" class="lc-io-input" placeholder="Enter standard input to test..."></textarea>
+                        </div>
+                        <div class="lc-io-box">
+                            <div class="lc-io-label">Output</div>
+                            <pre id="terminalOutput" class="lc-io-output">No commands run yet.</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TEST RESULTS PANE -->
+                <div class="tab-pane fade" id="test-result-pane" role="tabpanel" style="flex: 1; overflow-y: auto;">
+                    <div id="testResultContainer" style="padding: 20px;">
+                        <div class="text-center" style="color: #8c8c8c; padding-top: 40px;">
+                            <i class="ti ti-cloud-upload" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                            <p class="mt-2">Run or Submit code to see results</p>
+                        </div>
+                    </div>
+                </div>
+             </div>
+          </div>
+        </aside>
+      `;
+    }
 
-          <section class="side-card">
-            <div class="side-card-header">
-              <div>
-                <h2>Comments</h2>
-                <p>Discussions and questions related to this node.</p>
-              </div>
-              <span class="soft-chip" id="commentsCountBadge">0</span>
-            </div>
-            <div id="nodeCommentsContainer">
-              <div class="empty-light">
-                <div><i class="ti ti-loader-2"></i> Loading comments...</div>
-              </div>
-            </div>
-          </section>
-        </aside>`;
-        // --- START: HANDLE SUMMARY SUBMIT ---
+      // --- START: INIT MONACO EDITOR ---
+      require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+
+      function initMonaco(lecturerStarterCode) {
+        require(['vs/editor/editor.main'], function () {
+          const editorDiv = document.getElementById('editor');
+          if (editorDiv) {
+            const storageKey = 'saved_code_node_' + nodeId;
+            const savedCode = localStorage.getItem(storageKey);
+
+            // Code ưu tiên: Code SV đang gõ dang dở -> Code mẫu giảng viên -> Code mặc định Hello World
+            const fallbackCode = "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n}";
+            const defaultCode = lecturerStarterCode || fallbackCode;
+
+            myCodeEditor = monaco.editor.create(editorDiv, {
+              value: savedCode !== null ? savedCode : defaultCode,
+              language: "java",
+              theme: "vs",
+              automaticLayout: true,
+              fontSize: 14,
+              minimap: { enabled: false }
+            });
+
+            // Auto-save
+            myCodeEditor.onDidChangeModelContent(function () {
+              localStorage.setItem(storageKey, myCodeEditor.getValue());
+            });
+
+            // Backup save
+            window.addEventListener('beforeunload', function () {
+              if (typeof myCodeEditor !== 'undefined') {
+                localStorage.setItem(storageKey, myCodeEditor.getValue());
+              }
+            });
+          }
+        });
+
+        const btnRunCode = document.getElementById('btnRunCode');
+        const btnSubmitCode = document.getElementById('btnSubmitCode');
+        const consoleTab = new bootstrap.Tab(document.getElementById('console-tab'));
+        const testResultTab = new bootstrap.Tab(document.getElementById('test-result-tab'));
+
+        const terminalCard = document.getElementById('terminalCard');
+        const btnToggleTerminal = document.getElementById('btnToggleTerminal');
+        const terminalToggleIcon = document.getElementById('terminalToggleIcon');
+
+        if (btnToggleTerminal) {
+            btnToggleTerminal.addEventListener('click', function() {
+                terminalCard.classList.toggle('collapsed');
+                if (terminalCard.classList.contains('collapsed')) {
+                    terminalToggleIcon.classList.replace('ti-chevron-down', 'ti-chevron-up');
+                } else {
+                    terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
+                }
+                // Notify Monaco Editor to resize
+                setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
+            });
+        }
+
+        function expandTerminal() {
+            if (terminalCard && terminalCard.classList.contains('collapsed')) {
+                terminalCard.classList.remove('collapsed');
+                terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
+                setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
+            }
+        }
+
+        if (btnRunCode) {
+          btnRunCode.addEventListener('click', function () {
+            expandTerminal();
+            consoleTab.show();
+            const terminal = document.getElementById('terminalOutput');
+            const customInput = document.getElementById('customInput').value;
+            terminal.innerText = "> Compiling code. Please wait for the server...";
+            btnRunCode.disabled = true;
+
+            if (typeof myCodeEditor !== 'undefined') {
+              const codeString = myCodeEditor.getValue();
+
+              fetch('/api/compiler/execute', {
+                method: 'POST',
+                headers: authHeaders(),
+                body: JSON.stringify({ script: codeString, stdin: customInput })
+              })
+                .then(res => res.json())
+                .then(result => {
+                  if (result.output) {
+                    terminal.innerText = "> " + result.output;
+                  } else if (result.error) {
+                    terminal.innerText = "> Server Compiler Error: " + result.error;
+                  } else {
+                    terminal.innerText = "> " + JSON.stringify(result);
+                  }
+                })
+                .catch(err => {
+                  terminal.innerText = "> Network error or connection lost: " + err.message;
+                })
+                .finally(() => btnRunCode.disabled = false);
+            }
+          });
+        }
+
+        if (btnSubmitCode) {
+            btnSubmitCode.addEventListener('click', function() {
+                expandTerminal();
+                testResultTab.show();
+                const container = document.getElementById('testResultContainer');
+                container.innerHTML = `
+                    <div class="text-center text-muted" style="padding-top: 40px;">
+                        <i class="ti ti-loader-2 ti-spin" style="font-size: 2rem; color: #3b82f6;"></i>
+                        <p class="mt-2 text-white">Submitting code for grading...</p>
+                    </div>
+                `;
+                btnSubmitCode.disabled = true;
+
+                if (typeof myCodeEditor !== 'undefined') {
+                    const codeString = myCodeEditor.getValue();
+
+                    fetch(`/api/learning-nodes/${nodeId}/submit-code`, {
+                        method: 'POST',
+                        headers: authHeaders(),
+                        body: JSON.stringify({ code: codeString })
+                    })
+                    .then(async res => {
+                        if (!res.ok) throw new Error(await readError(res));
+                        return res.json();
+                    })
+                    .then(result => {
+                        const scoreColor = result.allPassed ? '#10b981' : (result.passedCount > 0 ? '#f59e0b' : '#ef4444');
+                        const statusText = result.allPassed ? 'Accepted' : 'Wrong Answer';
+                        
+                        let html = `
+                            <div style="margin-bottom: 16px;">
+                                <h3 style="color: ${scoreColor}; font-weight: bold; margin: 0;">${statusText}</h3>
+                                <div style="color: #aaa; font-size: 0.9rem; margin-top: 4px;">
+                                    Score: <span style="color: white; font-weight: bold;">${result.totalScore}/${result.maxScore}</span> | 
+                                    Passed: <span style="color: white; font-weight: bold;">${result.passedCount}/${result.totalCases} Test Cases</span>
+                                </div>
+                            </div>
+                        `;
+
+                        if (result.results && result.results.length > 0) {
+                            html += `<div style="display: flex; flex-direction: column; gap: 12px;">`;
+                            result.results.forEach((tc, index) => {
+                                const passColor = tc.passed ? '#10b981' : '#ef4444';
+                                const passIcon = tc.passed ? 'ti-check' : 'ti-x';
+                                
+                                html += `
+                                <div style="background: #2d2d2d; border-radius: 8px; border: 1px solid #444; overflow: hidden;">
+                                    <div style="padding: 8px 16px; background: #333; display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="font-weight: 600; color: #fff; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                                            <i class="ti ${passIcon}" style="color: ${passColor};"></i> Test Case #${index + 1}
+                                        </div>
+                                        <span class="badge" style="background: #444;">${tc.points} pts</span>
+                                    </div>
+                                    <div style="padding: 12px;">
+                                `;
+
+                                if (tc.hidden) {
+                                    html += `
+                                        <div style="color: #94a3b8; font-size: 0.85rem; font-style: italic; display: flex; align-items: center; gap: 6px;">
+                                            <i class="ti ti-lock"></i> Hidden Test Case. ${tc.passed ? 'Passed.' : 'Failed.'}
+                                        </div>
+                                    `;
+                                } else {
+                                    html += `
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                                            <div>
+                                                <label style="color: #aaa; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 2px;">Input</label>
+                                                <div style="background: #1a1a1a; padding: 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #e2e8f0; white-space: pre-wrap; word-break: break-all;">${escapeHtml(tc.inputData)}</div>
+                                            </div>
+                                            <div>
+                                                <label style="color: #aaa; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 2px;">Expected</label>
+                                                <div style="background: #1a1a1a; padding: 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #e2e8f0; white-space: pre-wrap; word-break: break-all;">${escapeHtml(tc.expectedOutput)}</div>
+                                            </div>
+                                            <div>
+                                                <label style="color: #aaa; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 2px;">Actual</label>
+                                                <div style="background: #1a1a1a; padding: 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: ${passColor}; white-space: pre-wrap; word-break: break-all;">${escapeHtml(tc.actualOutput)}</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+
+                                html += `</div></div>`;
+                            });
+                            html += `</div>`;
+                        }
+
+                        container.innerHTML = html;
+                    })
+                    .catch(err => {
+                        container.innerHTML = `
+                            <div class="text-center text-danger" style="padding-top: 40px;">
+                                <i class="ti ti-alert-circle" style="font-size: 2rem;"></i>
+                                <p class="mt-2">${err.message}</p>
+                            </div>
+                        `;
+                    })
+                    .finally(() => btnSubmitCode.disabled = false);
+                }
+            });
+        }
+      } // Đóng function initMonaco
+      // --- END: INIT MONACO EDITOR ---
+
+      // --- START: HANDLE SUMMARY SUBMIT ---
       const summaryForm = document.getElementById('summaryForm');
       const saveSummaryBtn = document.getElementById('saveSummaryBtn');
       const summaryStatus = document.getElementById('summaryStatus');

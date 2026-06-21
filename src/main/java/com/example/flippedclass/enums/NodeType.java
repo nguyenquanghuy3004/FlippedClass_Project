@@ -1,9 +1,9 @@
 package com.example.flippedclass.enums;
 
 public enum NodeType {
-    LESSON,
+//    LESSON,
     VIDEO,
     PRACTICE,
-    QUIZ,
-    REVIEW
+    QUIZ
+//    REVIEW
 }
