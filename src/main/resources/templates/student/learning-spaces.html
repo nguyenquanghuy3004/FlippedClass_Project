@@ -1,290 +1,67 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{student/layout}">
 
 <head>
-  <meta charset="UTF-8" />
   <title>Learning Spaces - FlippedClass</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
-  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
-  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
-
-  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
-  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-
-  <script>
-    /* --- Inlined from student-auth.js --- */
-    if (!localStorage.getItem('jwt_token')) {
-      window.location.href = '/login';
-    }
-
-  </script>
-  <script>
-    /* --- Inlined from student-user-menu.js --- */
-    (function () {
-      const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
-
-      function storedUser() {
-        return {
-          fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
-          username: localStorage.getItem('username') || '',
-          avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
-        };
-      }
-
-      function normalizeUser(user = {}) {
-        const stored = storedUser();
-        return {
-          name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
-          username: user.username || stored.username || '',
-          avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
-        };
-      }
-
-      function setStudentMenuUser(user = {}) {
-        const normalized = normalizeUser(user);
-
-        if (normalized.name && normalized.name !== 'Student') {
-          localStorage.setItem('full_name', normalized.name);
-        }
-        if (normalized.username) {
-          localStorage.setItem('username', normalized.username);
-        }
-        if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
-          localStorage.setItem('avatar_url', normalized.avatarUrl);
-        }
-
-        document.querySelectorAll('[data-user-name]').forEach((element) => {
-          element.textContent = normalized.name;
-        });
-        document.querySelectorAll('[data-user-avatar]').forEach((image) => {
-          image.src = normalized.avatarUrl;
-          image.onerror = () => {
-            image.onerror = null;
-            image.src = defaultAvatarUrl;
-          };
-        });
-
-        const topbarName = document.getElementById('studentName');
-        if (topbarName) topbarName.textContent = normalized.name;
-      }
-
-      function studentLogout() {
-        ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
-          localStorage.removeItem(key);
-        });
-        window.location.href = '/';
-      }
-
-      async function refreshStudentMenuUser() {
-        const token = localStorage.getItem('jwt_token');
-        const userId = localStorage.getItem('user_id');
-        if (!token || !userId) return;
-
-        try {
-          const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (!response.ok) return;
-          const user = await response.json();
-          setStudentMenuUser(user);
-        } catch (error) {
-          console.warn('Could not load user menu profile.', error);
-        }
-      }
-
-      function closeAllMenus(exceptMenu = null) {
-        document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
-          if (menu !== exceptMenu) {
-            menu.classList.remove('is-open');
-            menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
-          }
-        });
-      }
-
-      function initStudentUserMenus() {
-        setStudentMenuUser();
-        refreshStudentMenuUser();
-
-        document.querySelectorAll('[data-user-menu]').forEach((menu) => {
-          const toggle = menu.querySelector('[data-user-menu-toggle]');
-          const logoutButton = menu.querySelector('[data-user-logout]');
-
-          toggle?.addEventListener('click', (event) => {
-            event.stopPropagation();
-            const shouldOpen = !menu.classList.contains('is-open');
-            closeAllMenus(menu);
-            menu.classList.toggle('is-open', shouldOpen);
-            toggle.setAttribute('aria-expanded', String(shouldOpen));
-          });
-
-          logoutButton?.addEventListener('click', studentLogout);
-        });
-
-        document.addEventListener('click', () => closeAllMenus());
-        document.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape') closeAllMenus();
-        });
-      }
-
-      window.setStudentMenuUser = setStudentMenuUser;
-      window.studentLogout = studentLogout;
-      if (!window.logout) window.logout = studentLogout;
-
-      document.addEventListener('DOMContentLoaded', initStudentUserMenus);
-    })();
-
-  </script>
-  <link rel="stylesheet" th:href="@{/assets/css/student-learning-spaces.css}">
-  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
-  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+  <th:block layout:fragment="head">
+    <link rel="stylesheet" th:href="@{/assets/css/student-learning-spaces.css}">
+  </th:block>
 </head>
 
 <body>
-  <div id="overlay" class="overlay"></div>
 
-  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm">
-    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
-      <i class="ti ti-layout-sidebar-left-expand"></i>
-    </button>
-    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
-      <i class="ti ti-layout-sidebar-left-expand"></i>
-    </button>
+<span layout:fragment="topbar-title">Learning Spaces <span class="badge bg-primary-subtle text-primary rounded-pill">Roadmap</span></span>
 
-    <div class="topbar-main">
-      <div class="topbar-title-wrap d-none d-md-block">
-        <h5 class="topbar-title fw-bold text-dark ms-1">Learning Spaces <span
-            class="badge bg-primary-subtle text-primary rounded-pill">Roadmap</span></h5>
+<!-- MAIN CONTENT -->
+<main id="content" class="content py-10" layout:fragment="content">
+  <div class="container-fluid px-xl-5 page-shell">
+    <section id="joinInviteSection" class="join-hero">
+      <div>
+        <span class="eyebrow"><i class="ti ti-door-enter"></i> Join learning space</span>
       </div>
-      <ul class="topbar-actions list-unstyled">
-        <li class="dropdown">
-          <button
-            class="notification-trigger position-relative text-secondary d-flex align-items-center justify-content-center border-0"
-            type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false"
-            aria-label="Pending quiz notifications">
-            <i class="ti ti-bell-ringing fs-5 text-dark"></i>
-            <span id="notificationBadge"
-              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm d-none">0</span>
+
+      <form id="joinSpaceForm" class="join-form-card">
+        <label for="inviteCode" class="form-label fw-bold text-dark">Class invite code</label>
+        <div class="d-flex flex-column gap-3">
+          <input id="inviteCode" class="form-control invite-input" type="text" placeholder="" autocomplete="off"
+            maxlength="24" required>
+          <button id="joinSpaceButton" class="btn btn-primary rounded-pill fw-bold" type="submit">
+            <i class="ti ti-door-enter me-2"></i>Join class
           </button>
-          <div class="dropdown-menu dropdown-menu-end notification-menu p-0 border-0"
-            aria-labelledby="notificationDropdown">
-            <div class="p-3 border-bottom bg-white">
-              <div class="d-flex align-items-center justify-content-between">
-                <div>
-                  <h6 class="fw-900 text-dark mb-1">Notifications</h6>
-                  <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Loading notifications...</p>
-                </div>
-                <i class="ti ti-bell text-primary fs-4"></i>
-              </div>
-            </div>
-            <div id="notificationList" class="notification-list">
-              <div class="text-center text-muted py-4 px-3">
-                <div class="spinner-border text-primary mb-2" role="status"></div>
-                <p class="small fw-semibold mb-0">Loading pending quizzes...</p>
-              </div>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </nav>
-
-  <aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm">
-    <div class="logo-area border-bottom border-light">
-      <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
-        <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2">
-          <i class="ti ti-book-2 fs-3"></i>
         </div>
-        <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">Flipped<span
-            class="text-primary">Class</span></span>
-      </a>
-    </div>
-    <ul class="nav flex-column mt-4">
-      <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/dashboard}"
-          data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span
-            class="nav-text">Dashboard</span></a></li>
-      <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4 fw-bold" th:href="@{/student/learning-spaces}"
-          data-nav-key="learning-spaces" aria-current="page"><i class="ti ti-books fs-5"></i><span class="nav-text">
-            Learning Spaces</span></a></li>
-      <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}"
-          data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
-      <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}"
-          data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
+        <div id="joinMessage" class="message-box"></div>
+      </form>
+    </section>
 
-      <li class="sidebar-user-slot">
-        <div class="student-user-menu" data-user-menu>
-          <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false"
-            aria-label="Account menu">
-            <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}"
-              alt="Student avatar">
-            <span class="student-menu-info">
-              <span class="student-menu-name" data-user-name>Student</span>
-              <span class="student-menu-role">Student</span>
-            </span>
-            <i class="ti ti-chevron-up student-menu-chevron"></i>
-          </button>
-          <div class="student-menu-panel" role="menu">
-            <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i
-                class="ti ti-help-circle"></i><span>Help</span></a>
-            <button class="student-menu-item" type="button" data-bs-toggle="modal" data-bs-target="#profileDetailModal" role="menuitem"><i class="ti ti-user-edit"></i><span>Edit Profile</span></button>
-            <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i
-                class="ti ti-logout"></i><span>Logout</span></button>
+    <section class="learning-layout">
+      <aside class="panel-card">
+        <div class="d-flex align-items-start justify-content-between gap-3">
+          <div>
+            <h2 class="section-title">LEARNING SPACES</h2>
           </div>
-        </div>
-      </li>
-    </ul>
-  </aside>
-
-  <main id="content" class="content py-10">
-    <div class="container-fluid px-xl-5 page-shell">
-      <section id="joinInviteSection" class="join-hero">
-        <div>
-          <span class="eyebrow"><i class="ti ti-door-enter"></i> Join learning space</span>
+          <span id="spaceCount" class="soft-chip">classes</span>
         </div>
 
-        <form id="joinSpaceForm" class="join-form-card">
-          <label for="inviteCode" class="form-label fw-bold text-dark">Class invite code</label>
-          <div class="d-flex flex-column gap-3">
-            <input id="inviteCode" class="form-control invite-input" type="text" placeholder="" autocomplete="off"
-              maxlength="24" required>
-            <button id="joinSpaceButton" class="btn btn-primary rounded-pill fw-bold" type="submit">
-              <i class="ti ti-door-enter me-2"></i>Join class
-            </button>
-          </div>
-          <div id="joinMessage" class="message-box"></div>
-        </form>
-      </section>
+        <div class="mt-3">
+          <input id="spaceSearch" class="form-control rounded-pill" type="search" placeholder="Search classes...">
+        </div>
 
-      <section class="learning-layout">
-        <aside class="panel-card">
-          <div class="d-flex align-items-start justify-content-between gap-3">
+        <div id="spacesList" class="space-list">
+          <div class="loading-state">Loading classes...</div>
+        </div>
+      </aside>
+
+      <section class="panel-card detail-shell">
+        <div id="spaceDetail">
+          <div class="empty-state">
             <div>
-              <h2 class="section-title">LEARNING SPACES</h2>
-            </div>
-            <span id="spaceCount" class="soft-chip">classes</span>
-          </div>
-
-          <div class="mt-3">
-            <input id="spaceSearch" class="form-control rounded-pill" type="search" placeholder="Search classes...">
-          </div>
-
-          <div id="spacesList" class="space-list">
-            <div class="loading-state">Loading classes...</div>
-          </div>
-        </aside>
-
-        <section class="panel-card detail-shell">
-          <div id="spaceDetail">
-            <div class="empty-state">
-              <div>
-                <div class="mb-3 text-primary" style="font-size: 3rem;"><i class="ti ti-route"></i></div>
-              </div>
+              <div class="mb-3 text-primary" style="font-size: 3rem;"><i class="ti ti-route"></i></div>
             </div>
           </div>
-        </section>
+        </div>
       </section>
-    </div>
-  </main>
+    </section>
+  </div>
 
   <!-- Join Confirmation Modal -->
   <div class="modal fade" id="joinConfirmModal" tabindex="-1" aria-labelledby="joinConfirmModalLabel"
@@ -296,7 +73,6 @@
             style="width: 12px; height: 12px;"></button>
         </div>
         <div class="modal-body text-center pt-5 pb-4 px-4 position-relative">
-
           <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
             style="width: 100px; height: 100px; background-color: #f4f5fa;">
             <i class="ti ti-door-enter" style="font-size: 3rem; color: #0d124b;"></i>
@@ -322,9 +98,10 @@
       </div>
     </div>
   </div>
+</main>
 
-  <script>
-    /* --- Inlined from student-learning-spaces.js --- */
+<th:block layout:fragment="scripts">
+<script>
     const token = localStorage.getItem('jwt_token');
     const userId = localStorage.getItem('user_id');
 
@@ -428,10 +205,8 @@
         : 'Confirm Join';
     }
 
-    // Hiển thị modal thủ công (không cần window.bootstrap vì main.js là ES module)
     function showJoinConfirmModal() {
       if (!joinConfirmModalElement) return;
-      // Tạo backdrop
       const backdrop = document.createElement('div');
       backdrop.className = 'modal-backdrop fade show';
       backdrop.id = 'joinModalBackdrop';
@@ -440,7 +215,6 @@
       joinConfirmModalElement.style.display = 'block';
       joinConfirmModalElement.removeAttribute('aria-hidden');
       joinConfirmModalElement.setAttribute('aria-modal', 'true');
-      // Trigger transition
       requestAnimationFrame(() => {
         joinConfirmModalElement.classList.add('show');
       });
@@ -474,91 +248,6 @@
       return (learningSpaces || []).flatMap((space) =>
         (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
       );
-    }
-
-    function renderNotifications(learningSpaces, comments = []) {
-      const badge = document.getElementById('notificationBadge');
-      const summary = document.getElementById('notificationSummary');
-      const list = document.getElementById('notificationList');
-      const pending = flattenQuizzes(learningSpaces).filter((quiz) => !quiz.isCompleted);
-      const totalCount = pending.length + comments.length;
-
-      if (badge) {
-        badge.textContent = totalCount;
-        badge.classList.toggle('d-none', totalCount === 0);
-      }
-
-      if (summary) {
-        if (totalCount > 0) {
-          summary.textContent = `You have ${totalCount} notifications.`;
-        } else {
-          summary.textContent = 'No new notifications.';
-        }
-      }
-
-      if (!list) return;
-
-      if (totalCount === 0) {
-        list.innerHTML = `
-        <div class="text-center text-muted py-4 px-3">
-          <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
-          <h6 class="fw-bold text-dark mt-3 mb-1">No pending notifications</h6>
-          <p class="small fw-semibold mb-0">All open quizzes are complete and no new replies are available.</p>
-        </div>`;
-        return;
-      }
-
-      const allItems = [];
-
-      pending.forEach(quiz => {
-        allItems.push(`
-      <a class="notification-item" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}">
-        <div class="d-flex gap-3 align-items-start">
-          <span class="notification-icon flex-shrink-0">
-            <i class="ti ti-file-pencil"></i>
-          </span>
-          <div class="min-w-0">
-            <h6 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Untitled Quiz')}</h6>
-            <p class="small text-muted fw-semibold mb-1">${escapeHtml(quiz.space?.name || 'Learning space')}</p>
-            <span class="small text-primary fw-bold">Start Quiz</span>
-          </div>
-        </div>
-      </a>`);
-      });
-
-      comments.forEach(comment => {
-        const roadmapUrl = (comment.spaceId && comment.nodeId) 
-          ? `/student/learning-node?nodeId=${encodeURIComponent(comment.nodeId)}&spaceId=${encodeURIComponent(comment.spaceId)}&commentId=${encodeURIComponent(comment.id)}` 
-          : '#';
-        allItems.push(`
-      <a class="notification-item" href="${roadmapUrl}">
-        <div class="d-flex gap-3 align-items-start">
-          <span class="notification-icon flex-shrink-0 bg-info-subtle text-info">
-            <i class="ti ti-message-circle"></i>
-          </span>
-          <div class="min-w-0">
-            <h6 class="fw-bold mb-1">Reply from ${escapeHtml(comment.replierName || 'Someone')}</h6>
-            <p class="small text-muted fw-semibold mb-1 text-truncate">${escapeHtml(comment.content || 'New reply')}</p>
-            <span class="small text-info fw-bold">View Reply</span>
-          </div>
-        </div>
-      </a>`);
-      });
-
-      list.innerHTML = allItems.join('');
-    }
-
-    function renderNotificationError(message) {
-      const badge = document.getElementById('notificationBadge');
-      const summary = document.getElementById('notificationSummary');
-      const list = document.getElementById('notificationList');
-
-      if (badge) {
-        badge.textContent = '!';
-        badge.classList.remove('d-none');
-      }
-      if (summary) summary.textContent = 'Could not load notifications.';
-      if (list) list.innerHTML = `<div class="alert alert-danger m-3">${escapeHtml(message || 'Could not load notifications.')}</div>`;
     }
 
     function readInitialSpaceId() {
@@ -595,9 +284,7 @@
       });
     }
 
-    // Hàm chính: Tải danh sách các lớp học (learning spaces) từ backend
     async function loadSpaces(preferredSpaceId = null) {
-      // Kiểm tra quyền đăng nhập
       if (!token || !userId) {
         window.location.href = '/login';
         return;
@@ -615,9 +302,15 @@
         }
 
         const data = await response.json();
+        window.currentDashboardData = data;
         window.setStudentMenuUser?.(data.user);
         state.spaces = data.learningSpaces || [];
-        renderNotifications(state.spaces, data.commentNotifications || []);
+        
+        // Let layout helper run notifications update
+        if (typeof window.renderNotifications === 'function') {
+          window.renderNotifications(state.spaces, data.commentNotifications || []);
+        }
+
         renderSpaces();
 
         const preferred = Number(preferredSpaceId);
@@ -629,16 +322,13 @@
           renderEmptyDetail();
         }
       } catch (error) {
-        renderNotificationError(error.message);
         spacesList.innerHTML = `<div class="empty-state">${escapeHtml(error.message)}</div>`;
         renderEmptyDetail('Could not load learning space', 'Please check your login or try again later.');
       }
     }
 
-    // Hàm hiển thị danh sách các lớp học (cột bên trái)
     function renderSpaces() {
       const keyword = state.searchTerm.trim().toLowerCase();
-      // Lọc danh sách lớp học theo từ khóa tìm kiếm
       const filtered = state.spaces.filter((space) => {
         const haystack = `${space.name || ''} ${space.description || ''} ${space.inviteCode || ''}`.toLowerCase();
         return haystack.includes(keyword);
@@ -695,17 +385,15 @@
       </div>`;
     }
 
-    // Hàm xử lý khi người dùng chọn/nhấp vào một lớp học cụ thể
     async function selectSpace(spaceId) {
       const selected = state.spaces.find((space) => space.id === Number(spaceId));
       if (!selected) return;
 
       state.selectedSpaceId = selected.id;
-      renderSpaces(); // Cập nhật lại giao diện (đánh dấu active)
-      renderDetailLoading(selected); // Hiển thị trạng thái đang tải dữ liệu roadmap
+      renderSpaces();
+      renderDetailLoading(selected);
 
       try {
-        // Gọi API để lấy lộ trình học (roadmap/paths) của lớp được chọn
         const response = await fetch(`/api/learning-spaces/${selected.id}/learning-paths`, {
           headers: authHeaders(false)
         });
@@ -744,9 +432,7 @@
       </section>`;
     }
 
-    // Hàm hiển thị chi tiết lộ trình học (roadmap) của lớp học bên cột phải
     function renderDetail(space, paths, errorMessage = '') {
-      // Nếu có lỗi, hiển thị thông báo lỗi
       if (errorMessage) {
         spaceDetail.innerHTML = `
         ${detailHeaderTemplate(space)}
@@ -928,7 +614,6 @@
       }
     });
 
-    // Đóng modal khi bấm nút Cancel (data-bs-dismiss="modal")
     joinConfirmModalElement?.querySelector('[data-bs-dismiss="modal"]')?.addEventListener('click', hideJoinConfirmModal);
 
     spaceDetail.addEventListener('click', (event) => {
@@ -942,62 +627,12 @@
       renderSpaces();
     });
 
-    function setActiveSidebarLink(activeKey) {
-      document.querySelectorAll('.sidebar .nav-link[data-nav-key]').forEach(link => {
-        const isActive = link.dataset.navKey === activeKey;
-        link.classList.toggle('active', isActive);
-        link.classList.toggle('fw-bold', isActive);
-        link.classList.toggle('fw-semibold', !isActive);
-
-        if (isActive) {
-          link.setAttribute('aria-current', 'page');
-        } else {
-          link.removeAttribute('aria-current');
-        }
-      });
-    }
-
-    function initSidebarActiveState() {
-      const path = window.location.pathname.replace(/\/+$/, '') || '/';
-      let activeKey = null;
-
-      if (path === '/student/dashboard' && window.location.hash === '#myQuizSection') {
-        activeKey = 'my-quiz';
-      } else if (path === '/student/dashboard') {
-        activeKey = 'dashboard';
-      } else if (path.startsWith('/student/learning-spaces')) {
-        activeKey = 'learning-spaces';
-      } else if (path.startsWith('/student/my-quizzes')) {
-        activeKey = 'my-quiz';
-      } else if (path.startsWith('/student/take-quiz')) {
-        activeKey = 'my-quiz';
-      } else if (path.startsWith('/student/reports')) {
-        activeKey = 'reports';
-      }
-
-      if (activeKey) {
-        setActiveSidebarLink(activeKey);
-      }
-
-      document.querySelectorAll('.sidebar .nav-link[data-nav-key]').forEach(link => {
-        link.addEventListener('click', () => setActiveSidebarLink(link.dataset.navKey));
-      });
-    }
-
-    function logout() {
-      localStorage.removeItem('jwt_token');
-      localStorage.removeItem('user_id');
-      window.location.href = '/';
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
-      initSidebarActiveState();
       state.focusRoadmapOnce = shouldFocusRoadmap();
       state.focusJoinOnce = shouldFocusJoinInvite();
       loadSpaces(readInitialSpaceId()).finally(() => focusJoinInviteIfNeeded());
     });
-
-  </script>
+</script>
+</th:block>
 </body>
-
 </html>
