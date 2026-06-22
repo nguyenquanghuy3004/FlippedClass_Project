@@ -23,6 +23,7 @@ public class LearningSpaceController {
     @Autowired
     private LearningSpaceService learningSpaceService;
 
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "CREATE_SPACE", description = "User created a new learning space")
     @PreAuthorize("hasAuthority('MENTOR')")
     @PostMapping
     @Transactional
@@ -60,6 +61,7 @@ public class LearningSpaceController {
         return ResponseEntity.ok(new MessageResponse("Lưu trữ thành công "));
     }
     /////////
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "JOIN_SPACE", description = "User joined a learning space")
     @PostMapping("/join")
     public ResponseEntity<JoinLearningSpaceResponse>joinLearningSpace(@RequestBody JoinLearningSpaceRequest request){
         return ResponseEntity.ok(learningSpaceService.joinLearningSpace(request));

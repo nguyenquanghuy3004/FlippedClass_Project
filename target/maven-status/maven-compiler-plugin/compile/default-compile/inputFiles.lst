@@ -1,8 +1,11 @@
+C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\annotation\LogUserActivity.java
+C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\aspect\UserActivityLoggingAspect.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\config\DataInitializer.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\config\OpenApiConfig.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\config\QuestionBankSeeder.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\config\WebMvcConfig.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\config\WebSecurityConfig.java
+C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\AdminActivityRestController.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\AdminCurriculumRestController.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\AdminSpaceRestController.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\AdminUIController.java
@@ -111,6 +114,7 @@ C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\f
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\response\StudentProfileResponse.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\response\UserResponse.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\StudentProgressDTO.java
+C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\UserActivityLogDto.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\UserDTO.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\CourseDocument.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\EvaluationCriterion.java
@@ -135,6 +139,7 @@ C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\f
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\Student.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\StudentProfile.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\User.java
+C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\UserActivityLog.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\enums\AuthProvider.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\enums\DiscussionStatus.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\enums\DocumentType.java
@@ -177,6 +182,7 @@ C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\f
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\RoleRepository.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\StudentProfileRepository.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\StudentRepository.java
+C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\UserActivityLogRepository.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\UserRepository.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\security\jwt\AuthEntryPointJwt.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\security\jwt\AuthTokenFilter.java
@@ -214,6 +220,7 @@ C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\f
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\QuizServiceImpl.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\StudentDashboardServiceImpl.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\StudentProfileServiceImpl.java
+C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\UserActivityServiceImpl.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\UserDetailsImpl.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\UserDetailsServiceImpl.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\UserServiceImpl.java
@@ -233,6 +240,7 @@ C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\f
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\QuizService.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\StudentDashboardService.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\StudentProfileService.java
+C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\UserActivityService.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\service\UserService.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\TestHash.java
 C:\Users\84376\Documents\GitHub\FlippedClass_Project\src\main\java\com\example\flippedclass\util\StudentValidator.java
