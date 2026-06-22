@@ -134,6 +134,10 @@
 
 </script>
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+  <!-- Monaco Editor & JetBrains Mono -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -179,7 +183,6 @@
 <script>
 /* --- Inlined from student-learning-node.js --- */
 const token = localStorage.getItem('jwt_token');
-  const userId = localStorage.getItem('user_id');
   const urlParams = new URLSearchParams(window.location.search);
   const pathNodeMatch = window.location.pathname.match(/\/student\/learning-nodes\/(\d+)/);
   const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
@@ -375,239 +378,24 @@ const token = localStorage.getItem('jwt_token');
     return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
   }
 
-  let currentComments = [];
-
-  async function loadComments() {
-    const container = document.getElementById('nodeCommentsContainer');
-    const badge = document.getElementById('commentsCountBadge');
-    if (!container) return;
-
-    try {
-      const response = await fetch(`/api/nodes/${nodeId}/discussions`, { headers: authHeaders(false) });
-      if (response.status === 403) {
-        container.innerHTML = emptyLightTemplate('ti-lock', 'You do not have permission to comment in this class.');
-        if (badge) badge.textContent = '0';
-        return;
-      }
-      if (!response.ok) throw new Error(await readError(response));
-      
-      currentComments = await response.json();
-      renderCommentsUI();
-    } catch (err) {
-      container.innerHTML = emptyLightTemplate('ti-alert-circle', err.message || 'Could not load comments.');
-    }
-  }
-
-  function formatTime(dateString) {
-    if (!dateString) return '';
-    const d = new Date(dateString);
-    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
-
-  function renderCommentItem(comment, isReply = false, rootId = null) {
-    const isOwner = String(comment.authorId) === String(userId);
-    const defaultAvt = '/assets/images/avatar-1.jpg';
-    const avatar = comment.authorAvatar || defaultAvt;
-    const author = comment.authorName || 'Student';
-    const time = formatTime(comment.createdAt);
-    const currentRootId = rootId || comment.id;
-    const safeAuthor = author.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-
-    let html = `
-      <div class="comment-item ${isReply ? 'comment-reply' : ''}" style="display: flex; gap: 12px; margin-bottom: 16px;">
-        <img src="${escapeHtml(avatar)}" alt="avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='${defaultAvt}'">
-        <div style="flex: 1; background: #f8f9fa; border-radius: 8px; padding: 10px 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-            <strong style="font-size: 0.9rem; color: #1e293b;">${escapeHtml(author)}</strong>
-            <span style="font-size: 0.75rem; color: #64748b;">${escapeHtml(time)}</span>
+  function commentsTemplate(items) {
+    const discussions = items.filter((item) => normalizeItemType(item.itemType) === 'DISCUSSION');
+    const body = discussions.length
+      ? `<div class="comment-list">${discussions.map((item) => `
+          <div class="comment-item">
+            <span class="comment-author">${escapeHtml(item.title || 'Discussion')}</span>
+            <span class="comment-text">${escapeHtml(item.content || 'Your instructor opened a discussion topic for this node.')}</span>
           </div>
-          <div style="font-size: 0.875rem; color: #334155; margin-bottom: 8px; white-space: pre-wrap;" id="comment-content-${comment.id}">${escapeHtml(comment.content)}</div>
-          
-          <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #64748b;">
-            <button type="button" onclick="openReplyBox(${currentRootId}, '${safeAuthor}')" style="border:none; background:none; color:#64748b; cursor:pointer; padding:0;">Reply</button>
-            ${isOwner ? `<button type="button" onclick="deleteComment(${comment.id})" style="border:none; background:none; color:#ef4444; cursor:pointer; padding:0;">Delete</button>` : ''}
-          </div>
+        `).join('')}</div>`
+      : emptyLightTemplate('ti-message-off', 'No comments or discussion topics yet.');
 
-          <div id="edit-form-${comment.id}" style="display: none; margin-top: 8px;">
-          </div>
-
-          <!-- Reply Form -->
-          ${!isReply ? `
-          <div id="reply-form-${comment.id}" style="display: none; margin-top: 12px;">
-            <textarea id="reply-input-${comment.id}" placeholder="Write a reply..." class="form-control" style="width: 100%; border-radius: 6px; padding: 8px; border: 1px solid #e2e8f0; font-size: 0.875rem; margin-bottom: 8px;" rows="2"></textarea>
-            <div style="display: flex; gap: 8px;">
-              <button type="button" onclick="submitReply(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #3b82f6; color: white; border: none; cursor: pointer;">Reply</button>
-              <button type="button" onclick="toggleReplyForm(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
-            </div>
-          </div>
-          ` : ''}
-        </div>
-      </div>
-    `;
-
-    if (!isReply && comment.replies && comment.replies.length > 0) {
-      html += `<div style="padding-left: 32px; border-left: 2px solid #e2e8f0; margin-left: 16px; margin-bottom: 16px;">`;
-      comment.replies.forEach(reply => {
-        html += renderCommentItem(reply, true, comment.id);
-      });
-      html += `</div>`;
-    }
-
-    return html;
-  }
-
-  function renderCommentsUI() {
-    const container = document.getElementById('nodeCommentsContainer');
-    const badge = document.getElementById('commentsCountBadge');
-    if (!container) return;
-
-    let totalCount = currentComments.length;
-    currentComments.forEach(c => totalCount += (c.replies ? c.replies.length : 0));
-    if (badge) badge.textContent = totalCount;
-
-    let body = '';
-    if (currentComments.length === 0) {
-      body = emptyLightTemplate('ti-message-off', 'No comments yet. Be the first to start a discussion!');
-    } else {
-      body = `<div class="comment-list" style="max-height: 400px; overflow-y: auto; padding-right: 8px;">
-        ${currentComments.map(c => renderCommentItem(c, false)).join('')}
-      </div>`;
-    }
-
-    container.innerHTML = `
+    return `
       ${body}
-      <div class="comment-compose" style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-        <textarea id="rootCommentInput" placeholder="Write a comment or question..." style="width: 100%; border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1; font-size: 0.875rem; resize: vertical; margin-bottom: 8px;" rows="3"></textarea>
-        <button type="button" onclick="submitRootComment()" id="rootCommentBtn" style="width: 100%; padding: 8px; border-radius: 6px; background: #2563eb; color: white; border: none; font-weight: 500; cursor: pointer; transition: background 0.2s;">Send Comment</button>
-      </div>
-    `;
-
-    const input = document.getElementById('rootCommentInput');
-    const btn = document.getElementById('rootCommentBtn');
-    if (input && btn) {
-      input.addEventListener('input', () => {
-        btn.disabled = input.value.trim().length === 0;
-        btn.style.opacity = btn.disabled ? '0.6' : '1';
-      });
-      btn.disabled = true;
-      btn.style.opacity = '0.6';
-    }
+      <div class="comment-compose">
+        <textarea placeholder="Write a comment or question..."></textarea>
+        <button type="button" disabled>Send Comment</button>
+      </div>`;
   }
-
-  window.toggleReplyForm = function(id) {
-    const form = document.getElementById(`reply-form-${id}`);
-    if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
-  };
-
-  window.openReplyBox = function(rootId, mentionName) {
-    const form = document.getElementById(`reply-form-${rootId}`);
-    const input = document.getElementById(`reply-input-${rootId}`);
-    if (form && input) {
-      form.style.display = 'block';
-      if (mentionName && !input.value.includes(`@${mentionName}`)) {
-        input.value = `@${mentionName} ${input.value}`;
-      }
-      // Put cursor at the end
-      input.focus();
-      const val = input.value;
-      input.value = '';
-      input.value = val;
-    }
-  };
-
-  window.toggleEditForm = function(id) {
-    const form = document.getElementById(`edit-form-${id}`);
-    const contentDiv = document.getElementById(`comment-content-${id}`);
-    const input = document.getElementById(`edit-input-${id}`);
-    
-    if (form && contentDiv && input) {
-      if (form.style.display === 'none') {
-        form.style.display = 'block';
-        contentDiv.style.display = 'none';
-        input.value = contentDiv.textContent;
-      } else {
-        form.style.display = 'none';
-        contentDiv.style.display = 'block';
-      }
-    }
-  };
-
-  window.submitRootComment = async function() {
-    const input = document.getElementById('rootCommentInput');
-    const content = input.value.trim();
-    if (!content) return;
-
-    const btn = document.getElementById('rootCommentBtn');
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
-
-    try {
-      const res = await fetch(`/api/nodes/${nodeId}/discussions`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ content })
-      });
-      if (!res.ok) throw new Error(await readError(res));
-      await loadComments();
-    } catch(err) {
-      alert(err.message || 'Could not post comment');
-    } finally {
-      if(btn) {
-        btn.disabled = false;
-        btn.textContent = 'Send Comment';
-      }
-    }
-  };
-
-  window.submitReply = async function(parentId) {
-    const input = document.getElementById(`reply-input-${parentId}`);
-    const content = input?.value.trim();
-    if (!content) return;
-
-    try {
-      const res = await fetch(`/api/nodes/${nodeId}/discussions`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ content, parentId })
-      });
-      if (!res.ok) throw new Error(await readError(res));
-      await loadComments();
-    } catch(err) {
-      alert(err.message || 'Could not post reply');
-    }
-  };
-
-  window.submitEdit = async function(commentId) {
-    const input = document.getElementById(`edit-input-${commentId}`);
-    const content = input?.value.trim();
-    if (!content) return;
-
-    try {
-      const res = await fetch(`/api/comments/${commentId}?userId=${userId}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify({ content })
-      });
-      if (!res.ok) throw new Error(await readError(res));
-      await loadComments();
-    } catch(err) {
-      alert(err.message || 'Could not update comment');
-    }
-  };
-
-  window.deleteComment = async function(commentId) {
-    if (!confirm('Are you sure you want to delete this comment?')) return;
-    try {
-      const res = await fetch(`/api/nodes/${nodeId}/discussions/${commentId}`, {
-        method: 'DELETE',
-        headers: authHeaders(false)
-      });
-      if (!res.ok) throw new Error(await readError(res));
-      await loadComments();
-    } catch(err) {
-      alert(err.message || 'Could not delete comment');
-    }
-  };
 
   function renderError(title, message) {
     pageRoot.className = 'error-state';
@@ -657,36 +445,20 @@ const token = localStorage.getItem('jwt_token');
           <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
         </section>
 
-        <!-- START: LESSON SUMMARY UI -->
-        <section class="summary-card" style="margin-top: 1.5rem;">
-          <div class="summary-card-header">
-            <h2 class="summary-title">
-              <i class="ti ti-notebook"></i> Lesson Summary
-            </h2>
-            <span id="summaryStatus" class="summary-status">
-              <i class="ti ti-check"></i> Saved successfully
-            </span>
+        <!-- Code Editor Section (IDE) -->
+        <section class="ide-card dark-mode" style="margin-top: 2rem; background-color: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; margin: 0;"><i class="ti ti-code"></i> Code Editor</h2>
+            <button id="btnRunCode" class="btn btn-success" style="background-color: #2ea043; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: background-color 0.2s;"><i class="ti ti-player-play"></i> Run Code</button>
           </div>
-
-          <form id="summaryForm" class="summary-form">
-            <div>
-              <label for="keyTakeaways" class="summary-label">📚 Key takeaways from the lesson</label>
-              <textarea id="keyTakeaways" class="summary-textarea" placeholder="Record the important knowledge you learned from the lesson..." required></textarea>
-            </div>
-
-            <div>
-              <label for="questions" class="summary-label">❓ Concepts you didn't understand</label>
-              <textarea id="questions" class="summary-textarea" placeholder="Record any content you are still wondering about or didn't understand..."></textarea>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
-              <button type="submit" id="saveSummaryBtn" class="btn-primary">
-                <i class="ti ti-device-floppy"></i> Save Summary
-              </button>
-            </div>
-          </form>
+          
+          <div id="editor" style="height: 400px; border: 1px solid #444; border-radius: 4px; overflow: hidden;"></div>
+          
+          <div class="mt-3" style="margin-top: 20px;">
+            <h5 style="color: #aaa; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; font-size: 0.9rem;">Terminal Output:</h5>
+            <pre id="terminalOutput" style="background-color: #000; color: #00ff00; padding: 15px; border-radius: 4px; height: 150px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; border: 1px solid #333; margin: 0; white-space: pre-wrap; word-wrap: break-word;">> Chờ chạy lệnh...</pre>
+          </div>
         </section>
-        <!-- END: LESSON SUMMARY UI -->
       </section>
 
       <aside class="side-column">
@@ -707,63 +479,11 @@ const token = localStorage.getItem('jwt_token');
               <h2>Comments</h2>
               <p>Discussions and questions related to this node.</p>
             </div>
-            <span class="soft-chip" id="commentsCountBadge">0</span>
+            <span class="soft-chip">${discussions.length}</span>
           </div>
-          <div id="nodeCommentsContainer">
-            <div class="empty-light">
-              <div><i class="ti ti-loader-2"></i> Loading comments...</div>
-            </div>
-          </div>
+          ${commentsTemplate(items)}
         </section>
       </aside>`;
-
-    // --- START: HANDLE SUMMARY SUBMIT ---
-    const summaryForm = document.getElementById('summaryForm');
-    const saveSummaryBtn = document.getElementById('saveSummaryBtn');
-    const summaryStatus = document.getElementById('summaryStatus');
-
-    if (summaryForm && saveSummaryBtn && summaryStatus) {
-      summaryForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const keyTakeaways = document.getElementById('keyTakeaways').value;
-        const questions = document.getElementById('questions').value;
-        
-        const summaryJson = JSON.stringify({
-            keyTakeaways: keyTakeaways,
-            confusingPoints: questions
-        });
-
-        // Loading effect
-        saveSummaryBtn.disabled = true;
-        saveSummaryBtn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Saving...';
-
-        try {
-          const response = await fetch('/api/lesson-summaries', {
-            method: 'POST',
-            headers: authHeaders(true),
-            body: JSON.stringify({
-              learningNodeId: nodeId,
-              summaryContent: summaryJson
-            })
-          });
-
-          if (!response.ok) {
-            throw new Error(await readError(response));
-          }
-
-          // Show success state
-          summaryStatus.classList.add('show');
-          setTimeout(() => summaryStatus.classList.remove('show'), 3500);
-        } catch (err) {
-          alert('Failed to save summary: ' + err.message);
-        } finally {
-          saveSummaryBtn.disabled = false;
-          saveSummaryBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Summary';
-        }
-      });
-    }
-    // --- END: HANDLE SUMMARY SUBMIT ---
   }
 
   // Hàm chính: Tải thông tin của bài học (node) và các tài liệu/item liên quan từ backend
@@ -793,10 +513,77 @@ const token = localStorage.getItem('jwt_token');
 
       // Hiển thị nội dung ra giao diện
       renderNodePage(node, sortedItems);
-      loadComments();
+      
+      // Khởi tạo Monaco Editor
+      initMonacoEditor();
     } catch (error) {
       renderError('Could not load node', error.message || 'Please try again later.');
     }
+  }
+
+  let myCodeEditor; // Biến toàn cục để lưu instance của editor
+
+  function initMonacoEditor() {
+    const editorDiv = document.getElementById('editor');
+    if (!editorDiv) return;
+
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+
+    require(['vs/editor/editor.main'], function() {
+        myCodeEditor = monaco.editor.create(editorDiv, {
+            value: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n}",
+            language: "java",
+            theme: "vs-dark",     // Giao diện nền đen chuẩn Dev
+            automaticLayout: true,
+            fontSize: 14,
+            minimap: { enabled: false } // Tắt cái bản đồ nhỏ bên phải cho gọn
+        });
+    });
+
+    document.getElementById('btnRunCode').addEventListener('click', async function() {
+        const terminal = document.getElementById('terminalOutput');
+        const btn = document.getElementById('btnRunCode');
+        
+        terminal.innerText = "> Đang biên dịch code. Vui lòng đợi...";
+        terminal.style.color = "#aaa";
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Running...';
+        
+        // Lấy nội dung code đang gõ
+        const codeString = myCodeEditor.getValue();
+
+        try {
+            const response = await fetch('/api/compiler/execute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ script: codeString })
+            });
+            
+            const result = await response.json();
+            
+            // Phục hồi UI
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.innerHTML = '<i class="ti ti-player-play"></i> Run Code';
+
+            // JDoodle trả về Output ở trường "output"
+            if (result.output) {
+                terminal.style.color = response.ok ? "#00ff00" : "#ff4444";
+                terminal.innerText = "> " + result.output;
+            } else {
+                terminal.style.color = "#ff4444";
+                terminal.innerText = "> Lỗi Server Compiler: " + JSON.stringify(result);
+            }
+        } catch (error) {
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.innerHTML = '<i class="ti ti-player-play"></i> Run Code';
+            
+            terminal.style.color = "#ff4444";
+            terminal.innerText = "> Lỗi kết nối đến Backend: " + error.message;
+        }
+    });
   }
 
   loadNodePage();
