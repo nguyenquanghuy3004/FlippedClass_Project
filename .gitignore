@@ -1,0 +1,12 @@
+target/
+build/
+.idea/
+.vscode/
+*.log
+*.class
+.mvn/
+.tomcat/
+uploads/
+application-local.yml
+.DS_Store
+Thumbs.db
