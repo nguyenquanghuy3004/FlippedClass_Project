@@ -6,7 +6,19 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 @Repository
 public interface LearningNodeItemRepository extends JpaRepository<LearningNodeItem,Long> {
     List<LearningNodeItem> findByLearningNodeIdOrderByPosition(Long learningNodeId); // lấy danh sách tài nguyên của 1 bài học
+
+    @Query("SELECT i FROM LearningNodeItem i JOIN i.learningNode n JOIN n.learningPath p JOIN p.learningSpace s " +
+           "WHERE s.id IN :spaceIds AND i.itemType = :itemType " +
+           "ORDER BY n.createdAt DESC")
+    List<LearningNodeItem> findRecentItemsBySpaceIds(
+            @Param("spaceIds") List<Long> spaceIds, 
+            @Param("itemType") com.example.flippedclass.enums.ItemType itemType, 
+            Pageable pageable);
 }

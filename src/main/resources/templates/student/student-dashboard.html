@@ -13,72 +13,72 @@
 <span layout:fragment="topbar-title">Student Portal <span class="badge bg-primary-subtle text-primary rounded-pill">Learning</span></span>
 
 <!-- MAIN CONTENT -->
-<main id="content" class="content py-10" layout:fragment="content">
-  <div class="container-fluid px-xl-5">
-    <div class="row g-5">
+<main id="content" class="content py-4" layout:fragment="content">
+  <div class="container-fluid px-xl-4">
+    <div class="row g-4">
       <!-- MY LEARNING SPACES (APPLE STYLE CARDS) -->
       <div class="col-xl-8">
-        <div id="myQuizSection" class="d-flex justify-content-between align-items-end mb-4">
+        <div id="myQuizSection" class="d-flex justify-content-between align-items-end mb-3">
           <div>
-            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">My Learning Spaces</h2>
+            <h2 class="fc-section-title text-dark mb-0">My Learning Spaces</h2>
           </div>
           <a th:href="@{/student/learning-spaces(focus='join')}" class="join-space-plus" aria-label="Join class with invite code">
             <i class="ti ti-plus"></i>
           </a>
         </div>
 
-        <div class="row g-4" id="learningSpaceList">
+        <div class="row g-3" id="learningSpaceList">
           <div class="col-12">
-            <div class="bento-card text-center text-muted py-5">
+            <div class="bento-card text-center text-muted py-4">
               <div class="spinner-border text-primary mb-3" role="status"></div>
-              <p class="mb-0 fw-semibold">Loading learning spaces...</p>
+              <p class="fc-body mb-0">Loading learning spaces...</p>
             </div>
           </div>
         </div>
 
         <!-- PUBLIC SPACES SECTION -->
-        <hr class="my-5 opacity-10 border-secondary">
+        <hr class="my-4 opacity-10 border-secondary">
 
-        <div class="d-flex justify-content-between align-items-end mb-4">
+        <div class="d-flex justify-content-between align-items-end mb-3">
           <div>
-            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Explore Public Classes</h2>
+            <h2 class="fc-section-title text-dark mb-0">Explore Public Classes</h2>
           </div>
         </div>
 
-        <div class="row g-4" id="publicSpaceList">
+        <div class="row g-3" id="publicSpaceList">
           <div class="col-12">
-            <div class="bento-card text-center text-muted py-5">
+            <div class="bento-card text-center text-muted py-4">
               <div class="spinner-border text-primary mb-3" role="status"></div>
-              <p class="mb-0 fw-semibold">Loading public classes...</p>
+              <p class="fc-body mb-0">Loading public classes...</p>
             </div>
           </div>
         </div>
 
         <!-- COURSE QUIZZES SECTION -->
-        <hr class="my-5 opacity-10 border-secondary">
+        <hr class="my-4 opacity-10 border-secondary">
 
-        <div class="d-flex justify-content-between align-items-end mb-4">
+        <div class="d-flex justify-content-between align-items-end mb-3">
           <div>
-            <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px;">Course Quizzes</h2>
+            <h2 class="fc-section-title text-dark mb-0">Course Quizzes</h2>
           </div>
         </div>
 
-        <div class="accordion accordion-flush quiz-accordion bento-card p-3" id="quizAccordion">
+        <div class="accordion accordion-flush quiz-accordion bento-card p-0" id="quizAccordion">
           <div class="text-center text-muted py-4" id="quiz-loading">
             <div class="spinner-border text-primary mb-2" role="status"></div>
-            <p>Loading courses and quizzes...</p>
+            <p class="fc-body mb-0">Loading courses and quizzes...</p>
           </div>
         </div>
       </div>
 
       <!-- RIGHT COLUMN: RECENT DOCS -->
       <div class="col-xl-4">
-        <h2 class="h3 fw-900 text-dark mb-4" style="letter-spacing: -0.5px;">New Documents</h2>
-        <div class="bento-card p-4" id="recentDocuments">
+        <h2 class="fc-section-title text-dark mb-3">New Documents</h2>
+        <div class="bento-card p-3" id="recentDocuments">
           <div class="text-center text-muted py-4">
             <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
-            <h5 class="fw-bold text-dark mt-3 mb-2">Loading documents</h5>
-            <p class="small fw-semibold mb-0">Documents from your learning spaces will appear here.</p>
+            <h5 class="fc-card-title text-dark mt-3 mb-2">Loading documents</h5>
+            <p class="fc-meta mb-0">Documents from your learning spaces will appear here.</p>
           </div>
         </div>
       </div>
@@ -214,10 +214,10 @@
 
   function emptyState(icon, title, message) {
     return `
-        <div class="bento-card text-center text-muted py-5">
+        <div class="bento-card text-center text-muted py-4">
           <i class="ti ${icon} text-primary" style="font-size: 2.6rem;"></i>
-          <h5 class="fw-bold text-dark mt-3 mb-2">${escapeHtml(title)}</h5>
-          <p class="mb-0 fw-semibold">${escapeHtml(message)}</p>
+          <h5 class="fc-card-title text-dark mt-3 mb-2">${escapeHtml(title)}</h5>
+          <p class="fc-body mb-0">${escapeHtml(message)}</p>
         </div>`;
   }
 
@@ -246,10 +246,10 @@
             <a class="course-card text-decoration-none d-block" href="${roadmapUrl}" aria-label="Open roadmap for ${escapeHtml(space.name || 'learning space')}">
               <div class="course-card-header bg-${theme.color}">
                 <div class="d-flex justify-content-between align-items-start">
-                  <h3 class="course-title text-white pe-3">${escapeHtml(space.name || 'Untitled Learning Space')}</h3>
-                  <span class="badge bg-white text-dark shadow-sm px-2 py-1 rounded-pill flex-shrink-0"><i class="ti ti-circle-check me-1"></i>${escapeHtml(statusLabel(space.status))}</span>
+                  <h3 class="fc-card-title text-white pe-3 m-0">${escapeHtml(space.name || 'Untitled Learning Space')}</h3>
+                  <span class="fc-badge bg-white text-dark shadow-sm px-2 py-1 rounded-pill flex-shrink-0"><i class="ti ti-circle-check me-1"></i>${escapeHtml(statusLabel(space.status))}</span>
                 </div>
-                <p class="small fw-semibold mb-0 text-white-50">${escapeHtml(space.description || roleLabel(space.memberRole))}</p>
+                <p class="fc-meta mb-0 text-white-50 mt-1">${escapeHtml(space.description || roleLabel(space.memberRole))}</p>
                 <div class="course-instructor-avatar bg-${theme.color}-subtle text-${theme.color}">
                   <i class="ti ${theme.icon}"></i>
                 </div>
@@ -259,8 +259,8 @@
                   <div class="progress-fill bg-${theme.color}" style="width: ${percent}%;"></div>
                 </div>
                 <div class="d-flex justify-content-between mt-2">
-                  <span class="small fw-bold text-dark">${percent}% quiz completed</span>
-                  <span class="small text-muted fw-semibold">${pending ? `${pending} quizzes left` : quizzes.length ? 'All quizzes done' : 'No quizzes yet'}</span>
+                  <span class="fc-label text-dark">${percent}% quiz completed</span>
+                  <span class="fc-label text-muted">${pending ? `${pending} quizzes left` : quizzes.length ? 'All quizzes done' : 'No quizzes yet'}</span>
                 </div>
               </div>
             </a>
@@ -293,24 +293,24 @@
               ? `<div class="accordion-body border-top border-light">${quizzes.map((quiz) => `
               <div class="quiz-card-item d-flex align-items-center justify-content-between gap-3 p-3 bg-white rounded-3 shadow-sm mb-2 ${quiz.isCompleted ? 'opacity-75' : ''}">
                 <div>
-                  <h5 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Untitled Quiz')}</h5>
-                  <span class="small text-muted fw-semibold"><i class="ti ti-clock me-1"></i>${escapeHtml(quiz.durationMinutes || 0)} min</span>
-                  <span class="small text-muted fw-semibold ms-2"><i class="ti ti-list-check me-1"></i>${escapeHtml(quiz.totalQuestions || 0)} questions</span>
+                  <h5 class="fc-card-title mb-1">${escapeHtml(quiz.title || 'Untitled Quiz')}</h5>
+                  <span class="fc-meta text-muted"><i class="ti ti-clock me-1"></i>${escapeHtml(quiz.durationMinutes || 0)} min</span>
+                  <span class="fc-meta text-muted ms-2"><i class="ti ti-list-check me-1"></i>${escapeHtml(quiz.totalQuestions || 0)} questions</span>
                 </div>
                 <div class="text-end">${quizAction(quiz)}</div>
               </div>`).join('')}</div>`
               : `<div class="accordion-body border-top border-light text-center py-4">
               <div class="text-success mb-2"><i class="ti ti-circle-check" style="font-size: 3rem;"></i></div>
-              <h5 class="fw-bold">No quizzes in this class</h5>
-              <p class="text-muted small mb-0">When your instructor creates quizzes, they will appear here.</p>
+              <h5 class="fc-card-title">No quizzes in this class</h5>
+              <p class="fc-body text-muted mb-0">When your instructor creates quizzes, they will appear here.</p>
             </div>`;
 
       quizAccordion.insertAdjacentHTML('beforeend', `
           <div class="accordion-item border-0">
             <h2 class="accordion-header">
-              <button class="accordion-button ${index === 0 ? '' : 'collapsed'} bg-transparent fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index === 0 ? 'true' : 'false'}">
+              <button class="accordion-button ${index === 0 ? '' : 'collapsed'} bg-transparent fc-card-title border-0" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index === 0 ? 'true' : 'false'}">
                 <i class="ti ti-book text-primary me-2 fs-4"></i>${escapeHtml(space.name || 'Learning space')}
-                ${pending ? `<span class="badge bg-danger ms-auto me-3 rounded-pill">${pending} quizzes to do</span>` : `<span class="badge bg-secondary ms-auto me-3 rounded-pill">${quizzes.length ? 'Done' : 'No quizzes yet'}</span>`}
+                ${pending ? `<span class="fc-badge bg-danger text-white ms-auto me-3 px-2 py-1 rounded-pill">${pending} quizzes to do</span>` : `<span class="fc-badge bg-secondary text-white ms-auto me-3 px-2 py-1 rounded-pill">${quizzes.length ? 'Done' : 'No quizzes yet'}</span>`}
               </button>
             </h2>
             <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" data-bs-parent="#quizAccordion">
@@ -346,8 +346,8 @@
       list.innerHTML = `
           <div class="text-center text-muted py-4 px-3">
             <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
-            <h6 class="fw-bold text-dark mt-3 mb-1">No pending notifications</h6>
-            <p class="small fw-semibold mb-0">All open quizzes are complete and no new replies are available.</p>
+            <h6 class="fc-card-title text-dark mt-3 mb-1">No pending notifications</h6>
+            <p class="fc-body mb-0">All open quizzes are complete and no new replies are available.</p>
           </div>`;
       return;
     }
@@ -362,9 +362,9 @@
               <i class="ti ti-file-pencil"></i>
             </span>
             <div class="min-w-0">
-              <h6 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Untitled Quiz')}</h6>
-              <p class="small text-muted fw-semibold mb-1">${escapeHtml(quiz.space?.name || 'Learning space')}</p>
-              <span class="small text-primary fw-bold">Start Quiz</span>
+              <h6 class="fc-card-title mb-1">${escapeHtml(quiz.title || 'Untitled Quiz')}</h6>
+              <p class="fc-meta text-muted mb-1">${escapeHtml(quiz.space?.name || 'Learning space')}</p>
+              <span class="fc-label text-primary">Start Quiz</span>
             </div>
           </div>
         </a>`);
@@ -381,9 +381,9 @@
               <i class="ti ti-message-circle"></i>
             </span>
             <div class="min-w-0">
-              <h6 class="fw-bold mb-1">Reply from ${escapeHtml(comment.replierName || 'Someone')}</h6>
-              <p class="small text-muted fw-semibold mb-1 text-truncate">${escapeHtml(comment.content || 'New reply')}</p>
-              <span class="small text-info fw-bold">View Reply</span>
+              <h6 class="fc-card-title mb-1">Reply from ${escapeHtml(comment.replierName || 'Someone')}</h6>
+              <p class="fc-meta text-muted mb-1 text-truncate">${escapeHtml(comment.content || 'New reply')}</p>
+              <span class="fc-label text-info">View Reply</span>
             </div>
           </div>
         </a>`);
@@ -478,10 +478,10 @@
               .join(' · ');
       const href = doc.url || '#';
       const disabledClass = doc.url ? '' : ' opacity-75 pe-none';
-      const targetAttrs = doc.url ? ' target="_blank" rel="noopener noreferrer"' : '';
+      const clickHandler = doc.nodeId ? ` onclick="openDocumentNode(event, ${doc.nodeId})"` : '';
 
       return `
-          <a class="notification-item rounded-4 border mb-2${disabledClass}" href="${escapeHtml(href)}"${targetAttrs}>
+          <a class="notification-item rounded-4 border mb-2${disabledClass}" href="javascript:void(0)"${clickHandler}>
             <div class="d-flex gap-3 align-items-start">
               ${documentIconTemplate(doc)}
               <div class="min-w-0">
@@ -492,6 +492,34 @@
             </div>
           </a>`;
     }).join('');
+  }
+
+  async function openDocumentNode(event, nodeId) {
+    event.preventDefault();
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write('<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">Opening document...</div>');
+    }
+    try {
+      const res = await fetch(`/api/learning-nodes/${nodeId}/items`, { headers: authHeaders(false) });
+      if (!res.ok) throw new Error('Cannot fetch items');
+      const items = await res.json();
+      const docItem = items.find(i => ['PDF', 'DOC', 'DOCUMENT'].includes(String(i.itemType || '').toUpperCase()) && (i.fullUrl || i.url));
+      if (docItem) {
+        const docUrl = docItem.fullUrl || docItem.url;
+        if (newWindow) {
+          newWindow.location.href = docUrl;
+        } else {
+          window.open(docUrl, '_blank');
+        }
+      } else {
+        if (newWindow) newWindow.close();
+        alert('No document URL found for this node.');
+      }
+    } catch (err) {
+      if (newWindow) newWindow.close();
+      alert('Failed to load document: ' + err.message);
+    }
   }
 
   async function loadPublicSpaces() {

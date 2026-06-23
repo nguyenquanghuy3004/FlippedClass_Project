@@ -48,9 +48,9 @@ body {
     height: 100%;
     position: relative;
     overflow: hidden;
-    padding: 2rem;
+    padding: 1.5rem;
     border: 1px solid rgba(229, 231, 235, 0.9);
-    border-radius: 28px;
+    border-radius: 24px;
     background: rgba(255, 255, 255, 0.96);
     box-shadow: var(--fc-shadow-sm);
     transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
@@ -106,9 +106,9 @@ body {
 }
 
 .massive-avatar {
-    width: 160px;
-    height: 160px;
-    border: 6px solid rgba(255, 255, 255, 0.34);
+    width: 130px;
+    height: 130px;
+    border: 5px solid rgba(255, 255, 255, 0.34);
     border-radius: 50%;
     object-fit: cover;
     box-shadow: 0 18px 36px rgba(31, 41, 55, 0.22);
@@ -151,7 +151,7 @@ body {
 }
 
 .dashboard-hero-grid .bento-card {
-    padding: 1.25rem;
+    padding: 1rem;
     border-radius: var(--hero-card-radius);
 }
 
@@ -166,9 +166,9 @@ body {
 }
 
 .dashboard-hero-grid .massive-avatar {
-    width: 112px;
-    height: 112px;
-    border-width: 5px;
+    width: 90px;
+    height: 90px;
+    border-width: 4px;
 }
 
 .dashboard-hero-grid .status-dot {
@@ -211,8 +211,8 @@ body {
 }
 
 .dashboard-hero-grid .welcome-card {
-    min-height: 150px;
-    padding: 1.5rem 1.7rem !important;
+    min-height: 130px;
+    padding: 1.25rem 1.5rem !important;
 }
 
 .dashboard-hero-grid .welcome-card h1 {
@@ -229,16 +229,16 @@ body {
 }
 
 .dashboard-hero-grid .student-stat-card {
-    min-height: 150px;
-    padding: 1.15rem !important;
+    min-height: 130px;
+    padding: 1rem !important;
 }
 
 .dashboard-hero-grid .student-stat-card .stat-icon-bg {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 0.65rem !important;
-    border-radius: 16px;
-    font-size: 1.35rem;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0.5rem !important;
+    border-radius: 12px;
+    font-size: 1.15rem;
 }
 
 .dashboard-hero-grid .student-stat-card .stat-value {
@@ -272,15 +272,15 @@ body {
 
 .stat-icon-bg,
 .course-icon-wrapper {
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 20px;
+    border-radius: 16px;
     color: var(--fc-primary-dark) !important;
     background: var(--fc-primary-soft) !important;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
 }
 
 .document-logo-box {
@@ -331,7 +331,7 @@ body {
 }
 
 .course-card-header {
-    padding: 1.25rem 1.25rem 2.5rem 1.25rem;
+    padding: 1rem 1rem 2rem 1rem;
     position: relative;
 }
 
@@ -346,7 +346,7 @@ body {
 .text-orange { color: #ea580c !important; }
 
 .course-card-body {
-    padding: 1rem 1.25rem 1.25rem 1.25rem;
+    padding: 0.85rem 1rem 1rem 1rem;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -355,17 +355,17 @@ body {
 
 .course-instructor-avatar {
     position: absolute;
-    right: 1.25rem;
-    bottom: -24px;
-    width: 64px;
-    height: 64px;
+    right: 1rem;
+    bottom: -20px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     background: white;
-    border: 3px solid #ffffff;
+    border: 2px solid #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     z-index: 2;
 }
@@ -535,7 +535,7 @@ body {
 
 .quiz-accordion .accordion-button {
     border-radius: 20px !important;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.25rem;
     color: var(--fc-text);
     box-shadow: none !important;
 }
@@ -546,7 +546,7 @@ body {
 }
 
 .quiz-accordion .accordion-body {
-    padding: 1.5rem;
+    padding: 1.25rem;
     background: #ffffff;
 }
 
