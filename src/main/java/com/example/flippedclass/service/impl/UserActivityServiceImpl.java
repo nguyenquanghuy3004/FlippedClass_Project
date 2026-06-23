@@ -28,6 +28,9 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     // K-V: UserId -> List of Emitters (for multiple admin tabs watching the same user)
     private final Map<Long, List<SseEmitter>> userEmitters = new ConcurrentHashMap<>();
+    
+    // Global emitters for dashboard
+    private final List<SseEmitter> globalEmitters = new CopyOnWriteArrayList<>();
 
     @Override
     @Transactional
@@ -45,9 +48,21 @@ public class UserActivityServiceImpl implements UserActivityService {
             logEntry = activityLogRepository.save(logEntry);
 
             UserActivityLogDto dto = mapToDto(logEntry);
+            // Include user email/info in dto for global dashboard (extending dto inline isn't needed if we just map email to description)
+            // Wait, we need to show who did it on the global dashboard!
+            String finalDesc = "[" + user.getEmail() + "] " + description;
+            UserActivityLogDto globalDto = UserActivityLogDto.builder()
+                .id(logEntry.getId())
+                .actionType(logEntry.getActionType())
+                .description(finalDesc)
+                .createdAt(logEntry.getCreatedAt())
+                .build();
             
             // Push real-time event to admins watching this user
             pushEventToSubscribers(userId, dto);
+            
+            // Push to global dashboard
+            pushGlobalEvent(globalDto);
         } catch (Exception e) {
             log.error("Failed to log user activity", e);
         }
@@ -72,10 +87,36 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
     }
 
+    private void pushGlobalEvent(UserActivityLogDto dto) {
+        List<SseEmitter> deadEmitters = new CopyOnWriteArrayList<>();
+        for (SseEmitter emitter : globalEmitters) {
+            try {
+                emitter.send(SseEmitter.event().name("activity").data(dto));
+            } catch (Exception e) {
+                deadEmitters.add(emitter);
+            }
+        }
+        globalEmitters.removeAll(deadEmitters);
+    }
+
     @Override
     public List<UserActivityLogDto> getRecentActivities(Long userId) {
         return activityLogRepository.findTop50ByUserIdOrderByCreatedAtDesc(userId)
                 .stream().map(this::mapToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<UserActivityLogDto> getRecentGlobalActivities(String keyword, java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, org.springframework.data.domain.Pageable pageable) {
+        return activityLogRepository.findGlobalActivitiesWithFilter(keyword, startDate, endDate, pageable)
+                .map(log -> {
+                    String finalDesc = "[" + log.getUser().getEmail() + "] " + log.getDescription();
+                    return UserActivityLogDto.builder()
+                            .id(log.getId())
+                            .actionType(log.getActionType())
+                            .description(finalDesc)
+                            .createdAt(log.getCreatedAt())
+                            .build();
+                });
     }
 
     @Override
@@ -100,6 +141,18 @@ public class UserActivityServiceImpl implements UserActivityService {
                 userEmitters.remove(userId);
             }
         }
+    }
+
+    @Override
+    public SseEmitter subscribeToGlobalActivity() {
+        SseEmitter emitter = new SseEmitter(60 * 60 * 1000L); // 1 hour timeout
+        globalEmitters.add(emitter);
+
+        emitter.onCompletion(() -> globalEmitters.remove(emitter));
+        emitter.onTimeout(() -> globalEmitters.remove(emitter));
+        emitter.onError(e -> globalEmitters.remove(emitter));
+
+        return emitter;
     }
 
     private UserActivityLogDto mapToDto(UserActivityLog log) {

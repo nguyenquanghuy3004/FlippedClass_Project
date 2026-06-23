@@ -25,4 +25,5 @@ public class AdminActivityRestController {
     public SseEmitter streamActivities(@PathVariable Long userId) {
         return userActivityService.subscribeToUserActivity(userId);
     }
+
 }

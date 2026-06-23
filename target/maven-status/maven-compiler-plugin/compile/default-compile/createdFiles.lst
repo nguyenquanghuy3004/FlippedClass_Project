@@ -175,6 +175,7 @@ com\example\flippedclass\dto\request\CreateLearningSpaceRequest.class
 com\example\flippedclass\config\DataInitializer.class
 com\example\flippedclass\dto\response\UserResponse.class
 com\example\flippedclass\entity\LearningPath$LearningPathBuilder.class
+com\example\flippedclass\controller\AdminGlobalActivityRestController.class
 com\example\flippedclass\enums\DocumentType.class
 com\example\flippedclass\repository\QuizRepository.class
 com\example\flippedclass\dto\response\InteractionLogResponse$InteractionLogResponseBuilder.class
