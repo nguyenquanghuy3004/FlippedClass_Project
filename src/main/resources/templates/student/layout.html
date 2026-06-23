@@ -13,8 +13,9 @@
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
-  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
-  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css?v=1.1}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css?v=1.1}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-layout.css?v=1.2}">
 
   <!-- AUTHENTICATION GUARD -->
   <script>
@@ -48,20 +49,35 @@
 
 <!-- TOPBAR -->
 <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm">
-  <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
-    <i class="ti ti-layout-sidebar-left-expand"></i>
-  </button>
-  <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
-    <i class="ti ti-layout-sidebar-left-expand"></i>
-  </button>
+  <div class="d-flex align-items-center gap-2">
+    <!-- Brand Logo on Topbar Left -->
+    <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
+      <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2" style="background: linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary) 58%, var(--fc-accent)) !important; width: 32px; height: 32px; box-shadow: 0 8px 16px rgba(9, 11, 79, 0.12);">
+        <i class="ti ti-book-2 fs-5"></i>
+      </div>
+      <span class="logo-text fw-bolder fs-5 text-dark" style="letter-spacing: -0.5px;">Flipped<span class="text-primary" style="color: var(--fc-primary-dark) !important;">Class</span></span>
+    </a>
+
+    <!-- Divider Line -->
+    <div class="vr text-muted opacity-25 d-none d-lg-block ms-2" style="height: 24px;"></div>
+
+    <!-- Toggle Buttons -->
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm rounded-3">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none rounded-3 me-2">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+  </div>
 
   <div class="topbar-main">
-    <div class="topbar-title-wrap d-none d-md-block">
+    <div class="topbar-title-wrap">
       <h5 class="topbar-title fw-bold text-dark ms-1">
         <span layout:fragment="topbar-title">Student Portal</span>
       </h5>
     </div>
-    <ul class="topbar-actions list-unstyled">
+    
+    <ul class="topbar-actions list-unstyled" layout:fragment="topbar-actions">
       <!-- Notification Bell -->
       <li class="dropdown">
         <button class="notification-trigger position-relative text-secondary d-flex align-items-center justify-content-center border-0"
@@ -105,7 +121,7 @@
       <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">Flipped<span class="text-primary">Class</span></span>
     </a>
   </div>
-  <ul class="nav flex-column mt-4">
+  <ul class="nav flex-column mt-0 pt-2">
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Learning Space</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
@@ -227,6 +243,87 @@
         username: localStorage.getItem('username') || '',
         avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
       };
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderNotifications(quizzes, comments = []) {
+      const badge = document.getElementById('notificationBadge');
+      const summary = document.getElementById('notificationSummary');
+      const list = document.getElementById('notificationList');
+      const pending = (quizzes || []).filter((quiz) => !quiz.isCompleted);
+      const totalCount = pending.length + comments.length;
+
+      if (badge) {
+        badge.textContent = totalCount;
+        badge.classList.toggle('d-none', totalCount === 0);
+      }
+
+      if (summary) {
+        if (totalCount > 0) {
+          summary.textContent = `You have ${totalCount} notifications.`;
+        } else {
+          summary.textContent = 'No new notifications.';
+        }
+      }
+
+      if (!list) return;
+
+      if (totalCount === 0) {
+        list.innerHTML = `
+            <div class="text-center text-muted py-4 px-3">
+              <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
+              <h6 class="fw-bold text-dark mt-3 mb-1">No pending notifications</h6>
+              <p class="small fw-semibold mb-0">All open quizzes are complete and no new replies are available.</p>
+            </div>`;
+        return;
+      }
+
+      const allItems = [];
+
+      pending.forEach(quiz => {
+        allItems.push(`
+          <a class="notification-item" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}">
+            <div class="d-flex gap-3 align-items-start">
+              <span class="stat-icon-bg flex-shrink-0" style="width: 42px; height: 42px; border-radius: 14px; font-size: 1.25rem;">
+                <i class="ti ti-file-pencil"></i>
+              </span>
+              <div class="min-w-0">
+                <h6 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Untitled Quiz')}</h6>
+                <p class="small text-muted fw-semibold mb-1">${escapeHtml(quiz.space?.name || quiz.learningSpaceName || 'Learning space')}</p>
+                <span class="small text-primary fw-bold">Start Quiz</span>
+              </div>
+            </div>
+          </a>`);
+      });
+
+      comments.forEach(comment => {
+        const roadmapUrl = (comment.spaceId && comment.nodeId) 
+          ? `/student/learning-node?nodeId=${encodeURIComponent(comment.nodeId)}&spaceId=${encodeURIComponent(comment.spaceId)}&commentId=${encodeURIComponent(comment.id)}` 
+          : '#';
+        allItems.push(`
+          <a class="notification-item" href="${roadmapUrl}">
+            <div class="d-flex gap-3 align-items-start">
+              <span class="stat-icon-bg flex-shrink-0 bg-info-subtle text-info" style="width: 42px; height: 42px; border-radius: 14px; font-size: 1.25rem;">
+                <i class="ti ti-message-circle"></i>
+              </span>
+              <div class="min-w-0">
+                <h6 class="fw-bold mb-1">Reply from ${escapeHtml(comment.replierName || 'Someone')}</h6>
+                <p class="small text-muted fw-semibold mb-1 text-truncate">${escapeHtml(comment.content || 'New reply')}</p>
+                <span class="small text-info fw-bold">View Reply</span>
+              </div>
+            </div>
+          </a>`);
+      });
+
+      list.innerHTML = allItems.join('');
     }
 
     function normalizeUser(user = {}) {
@@ -558,6 +655,7 @@
     // Expose helpers
     window.setStudentMenuUser = setStudentMenuUser;
     window.studentLogout = studentLogout;
+    window.renderNotifications = renderNotifications;
     if (!window.logout) window.logout = studentLogout;
 
     document.addEventListener('DOMContentLoaded', initStudentLayout);

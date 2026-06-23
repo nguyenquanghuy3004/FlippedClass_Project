@@ -165,9 +165,22 @@
   }
 
   function flattenQuizzes(learningSpaces) {
-    return (learningSpaces || []).flatMap((space) =>
+    return getJoinedSpaces(learningSpaces).flatMap((space) =>
             (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
     );
+  }
+
+  function getJoinedSpaces(learningSpaces) {
+    return (learningSpaces || []).filter((space) => {
+      if (typeof space.joined === 'boolean') {
+        return space.joined;
+      }
+      return true;
+    });
+  }
+
+  function getJoinedSpaceIds(learningSpaces) {
+    return getJoinedSpaces(learningSpaces).map((space) => space.id);
   }
 
   function renderProfile(data) {
@@ -189,13 +202,14 @@
   }
 
   function renderStats(learningSpaces, quizzes) {
+    const joinedSpaces = getJoinedSpaces(learningSpaces);
     const completedCount = quizzes.filter((quiz) => quiz.isCompleted).length;
     const pendingCount = quizzes.length - completedCount;
 
-    setText('#learningSpaceCount', learningSpaces.length);
+    setText('#learningSpaceCount', joinedSpaces.length);
     setText('#completedQuizCount', completedCount);
     setText('#pendingQuizCount', pendingCount);
-    setText('#dashboardSummary', `You are enrolled in ${learningSpaces.length} classes and have completed ${completedCount}/${quizzes.length} quizzes.`);
+    setText('#dashboardSummary', `You are enrolled in ${joinedSpaces.length} classes and have completed ${completedCount}/${quizzes.length} quizzes.`);
   }
 
   function emptyState(icon, title, message) {
@@ -211,12 +225,13 @@
     const list = document.getElementById('learningSpaceList');
     if (!list) return;
 
-    if (!learningSpaces.length) {
+    const joinedSpaces = getJoinedSpaces(learningSpaces);
+    if (!joinedSpaces.length) {
       list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'No Classes Yet', 'Enter a class code on My Classes to join a learning space.')}</div>`;
       return;
     }
 
-    list.innerHTML = learningSpaces.slice(0, 4).map((space, index) => {
+    list.innerHTML = joinedSpaces.slice(0, 4).map((space, index) => {
       const quizzes = space.quizzes || [];
       const completed = quizzes.filter((quiz) => quiz.isCompleted).length;
       const percent = quizzes.length ? Math.round((completed / quizzes.length) * 100) : 0;
@@ -264,12 +279,13 @@
     if (!quizAccordion) return;
 
     quizAccordion.innerHTML = '';
-    if (!learningSpaces.length) {
+    const joinedSpaces = getJoinedSpaces(learningSpaces);
+    if (!joinedSpaces.length) {
       quizAccordion.innerHTML = `<div class="text-center text-muted py-4"><p class="mb-0 fw-semibold">You have not joined any learning spaces yet.</p></div>`;
       return;
     }
 
-    learningSpaces.forEach((space, index) => {
+    joinedSpaces.forEach((space, index) => {
       const quizzes = space.quizzes || [];
       const pending = quizzes.filter((quiz) => !quiz.isCompleted).length;
       const collapseId = `collapseSpace${space.id || index}`;
@@ -495,8 +511,8 @@
     const list = document.getElementById('publicSpaceList');
     if (!list) return;
     
-    const joinedIds = window.currentDashboardData?.learningSpaces?.map(s => s.id) || [];
-    const availableSpaces = spaces.filter(s => !joinedIds.includes(s.id));
+    const joinedIds = getJoinedSpaceIds(window.currentDashboardData?.learningSpaces);
+    const availableSpaces = (spaces || []).filter((space) => !joinedIds.includes(space.id));
 
     if (!availableSpaces.length) {
       list.innerHTML = `<div class="col-12">${emptyState('ti-world-search', 'No Public Classes', 'There are currently no new public classes available to join.')}</div>`;

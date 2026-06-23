@@ -1,17 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{student/layout}">
-
 <head>
   <title>Learning Spaces - FlippedClass</title>
   <th:block layout:fragment="head">
     <link rel="stylesheet" th:href="@{/assets/css/student-learning-spaces.css}">
   </th:block>
 </head>
-
 <body>
-
 <span layout:fragment="topbar-title">Learning Spaces <span class="badge bg-primary-subtle text-primary rounded-pill">Roadmap</span></span>
-
 <!-- MAIN CONTENT -->
 <main id="content" class="content py-10" layout:fragment="content">
   <div class="container-fluid px-xl-5 page-shell">
@@ -19,12 +15,11 @@
       <div>
         <span class="eyebrow"><i class="ti ti-door-enter"></i> Join learning space</span>
       </div>
-
       <form id="joinSpaceForm" class="join-form-card">
         <label for="inviteCode" class="form-label fw-bold text-dark">Class invite code</label>
         <div class="d-flex flex-column gap-3">
           <input id="inviteCode" class="form-control invite-input" type="text" placeholder="" autocomplete="off"
-            maxlength="24" required>
+                 maxlength="24" required>
           <button id="joinSpaceButton" class="btn btn-primary rounded-pill fw-bold" type="submit">
             <i class="ti ti-door-enter me-2"></i>Join class
           </button>
@@ -32,25 +27,21 @@
         <div id="joinMessage" class="message-box"></div>
       </form>
     </section>
-
     <section class="learning-layout">
       <aside class="panel-card">
         <div class="d-flex align-items-start justify-content-between gap-3">
           <div>
-            <h2 class="section-title">LEARNING SPACES</h2>
+            <h4 class="section-title">LEARNING SPACES</h4>
           </div>
           <span id="spaceCount" class="soft-chip">classes</span>
         </div>
-
         <div class="mt-3">
           <input id="spaceSearch" class="form-control rounded-pill" type="search" placeholder="Search classes...">
         </div>
-
         <div id="spacesList" class="space-list">
           <div class="loading-state">Loading classes...</div>
         </div>
       </aside>
-
       <section class="panel-card detail-shell">
         <div id="spaceDetail">
           <div class="empty-state">
@@ -62,57 +53,51 @@
       </section>
     </section>
   </div>
-
   <!-- Join Confirmation Modal -->
   <div class="modal fade" id="joinConfirmModal" tabindex="-1" aria-labelledby="joinConfirmModalLabel"
-    aria-hidden="true">
+       aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
         <div class="modal-header border-0 pb-0 position-absolute w-100 z-1 justify-content-start">
           <button type="button" class="btn-close m-4 opacity-50" data-bs-dismiss="modal" aria-label="Close"
-            style="width: 12px; height: 12px;"></button>
+                  style="width: 12px; height: 12px;"></button>
         </div>
         <div class="modal-body text-center pt-5 pb-4 px-4 position-relative">
           <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
-            style="width: 100px; height: 100px; background-color: #f4f5fa;">
+               style="width: 100px; height: 100px; background-color: #f4f5fa;">
             <i class="ti ti-door-enter" style="font-size: 3rem; color: #0d124b;"></i>
           </div>
-
           <h4 class="fw-bold mb-2 text-dark">Join Learning Space</h4>
           <p class="text-muted mb-4 px-3" style="font-size: 0.95rem;">You are requesting to join the following class.
             Are you sure you want to proceed?</p>
-
           <div class="p-4 bg-white rounded-3 mb-4 mx-3" style="border: 1px solid #eaeaef;">
             <h3 id="confirmSpaceName" class="fw-bolder mb-0" style="color: #0d124b; letter-spacing: -0.5px;"></h3>
           </div>
-
           <!-- Hidden invite code so JS can still use it -->
           <span id="confirmInviteCode" class="d-none"></span>
         </div>
         <div class="modal-footer border-0 pt-0 pb-5 px-4 justify-content-center gap-3">
           <button type="button" class="btn rounded-pill px-4 py-2 fw-bold text-dark border-0"
-            style="background-color: #f4f5f7;" data-bs-dismiss="modal">Cancel</button>
+                  style="background-color: #f4f5f7;" data-bs-dismiss="modal">Cancel</button>
           <button type="button" class="btn rounded-pill px-5 py-2 fw-bold text-white" style="background-color: #0d124b;"
-            id="confirmJoinButton">Confirm Join</button>
+                  id="confirmJoinButton">Confirm Join</button>
         </div>
       </div>
     </div>
   </div>
 </main>
-
 <th:block layout:fragment="scripts">
-<script>
+  <script>
     const token = localStorage.getItem('jwt_token');
     const userId = localStorage.getItem('user_id');
-
     const state = {
       spaces: [],
+      allSpaces: [],
       selectedSpaceId: null,
       searchTerm: '',
       focusRoadmapOnce: false,
       focusJoinOnce: false
     };
-
     const spacesList = document.getElementById('spacesList');
     const spaceDetail = document.getElementById('spaceDetail');
     const spaceCount = document.getElementById('spaceCount');
@@ -126,28 +111,24 @@
     const confirmInviteCode = document.getElementById('confirmInviteCode');
     const confirmJoinButton = document.getElementById('confirmJoinButton');
     let pendingInviteCode = '';
-
     function authHeaders(includeJson = true) {
       const headers = { Authorization: `Bearer ${token}` };
       if (includeJson) headers['Content-Type'] = 'application/json';
       return headers;
     }
-
     function escapeHtml(value) {
       return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+              .replaceAll('&', '&amp;')
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;')
+              .replaceAll('"', '&quot;')
+              .replaceAll("'", '&#039;');
     }
-
     function truncate(value, maxLength = 110) {
       const text = String(value || '').trim();
       if (!text) return '';
       return text.length > maxLength ? `${text.slice(0, maxLength - 1)}...` : text;
     }
-
     function statusLabel(status) {
       const labels = {
         ACTIVE: 'Active',
@@ -159,18 +140,17 @@
       };
       return labels[status] || status || 'Unknown';
     }
-
     function nodeTypeLabel(type) {
       const labels = {
         LESSON: 'Lesson',
         VIDEO: 'Video',
         PRACTICE: 'Practice',
         QUIZ: 'Quiz',
-        REVIEW: 'Review'
+        REVIEW: 'Review',
+        DOCUMENT: 'Document'
       };
       return labels[type] || type || 'Node';
     }
-
     function roleLabel(role) {
       const labels = {
         MEMBER: 'Student',
@@ -179,32 +159,27 @@
       };
       return labels[role] || role || 'Member';
     }
-
     function setJoinMessage(message, type) {
       joinMessage.textContent = message;
       joinMessage.className = `message-box show ${type}`;
     }
-
     function clearJoinMessage() {
       joinMessage.textContent = '';
       joinMessage.className = 'message-box';
     }
-
     function setJoinButtonLoading(isLoading, label = 'Joining...') {
       joinButton.disabled = isLoading;
       joinButton.innerHTML = isLoading
-        ? `<span class="spinner-border spinner-border-sm me-2" role="status"></span>${label}`
-        : '<i class="ti ti-door-enter me-2"></i>Join class';
+              ? `<span class="spinner-border spinner-border-sm me-2" role="status"></span>${label}`
+              : '<i class="ti ti-door-enter me-2"></i>Join class';
     }
-
     function setConfirmJoinLoading(isLoading) {
       if (!confirmJoinButton) return;
       confirmJoinButton.disabled = isLoading;
       confirmJoinButton.innerHTML = isLoading
-        ? '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Joining...'
-        : 'Confirm Join';
+              ? '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Joining...'
+              : 'Confirm Join';
     }
-
     function showJoinConfirmModal() {
       if (!joinConfirmModalElement) return;
       const backdrop = document.createElement('div');
@@ -219,7 +194,6 @@
         joinConfirmModalElement.classList.add('show');
       });
     }
-
     function hideJoinConfirmModal() {
       if (!joinConfirmModalElement) return;
       joinConfirmModalElement.classList.remove('show');
@@ -232,7 +206,6 @@
         joinConfirmModalElement.removeAttribute('aria-modal');
       }, 200);
     }
-
     async function readError(response) {
       const text = await response.text();
       if (!text) return 'Something went wrong. Please try again.';
@@ -243,29 +216,39 @@
         return text;
       }
     }
-
     function flattenQuizzes(learningSpaces) {
-      return (learningSpaces || []).flatMap((space) =>
-        (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
+      return getJoinedSpaces(learningSpaces).flatMap((space) =>
+              (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
       );
     }
-
+    function getJoinedSpaces(learningSpaces) {
+      return (learningSpaces || []).filter((space) => {
+        if (typeof space.joined === 'boolean') {
+          return space.joined;
+        }
+        return true;
+      });
+    }
+    function isJoinedSpace(space) {
+      if (!space) return false;
+      if (typeof space.joined === 'boolean') {
+        return space.joined;
+      }
+      return true;
+    }
     function readInitialSpaceId() {
       const value = new URLSearchParams(window.location.search).get('spaceId');
       const id = Number(value);
       return Number.isFinite(id) && id > 0 ? id : null;
     }
-
     function shouldFocusRoadmap() {
       const params = new URLSearchParams(window.location.search);
       return params.get('focus') === 'roadmap' || window.location.hash === '#roadmap';
     }
-
     function shouldFocusJoinInvite() {
       const params = new URLSearchParams(window.location.search);
       return params.get('focus') === 'join' || ['#join', '#joinSpaceForm'].includes(window.location.hash);
     }
-
     function focusRoadmapIfNeeded() {
       if (!state.focusRoadmapOnce) return;
       state.focusRoadmapOnce = false;
@@ -273,7 +256,6 @@
         spaceDetail.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
-
     function focusJoinInviteIfNeeded() {
       if (!state.focusJoinOnce) return;
       state.focusJoinOnce = false;
@@ -283,37 +265,36 @@
         inviteCodeInput?.focus({ preventScroll: true });
       });
     }
-
     async function loadSpaces(preferredSpaceId = null) {
       if (!token || !userId) {
         window.location.href = '/login';
         return;
       }
-
       spacesList.innerHTML = '<div class="loading-state">Loading class list...</div>';
-
       try {
         const response = await fetch(`/api/students/${userId}/dashboard`, {
           headers: authHeaders(false)
         });
-
         if (!response.ok) {
           throw new Error(await readError(response));
         }
-
         const data = await response.json();
         window.currentDashboardData = data;
         window.setStudentMenuUser?.(data.user);
-        state.spaces = data.learningSpaces || [];
-        
+        state.allSpaces = data.learningSpaces || [];
+        state.spaces = getJoinedSpaces(state.allSpaces);
+
         // Let layout helper run notifications update
         if (typeof window.renderNotifications === 'function') {
-          window.renderNotifications(state.spaces, data.commentNotifications || []);
+          window.renderNotifications(flattenQuizzes(state.allSpaces), data.commentNotifications || []);
         }
-
         renderSpaces();
-
         const preferred = Number(preferredSpaceId);
+        const preferredSpace = state.allSpaces.find((space) => space.id === preferred);
+        if (Number.isFinite(preferred) && preferredSpace && !isJoinedSpace(preferredSpace)) {
+          renderJoinPublicPrompt(preferredSpace);
+          return;
+        }
         const hasPreferred = Number.isFinite(preferred) && state.spaces.some((space) => space.id === preferred);
         const nextSpaceId = hasPreferred ? preferred : state.selectedSpaceId || (state.spaces[0] && state.spaces[0].id);
         if (nextSpaceId) {
@@ -326,16 +307,13 @@
         renderEmptyDetail('Could not load learning space', 'Please check your login or try again later.');
       }
     }
-
     function renderSpaces() {
       const keyword = state.searchTerm.trim().toLowerCase();
       const filtered = state.spaces.filter((space) => {
         const haystack = `${space.name || ''} ${space.description || ''} ${space.inviteCode || ''}`.toLowerCase();
         return haystack.includes(keyword);
       });
-
       spaceCount.textContent = `${state.spaces.length} classes`;
-
       if (filtered.length === 0) {
         spacesList.innerHTML = `
         <div class="empty-state">
@@ -346,14 +324,12 @@
         </div>`;
         return;
       }
-
       const iconThemes = [
         { icon: 'ti-template', color: 'primary' },
         { icon: 'ti-flame', color: 'orange' },
         { icon: 'ti-database', color: 'info' },
         { icon: 'ti-brand-aws', color: 'warning' }
       ];
-
       spacesList.innerHTML = filtered.map((space, index) => {
         const theme = iconThemes[index % iconThemes.length];
         return `
@@ -368,12 +344,10 @@
         </div>
       </button>
     `}).join('');
-
       document.querySelectorAll('[data-space-id]').forEach((button) => {
         button.addEventListener('click', () => selectSpace(Number(button.dataset.spaceId)));
       });
     }
-
     function renderEmptyDetail(title = 'Select a learning space', message = 'Course roadmaps and nodes will appear here.') {
       spaceDetail.innerHTML = `
       <div class="empty-state">
@@ -384,24 +358,72 @@
         </div>
       </div>`;
     }
-
+    function renderJoinPublicPrompt(space) {
+      state.selectedSpaceId = null;
+      renderSpaces();
+      spaceDetail.innerHTML = `
+      <div class="empty-state">
+        <div>
+          <div class="mb-3 text-primary" style="font-size: 3rem;"><i class="ti ti-door-enter"></i></div>
+          <h2 class="section-title">${escapeHtml(space.name || 'Public class')}</h2>
+          <p class="section-note">This is a public class. Join it before you can view the roadmap and learning nodes.</p>
+          <button type="button" class="btn btn-primary rounded-pill fw-bold px-4 mt-3" id="joinPublicSpaceButton" data-space-id="${space.id}">
+            <i class="ti ti-door-enter me-2"></i>Join class
+          </button>
+        </div>
+      </div>`;
+      document.getElementById('joinPublicSpaceButton')?.addEventListener('click', () => joinPublicSpace(space.id));
+    }
+    async function joinPublicSpace(spaceId) {
+      const button = document.getElementById('joinPublicSpaceButton');
+      const originalHtml = button?.innerHTML;
+      if (button) {
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Joining...';
+      }
+      try {
+        const response = await fetch('/api/learning-spaces/join', {
+          method: 'POST',
+          headers: authHeaders(true),
+          body: JSON.stringify({ spaceId: Number(spaceId) })
+        });
+        if (!response.ok) {
+          throw new Error(await readError(response));
+        }
+        const data = await response.json();
+        setJoinMessage(data.message || 'Joined class successfully.', 'success');
+        await loadSpaces(data.learningSpaceId);
+      } catch (error) {
+        setJoinMessage(error.message, 'error');
+        if (button) {
+          button.disabled = false;
+          button.innerHTML = originalHtml;
+        }
+      }
+    }
     async function selectSpace(spaceId) {
       const selected = state.spaces.find((space) => space.id === Number(spaceId));
-      if (!selected) return;
-
+      if (!selected) {
+        const publicSpace = state.allSpaces.find((space) => space.id === Number(spaceId));
+        if (publicSpace && !isJoinedSpace(publicSpace)) {
+          renderJoinPublicPrompt(publicSpace);
+        }
+        return;
+      }
+      if (!isJoinedSpace(selected)) {
+        renderJoinPublicPrompt(selected);
+        return;
+      }
       state.selectedSpaceId = selected.id;
       renderSpaces();
       renderDetailLoading(selected);
-
       try {
         const response = await fetch(`/api/learning-spaces/${selected.id}/learning-paths`, {
           headers: authHeaders(false)
         });
-
         if (!response.ok) {
           throw new Error(await readError(response));
         }
-
         const paths = await response.json();
         renderDetail(selected, paths || []);
       } catch (error) {
@@ -410,13 +432,11 @@
         focusRoadmapIfNeeded();
       }
     }
-
     function renderDetailLoading(space) {
       spaceDetail.innerHTML = `
       ${detailHeaderTemplate(space)}
       <div class="loading-state">Loading class roadmap...</div>`;
     }
-
     function detailHeaderTemplate(space) {
       return `
       <section class="detail-header" id="roadmap">
@@ -431,7 +451,6 @@
         </div>
       </section>`;
     }
-
     function renderDetail(space, paths, errorMessage = '') {
       if (errorMessage) {
         spaceDetail.innerHTML = `
@@ -445,7 +464,6 @@
         </div>`;
         return;
       }
-
       if (!paths.length) {
         spaceDetail.innerHTML = `
         ${detailHeaderTemplate(space)}
@@ -458,7 +476,6 @@
         </div>`;
         return;
       }
-
       const sortedPaths = [...paths].sort((a, b) => (a.position || 0) - (b.position || 0));
       spaceDetail.innerHTML = `
       ${detailHeaderTemplate(space)}
@@ -466,12 +483,10 @@
         ${sortedPaths.map((path, index) => pathTemplate(path, index)).join('')}
       </div>`;
     }
-
     function pathTemplate(path, index) {
       const nodes = [...(path.nodes || [])].sort((a, b) => (a.id || 0) - (b.id || 0));
       const openNodes = nodes.filter((node) => ['UNLOCKED', 'ACTIVE'].includes(node.status)).length;
       const percent = nodes.length ? Math.round((openNodes / nodes.length) * 100) : 0;
-
       return `
       <article class="path-card">
         <header class="path-header">
@@ -492,15 +507,33 @@
         </div>
       </article>`;
     }
-
     function nodeTemplate(node, index) {
+      const isDocument = node.nodeType === 'DOCUMENT';
       const params = new URLSearchParams({
         nodeId: node.id,
         spaceId: state.selectedSpaceId || ''
       });
 
+      if (isDocument) {
+        return `
+        <a class="node-card" href="javascript:void(0)" onclick="openDocumentNode(event, ${node.id})" style="cursor: pointer;">
+          <div class="node-index">${index + 1}</div>
+          <div>
+            <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
+            <p class="node-content">${escapeHtml(node.content || 'Click to open document in new tab.')}</p>
+          </div>
+          <div class="node-badges">
+            <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+            <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
+          </div>
+          <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
+        </a>`;
+      }
+
+      const href = `/student/learning-node?${params.toString()}`;
+
       return `
-      <a class="node-card" href="/student/learning-node?${params.toString()}">
+      <a class="node-card" href="${href}">
         <div class="node-index">${index + 1}</div>
         <div>
           <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
@@ -514,6 +547,33 @@
       </a>`;
     }
 
+    async function openDocumentNode(event, nodeId) {
+      event.preventDefault();
+      const newWindow = window.open('', '_blank');
+      if (newWindow) {
+        newWindow.document.write('<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">Opening document...</div>');
+      }
+      try {
+        const res = await fetch(`/api/learning-nodes/${nodeId}/items`, { headers: authHeaders(false) });
+        if (!res.ok) throw new Error('Cannot fetch items');
+        const items = await res.json();
+        const docItem = items.find(i => ['PDF', 'DOC', 'DOCUMENT'].includes(String(i.itemType || '').toUpperCase()) && (i.fullUrl || i.url));
+        if (docItem) {
+          const docUrl = docItem.fullUrl || docItem.url;
+          if (newWindow) {
+            newWindow.location.href = docUrl;
+          } else {
+            window.open(docUrl, '_blank');
+          }
+        } else {
+          if (newWindow) newWindow.close();
+          alert('No document URL found for this node.');
+        }
+      } catch (err) {
+        if (newWindow) newWindow.close();
+        alert('Failed to load document: ' + err.message);
+      }
+    }
     function emptyNodesTemplate() {
       return `
       <div class="empty-state" style="min-height: 160px;">
@@ -523,7 +583,6 @@
         </div>
       </div>`;
     }
-
     async function copyInviteCode(code) {
       if (!code) return;
       try {
@@ -533,60 +592,47 @@
         setJoinMessage(`Class code: ${code}`, 'success');
       }
     }
-
     async function previewSpaceByInviteCode(inviteCode) {
       const response = await fetch(`/api/learning-spaces/invite-code/${encodeURIComponent(inviteCode)}`, {
         headers: authHeaders(false)
       });
-
       if (!response.ok) {
         throw new Error(await readError(response));
       }
-
       return response.json();
     }
-
     async function joinSpaceByInviteCode(inviteCode) {
       const response = await fetch('/api/learning-spaces/join', {
         method: 'POST',
         headers: authHeaders(true),
         body: JSON.stringify({ inviteCode })
       });
-
       if (!response.ok) {
         throw new Error(await readError(response));
       }
-
       return response.json();
     }
-
     async function handleJoinSuccess(data) {
       setJoinMessage(data.message || 'Joined class successfully.', 'success');
       inviteCodeInput.value = '';
       pendingInviteCode = '';
       await loadSpaces(data.learningSpaceId);
     }
-
     joinForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearJoinMessage();
-
       const inviteCode = inviteCodeInput.value.trim();
       if (!inviteCode) {
         setJoinMessage('Please enter an invite code.', 'error');
         return;
       }
-
       setJoinButtonLoading(true, 'Checking...');
-
       try {
         const space = await previewSpaceByInviteCode(inviteCode);
-
         if (!joinConfirmModalElement || !confirmSpaceName || !confirmInviteCode) {
           await handleJoinSuccess(await joinSpaceByInviteCode(inviteCode));
           return;
         }
-
         pendingInviteCode = inviteCode;
         confirmSpaceName.textContent = space.name || 'Learning Space';
         confirmInviteCode.textContent = inviteCode;
@@ -597,11 +643,9 @@
         setJoinButtonLoading(false);
       }
     });
-
     confirmJoinButton?.addEventListener('click', async () => {
       if (!pendingInviteCode) return;
       setConfirmJoinLoading(true);
-
       try {
         const data = await joinSpaceByInviteCode(pendingInviteCode);
         hideJoinConfirmModal();
@@ -613,26 +657,22 @@
         setConfirmJoinLoading(false);
       }
     });
-
     joinConfirmModalElement?.querySelector('[data-bs-dismiss="modal"]')?.addEventListener('click', hideJoinConfirmModal);
-
     spaceDetail.addEventListener('click', (event) => {
       const copyButton = event.target.closest('[data-copy-invite-code]');
       if (!copyButton) return;
       copyInviteCode(copyButton.dataset.copyInviteCode);
     });
-
     spaceSearch.addEventListener('input', () => {
       state.searchTerm = spaceSearch.value;
       renderSpaces();
     });
-
     document.addEventListener('DOMContentLoaded', () => {
       state.focusRoadmapOnce = shouldFocusRoadmap();
       state.focusJoinOnce = shouldFocusJoinInvite();
       loadSpaces(readInitialSpaceId()).finally(() => focusJoinInviteIfNeeded());
     });
-</script>
+  </script>
 </th:block>
 </body>
 </html>

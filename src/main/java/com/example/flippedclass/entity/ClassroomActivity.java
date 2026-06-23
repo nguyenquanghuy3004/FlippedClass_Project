@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClassroomActivity extends BaseEntity {
+public class ClassroomActivity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,15 +37,18 @@ public class ClassroomActivity extends BaseEntity {
     private String description;
 
     @Column(name = "min_members_per_group")
+    @Builder.Default
     private Integer minMembersPerGroup = 1;
 
     @Column(name = "max_members_per_group")
     private Integer maxMembersPerGroup;
 
     @Column(name = "allow_late_submission")
+    @Builder.Default
     private boolean allowLateSubmission = false;
 
     @Column(name = "auto_group_enabled")
+    @Builder.Default
     private boolean autoGroupEnabled = false;
 
     @Future(message = "Deadline must be in the future")
@@ -54,9 +57,18 @@ public class ClassroomActivity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ActivityStatus status = ActivityStatus.DRAFT;
-
-    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<ActivityGroup> groups = new ArrayList<>();
+    private ActivityStatus status = ActivityStatus.DRAFT;
+    
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+//    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @Builder.Default
+//    private List<ActivityGroup> groups = new ArrayList<>();
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

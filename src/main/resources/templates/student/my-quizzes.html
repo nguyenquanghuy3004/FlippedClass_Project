@@ -15,7 +15,7 @@
 <!-- MAIN CONTENT -->
 <main id="content" class="content py-10" layout:fragment="content">
   <div class="container-fluid px-xl-5">
-    <div class="d-flex align-items-center mb-4 mt-3">
+    <div class="d-flex align-items-center mb-4">
       <div class="bg-primary text-white rounded p-2 me-3 d-flex align-items-center justify-content-center shadow-sm">
         <i class="ti ti-list-check fs-2"></i>
       </div>
@@ -97,7 +97,10 @@
   }
 
   function flattenQuizzes(data) {
-    const spaces = data.learningSpaces || [];
+    const spaces = (data.learningSpaces || []).filter(space => {
+      if (typeof space.joined === 'boolean') return space.joined;
+      return true;
+    });
     return spaces.flatMap(space => (space.quizzes || []).map(quiz => ({
       ...quiz,
       learningSpaceName: space.name || quiz.learningSpaceName || 'Learning space',
@@ -240,6 +243,9 @@
       state.quizzes = flattenQuizzes(data);
       updateStats((data.learningSpaces || []).length);
       renderQuizzes();
+      if (typeof window.renderNotifications === 'function') {
+        window.renderNotifications(state.quizzes, data.commentNotifications || []);
+      }
     } catch (error) {
       quizGrid.innerHTML = `
         <div class="empty-card" style="grid-column: 1 / -1;">

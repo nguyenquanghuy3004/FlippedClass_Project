@@ -17,4 +17,7 @@ public interface NodeDiscussionRepository extends JpaRepository<NodeDiscussion, 
     
     @Query("SELECT COUNT(nd) FROM NodeDiscussion nd WHERE nd.learningNode.id = :nodeId AND nd.parentDiscussion IS NULL AND nd.status = 'SOLVED'")
     long countSolvedByNodeId(@Param("nodeId") Long nodeId);
+
+    @Query("SELECT nd FROM NodeDiscussion nd WHERE nd.parentDiscussion.user.id = :userId AND nd.user.id != :userId ORDER BY nd.createdAt DESC")
+    List<NodeDiscussion> findRepliesToUser(@Param("userId") Long userId);
 }

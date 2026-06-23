@@ -20,6 +20,8 @@ public interface LearningSpaceMemberRepository extends JpaRepository<LearningSpa
 
     boolean existsByLearningSpaceAndUser(LearningSpace learningSpace, User user);
 
+    boolean existsByLearningSpaceIdAndUserId(Long learningSpaceId, Long userId);
+
     List<LearningSpaceMember> findByUser_IdOrderByJoinedAtDesc(Long userId);
     int countByUser_Id(Long userId);
 

@@ -126,6 +126,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<LearningSpaceResponse> getPublicSpaces() {
         return learningSpaceRepository
                 .findByVisibilityAndStatus(VisibilityType.PUBLIC, LearningSpaceStatus.ACTIVE)

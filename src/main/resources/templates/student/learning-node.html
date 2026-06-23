@@ -15,6 +15,7 @@
       #topbar {
         left: 0 !important;
         width: 100% !important;
+        margin-left: 0 !important;
       }
       #toggleBtn, #mobileBtn {
         display: none !important;
@@ -28,13 +29,7 @@
 
 <body>
 
-<span layout:fragment="topbar-title" style="display: flex; align-items: center;">
-  <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none me-4">
-    <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-      <i class="ti ti-book-2 fs-5"></i>
-    </div>
-    <span class="logo-text fw-bolder fs-5 text-dark" style="letter-spacing: -0.5px; font-family: inherit;">Flipped<span class="text-primary">Class</span></span>
-  </a>
+<span layout:fragment="topbar-title">
   <a id="backLink" class="back-link" th:href="@{/student/learning-spaces}" style="font-size: 0.9rem; font-weight: 500; color: #475569; text-decoration: none; display: flex; align-items: center; gap: 6px;">
     <i class="ti ti-arrow-left"></i> Back to roadmap
   </a>
@@ -968,13 +963,7 @@
         }
 
         const hasVideo = sortedItems.some(i => String(i.itemType || '').toUpperCase() === 'VIDEO');
-        if (!hasVideo && node.nodeType !== 'GROUP_ACTIVITY') {
-          const docItem = sortedItems.find(i => ['PDF', 'DOC', 'DOCUMENT'].includes(String(i.itemType || '').toUpperCase()) && (i.fullUrl || i.url));
-          if (docItem) {
-            window.location.replace(docItem.fullUrl || docItem.url);
-            return;
-          }
-        }
+        // Redirection for PDF/DOC has been removed so that documents open inside the portal via iframe.
 
         if (node.nodeType === 'GROUP_ACTIVITY') {
             if (typeof window.renderGroupActivityPage === 'function') {
