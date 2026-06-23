@@ -91,6 +91,17 @@ public class LecturerGroupActivityServiceImpl implements LecturerGroupActivitySe
         activity.setDescription(request.getDescription());
         activity.setMaxMembers(request.getMaxMembers());
         activity.setDeadline(request.getDeadline());
+
+        if (request.getLearningPathId() != null) {
+            LearningNode node = activity.getLearningNode();
+            if (node != null && (node.getLearningPath() == null || !node.getLearningPath().getId().equals(request.getLearningPathId()))) {
+                LearningPath path = pathRepository.findById(request.getLearningPathId())
+                        .orElseThrow(() -> new NotFoundException("Learning path not found"));
+                node.setLearningPath(path);
+                nodeRepository.save(node);
+                activity.setLearningSpace(path.getLearningSpace());
+            }
+        }
         
         activityRepository.save(activity);
         
@@ -112,6 +123,23 @@ public class LecturerGroupActivityServiceImpl implements LecturerGroupActivitySe
         activityRepository.save(activity);
         
         return mapToResponse(activity);
+    }
+
+    @Override
+    @Transactional
+    public void deleteActivity(Long lecturerId, Long activityId) {
+        GroupActivity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new NotFoundException("Activity not found"));
+        
+        LearningNode node = activity.getLearningNode();
+        
+        // Delete activity (which should cascade delete groups and submissions if configured correctly, or we can just rely on JPA)
+        activityRepository.delete(activity);
+        
+        // Also delete the learning node since they are tightly coupled
+        if (node != null) {
+            nodeRepository.delete(node);
+        }
     }
 
     @Override
@@ -247,6 +275,7 @@ public class LecturerGroupActivityServiceImpl implements LecturerGroupActivitySe
                 .id(activity.getId())
                 .learningNodeId(activity.getLearningNode() != null ? activity.getLearningNode().getId() : null)
                 .learningNodeTitle(activity.getLearningNode() != null ? activity.getLearningNode().getTitle() : null)
+                .learningPathId(activity.getLearningNode() != null && activity.getLearningNode().getLearningPath() != null ? activity.getLearningNode().getLearningPath().getId() : null)
                 .title(activity.getTitle())
                 .description(activity.getDescription())
                 .maxMembers(activity.getMaxMembers())

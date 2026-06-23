@@ -166,6 +166,14 @@
                         <div class="modal-body p-4">
                             <div class="row g-4">
                                 <div class="col-12">
+                                    <label class="form-label fw-bold">Select Learning Path (Module) <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="editPathSelect" required>
+                                        <option value="" disabled selected>Loading modules...</option>
+                                    </select>
+                                    <div class="form-text">Change this to move the activity to another Module.</div>
+                                </div>
+                                
+                                <div class="col-12">
                                     <label class="form-label fw-bold">Activity Title <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="editActivityTitle" required placeholder="e.g., Final Capstone Project">
                                 </div>
@@ -260,8 +268,10 @@
                                                     <li><a class="dropdown-item py-2" href="#" onclick="openEditModal(${activity.id}); return false;"><i class="ti ti-edit me-2"></i>Edit</a></li>
                                                     ${activity.status === 'LOCKED' ? 
                                                         `<li><a class="dropdown-item py-2 text-success" href="#" onclick="toggleActivityStatus(${activity.id}, 'OPEN'); return false;"><i class="ti ti-lock-open me-2"></i>Open (Unlock)</a></li>` :
-                                                        `<li><a class="dropdown-item py-2 text-danger" href="#" onclick="toggleActivityStatus(${activity.id}, 'LOCKED'); return false;"><i class="ti ti-lock me-2"></i>Close (Lock)</a></li>`
+                                                        `<li><a class="dropdown-item py-2 text-warning" href="#" onclick="toggleActivityStatus(${activity.id}, 'LOCKED'); return false;"><i class="ti ti-lock me-2"></i>Close (Lock)</a></li>`
                                                     }
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item py-2 text-danger" href="#" onclick="deleteActivity(${activity.id}); return false;"><i class="ti ti-trash me-2"></i>Delete</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -413,6 +423,30 @@
                     if (!response.ok) throw new Error('Failed to load activity details');
                     const activity = await response.json();
                     
+                    // Load paths for edit modal
+                    const spaceId = document.getElementById('spaceId').value;
+                    const pathSelect = document.getElementById('editPathSelect');
+                    pathSelect.innerHTML = '<option value="" disabled selected>Loading modules...</option>';
+                    
+                    try {
+                        const responsePaths = await fetch(`/api/learning-spaces/${spaceId}/learning-paths`, { headers });
+                        if (responsePaths.ok) {
+                            const paths = await responsePaths.json();
+                            pathSelect.innerHTML = '<option value="" disabled selected>Select a learning path</option>';
+                            paths.forEach(path => {
+                                const option = document.createElement('option');
+                                option.value = path.id;
+                                option.textContent = path.title;
+                                if (activity.learningPathId === path.id) {
+                                    option.selected = true;
+                                }
+                                pathSelect.appendChild(option);
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error loading paths for edit', e);
+                    }
+                    
                     document.getElementById('editActivityTitle').value = activity.title;
                     document.getElementById('editActivityDescription').value = activity.description || '';
                     document.getElementById('editActivityMaxMembers').value = activity.maxMembers;
@@ -461,6 +495,7 @@
                     }
                     
                     const payload = {
+                        learningPathId: parseInt(document.getElementById('editPathSelect').value),
                         title: document.getElementById('editActivityTitle').value,
                         description: document.getElementById('editActivityDescription').value,
                         maxMembers: parseInt(document.getElementById('editActivityMaxMembers').value),
@@ -547,6 +582,38 @@
                     } catch (error) {
                         console.error('Error toggling activity status:', error);
                         Swal.fire('Error', 'Failed to update activity status', 'error');
+                    }
+                }
+            }
+
+            async function deleteActivity(activityId) {
+                const confirm = await Swal.fire({
+                    title: 'Delete Activity?',
+                    text: "This action cannot be undone. All groups and submissions will be permanently deleted.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete it!'
+                });
+
+                if (confirm.isConfirmed) {
+                    try {
+                        const token = localStorage.getItem('jwt_token');
+                        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+                        
+                        const response = await fetch(`/api/lecturer/group-activities/${activityId}`, {
+                            method: 'DELETE',
+                            headers: headers
+                        });
+                        
+                        if (!response.ok) throw new Error('Failed to delete activity');
+                        
+                        Swal.fire('Deleted!', 'The activity has been deleted.', 'success');
+                        loadActivities();
+                    } catch (error) {
+                        console.error('Error deleting activity:', error);
+                        Swal.fire('Error', 'Failed to delete activity', 'error');
                     }
                 }
             }

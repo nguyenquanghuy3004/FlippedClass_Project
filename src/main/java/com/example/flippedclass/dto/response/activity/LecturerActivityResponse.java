@@ -12,6 +12,7 @@ public class LecturerActivityResponse {
     private Long id;
     private Long learningNodeId;
     private String learningNodeTitle;
+    private Long learningPathId;
     private String title;
     private String description;
     private Integer maxMembers;

@@ -64,6 +64,15 @@ public class LecturerGroupActivityRestController {
         return lecturerGroupActivityService.updateActivityStatus(currentUser.getId(), id, status);
     }
 
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
+    public void deleteActivity(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        lecturerGroupActivityService.deleteActivity(currentUser.getId(), id);
+    }
+
     @GetMapping("/{id}/groups")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
     public List<LecturerGroupResponse> listGroups(

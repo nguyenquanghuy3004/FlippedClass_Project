@@ -20,4 +20,6 @@ public interface LecturerGroupActivityService {
     List<LecturerGroupResponse> listGroupsByActivityId(Long activityId, String search, String filter);
     LecturerReviewResponse getGroupReview(Long groupId);
     LecturerReviewResponse gradeGroup(Long currentUserId, Long groupId, LecturerGradeRequest request);
+
+    void deleteActivity(Long lecturerId, Long activityId);
 }

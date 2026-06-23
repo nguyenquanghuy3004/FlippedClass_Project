@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 
 @Data
 public class LecturerActivityUpdateRequest {
+    private Long learningPathId;
+
     @NotBlank(message = "Title is required")
     private String title;
 
