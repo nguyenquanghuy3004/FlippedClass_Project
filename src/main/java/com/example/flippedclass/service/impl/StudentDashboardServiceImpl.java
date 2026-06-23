@@ -3,7 +3,7 @@ package com.example.flippedclass.service.impl;
 import com.example.flippedclass.dto.request.UpdateStudentProfileRequest;
 import com.example.flippedclass.dto.response.DashboardLearningSpaceResponse;
 import com.example.flippedclass.dto.response.DashboardUserResponse;
-import com.example.flippedclass.dto.response.CourseDocumentResponse;
+import com.example.flippedclass.dto.response.RecentDocumentResponse;
 import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.dto.response.StudentProfileResponse;
 import com.example.flippedclass.dto.response.QuizResponse;
@@ -40,6 +40,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
         private final QuizQuestionRepository quizQuestionRepository;
         private final CourseDocumentRepository courseDocumentRepository;
         private final com.example.flippedclass.repository.NodeDiscussionRepository nodeDiscussionRepository;
+        private final com.example.flippedclass.repository.LearningNodeItemRepository learningNodeItemRepository;
 
         @Override
         @Transactional(readOnly = true)
@@ -103,13 +104,15 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                         }
                 }
 
-                List<CourseDocumentResponse> recentDocuments = allSpaceIds.isEmpty()
+                List<RecentDocumentResponse> recentDocuments = allSpaceIds.isEmpty()
                                 ? List.of()
-                                : courseDocumentRepository
-                                                .findTop8ByLearningPath_LearningSpace_IdInOrderByCreatedAtDesc(
-                                                                allSpaceIds)
+                                : learningNodeItemRepository
+                                                .findRecentItemsBySpaceIds(
+                                                                allSpaceIds,
+                                                                com.example.flippedclass.enums.ItemType.PDF,
+                                                                org.springframework.data.domain.PageRequest.of(0, 8))
                                                 .stream()
-                                                .map(CourseDocumentResponse::from)
+                                                .map(RecentDocumentResponse::from)
                                                 .toList();
 
                 List<NodeDiscussion> replies = nodeDiscussionRepository.findRepliesToUser(studentId);

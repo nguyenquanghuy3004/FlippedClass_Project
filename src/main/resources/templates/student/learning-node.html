@@ -336,11 +336,13 @@
     function renderCommentsUI() {
       const container = document.getElementById('nodeCommentsContainer');
       const badge = document.getElementById('commentsCountBadge');
+      const heroBadge = document.getElementById('heroCommentsCount');
       if (!container) return;
 
       let totalCount = currentComments.length;
       currentComments.forEach(c => totalCount += (c.replies ? c.replies.length : 0));
       if (badge) badge.textContent = totalCount;
+      if (heroBadge) heroBadge.textContent = totalCount;
 
       let body = '';
       if (currentComments.length === 0) {
@@ -632,23 +634,16 @@
           <section class="node-hero">
             <span class="eyebrow"><i class="ti ti-player-play"></i> Learning Spaces node</span>
             <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
-            <p class="node-description">${escapeHtml(node.content || 'Your instructor has not added a description for this node yet.')}</p>
             <div class="meta-row">
               <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
               <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
               <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Video available' : 'No video'}</span>
-              <span class="soft-chip"><i class="ti ti-folder-open"></i>${resources.length} resource</span>
-              <span class="soft-chip"><i class="ti ti-messages"></i>${discussions.length} comments</span>
+              <span class="soft-chip"><i class="ti ti-messages"></i><span id="heroCommentsCount">0</span> comments</span>
             </div>
           </section>
 
           <section class="video-shell">
             ${videoTemplate(node, items)}
-            <div class="player-controls">
-              <button class="server-pill active" type="button">Lesson Video</button>
-              <button class="server-pill" type="button">${resources.length} resource</button>
-              <button class="server-pill" type="button">${discussions.length} comments</button>
-            </div>
           </section>
 
           <section class="content-card">
@@ -689,16 +684,7 @@
         </section>
 
         <aside class="side-column">
-          <section class="side-card">
-            <div class="side-card-header">
-              <div>
-                <h2>Resources</h2>
-                <p>Documents, source code, or quizzes for this node.</p>
-              </div>
-              <span class="soft-chip">${resources.length}</span>
-            </div>
-            ${resourcesTemplate(items)}
-          </section>
+          
 
           <section class="side-card">
             <div class="side-card-header">
