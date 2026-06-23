@@ -61,15 +61,16 @@ window.renderGroupActivityPage = async function(node, nodeId) {
 
     const styles = `
         <style>
-            .ga-container { max-width: 900px; margin: 0 auto; padding: 2rem; font-family: 'Inter', sans-serif; }
-            .ga-header { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+            #pageRoot.lesson-layout { display: flex; flex-direction: row; min-height: calc(100vh - 65px); background-image: url('/uploads/anh/group_activies.jpg'); background-size: cover; background-position: center; background-attachment: fixed; gap: 24px; padding: 24px; align-items: stretch; }
+            @media (max-width: 992px) { #pageRoot.lesson-layout { flex-direction: column; } }
+            .ga-left-col { flex: 1; display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 800px; margin: 0 auto; }
+            .ga-right-col { flex: 1; display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 800px; margin: 0 auto; }
+            .ga-card { background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 24px; border: 1px solid rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); }
             .ga-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
             .ga-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
             .ga-badge-draft { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
             .ga-badge-open { background: #ecfdf5; color: #10b981; border: 1px solid #a7f3d0; }
             .ga-badge-locked { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
-            .ga-section { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-            .ga-section-warning { border-color: #fde047; background: #fefce8; }
             .ga-btn { padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; font-size: 0.875rem; }
             .ga-btn-primary { background: #4f46e5; color: white; }
             .ga-btn-primary:hover { background: #4338ca; }
@@ -77,17 +78,17 @@ window.renderGroupActivityPage = async function(node, nodeId) {
             .ga-btn-outline:hover { background: #f8fafc; color: #0f172a; }
             .ga-btn-danger { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
             .ga-btn-danger:hover { background: #fee2e2; }
-            .ga-input { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; transition: border-color 0.2s; }
-            .ga-input:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+            .ga-input { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; transition: border-color 0.2s; background: rgba(255,255,255,0.8); }
+            .ga-input:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); background: #ffffff; }
             .member-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-            .member-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+            .member-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: rgba(248, 250, 252, 0.8); border-radius: 12px; border: 1px solid rgba(226, 232, 240, 0.8); }
         </style>
     `;
 
     let ui = `
         ${styles}
-        <div class="ga-container">
-            <div class="ga-header">
+        <div class="ga-left-col">
+            <div class="ga-card">
                 <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                     <i class="ti ti-users text-primary"></i> GROUP ACTIVITY
                 </div>
@@ -104,7 +105,7 @@ window.renderGroupActivityPage = async function(node, nodeId) {
     if (!myGroup) {
         if (activity.status === 'LOCKED') {
             ui += `
-                <div class="ga-section">
+                <div class="ga-card">
                     <div style="text-align: center; padding: 2rem 0;">
                         <i class="ti ti-lock text-muted" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                         <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Hoạt động đã khóa</h2>
@@ -114,7 +115,7 @@ window.renderGroupActivityPage = async function(node, nodeId) {
             `;
         } else {
             ui += `
-                <div class="ga-section ga-section-warning">
+                <div class="ga-card" style="border: 1px dashed rgba(253, 224, 71, 0.8); background: rgba(254, 252, 232, 0.5);">
                     <h2 style="font-size: 1.25rem; font-weight: 700; color: #ca8a04; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
                         <i class="ti ti-alert-circle"></i> Bạn chưa có nhóm
                     </h2>
@@ -148,10 +149,20 @@ window.renderGroupActivityPage = async function(node, nodeId) {
                 </div>
             `;
         }
+        
+        ui += `
+            </div> <!-- Close ga-left-col -->
+            <div class="ga-right-col">
+                 <div class="ga-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #94a3b8; min-height: 400px; border: 1px dashed #cbd5e1; background: transparent;">
+                     <i class="ti ti-messages" style="font-size: 3rem; margin-bottom: 16px;"></i>
+                     <p>Tham gia nhóm để mở khóa thảo luận</p>
+                 </div>
+            </div>
+        `;
     } else {
         const isLeader = myGroup.leaderId === parseInt(userId);
         ui += `
-            <div class="ga-section">
+            <div class="ga-card">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
                     <div>
                         <div style="font-size: 0.8rem; font-weight: 600; color: #10b981; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
@@ -232,10 +243,39 @@ window.renderGroupActivityPage = async function(node, nodeId) {
                     </div>
                 </div>
             </div>
+            
+            </div> <!-- Close ga-left-col -->
+
+            <!-- START COMMENTS SECTION -->
+            <div class="ga-right-col">
+                <div class="ga-card" style="display: flex; flex-direction: column; height: 100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <div>
+                            <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">Comments</h2>
+                            <p style="color: #64748b; font-size: 0.9rem;">Discussions and questions related to this group.</p>
+                        </div>
+                        <span class="ga-badge" style="background: white; border: 1px solid #e2e8f0; color: #475569;" id="commentsCountBadge">0</span>
+                    </div>
+                    <div id="nodeCommentsContainer" style="flex: 1; overflow-y: auto;">
+                        <div style="text-align: center; padding: 2rem; color: #64748b;">
+                            <i class="ti ti-loader-2 ti-spin" style="font-size: 1.5rem;"></i>
+                            <div style="margin-top: 8px;">Loading comments...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END COMMENTS SECTION -->
         `;
+        
+        // Cập nhật currentGroupId và gọi loadComments
+        window.currentGroupId = myGroup.id;
+        setTimeout(() => {
+            if (typeof window.loadComments === 'function') {
+                window.loadComments();
+            }
+        }, 100);
     }
 
-    ui += '</div>';
     pageRoot.innerHTML = ui;
 }
 

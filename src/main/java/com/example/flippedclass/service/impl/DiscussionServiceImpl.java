@@ -10,6 +10,8 @@ import com.example.flippedclass.enums.DiscussionStatus;
 import com.example.flippedclass.repository.LearningNodeRepository;
 import com.example.flippedclass.repository.NodeDiscussionRepository;
 import com.example.flippedclass.repository.UserRepository;
+import com.example.flippedclass.repository.StudyGroupRepository;
+import com.example.flippedclass.entity.StudyGroup;
 import com.example.flippedclass.service.DiscussionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,17 +27,23 @@ public class DiscussionServiceImpl implements DiscussionService {
     private final NodeDiscussionRepository discussionRepository;
     private final LearningNodeRepository nodeRepository;
     private final UserRepository userRepository;
+    private final StudyGroupRepository groupRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public List<DiscussionResponse> getDiscussionsByNodeId(Long nodeId) {
-        List<NodeDiscussion> rootDiscussions = discussionRepository.findRootDiscussionsByNodeId(nodeId);
+    public List<DiscussionResponse> getDiscussionsByNodeId(Long nodeId, Long groupId) {
+        List<NodeDiscussion> rootDiscussions;
+        if (groupId != null) {
+            rootDiscussions = discussionRepository.findRootDiscussionsByNodeIdAndGroupId(nodeId, groupId);
+        } else {
+            rootDiscussions = discussionRepository.findRootDiscussionsByNodeId(nodeId);
+        }
         return rootDiscussions.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public DiscussionResponse addDiscussion(Long nodeId, String username, DiscussionRequest request) {
+    public DiscussionResponse addDiscussion(Long nodeId, Long groupId, String username, DiscussionRequest request) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         LearningNode node = nodeRepository.findById(nodeId).orElseThrow(() -> new RuntimeException("Node not found"));
 
@@ -44,6 +52,11 @@ public class DiscussionServiceImpl implements DiscussionService {
                 .user(user)
                 .content(request.getContent())
                 .build();
+
+        if (groupId != null) {
+            StudyGroup group = groupRepository.findById(groupId).orElseThrow(() -> new RuntimeException("Group not found"));
+            discussion.setStudyGroup(group);
+        }
 
         if (request.getParentId() != null) {
             NodeDiscussion parent = discussionRepository.findById(request.getParentId())
