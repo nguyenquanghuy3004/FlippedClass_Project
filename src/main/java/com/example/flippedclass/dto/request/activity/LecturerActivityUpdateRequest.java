@@ -9,18 +9,17 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class LecturerActivityCreateRequest {
-    @NotNull(message = "Learning Path ID is required")
-    private Long learningPathId;
-
+public class LecturerActivityUpdateRequest {
     @NotBlank(message = "Title is required")
     private String title;
-    
+
     private String description;
-    
+
+    @NotNull(message = "Max members is required")
     @Min(value = 1, message = "Max members must be at least 1")
     private Integer maxMembers;
-    
+
+    @NotNull(message = "Deadline is required")
     @Future(message = "Deadline must be in the future")
     private LocalDateTime deadline;
 }

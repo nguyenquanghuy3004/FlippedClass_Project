@@ -102,40 +102,52 @@ window.renderGroupActivityPage = async function(node, nodeId) {
     `;
 
     if (!myGroup) {
-        ui += `
-            <div class="ga-section ga-section-warning">
-                <h2 style="font-size: 1.25rem; font-weight: 700; color: #ca8a04; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                    <i class="ti ti-alert-circle"></i> Bạn chưa có nhóm
-                </h2>
-                <p style="color: #713f12; font-size: 0.9rem; margin-bottom: 16px;">Hãy tham gia một nhóm có sẵn hoặc tạo nhóm mới để bắt đầu làm bài.</p>
-                
-                <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-                    <input type="text" id="newGroupName" class="ga-input" placeholder="Tên nhóm mới..." style="flex: 1;" />
-                    <button class="ga-btn ga-btn-primary" onclick="window.handleCreateGroup(${activity.id}, ${nodeId})"><i class="ti ti-plus"></i> Tạo nhóm</button>
+        if (activity.status === 'LOCKED') {
+            ui += `
+                <div class="ga-section">
+                    <div style="text-align: center; padding: 2rem 0;">
+                        <i class="ti ti-lock text-muted" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Hoạt động đã khóa</h2>
+                        <p style="color: #64748b; font-size: 0.9rem;">Thời gian tham gia hoạt động nhóm này đã kết thúc. Bạn không thể tạo hoặc tham gia nhóm nữa.</p>
+                    </div>
                 </div>
+            `;
+        } else {
+            ui += `
+                <div class="ga-section ga-section-warning">
+                    <h2 style="font-size: 1.25rem; font-weight: 700; color: #ca8a04; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                        <i class="ti ti-alert-circle"></i> Bạn chưa có nhóm
+                    </h2>
+                    <p style="color: #713f12; font-size: 0.9rem; margin-bottom: 16px;">Hãy tham gia một nhóm có sẵn hoặc tạo nhóm mới để bắt đầu làm bài.</p>
+                    
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                        <input type="text" id="newGroupName" class="ga-input" placeholder="Tên nhóm mới..." style="flex: 1;" />
+                        <button class="ga-btn ga-btn-primary" onclick="window.handleCreateGroup(${activity.id}, ${nodeId})"><i class="ti ti-plus"></i> Tạo nhóm</button>
+                    </div>
 
-                <h3 style="font-size: 1rem; font-weight: 600; color: #0f172a; margin-bottom: 12px;">Các nhóm đang tìm thành viên:</h3>
-                ${availableGroups.length === 0 ? '<p style="color: #64748b; font-size: 0.9rem; font-style: italic;">Không có nhóm nào trống.</p>' : ''}
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;">
-                    ${availableGroups.map(g => `
-                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
-                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 4px;">${escapeHtml(g.groupName)}</div>
-                            <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">${g.currentMembers} / ${g.maxMembers} thành viên</div>
-                            <div id="join-btn-container-${g.id}">
-                                <button class="ga-btn ga-btn-outline" style="width: 100%; padding: 6px;" onclick="document.getElementById('join-btn-container-${g.id}').style.display='none'; document.getElementById('join-input-container-${g.id}').style.display='block';">Tham gia nhóm</button>
-                            </div>
-                            <div id="join-input-container-${g.id}" style="display: none;">
-                                <input type="text" id="inviteCode-${g.id}" class="ga-input" placeholder="Nhập Invite Code..." style="margin-bottom: 8px; padding: 6px 10px; font-size: 0.85rem;" />
-                                <div style="display: flex; gap: 8px;">
-                                    <button class="ga-btn ga-btn-primary" style="flex: 1; padding: 6px;" onclick="window.handleJoinGroup(${activity.id}, ${g.id}, ${nodeId})">Vào nhóm</button>
-                                    <button class="ga-btn ga-btn-outline" style="padding: 6px;" onclick="document.getElementById('join-input-container-${g.id}').style.display='none'; document.getElementById('join-btn-container-${g.id}').style.display='block';"><i class="ti ti-x"></i></button>
+                    <h3 style="font-size: 1rem; font-weight: 600; color: #0f172a; margin-bottom: 12px;">Các nhóm đang tìm thành viên:</h3>
+                    ${availableGroups.length === 0 ? '<p style="color: #64748b; font-size: 0.9rem; font-style: italic;">Không có nhóm nào trống.</p>' : ''}
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;">
+                        ${availableGroups.map(g => `
+                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                                <div style="font-weight: 600; color: #0f172a; margin-bottom: 4px;">${escapeHtml(g.groupName)}</div>
+                                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">${g.currentMembers} / ${g.maxMembers} thành viên</div>
+                                <div id="join-btn-container-${g.id}">
+                                    <button class="ga-btn ga-btn-outline" style="width: 100%; padding: 6px;" onclick="document.getElementById('join-btn-container-${g.id}').style.display='none'; document.getElementById('join-input-container-${g.id}').style.display='block';">Tham gia nhóm</button>
+                                </div>
+                                <div id="join-input-container-${g.id}" style="display: none;">
+                                    <input type="text" id="inviteCode-${g.id}" class="ga-input" placeholder="Nhập Invite Code..." style="margin-bottom: 8px; padding: 6px 10px; font-size: 0.85rem;" />
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="ga-btn ga-btn-primary" style="flex: 1; padding: 6px;" onclick="window.handleJoinGroup(${activity.id}, ${g.id}, ${nodeId})">Vào nhóm</button>
+                                        <button class="ga-btn ga-btn-outline" style="padding: 6px;" onclick="document.getElementById('join-input-container-${g.id}').style.display='none'; document.getElementById('join-btn-container-${g.id}').style.display='block';"><i class="ti ti-x"></i></button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
     } else {
         const isLeader = myGroup.leaderId === parseInt(userId);
         ui += `
@@ -151,7 +163,7 @@ window.renderGroupActivityPage = async function(node, nodeId) {
                         </h2>
                         <p style="color: #64748b; font-size: 0.9rem;">${myGroup.members.length} / ${activity.maxMembers} Members | Vai trò của bạn: ${isLeader ? '<span style="color:#eab308; font-weight:bold;"><i class="ti ti-crown"></i> LEADER</span>' : 'Thành viên'}</p>
                     </div>
-                    <button class="ga-btn ga-btn-danger" onclick="window.handleLeaveGroup(${myGroup.id}, ${nodeId})"><i class="ti ti-logout"></i> Rời nhóm</button>
+                    ${activity.status === 'LOCKED' ? '' : `<button class="ga-btn ga-btn-danger" onclick="window.handleLeaveGroup(${myGroup.id}, ${nodeId})"><i class="ti ti-logout"></i> Rời nhóm</button>`}
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; margin-top: 24px;">

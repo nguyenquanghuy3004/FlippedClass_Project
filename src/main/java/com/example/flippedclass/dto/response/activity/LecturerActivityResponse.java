@@ -16,6 +16,7 @@ public class LecturerActivityResponse {
     private String description;
     private Integer maxMembers;
     private LocalDateTime deadline;
+    private LocalDateTime createdAt;
     private ActivityStatus status;
     private int totalGroups;
     private int totalStudents;

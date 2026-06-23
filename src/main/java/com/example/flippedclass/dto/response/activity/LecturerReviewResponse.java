@@ -7,12 +7,14 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class LecturerSubmissionResponse {
-    private Long id;
+public class LecturerReviewResponse {
+    private Long groupId;
     private String groupName;
     private String githubUrl;
     private String submittedBy;
     private LocalDateTime submittedAt;
     private Double score;
     private String feedback;
+    private String status;
+    private java.util.List<String> members;
 }

@@ -39,7 +39,6 @@ public class SubmissionServiceImpl implements SubmissionService {
         ActivitySubmission submission = group.getSubmission();
         if (submission == null) {
             submission = ActivitySubmission.builder()
-                    .activity(group.getActivity())
                     .group(group)
                     .githubRepoUrl(request.getGithubRepoUrl())
                     .note(request.getNote())

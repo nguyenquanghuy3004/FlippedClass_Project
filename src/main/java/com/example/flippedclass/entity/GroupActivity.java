@@ -29,6 +29,11 @@ public class GroupActivity {
     @JsonIgnore
     private LearningNode learningNode;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_space_id", nullable = false)
+    @JsonIgnore
+    private LearningSpace learningSpace;
+
     @NotBlank(message = "Title is required")
     @Column(nullable = false)
     private String title;
@@ -40,7 +45,6 @@ public class GroupActivity {
     @Builder.Default
     private Integer maxMembers = 4;
 
-    @Future(message = "Deadline must be in the future")
     @Column
     private LocalDateTime deadline;
 

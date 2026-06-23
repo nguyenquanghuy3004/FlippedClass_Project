@@ -144,6 +144,24 @@ public class TemplateController {
         return "lecturer/learning-analytics";
     }
 
+    @GetMapping("/lecturer/spaces/{spaceId}/group-activities")
+    public String lecturerGroupActivities(@PathVariable Long spaceId, Model model) {
+        model.addAttribute("spaceId", spaceId);
+        return "lecturer/group-activities";
+    }
+
+    @GetMapping("/lecturer/group-activities/{activityId}")
+    public String lecturerActivityDetail(@PathVariable Long activityId, Model model) {
+        model.addAttribute("activityId", activityId);
+        return "lecturer/activity-detail";
+    }
+
+    @GetMapping("/lecturer/groups/{groupId}/review")
+    public String lecturerGroupReview(@PathVariable Long groupId, Model model) {
+        model.addAttribute("groupId", groupId);
+        return "lecturer/group-review";
+    }
+
     @GetMapping("/lecturer/summaries/{summaryId}/review")
     public String summaryReview(@PathVariable Long summaryId, Model model) {
         model.addAttribute("summaryId", summaryId);

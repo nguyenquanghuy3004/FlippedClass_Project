@@ -1,8 +1,11 @@
 package com.example.flippedclass.controller;
 
 import com.example.flippedclass.dto.request.activity.LecturerActivityCreateRequest;
+import com.example.flippedclass.dto.request.activity.LecturerActivityUpdateRequest;
+import com.example.flippedclass.dto.request.activity.LecturerGradeRequest;
 import com.example.flippedclass.dto.response.activity.LecturerActivityResponse;
 import com.example.flippedclass.dto.response.activity.LecturerGroupResponse;
+import com.example.flippedclass.dto.response.activity.LecturerReviewResponse;
 import com.example.flippedclass.service.LecturerGroupActivityService;
 import com.example.flippedclass.service.impl.UserDetailsImpl;
 import jakarta.validation.Valid;
@@ -23,7 +26,7 @@ public class LecturerGroupActivityRestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority('LECTURER')")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
     public LecturerActivityResponse createActivity(
             @Valid @RequestBody LecturerActivityCreateRequest request,
             @AuthenticationPrincipal UserDetailsImpl currentUser) {
@@ -31,24 +34,57 @@ public class LecturerGroupActivityRestController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('LECTURER')")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
     public List<LecturerActivityResponse> listActivities(
             @RequestParam("spaceId") Long spaceId) {
         return lecturerGroupActivityService.listActivitiesBySpaceId(spaceId);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('LECTURER')")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
     public LecturerActivityResponse getActivityDetails(@PathVariable Long id) {
         return lecturerGroupActivityService.getActivityDetails(id);
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
+    public LecturerActivityResponse updateActivity(
+            @PathVariable Long id,
+            @Valid @RequestBody LecturerActivityUpdateRequest request,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        return lecturerGroupActivityService.updateActivity(currentUser.getId(), id, request);
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
+    public LecturerActivityResponse updateActivityStatus(
+            @PathVariable Long id,
+            @RequestParam("status") String status,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        return lecturerGroupActivityService.updateActivityStatus(currentUser.getId(), id, status);
+    }
+
     @GetMapping("/{id}/groups")
-    @PreAuthorize("hasAuthority('LECTURER')")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
     public List<LecturerGroupResponse> listGroups(
             @PathVariable Long id,
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "filter", required = false) String filter) {
         return lecturerGroupActivityService.listGroupsByActivityId(id, search, filter);
+    }
+
+    @GetMapping("/groups/{groupId}/review")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
+    public LecturerReviewResponse getGroupReview(@PathVariable Long groupId) {
+        return lecturerGroupActivityService.getGroupReview(groupId);
+    }
+
+    @PutMapping("/groups/{groupId}/grade")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
+    public LecturerReviewResponse gradeGroup(
+            @PathVariable Long groupId,
+            @Valid @RequestBody LecturerGradeRequest request,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        return lecturerGroupActivityService.gradeGroup(currentUser.getId(), groupId, request);
     }
 }
