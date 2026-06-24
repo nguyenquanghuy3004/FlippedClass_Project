@@ -15,10 +15,10 @@ public interface LearningNodeItemRepository extends JpaRepository<LearningNodeIt
     List<LearningNodeItem> findByLearningNodeIdOrderByPosition(Long learningNodeId); // lấy danh sách tài nguyên của 1 bài học
 
     @Query("SELECT i FROM LearningNodeItem i JOIN i.learningNode n JOIN n.learningPath p JOIN p.learningSpace s " +
-           "WHERE s.id IN :spaceIds AND i.itemType = :itemType " +
+           "WHERE s.id IN :spaceIds AND i.itemType IN :itemTypes " +
            "ORDER BY n.createdAt DESC")
-    List<LearningNodeItem> findRecentItemsBySpaceIds(
+    List<LearningNodeItem> findRecentDocumentsBySpaceIds(
             @Param("spaceIds") List<Long> spaceIds, 
-            @Param("itemType") com.example.flippedclass.enums.ItemType itemType, 
+            @Param("itemTypes") List<com.example.flippedclass.enums.ItemType> itemTypes, 
             Pageable pageable);
 }

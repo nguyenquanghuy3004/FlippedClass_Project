@@ -60,6 +60,13 @@ public class LearningSpaceController {
         learningSpaceService.archiveLearningSpace(id);
         return ResponseEntity.ok(new MessageResponse("Lưu trữ thành công "));
     }
+
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")
+    @PostMapping("/{id}/clone")
+    public ResponseEntity<LearningSpaceResponse> cloneLearningSpace(@PathVariable Long id, @RequestParam String newName) {
+        LearningSpaceResponse response = learningSpaceService.cloneSpace(id, newName);
+        return ResponseEntity.ok(response);
+    }
     /////////
     @com.example.flippedclass.annotation.LogUserActivity(actionType = "JOIN_SPACE", description = "User joined a learning space")
     @PostMapping("/join")
