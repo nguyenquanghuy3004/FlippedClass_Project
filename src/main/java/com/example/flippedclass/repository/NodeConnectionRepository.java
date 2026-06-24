@@ -14,7 +14,4 @@ public interface NodeConnectionRepository extends JpaRepository<NodeConnection, 
             Long sourceNodeId,
             Long targetNodeId
     );
-
-    List<NodeConnection> findByTargetNodeId(Long targetNodeId);
-    void deleteByTargetNodeId(Long targetNodeId);
 }

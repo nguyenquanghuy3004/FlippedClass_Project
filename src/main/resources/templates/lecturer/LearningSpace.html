@@ -171,7 +171,6 @@
                         <ul class="dropdown-menu shadow-sm border-0 rounded-3">
                             <li><a class="dropdown-item d-flex align-items-center gap-2 edit-space-btn" href="#"><i
                                         class="ti ti-pencil"></i> Edit Space</a></li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2 clone-space-btn" href="#"><i class="ti ti-copy"></i> Clone Space</a></li>
                             <li><a class="dropdown-item d-flex align-items-center gap-2 archive-space-btn" href="#"><i
                                         class="ti ti-archive"></i> <span class="archive-text">Archive Space</span></a>
                             </li>
@@ -230,8 +229,6 @@
                 // Hàm lấy danh sách Learning Space của giảng viên từ API
                 function fetchSpaces() {
                     fetch('/api/learning-spaces/my-spaces', {
-                        method: 'GET',
-                        cache: 'no-store',
                         headers: {
                             'Authorization': 'Bearer ' + token
                         }
@@ -294,10 +291,6 @@
                                 editBtn.dataset.description = space.description || '';
                                 editBtn.dataset.visibility = space.visibility || 'PRIVATE';
 
-                                const cloneBtn = clone.querySelector('.clone-space-btn');
-                                cloneBtn.dataset.id = space.id;
-                                cloneBtn.dataset.name = space.name;
-
                                 const archiveBtn = clone.querySelector('.archive-space-btn');
                                 archiveBtn.dataset.id = space.id;
                                 archiveBtn.dataset.status = status;
@@ -311,7 +304,6 @@
                                 }
 
                                 clone.querySelector('.delete-space-btn').dataset.id = space.id;
-                                clone.querySelector('.delete-space-btn').dataset.status = status;
 
                                 grid.appendChild(clone);
                             });
@@ -547,13 +539,6 @@
                 // Delete Space (Xóa tạm vào thùng rác)
                 $(document).on('click', '.delete-space-btn', function (e) {
                     e.preventDefault();
-                    
-                    const status = $(this).data('status');
-                    if (status === 'ARCHIVE') {
-                        Swal.fire('Cảnh báo!', 'Không thể xóa Không gian học tập đang bị lưu trữ. Vui lòng mở lưu trữ (Unarchive) trước khi xóa.', 'warning');
-                        return;
-                    }
-
                     Swal.fire({
                         title: 'Delete Space?',
                         text: "Are you sure you want to delete this space?",
@@ -578,45 +563,20 @@
                     });
                 });
 
-                $(document).on('click', '.clone-space-btn', function (e) {
+                // Fallback dropdown toggle for cloned elements
+                $(document).on('click', '.card-options-top', function (e) {
                     e.preventDefault();
-                    const spaceId = $(this).data('id');
-                    const oldName = $(this).data('name');
-
-                    const newName = prompt("Vui lòng nhập tên cho Không gian học tập mới:", oldName + " (Copy)");
-                    
-                    if (newName && newName.trim() !== "") {
-                        Swal.fire({
-                            title: 'Đang nhân bản...',
-                            text: 'Vui lòng đợi trong giây lát.',
-                            allowOutsideClick: false,
-                            didOpen: () => { Swal.showLoading(); }
-                        });
-
-                        fetch(`/api/learning-spaces/${spaceId}/clone`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer ' + token
-                            },
-                            body: JSON.stringify({ newName: newName })
-                        })
-                        .then(res => {
-                            if (!res.ok) {
-                                return res.json().then(err => { throw new Error(err.message || "Lỗi khi clone"); });
-                            }
-                            return res.json();
-                        })
-                        .then(data => {
-                            Swal.fire('Thành công!', 'Đã nhân bản Không gian học tập thành công.', 'success');
-                            fetchSpaces(); 
-                        })
-                        .catch(err => {
-                            Swal.fire('Lỗi!', err.message, 'error');
-                        });
-                    }
+                    e.stopPropagation();
+                    const menu = $(this).next('.dropdown-menu');
+                    $('.dropdown-menu').not(menu).removeClass('show');
+                    menu.toggleClass('show');
                 });
 
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('.card-options-top').length) {
+                        $('.dropdown-menu').removeClass('show');
+                    }
+                });
             });
         </script>
     </th:block>

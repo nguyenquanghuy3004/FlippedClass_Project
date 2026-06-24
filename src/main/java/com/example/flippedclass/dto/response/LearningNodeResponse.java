@@ -15,13 +15,9 @@ public class LearningNodeResponse {
     private String description;
     private Long learningPathId;
     private Long learningSpaceId;
-//    private Double positionY;
     private String status;
     private String nodeType;
     private String content;
-    private String starterCode;
-    private String solutionCode;
-    private Long prerequisiteNodeId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

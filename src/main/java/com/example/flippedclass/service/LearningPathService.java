@@ -16,9 +16,9 @@ public interface LearningPathService {
 
     LearningPathResponse createLearningPath(Long spaceId, CreateLearningPathRequest request);
 
-    List<LearningPathResponse> getLearningPath(Long spaceId, Long studentId);
+    List<LearningPathResponse> getLearningPath(Long spaceId);
 
-    LearningPathResponse getLearningPathDetail(Long spaceId, Long pathId, Long studentId);
+    LearningPathResponse getLearningPathDetail(Long spaceId, Long pathId);
 
     LearningPathResponse updateLearningPath(Long spaceId, Long pathId, UpdateLearningPathRequest request);
 

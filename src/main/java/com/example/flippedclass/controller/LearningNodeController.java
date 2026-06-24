@@ -61,7 +61,7 @@ public class LearningNodeController {
         @DeleteMapping("/item/{itemId}")
     public ResponseEntity<Map<String,String>> deleteItem(@PathVariable Long itemId){
         learningNodeItemService.delete(itemId);
-        return  ResponseEntity.ok(Map.of("message", "Document unlinked successfully"));
+        return  ResponseEntity.ok(Map.of("message", "gỡ tài liệu thành công"));
         }
 
 }

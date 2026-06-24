@@ -32,6 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
+<<<<<<< HEAD
 ### Mac OS ###
 .DS_Store
 
@@ -43,3 +44,22 @@ uploads/
 
 target/
 target-mvn/
+=======
+### Java ###
+*.class
+*.log
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+### Mac ###
+.DS_Store
+
+### Others ###
+temp_exec/
+uploads/
+>>>>>>> origin/Quanh1

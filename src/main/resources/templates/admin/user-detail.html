@@ -2,6 +2,37 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{admin/layout}">
 <head>
     <title>User Detail</title>
+    <style>
+        .activity-log-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .activity-item {
+            border-left: 3px solid #dee2e6;
+            padding-left: 15px;
+            position: relative;
+            margin-bottom: 15px;
+            transition: background-color 0.5s ease;
+        }
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 5px;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid #0d6efd;
+        }
+        .activity-item.highlight {
+            background-color: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .activity-item.highlight::before {
+            border-color: #ffc107;
+        }
+    </style>
 </head>
 <body>
     <div layout:fragment="content">
@@ -22,7 +53,7 @@
         <div class="row g-3">
             <!-- Main Info -->
             <div class="col-md-8">
-                <div class="card h-100">
+                <div class="card mb-3">
                     <div class="card-header bg-white px-4 py-3 border-bottom">
                         <h5 class="mb-0">Profile Information</h5>
                     </div>
@@ -43,7 +74,7 @@
                         
                         <hr class="my-4 border-secondary opacity-25">
                         
-                        <h6 class="fw-bold mb-3">Learning Activity</h6>
+                        <h6 class="fw-bold mb-3">Learning Stats</h6>
                         <div class="row text-center">
                             <div class="col-6 border-end">
                                 <h3 class="fw-bold text-primary mb-1" id="u-joined">0</h3>
@@ -53,6 +84,21 @@
                                 <h3 class="fw-bold text-success mb-1" id="u-owned">0</h3>
                                 <div class="small text-muted">Spaces Owned</div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Activity Log -->
+                <div class="card">
+                    <div class="card-header bg-white px-4 py-3 border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="ti ti-activity text-primary me-2"></i>Real-time Activity Log
+                        </h5>
+                        <span class="badge bg-success" id="sse-status">Connected</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="activity-log-container pe-2" id="activityList">
+                            <div class="text-center text-muted" id="no-activity-msg">No recent activities found.</div>
                         </div>
                     </div>
                 </div>
@@ -87,6 +133,8 @@
             
             $(document).ready(function() {
                 loadUserDetail();
+                loadRecentActivities();
+                setupSseConnection();
             });
 
             function loadUserDetail() {
@@ -100,10 +148,10 @@
                         
                         currentStatus = data.user.status;
                         if(currentStatus === 'ACTIVE') {
-                            $('#u-status').html('<span class="badge badge-active">ACTIVE</span>');
+                            $('#u-status').html('<span class="badge bg-success bg-opacity-10 text-success">ACTIVE</span>');
                             $('#btn-toggle-status').text('Lock Account').removeClass('btn-success').addClass('btn-warning');
                         } else {
-                            $('#u-status').html('<span class="badge badge-locked">LOCKED</span>');
+                            $('#u-status').html('<span class="badge bg-danger bg-opacity-10 text-danger">LOCKED</span>');
                             $('#btn-toggle-status').text('Unlock Account').removeClass('btn-warning').addClass('btn-success');
                         }
                         
@@ -126,10 +174,63 @@
                     }
                 });
             }
+
+            function loadRecentActivities() {
+                const id = $('#userId').val();
+                $.ajax({
+                    url: `/api/admin/users/${id}/activities`,
+                    method: 'GET',
+                    success: function(activities) {
+                        if (activities.length > 0) {
+                            $('#no-activity-msg').hide();
+                            activities.forEach(activity => appendActivity(activity, false));
+                        }
+                    }
+                });
+            }
+
+            function setupSseConnection() {
+                const id = $('#userId').val();
+                const eventSource = new EventSource(`/api/admin/users/${id}/activity-stream`);
+                
+                eventSource.addEventListener('activity', function(event) {
+                    const activity = JSON.parse(event.data);
+                    $('#no-activity-msg').hide();
+                    appendActivity(activity, true);
+                });
+
+                eventSource.onopen = function() {
+                    $('#sse-status').text('Connected').removeClass('bg-danger').addClass('bg-success');
+                };
+
+                eventSource.onerror = function() {
+                    $('#sse-status').text('Disconnected').removeClass('bg-success').addClass('bg-danger');
+                };
+            }
+
+            function appendActivity(activity, isNew) {
+                const date = new Date(activity.createdAt).toLocaleString();
+                const itemHtml = `
+                    <div class="activity-item ${isNew ? 'highlight' : ''}" id="act-${activity.id}">
+                        <div class="d-flex justify-content-between">
+                            <strong>${activity.actionType}</strong>
+                            <small class="text-muted">${date}</small>
+                        </div>
+                        <p class="mb-0 text-muted small">${activity.description}</p>
+                    </div>
+                `;
+                
+                if (isNew) {
+                    $('#activityList').prepend(itemHtml);
+                    // Remove highlight after 3 seconds
+                    setTimeout(() => {
+                        $(`#act-${activity.id}`).removeClass('highlight');
+                    }, 3000);
+                } else {
+                    $('#activityList').append(itemHtml);
+                }
+            }
         </script>
     </th:block>
 </body>
 </html>
-
-
-

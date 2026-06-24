@@ -6,13 +6,11 @@ import com.example.flippedclass.dto.request.UpdateLearningPathRequest;
 import com.example.flippedclass.dto.response.LearningPathResponse;
 import com.example.flippedclass.dto.response.MessageResponse;
 import com.example.flippedclass.service.LearningPathService;
-import com.example.flippedclass.service.impl.UserDetailsImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.Authentication;
 import com.example.flippedclass.service.LearningNodeService;
 import com.example.flippedclass.dto.request.CreateLearningNodeRequest;
 import com.example.flippedclass.dto.response.LearningNodeResponse;
@@ -46,25 +44,17 @@ public class LearningPathController {
 
     @PreAuthorize("@spaceSecurity.isMemberInSpace(#spaceId)")
     @GetMapping
-    public ResponseEntity<List<LearningPathResponse>> getLearningPath(@PathVariable Long spaceId, Authentication authentication) {
-        Long userId = null;
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
-            userId = userDetails.getId();
-        }
+    public ResponseEntity<List<LearningPathResponse>> getLearningPath(@PathVariable Long spaceId) {
         return ResponseEntity
-                .ok(learningPathService.getLearningPath(spaceId, userId));
+                .ok(learningPathService.getLearningPath(spaceId));
     }
 
 
     @PreAuthorize("@spaceSecurity.isMemberInSpace(#spaceId)")
     @GetMapping("/{pathId}")
-    public ResponseEntity<LearningPathResponse> getDetail(@PathVariable Long spaceId, @PathVariable Long pathId, Authentication authentication) {
-        Long userId = null;
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
-            userId = userDetails.getId();
-        }
+    public ResponseEntity<LearningPathResponse> getDetail(@PathVariable Long spaceId, @PathVariable Long pathId) {
         return ResponseEntity
-                .ok(learningPathService.getLearningPathDetail(spaceId, pathId, userId));
+                .ok(learningPathService.getLearningPathDetail(spaceId, pathId));
     }
 
 
@@ -82,14 +72,14 @@ public class LearningPathController {
     public ResponseEntity<?> archive(@PathVariable Long spaceId, @PathVariable Long pathId) {
         learningPathService.archiveLearningPath(spaceId, pathId);
         return ResponseEntity
-                .ok(new MessageResponse("Module archived successfully"));
+                .ok(new MessageResponse("Lưu trữ module thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PutMapping("/{pathId}/restore")
     public ResponseEntity<?> restore(@PathVariable Long spaceId, @PathVariable Long pathId) {
         learningPathService.restoreLearningPath(spaceId, pathId);
-        return ResponseEntity.ok(new MessageResponse("Module restored successfully"));
+        return ResponseEntity.ok(new MessageResponse("Khôi phục module thành công"));
     }
 
 
@@ -97,21 +87,21 @@ public class LearningPathController {
     @DeleteMapping("/{pathId}")
     public ResponseEntity<?> delete(@PathVariable Long spaceId, @PathVariable Long pathId) {
         learningPathService.deleteLearningPathModul(spaceId, pathId);
-        return ResponseEntity.ok(new MessageResponse("Module deleted successfully"));
+        return ResponseEntity.ok(new MessageResponse("Xóa module thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER')")
     @DeleteMapping
     public ResponseEntity<?> deleteAll(@PathVariable Long spaceId) {
         learningPathService.deleteAllLearningPaths(spaceId);
-        return ResponseEntity.ok(new MessageResponse("Roadmap deleted successfully"));
+        return ResponseEntity.ok(new MessageResponse("Xóa toàn bộ roadmap thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PutMapping("/reorder")
     public ResponseEntity<?> reorder(@PathVariable Long spaceId, @Valid @RequestBody ReorderLearningPathRequest request) {
         learningPathService.reorderLearningPaths(spaceId, request);
-        return ResponseEntity.ok(new MessageResponse("Order updated successfully"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật thứ tự thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
@@ -119,7 +109,7 @@ public class LearningPathController {
     public ResponseEntity<?> deleteNode( @PathVariable Long spaceId,@PathVariable Long pathId,
             @PathVariable Long nodeId) {
         learningNodeService.deleteNode(nodeId);
-        return ResponseEntity.ok(new MessageResponse("Node deleted successfully"));
+        return ResponseEntity.ok(new MessageResponse("Xóa bài học thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")

@@ -7,20 +7,17 @@ public class StudentDashboardResponse {
     private StudentProfileResponse studentProfile;
     private List<DashboardLearningSpaceResponse> learningSpaces;
     private List<CourseDocumentResponse> recentDocuments;
-    private List<CommentNotificationResponse> commentNotifications;
 
     public StudentDashboardResponse(
             DashboardUserResponse user,
             StudentProfileResponse studentProfile,
             List<DashboardLearningSpaceResponse> learningSpaces,
-            List<CourseDocumentResponse> recentDocuments,
-            List<CommentNotificationResponse> commentNotifications
+            List<CourseDocumentResponse> recentDocuments
     ) {
         this.user = user;
         this.studentProfile = studentProfile;
         this.learningSpaces = learningSpaces;
         this.recentDocuments = recentDocuments;
-        this.commentNotifications = commentNotifications;
     }
 
     public DashboardUserResponse getUser() {
@@ -37,9 +34,5 @@ public class StudentDashboardResponse {
 
     public List<CourseDocumentResponse> getRecentDocuments() {
         return recentDocuments;
-    }
-
-    public List<CommentNotificationResponse> getCommentNotifications() {
-        return commentNotifications;
     }
 }
