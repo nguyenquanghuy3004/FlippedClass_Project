@@ -23,7 +23,7 @@ body {
   background:
           radial-gradient(circle at top left, rgba(91, 92, 226, 0.18), transparent 32rem),
           linear-gradient(180deg, #ffffff 0%, var(--fc-background) 48%, #ffffff 100%);
-  font-family: "Lexend", "Trebuchet MS", sans-serif;
+  font-family: "Inter", "Trebuchet MS", sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }

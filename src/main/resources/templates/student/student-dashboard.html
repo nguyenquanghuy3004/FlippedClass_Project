@@ -231,39 +231,53 @@
       return;
     }
 
+    const banners = ['banner-green', 'banner-blue', 'banner-darkblue', 'banner-red', 'banner-gray'];
+    const avatars = ['avatar-blue', 'avatar-orange', 'avatar-green', 'avatar-red'];
+
     list.innerHTML = joinedSpaces.slice(0, 4).map((space, index) => {
-      const quizzes = space.quizzes || [];
-      const completed = quizzes.filter((quiz) => quiz.isCompleted).length;
-      const percent = quizzes.length ? Math.round((completed / quizzes.length) * 100) : 0;
-      const pending = quizzes.length - completed;
-      const theme = iconThemes[index % iconThemes.length];
+      const bannerClass = banners[index % banners.length];
+      const avatarClass = avatars[index % avatars.length];
+      const firstLetter = space.name ? space.name.charAt(0).toUpperCase() : 'S';
+      
       const roadmapUrl = space.id
               ? `/student/learning-spaces?spaceId=${encodeURIComponent(space.id)}&focus=roadmap`
               : '/student/learning-spaces';
 
       return `
-          <div class="col-md-6">
-            <a class="course-card text-decoration-none d-block" href="${roadmapUrl}" aria-label="Open roadmap for ${escapeHtml(space.name || 'learning space')}">
-              <div class="course-card-header bg-${theme.color}">
-                <div class="d-flex justify-content-between align-items-start">
-                  <h3 class="fc-card-title text-white pe-3 m-0">${escapeHtml(space.name || 'Untitled Learning Space')}</h3>
-                  <span class="fc-badge bg-white text-dark shadow-sm px-2 py-1 rounded-pill flex-shrink-0"><i class="ti ti-circle-check me-1"></i>${escapeHtml(statusLabel(space.status))}</span>
+          <div class="col-md-6 mb-4">
+            <div class="classroom-card h-100">
+                <div class="card-banner ${bannerClass}">
+                    <div class="banner-pattern"></div>
+                    <a href="${roadmapUrl}" class="card-title-link">
+                        <h2 class="course-title">${escapeHtml(space.name || 'Untitled Learning Space')}</h2>
+                        <div class="course-subtitle">${escapeHtml(space.description || 'Sample Space')}</div>
+                    </a>
+                    <div class="card-options-top">
+                        <i class="ti ti-dots-vertical"></i>
+                    </div>
                 </div>
-                <p class="fc-meta mb-0 text-white-50 mt-1">${escapeHtml(space.description || roleLabel(space.memberRole))}</p>
-                <div class="course-instructor-avatar bg-${theme.color}-subtle text-${theme.color}">
-                  <i class="ti ${theme.icon}"></i>
+
+                <div class="card-avatar ${avatarClass}">
+                    ${firstLetter}
                 </div>
-              </div>
-              <div class="course-card-body">
-                <div class="progress-track mt-0">
-                  <div class="progress-fill bg-${theme.color}" style="width: ${percent}%;"></div>
+
+                <div class="card-body-content">
+                    <!-- Student specific body content could go here, keeping it clean per design -->
                 </div>
-                <div class="d-flex justify-content-between mt-2">
-                  <span class="fc-label text-dark">${percent}% quiz completed</span>
-                  <span class="fc-label text-muted">${pending ? `${pending} quizzes left` : quizzes.length ? 'All quizzes done' : 'No quizzes yet'}</span>
+
+                <div class="card-footer">
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="status-indicator status-${escapeHtml(space.status || 'ACTIVE')}" title="Status"></span>
+                        <span class="visibility-text text-muted" style="font-size: 0.75rem; font-weight: 600;">${escapeHtml(space.visibility || 'PUBLIC')}</span>
+                    </div>
+                    <div class="d-flex gap-1">
+                        <div class="footer-icon"><i class="ti ti-share"></i></div>
+                        <div class="footer-icon"><i class="ti ti-id-badge-2"></i></div>
+                        <div class="footer-icon"><i class="ti ti-folder"></i></div>
+                        <div class="footer-icon"><i class="ti ti-dots-vertical"></i></div>
+                    </div>
                 </div>
-              </div>
-            </a>
+            </div>
           </div>`;
     }).join('');
   }
