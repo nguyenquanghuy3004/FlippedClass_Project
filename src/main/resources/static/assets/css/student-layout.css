@@ -1,0 +1,190 @@
+/* Student Layout Stylesheet */
+:root {
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --topbar-height: 64px;
+}
+
+/* Base adjustment for fixed topbar */
+body {
+  padding-top: var(--topbar-height);
+  transition: padding-left 180ms ease;
+}
+
+/* TOPBAR POSITIONING & DESIGN */
+#topbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  height: var(--topbar-height);
+  z-index: 1030;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.85) !important;
+  box-shadow: var(--fc-shadow-sm, 0 10px 24px rgba(31, 41, 55, 0.08)) !important;
+}
+
+.topbar-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-left: 1.5rem;
+}
+
+.topbar-title-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.topbar-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--fc-text, #090b33);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.topbar-title .badge {
+  font-size: 0.72rem;
+  padding: 0.35rem 0.75rem;
+  font-weight: 800;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* SIDEBAR POSITIONING */
+#sidebar {
+  position: fixed;
+  top: var(--topbar-height) !important;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  z-index: 1020;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-right: 1px solid var(--fc-border, #e9e7f4) !important;
+  box-shadow: 12px 0 30px rgba(31, 41, 55, 0.03);
+  transition: width 180ms ease, transform 180ms ease;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#sidebar .logo-area {
+  display: none; /* Hidden by default on desktop */
+}
+
+#sidebar .nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 1.5rem;
+}
+
+.sidebar-user-slot {
+  margin-top: auto !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* CONTENT POSITIONING */
+.content {
+  margin-left: var(--sidebar-width);
+  min-height: calc(100vh - var(--topbar-height));
+  padding: 0.75rem clamp(1rem, 3vw, 2rem) 2rem;
+  transition: margin-left 180ms ease;
+}
+
+.content.py-10 {
+  padding-top: 0.75rem !important;
+  padding-bottom: 2rem !important;
+}
+
+/* COLLAPSED STATES (DESKTOP) */
+body.sidebar-collapsed #sidebar {
+  width: var(--sidebar-collapsed-width);
+}
+
+body.sidebar-collapsed .content {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+body.sidebar-collapsed #sidebar .nav-text,
+body.sidebar-collapsed #sidebar .logo-text,
+body.sidebar-collapsed #sidebar .student-menu-info,
+body.sidebar-collapsed #sidebar .student-menu-chevron {
+  display: none !important;
+}
+
+body.sidebar-collapsed #sidebar .nav-link {
+  justify-content: center;
+  padding: 0.8rem !important;
+  margin: 0 0.75rem 0.5rem !important;
+}
+
+body.sidebar-collapsed #sidebar .student-menu-trigger {
+  width: 48px;
+  height: 48px;
+  justify-content: center;
+  padding: 0.35rem;
+  border-radius: 50%;
+}
+
+/* RESPONSIVE STATES (MOBILE & TABLET) */
+@media (max-width: 991.98px) {
+  #sidebar {
+    top: 0;
+    z-index: 1040;
+    transform: translateX(-100%);
+    box-shadow: 15px 0 35px rgba(31, 41, 55, 0.15);
+  }
+  
+  #sidebar .logo-area {
+    display: flex; /* Shown on mobile when sidebar drawer is open */
+    height: var(--topbar-height);
+    align-items: center;
+    padding: 0 1.4rem;
+    border-bottom: 1px solid var(--fc-border, #e9e7f4);
+  }
+  
+  .content {
+    margin-left: 0 !important;
+  }
+  
+  body.sidebar-open #sidebar {
+    transform: translateX(0);
+  }
+  
+  /* OVERLAY FOR MOBILE DRAWER */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1035;
+    background: rgba(9, 11, 51, 0.35);
+    backdrop-filter: blur(2px);
+  }
+  
+  body.sidebar-open .overlay {
+    display: block;
+  }
+  
+  .topbar-main {
+    margin-left: 0.75rem;
+  }
+}

@@ -44,6 +44,7 @@ public class LearningPathController {
         return ResponseEntity.ok(learningNodeService.createLearningNode(pathId, request));
     }
 
+    @PreAuthorize("@spaceSecurity.isMemberInSpace(#spaceId)")
     @GetMapping
     public ResponseEntity<List<LearningPathResponse>> getLearningPath(@PathVariable Long spaceId, Authentication authentication) {
         Long userId = null;
@@ -55,6 +56,7 @@ public class LearningPathController {
     }
 
 
+    @PreAuthorize("@spaceSecurity.isMemberInSpace(#spaceId)")
     @GetMapping("/{pathId}")
     public ResponseEntity<LearningPathResponse> getDetail(@PathVariable Long spaceId, @PathVariable Long pathId, Authentication authentication) {
         Long userId = null;

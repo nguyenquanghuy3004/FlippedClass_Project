@@ -16,9 +16,6 @@ public class SpaceSecurityEvaluator {
     @Autowired
     private LearningSpaceMemberRepository memberRepository;
 
-    @Autowired
-    private com.example.flippedclass.repository.LearningSpaceRepository learningSpaceRepository;
-
     public boolean hasRoleInSpace(Long spaceId, String... roles) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
@@ -43,13 +40,22 @@ public class SpaceSecurityEvaluator {
             return Arrays.asList(roles).contains(member.getRole().name());
         }
 
-        // Nếu không có member record, kiểm tra xem có phải là PUBLIC không
-        com.example.flippedclass.entity.LearningSpace space = learningSpaceRepository.findById(spaceId).orElse(null);
-        if (space != null && space.getVisibility() == com.example.flippedclass.enums.VisibilityType.PUBLIC 
-                && space.getStatus() == com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE) {
-            return Arrays.asList(roles).contains("MEMBER");
+        return false;
+    }
+
+    public boolean isMemberInSpace(Long spaceId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return false;
         }
 
-        return false;
+        for (org.springframework.security.core.GrantedAuthority authority : auth.getAuthorities()) {
+            if (authority.getAuthority().equals("ADMIN")) {
+                return true;
+            }
+        }
+
+        String username = auth.getName();
+        return memberRepository.findByLearningSpaceIdAndUserUsername(spaceId, username).isPresent();
     }
 }

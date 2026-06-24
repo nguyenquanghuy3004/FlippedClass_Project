@@ -24,6 +24,8 @@ public interface LearningSpaceMemberRepository extends JpaRepository<LearningSpa
 
     long countByLearningSpaceIdAndRole(Long learningSpaceId, com.example.flippedclass.enums.MemberRole role);
 
+    boolean existsByLearningSpaceIdAndUserId(Long learningSpaceId, Long userId);
+
     List<LearningSpaceMember> findByUser_IdOrderByJoinedAtDesc(Long userId);
     int countByUser_Id(Long userId);
 
