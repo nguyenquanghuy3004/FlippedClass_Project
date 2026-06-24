@@ -156,7 +156,7 @@ public class TemplateController {
         model.addAttribute("spaceId", spaceId);
         model.addAttribute("isSupporter", true);
         try {
-            model.addAttribute("paths", learningPathService.getLearningPath(spaceId));
+            model.addAttribute("paths", learningPathService.getLearningPath(spaceId, null));
         } catch(Exception e) {
             model.addAttribute("paths", java.util.Collections.emptyList());
         }
