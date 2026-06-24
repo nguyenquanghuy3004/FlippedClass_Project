@@ -237,10 +237,8 @@ public class QuizServiceImpl implements QuizService {
         List<QuizAttempt> attempts = attemptRepository.findByQuizId(quizId);
         long total = attempts.size();
 
-        BigDecimal avg = attemptRepository.averageScoreByQuizId(quizId);
-        if (avg == null) {
-            avg = BigDecimal.ZERO;
-        }
+        Double avgScoreObj = attemptRepository.averageScoreByQuizId(quizId);
+        BigDecimal avg = avgScoreObj != null ? BigDecimal.valueOf(avgScoreObj) : BigDecimal.ZERO;
 
         BigDecimal highest = attempts.stream()
                 .map(QuizAttempt::getScore)
@@ -321,8 +319,8 @@ public class QuizServiceImpl implements QuizService {
 
     private QuizResponse toResponse(Quiz quiz) {
         long totalAttempts = attemptRepository.countByQuizId(quiz.getId());
-        BigDecimal avgScore = attemptRepository.averageScoreByQuizId(quiz.getId());
-        double avg = avgScore != null ? avgScore.doubleValue() : 0.0;
+        Double avgScore = attemptRepository.averageScoreByQuizId(quiz.getId());
+        double avg = avgScore != null ? avgScore : 0.0;
 
         Integer passScore = quiz.getPassScore() != null ? quiz.getPassScore() : 50;
         long passedCount = attemptRepository.findByQuizId(quiz.getId()).stream()

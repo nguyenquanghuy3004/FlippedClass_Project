@@ -36,6 +36,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     private final UserRepository userRepository;
     private final InviteCodeGenerator inviteCodeGenerator;
     private final ValidateJoinLearningSpace validateJoinLearningSpace;
+    private final com.example.flippedclass.repository.PeerPairingRepository peerPairingRepository;
 
 
     private User getCurrentUser() {
@@ -76,15 +77,23 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
             }
         }
 
+        // Prevent duplicate space names for the same owner
+        List<LearningSpace> existingSpaces = learningSpaceRepository.findByOwnerIdAndStatus(owner.getId(), LearningSpaceStatus.ACTIVE);
+        boolean nameExists = existingSpaces.stream().anyMatch(s -> s.getName().equalsIgnoreCase(request.getName().trim()));
+        if (nameExists) {
+            throw new IllegalArgumentException("Bạn đã có một Mentoring Space với tên này rồi. Vui lòng chọn tên khác!");
+        }
+
         // Create Entity and save
         String inviteCode = inviteCodeGenerator.generateUniqueInviteCode();
 
-        LearningSpace learningSpace = new LearningSpace();
-        learningSpace.setName(request.getName());
-        learningSpace.setDescription(request.getDescription());
-        learningSpace.setVisibility(request.getVisibility());
-        learningSpace.setOwner(owner);
-        learningSpace.setInviteCode(inviteCode);
+        LearningSpace learningSpace = LearningSpace.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .visibility(request.getVisibility())
+                .owner(owner)
+                .inviteCode(inviteCode)
+                .build();
         
         LearningSpace savedSpace = learningSpaceRepository.save(learningSpace);
 
@@ -95,6 +104,21 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         ownerMember.setRole(MemberRole.OWNER);
         ownerMember.setStatus(MemberStatus.ACTIVE);
         memberRepository.save(ownerMember);
+
+        // Auto-add mentees of this supporter to the newly created space
+        List<com.example.flippedclass.entity.PeerPairing> mentees = peerPairingRepository.findByMentor_Id(owner.getId());
+        for (com.example.flippedclass.entity.PeerPairing pairing : mentees) {
+            if (pairing.getStatus() == com.example.flippedclass.enums.PeerPairingStatus.ACTIVE) {
+                if (!memberRepository.existsByLearningSpaceAndUser(savedSpace, pairing.getMentee())) {
+                    LearningSpaceMember menteeMember = new LearningSpaceMember();
+                    menteeMember.setLearningSpace(savedSpace);
+                    menteeMember.setUser(pairing.getMentee());
+                    menteeMember.setRole(MemberRole.MEMBER);
+                    menteeMember.setStatus(MemberStatus.ACTIVE);
+                    memberRepository.save(menteeMember);
+                }
+            }
+        }
 
         // Return Response DTO
         return LearningSpaceResponse.builder()
@@ -113,9 +137,16 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Override
     public List<LearningSpaceResponse> getMySpaces() {
         User currentUser = getCurrentUser();
-        List<LearningSpace> spaces = learningSpaceRepository.findByOwnerId(currentUser.getId());
-        
-        return spaces.stream().map(space -> LearningSpaceResponse.builder()
+        List<LearningSpace> ownedSpaces = learningSpaceRepository.findByOwnerId(currentUser.getId());
+        List<LearningSpace> joinedSpaces = memberRepository.findByUser_IdOrderByJoinedAtDesc(currentUser.getId()).stream()
+                .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
+                .map(LearningSpaceMember::getLearningSpace)
+                .collect(Collectors.toList());
+
+        java.util.Set<LearningSpace> allSpaces = new java.util.HashSet<>(ownedSpaces);
+        allSpaces.addAll(joinedSpaces);
+
+        return allSpaces.stream().map(space -> LearningSpaceResponse.builder()
                 .id(space.getId())
                 .name(space.getName())
                 .description(space.getDescription())
@@ -247,6 +278,12 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
             if (!learningSpace.getOwner().getUsername().equals(username)) {
                 throw new IllegalArgumentException("Bạn không có quyền xóa");
             }
+        }
+
+        // Không cho phép xóa nếu đã có học viên (MEMBER) tham gia
+        long memberCount = memberRepository.countByLearningSpaceIdAndRole(id, MemberRole.MEMBER);
+        if (memberCount > 0) {
+            throw new IllegalArgumentException("Không thể xóa Learning Space này vì đã có học viên (Mentee) tham gia.");
         }
 
         learningSpace.setStatus(LearningSpaceStatus.DELETE);

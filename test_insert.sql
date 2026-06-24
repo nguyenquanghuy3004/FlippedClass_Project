@@ -1,0 +1,1 @@
+﻿USE FlippedClassDB; INSERT INTO learning_nodes (title, learning_path_id, node_type, status, content, description) VALUES (N'Tiếng Việt Thử Nghiệm', 18, 'LESSON', 'ACTIVE', N'Test', N'Test'); SELECT id, title FROM learning_nodes WHERE title = N'Tiếng Việt Thử Nghiệm';

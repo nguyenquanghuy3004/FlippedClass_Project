@@ -14,4 +14,5 @@ public interface PeerPairingRepository extends JpaRepository<PeerPairing, Long> 
     List<PeerPairing> findByLearningSpace_IdAndMentee_Id(Long learningSpaceId, Long menteeId);
     Optional<PeerPairing> findByLearningSpace_IdAndMentee_IdAndMentor_Id(Long learningSpaceId, Long menteeId, Long mentorId);
     long countByLearningSpace_IdAndMentor_IdAndStatus(Long learningSpaceId, Long mentorId, com.example.flippedclass.enums.PeerPairingStatus status);
+    List<PeerPairing> findByMentor_Id(Long mentorId);
 }

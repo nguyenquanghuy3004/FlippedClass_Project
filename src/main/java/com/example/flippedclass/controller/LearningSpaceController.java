@@ -38,7 +38,7 @@ public class LearningSpaceController {
     }
 
 
-    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN') or hasAuthority('STUDENT')")
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteLearningSpace (@PathVariable Long id){
         learningSpaceService.deleteLearningSpace(id);

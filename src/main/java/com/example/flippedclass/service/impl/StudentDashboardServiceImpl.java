@@ -48,7 +48,9 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 .map(this::toStudentProfileResponse)
                 .orElse(null);
 
-        List<LearningSpaceMember> memberships = learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId);
+        List<LearningSpaceMember> memberships = learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId).stream()
+                .filter(m -> m.getLearningSpace().getStatus() == com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE)
+                .toList();
         List<Long> joinedSpaceIds = memberships.stream()
                 .map(member -> member.getLearningSpace().getId())
                 .distinct()

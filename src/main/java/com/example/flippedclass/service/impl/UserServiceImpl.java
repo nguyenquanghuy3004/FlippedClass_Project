@@ -14,6 +14,9 @@ import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.UserService;
 
 
+import com.example.flippedclass.repository.LearningSpaceMemberRepository;
+import com.example.flippedclass.enums.MemberRole;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,10 +27,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final LearningSpaceMemberRepository memberRepository;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, LearningSpaceMemberRepository memberRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.memberRepository = memberRepository;
     }
 
     @Override
@@ -67,7 +72,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getById(Long id) {
-        return toResponse(findUser(id));
+        UserResponse response = toResponse(findUser(id));
+        if (memberRepository != null) {
+            response.setSupporter(memberRepository.existsByUser_IdAndRole(id, MemberRole.SUPPORTER));
+        }
+        return response;
     }
 
     @Override
@@ -93,6 +102,7 @@ public class UserServiceImpl implements UserService {
         Set<String> roleNames = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(Collectors.toSet());
+                
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -101,6 +111,7 @@ public class UserServiceImpl implements UserService {
                 .avatarUrl(user.getAvatarUrl())
                 .provider(user.getProvider() != null ? user.getProvider().name() : null)
                 .roles(roleNames)
+                .isSupporter(false)
                 .createdAt(user.getCreatedAt())
                 .build();
     }

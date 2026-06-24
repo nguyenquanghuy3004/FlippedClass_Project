@@ -76,6 +76,16 @@ public class TemplateController {
         return "lecturer/quiz-statistics";
     }
 
+    @GetMapping("/supporter/quizzes/{id}/builder")
+    public String supporterQuizBuilder() {
+        return "supporter/quiz-builder";
+    }
+
+    @GetMapping("/supporter/quizzes/{id}/statistics")
+    public String supporterQuizStatistics() {
+        return "supporter/quiz-statistics";
+    }
+
     @GetMapping("/student/dashboard")
     public String studentDashboard() {
         return "student/student-dashboard";
@@ -136,6 +146,18 @@ public class TemplateController {
         return "lecturer/learningPath";
     }
 
+    @GetMapping("/supporter/space/{spaceId}")
+    public String supporterLearningPath(@PathVariable Long spaceId, Model model) {
+        model.addAttribute("spaceId", spaceId);
+        model.addAttribute("isSupporter", true);
+        try {
+            model.addAttribute("paths", learningPathService.getLearningPath(spaceId));
+        } catch(Exception e) {
+            model.addAttribute("paths", java.util.Collections.emptyList());
+        }
+        return "supporter/learningPath";
+    }
+
     @GetMapping("/lecturer/learning-nodes/{nodeId}/preview")
     public String lecturerNodePreview(@PathVariable Long nodeId, Model model) {
         model.addAttribute("nodeId", nodeId);
@@ -147,6 +169,13 @@ public class TemplateController {
         model.addAttribute("spaceId", spaceId);
         return "lecturer/space-members";
     }
+
+    @GetMapping("/supporter/space-members")
+    public String supporterSpaceMembers(@RequestParam("spaceId") Long spaceId, Model model) {
+        model.addAttribute("spaceId", spaceId);
+        return "supporter/space-members";
+    }
+
 
     @GetMapping("/lecturer/spaces/{spaceId}/analytics")
     public String learningAnalytics(@PathVariable Long spaceId, Model model) {
