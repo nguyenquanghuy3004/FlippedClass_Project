@@ -159,6 +159,7 @@
   </script>
   <link rel="stylesheet" th:href="@{/assets/css/student-dashboard.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-layout.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
 </head>
 
@@ -222,7 +223,7 @@
       <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">Flipped<span class="text-primary">Class</span></span>
     </a>
   </div>
-  <ul class="nav flex-column mt-4">
+  <ul class="nav flex-column mt-2">
     <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4 fw-bold" th:href="@{/student/dashboard}" data-nav-key="dashboard" aria-current="page"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
