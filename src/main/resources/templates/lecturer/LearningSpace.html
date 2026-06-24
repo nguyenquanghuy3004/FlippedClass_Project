@@ -165,21 +165,23 @@
                             <div class="course-subtitle"></div>
                         </a>
 
-                        <div class="card-options-top" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="ti ti-dots-vertical"></i>
+                        <div class="dropdown position-absolute" style="top: 12px; right: 8px; z-index: 10;">
+                            <div class="card-options-top" data-bs-toggle="dropdown" aria-expanded="false" style="position: static; padding: 8px;">
+                                <i class="ti ti-dots-vertical"></i>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 edit-space-btn" href="#"><i
+                                            class="ti ti-pencil"></i> Edit Space</a></li>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 archive-space-btn" href="#"><i
+                                            class="ti ti-archive"></i> <span class="archive-text">Archive Space</span></a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger delete-space-btn"
+                                        href="#"><i class="ti ti-trash"></i> Delete Space</a></li>
+                            </ul>
                         </div>
-                        <ul class="dropdown-menu shadow-sm border-0 rounded-3">
-                            <li><a class="dropdown-item d-flex align-items-center gap-2 edit-space-btn" href="#"><i
-                                        class="ti ti-pencil"></i> Edit Space</a></li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2 archive-space-btn" href="#"><i
-                                        class="ti ti-archive"></i> <span class="archive-text">Archive Space</span></a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger delete-space-btn"
-                                    href="#"><i class="ti ti-trash"></i> Delete Space</a></li>
-                        </ul>
                     </div>
 
                     <div class="card-avatar"></div>

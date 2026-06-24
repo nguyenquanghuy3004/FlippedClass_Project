@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{lecturer/layout}">
-<head>
-    <meta charset="UTF-8">
-    <title>Peer Mentoring Management - FlippedClass</title>
-    <th:block layout:fragment="head">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-    </th:block>
-</head>
-<body>
-<div layout:fragment="content">
+<div th:fragment="content">
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
             <div>
@@ -76,7 +65,7 @@
     </div>
 </div>
 
-<th:block layout:fragment="scripts">
+<th:block th:fragment="scripts">
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         let spaceId = urlParams.get('spaceId');
@@ -260,5 +249,3 @@
         }
     </script>
 </th:block>
-</body>
-</html>

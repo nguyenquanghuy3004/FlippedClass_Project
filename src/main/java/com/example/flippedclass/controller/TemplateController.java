@@ -135,14 +135,19 @@ public class TemplateController {
     @Autowired
     private LearningPathService learningPathService;
 
-    @GetMapping("/lecturer/space/{spaceId}")
-    public String learningPath(@PathVariable Long spaceId, Model model) {
+    private void loadSpaceCommonData(Long spaceId, String activeTab, Model model) {
         model.addAttribute("spaceId", spaceId);
+        model.addAttribute("activeTab", activeTab);
         try {
             model.addAttribute("paths", learningPathService.getLearningPath(spaceId));
         } catch(Exception e) {
             model.addAttribute("paths", java.util.Collections.emptyList());
         }
+    }
+
+    @GetMapping("/lecturer/space/{spaceId}")
+    public String learningPath(@PathVariable Long spaceId, Model model) {
+        loadSpaceCommonData(spaceId, "roadmap", model);
         return "lecturer/learningPath";
     }
 
@@ -166,8 +171,8 @@ public class TemplateController {
 
     @GetMapping("/lecturer/space-members")
     public String spaceMembers(@RequestParam("spaceId") Long spaceId, Model model) {
-        model.addAttribute("spaceId", spaceId);
-        return "lecturer/space-members";
+        loadSpaceCommonData(spaceId, "people", model);
+        return "lecturer/learningPath";
     }
 
     @GetMapping("/supporter/space-members")
@@ -179,14 +184,14 @@ public class TemplateController {
 
     @GetMapping("/lecturer/spaces/{spaceId}/analytics")
     public String learningAnalytics(@PathVariable Long spaceId, Model model) {
-        model.addAttribute("spaceId", spaceId);
-        return "lecturer/learning-analytics";
+        loadSpaceCommonData(spaceId, "analytics", model);
+        return "lecturer/learningPath";
     }
 
     @GetMapping("/lecturer/spaces/{spaceId}/group-activities")
     public String lecturerGroupActivities(@PathVariable Long spaceId, Model model) {
-        model.addAttribute("spaceId", spaceId);
-        return "lecturer/group-activities";
+        loadSpaceCommonData(spaceId, "activities", model);
+        return "lecturer/learningPath";
     }
 
     @GetMapping("/lecturer/group-activities/{activityId}")
