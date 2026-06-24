@@ -42,18 +42,17 @@
     </div>
     
     <div class="ms-auto">
-      <div class="student-user-menu topbar-user-menu" data-user-menu style="position: relative;">
-        <button class="student-menu-trigger bg-transparent border-0 d-flex align-items-center" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
-          <img class="student-menu-avatar rounded-circle border border-2 border-white shadow-sm" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Lecturer avatar" style="width: 38px; height: 38px; object-fit: cover;">
-          <span class="student-menu-info ms-2 d-none d-md-block text-start">
-            <span class="student-menu-name fw-bold text-dark d-block" data-user-name style="font-size: 0.9rem;">Lecturer View</span>
+      <div class="student-user-menu topbar-user-menu" data-user-menu>
+        <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+          <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Lecturer avatar">
+          <span class="student-menu-info">
+            <span class="student-menu-name" data-user-name>Lecturer View</span>
           </span>
-          <i class="ti ti-chevron-down student-menu-chevron ms-2 text-muted"></i>
+          <i class="ti ti-chevron-down student-menu-chevron ms-1"></i>
         </button>
-        <div class="student-menu-panel position-absolute end-0 mt-2 bg-white rounded-3 shadow border p-2" role="menu" style="min-width: 180px; z-index: 1000; display: none;">
-          <a class="student-menu-item d-flex align-items-center gap-2 px-3 py-2 text-dark text-decoration-none rounded hover-bg-light" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle fs-5"></i><span>Help</span></a>
-          <div class="dropdown-divider my-1"></div>
-          <button class="student-menu-item student-menu-item-danger d-flex align-items-center gap-2 px-3 py-2 text-danger bg-transparent border-0 w-100 rounded hover-bg-light text-start" type="button" onclick="logout()" role="menuitem"><i class="ti ti-logout fs-5"></i><span>Logout</span></button>
+        <div class="student-menu-panel" role="menu">
+          <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+          <button class="student-menu-item student-menu-item-danger" type="button" onclick="logout()" role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
         </div>
       </div>
     </div>
@@ -159,22 +158,29 @@
 
     // Auto-highlight active sidebar menu item
     $(document).ready(function() {
-      // User Menu Toggle Logic
-      const $menuPanel = $('.student-menu-panel');
-      $('[data-user-menu-toggle]').on('click', function(e) {
-        e.stopPropagation();
-        const isOpen = $(this).attr('aria-expanded') === 'true';
-        if (isOpen) {
-          $menuPanel.hide();
-          $(this).attr('aria-expanded', 'false');
-        } else {
-          $menuPanel.show();
-          $(this).attr('aria-expanded', 'true');
+      // User Menu Toggle Logic (CSS-driven)
+      document.querySelectorAll('[data-user-menu]').forEach((menu) => {
+        const toggle = menu.querySelector('[data-user-menu-toggle]');
+        if (toggle) {
+          toggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const shouldOpen = !menu.classList.contains('is-open');
+            document.querySelectorAll('[data-user-menu].is-open').forEach(m => {
+              m.classList.remove('is-open');
+              const t = m.querySelector('[data-user-menu-toggle]');
+              if (t) t.setAttribute('aria-expanded', 'false');
+            });
+            menu.classList.toggle('is-open', shouldOpen);
+            toggle.setAttribute('aria-expanded', String(shouldOpen));
+          });
         }
       });
-      $(document).on('click', function() {
-        $menuPanel.hide();
-        $('[data-user-menu-toggle]').attr('aria-expanded', 'false');
+      document.addEventListener('click', () => {
+        document.querySelectorAll('[data-user-menu].is-open').forEach(m => {
+          m.classList.remove('is-open');
+          const t = m.querySelector('[data-user-menu-toggle]');
+          if (t) t.setAttribute('aria-expanded', 'false');
+        });
       });
 
       const path = window.location.pathname;
