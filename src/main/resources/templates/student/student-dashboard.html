@@ -926,10 +926,10 @@
               .join(' · ');
       const href = doc.url || '#';
       const disabledClass = doc.url ? '' : ' opacity-75 pe-none';
-      const targetAttrs = doc.url ? ' target="_blank" rel="noopener noreferrer"' : '';
+      const clickHandler = doc.nodeId ? ` onclick="openDocumentNode(event, ${doc.nodeId})"` : '';
 
       return `
-          <a class="notification-item rounded-4 border mb-2${disabledClass}" href="${escapeHtml(href)}"${targetAttrs}>
+          <a class="notification-item rounded-4 border mb-2${disabledClass}" href="javascript:void(0)"${clickHandler}>
             <div class="d-flex gap-3 align-items-start">
               ${documentIconTemplate(doc)}
               <div class="min-w-0">
@@ -940,6 +940,34 @@
             </div>
           </a>`;
     }).join('');
+  }
+
+  async function openDocumentNode(event, nodeId) {
+    event.preventDefault();
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write('<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">Opening document...</div>');
+    }
+    try {
+      const res = await fetch(`/api/learning-nodes/${nodeId}/items`, { headers: authHeaders(false) });
+      if (!res.ok) throw new Error('Cannot fetch items');
+      const items = await res.json();
+      const docItem = items.find(i => ['PDF', 'DOC', 'DOCUMENT'].includes(String(i.itemType || '').toUpperCase()) && (i.fullUrl || i.url));
+      if (docItem) {
+        const docUrl = docItem.fullUrl || docItem.url;
+        if (newWindow) {
+          newWindow.location.href = docUrl;
+        } else {
+          window.open(docUrl, '_blank');
+        }
+      } else {
+        if (newWindow) newWindow.close();
+        alert('No document URL found for this node.');
+      }
+    } catch (err) {
+      if (newWindow) newWindow.close();
+      alert('Failed to load document: ' + err.message);
+    }
   }
 
   async function loadPublicSpaces() {

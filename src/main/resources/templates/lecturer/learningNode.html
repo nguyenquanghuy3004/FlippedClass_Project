@@ -180,11 +180,11 @@
                             <div class="mb-3">
                                 <label for="nodeType" class="form-label fw-semibold small" style="color:#312e81;">Lesson Type</label>
                                 <select class="form-select border-0 rounded-3" style="background:#f4f5fb;" id="nodeType">
-<!--                                    <option value="LESSON">📖 Theory Lesson</option>-->
-                                    <option value="PRACTICE">💻 Practice Module</option>
+                                    <option value="LESSON" th:unless="${isSupporter != null and isSupporter}">📖 Theory Lesson</option>
+                                    <option value="PRACTICE" th:if="${isSupporter != null and isSupporter}">💻 Practice Module</option>
                                     <option value="VIDEO">▶️ Video Lesson</option>
                                     <option value="DOCUMENT">📄 Document</option>
-<!--                                    <option value="REVIEW">🔁 Review Session</option>-->
+                                    <option value="REVIEW" th:unless="${isSupporter != null and isSupporter}">🔁 Review Session</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -246,11 +246,11 @@
                             <div class="mb-3">
                                 <label for="editNodeType" class="form-label fw-semibold small" style="color:#312e81;">Lesson Type</label>
                                 <select class="form-select border-0 rounded-3" style="background:#f4f5fb;" id="editNodeType">
-<!--                                    <option value="LESSON">📖 Theory Lesson</option>-->
-                                    <option value="PRACTICE">💻 Practice Module</option>
+                                    <option value="LESSON" th:unless="${isSupporter != null and isSupporter}">📖 Theory Lesson</option>
+                                    <option value="PRACTICE" th:if="${isSupporter != null and isSupporter}">💻 Practice Module</option>
                                     <option value="VIDEO">▶️ Video Lesson</option>
                                     <option value="DOCUMENT">📄 Document</option>
-<!--                                    <option value="REVIEW">🔁 Review Session</option>-->
+                                    <option value="REVIEW" th:unless="${isSupporter != null and isSupporter}">🔁 Review Session</option>
                                 </select>
                             </div>
                             <div class="mb-3">
