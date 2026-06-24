@@ -33,6 +33,12 @@ public class LearningNode {
     @Column(name = "content", columnDefinition = "NVARCHAR(MAX)")
     private String content;
 
+    @Column(name = "starter_code", columnDefinition = "NVARCHAR(MAX)")
+    private String starterCode;
+
+    @Column(name = "solution_code", columnDefinition = "NVARCHAR(MAX)")
+    private String solutionCode;
+
     @Column(name = "node_type", length = 50)
     private String nodeType;
 

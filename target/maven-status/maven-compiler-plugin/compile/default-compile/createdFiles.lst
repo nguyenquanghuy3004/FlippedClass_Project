@@ -11,6 +11,7 @@ com\example\flippedclass\dto\StudentProgressDTO.class
 com\example\flippedclass\entity\QuestionBank.class
 com\example\flippedclass\dto\admin\UserDetailDto.class
 com\example\flippedclass\service\NodeConnectionService.class
+com\example\flippedclass\dto\response\TestResultResponse$TestResultResponseBuilder.class
 com\example\flippedclass\entity\NodeDiscussion.class
 com\example\flippedclass\dto\response\LearningNodeItemResponse.class
 com\example\flippedclass\entity\NodeProgress.class
@@ -39,6 +40,7 @@ com\example\flippedclass\dto\response\ApiErrorResponse.class
 com\example\flippedclass\dto\response\RoadmapGraphResponse$Node.class
 com\example\flippedclass\entity\GradeEntry.class
 com\example\flippedclass\dto\response\DiscussionResponse.class
+com\example\flippedclass\dto\response\CommentNotificationResponse$CommentNotificationResponseBuilder.class
 com\example\flippedclass\enums\LearningSpaceStatus.class
 com\example\flippedclass\dto\request\CreateQuizRequest.class
 com\example\flippedclass\exception\NotFoundException.class
@@ -84,6 +86,7 @@ com\example\flippedclass\entity\Quiz$QuizBuilder.class
 com\example\flippedclass\entity\GradeEntry$GradeEntryBuilder.class
 com\example\flippedclass\dto\response\QuizResponse.class
 com\example\flippedclass\dto\response\RoadmapGraphResponse$Edge.class
+com\example\flippedclass\dto\response\TestResultResponse$TestCaseResult.class
 com\example\flippedclass\util\ValidateJoinLearningSpace.class
 com\example\flippedclass\repository\InteractionLogRepository.class
 com\example\flippedclass\entity\NodeDiscussion$NodeDiscussionBuilder.class
@@ -143,6 +146,7 @@ com\example\flippedclass\dto\response\GradeEntryResponse.class
 com\example\flippedclass\controller\QuestionBankController.class
 com\example\flippedclass\controller\QuizController.class
 com\example\flippedclass\dto\request\CreateEvaluationSessionRequest$CriterionItem.class
+com\example\flippedclass\dto\response\CommentNotificationResponse.class
 com\example\flippedclass\dto\response\QuizAttemptResponse.class
 com\example\flippedclass\entity\NodeConnection.class
 com\example\flippedclass\dto\request\DiscussionRequest$DiscussionRequestBuilder.class
@@ -151,10 +155,12 @@ com\example\flippedclass\dto\response\EvaluationSessionResponse$EvaluationSessio
 com\example\flippedclass\controller\StudentDashboardController.class
 com\example\flippedclass\dto\request\CreateInteractionLogRequest.class
 com\example\flippedclass\service\StudentDashboardService.class
+com\example\flippedclass\dto\request\SubmitCodeRequest.class
 com\example\flippedclass\dto\response\LearningNodeResponse.class
 com\example\flippedclass\entity\InteractionLog$InteractionLogBuilder.class
 com\example\flippedclass\dto\response\QuestionBankResponse$QuestionBankResponseBuilder.class
 com\example\flippedclass\security\jwt\AuthEntryPointJwt.class
+com\example\flippedclass\entity\TestCase$TestCaseBuilder.class
 com\example\flippedclass\controller\LearningPathController.class
 com\example\flippedclass\FlippedClassApplication.class
 com\example\flippedclass\repository\LearningNodeItemRepository.class
@@ -167,6 +173,7 @@ com\example\flippedclass\controller\LearningNodeController.class
 com\example\flippedclass\entity\PeerPairing.class
 com\example\flippedclass\dto\request\CreateLearningSpaceRequest.class
 com\example\flippedclass\config\DataInitializer.class
+com\example\flippedclass\repository\TestCaseRepository.class
 com\example\flippedclass\dto\response\UserResponse.class
 com\example\flippedclass\entity\LearningPath$LearningPathBuilder.class
 com\example\flippedclass\enums\DocumentType.class
@@ -201,6 +208,8 @@ com\example\flippedclass\dto\request\UpdateStudentProfileRequest.class
 com\example\flippedclass\service\impl\UserServiceImpl.class
 com\example\flippedclass\enums\RoleName.class
 com\example\flippedclass\dto\request\CreateLearningPathRequest.class
+com\example\flippedclass\dto\request\TestCaseDTO.class
+com\example\flippedclass\controller\CodeCompilerController.class
 com\example\flippedclass\controller\LearningSpaceMemberUIController.class
 com\example\flippedclass\service\impl\LearningNodeItemServiceImpl.class
 com\example\flippedclass\dto\response\QuizQuestionResponse$QuizQuestionResponseBuilder.class
@@ -212,7 +221,12 @@ com\example\flippedclass\dto\request\UpdateLearningSpaceRequest.class
 com\example\flippedclass\controller\AuthController.class
 com\example\flippedclass\controller\StudentProfileController.class
 com\example\flippedclass\repository\EvaluationCriterionRepository.class
+<<<<<<< HEAD
 com\example\flippedclass\repository\PeerPairingRepository.class
+=======
+com\example\flippedclass\dto\response\TestResultResponse.class
+com\example\flippedclass\dto\response\TestResultResponse$TestCaseResult$TestCaseResultBuilder.class
+>>>>>>> origin/Nguyenhuy
 com\example\flippedclass\dto\request\CompleteProfileRequest.class
 com\example\flippedclass\dto\response\QuizResponse$QuizResponseBuilder.class
 com\example\flippedclass\dto\request\CreateQuestionBankRequest$CreateQuestionBankRequestBuilder.class
@@ -226,6 +240,7 @@ com\example\flippedclass\dto\StudentProgressDTO$StudentProgressDTOBuilder.class
 com\example\flippedclass\dto\request\NodeConnectionRequest.class
 com\example\flippedclass\dto\response\LearningNodeItemResponse$LearningNodeItemResponseBuilder.class
 com\example\flippedclass\dto\request\ReorderLearningPathRequest.class
+com\example\flippedclass\dto\request\CloneSpaceRequest.class
 com\example\flippedclass\dto\response\QuizStatisticsResponse$QuizStatisticsResponseBuilder.class
 com\example\flippedclass\service\AdminUserService.class
 com\example\flippedclass\repository\LearningSpaceMemberRepository.class
@@ -243,6 +258,7 @@ com\example\flippedclass\dto\response\StudentProfileResponse$StudentProfileRespo
 com\example\flippedclass\service\LearningAnalyticsService.class
 com\example\flippedclass\service\impl\QuizServiceImpl.class
 com\example\flippedclass\service\impl\NodeConnectionServiceImpl.class
+com\example\flippedclass\dto\request\TestCaseDTO$TestCaseDTOBuilder.class
 com\example\flippedclass\dto\request\CourseDocumentRequest.class
 com\example\flippedclass\dto\response\LearningSpaceResponse$LearningSpaceResponseBuilder.class
 com\example\flippedclass\service\NodeCommentService.class
@@ -272,9 +288,11 @@ com\example\flippedclass\entity\LearningSpaceMember.class
 com\example\flippedclass\repository\QuestionBankRepository.class
 com\example\flippedclass\repository\LearningPathRepository.class
 com\example\flippedclass\dto\admin\UserAdminDto$UserAdminDtoBuilder.class
+com\example\flippedclass\entity\TestCase.class
 com\example\flippedclass\entity\NodeConnection$NodeConnectionBuilder.class
 com\example\flippedclass\enums\MemberStatus.class
 com\example\flippedclass\service\LessonSummaryService.class
+com\example\flippedclass\service\LocalCompilerService.class
 com\example\flippedclass\service\impl\UserDetailsImpl.class
 com\example\flippedclass\validation\QuizValidator.class
 com\example\flippedclass\service\impl\AdminUserServiceImpl.class

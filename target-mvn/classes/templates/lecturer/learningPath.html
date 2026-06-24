@@ -102,13 +102,14 @@
 
                                 <!-- Top accent bar is handled by CSS ::before -->
                                 <div class="path-card-header d-flex justify-content-between align-items-start">
-                                    <div>
+                                    <div style="cursor: pointer;" data-bs-toggle="collapse" th:data-bs-target="'#timeline-' + ${path.id}" aria-expanded="true" onclick="const i=this.querySelector('.chevron-toggle'); if(i.classList.contains('ti-chevron-down')){i.classList.replace('ti-chevron-down','ti-chevron-right')}else{i.classList.replace('ti-chevron-right','ti-chevron-down')}">
                                         <!-- Week chip -->
                                         <span class="path-week-label">
                                             <i class="ti ti-calendar-week me-1"></i>
                                             Week <span th:text="${iterStat.count}">1</span>
                                             &nbsp;&middot;&nbsp;
                                             <span th:text="${path.nodes != null ? path.nodes.size() : 0}">0</span> lessons
+                                            <i class="ti ti-chevron-down chevron-toggle" style="margin-left: 6px; font-weight: bold; color: #6366f1;"></i>
                                         </span>
                                         <!-- Title -->
                                         <h5 class="card-title d-flex align-items-center gap-2 mt-1">
@@ -159,7 +160,7 @@
                                 </div>
 
                                 <!-- Nodes area -->
-                                <div class="card-body px-4 pb-4 pt-2">
+                                <div class="card-body px-4 pb-4 pt-2 collapse show" th:id="'timeline-' + ${path.id}">
                                     <!-- Has lessons -->
                                     <div th:if="${path.nodes != null and !path.nodes.empty}" class="nodes-container">
                                         <th:block th:each="node : ${path.nodes}">
@@ -560,6 +561,7 @@
                     $('#nodeTitle').val('');
                     $('#nodeDescription').val('');
                     $('#nodeType').val('VIDEO');
+                    $('#nodePrerequisite').val('');
                     $('#nodeTitle, #nodeDescription').removeClass('is-invalid');
                     $('#createNodeError').hide();
                     $('#createNodeModal').modal('show');
@@ -578,12 +580,14 @@
                     const title = $(this).data('title');
                     const description = $(this).data('description');
                     const type = $(this).data('type');
+                    const prereq = $(this).data('prereq');
 
                     $('#editNodePathId').val(pathId);
                     $('#editNodeId').val(nodeId);
                     $('#editNodeTitle').val(title);
                     $('#editNodeDescription').val(description !== 'null' ? description : '');
                     $('#editNodeType').val(type || 'VIDEO');
+                    $('#editNodePrerequisite').val(prereq || '');
                     $('#editNodeTitle, #editNodeDescription').removeClass('is-invalid');
                     $('#editNodeError').hide();
                     $('#editNodeModal').modal('show');
@@ -625,6 +629,7 @@
                     const title = $('#nodeTitle').val().trim();
                     const desc = $('#nodeDescription').val().trim();
                     const type = $('#nodeType').val();
+                    const prereq = $('#nodePrerequisite').val() || null;
 
                     btn.prop('disabled', true).text('Adding...');
 
@@ -634,10 +639,14 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
+                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId, prerequisiteNodeId: prereq })
                     })
-                        .then(res => {
-                            if (!res.ok) throw new Error("Failed to add lesson");
+                        .then(async res => {
+                            if (!res.ok) {
+                                const errText = await res.text();
+                                console.error("Create node error:", errText);
+                                throw new Error("Failed to add lesson: " + errText);
+                            }
                             return res.json();
                         })
                         .then(data => {
@@ -660,6 +669,7 @@
                     const title = $('#editNodeTitle').val().trim();
                     const desc = $('#editNodeDescription').val().trim();
                     const type = $('#editNodeType').val();
+                    const prereq = $('#editNodePrerequisite').val() || null;
 
                     btn.prop('disabled', true).text('Saving...');
 
@@ -669,10 +679,14 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
+                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId, prerequisiteNodeId: prereq })
                     })
-                        .then(res => {
-                            if (!res.ok) throw new Error("Failed to update lesson");
+                        .then(async res => {
+                            if (!res.ok) {
+                                const errText = await res.text();
+                                console.error("Update node error:", errText);
+                                throw new Error("Failed to update lesson: " + errText);
+                            }
                             return res.json();
                         })
                         .then(data => {

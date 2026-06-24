@@ -8,7 +8,11 @@ import lombok.Setter;
 public class  CreateLearningNodeRequest {
     private String title;
     private String description;
+    private String content;
+    private String starterCode;
+    private String solutionCode;
     private Long learningPathId;
     private String nodeType;
+    private Long prerequisiteNodeId;
 }
 

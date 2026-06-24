@@ -26,6 +26,10 @@ public class LearningPathServiceImpl implements LearningPathService {
      LearningSpaceRepository learningSpaceRepository;
     @Autowired
      LearningPathRepository learningPathRepository;
+    @Autowired
+    private com.example.flippedclass.repository.NodeConnectionRepository nodeConnectionRepository;
+    @Autowired
+    private com.example.flippedclass.repository.NodeProgressRepository nodeProgressRepository;
 
     @Override
     public LearningPath getLearningPathEntity(Long id) {
@@ -55,22 +59,22 @@ public class LearningPathServiceImpl implements LearningPathService {
         path.setLearningSpace(space);
         path.setLecturer(space.getOwner());
 
-        return toResponse(learningPathRepository.save(path));
+        return toResponse(learningPathRepository.save(path), null);
     }
 
     @Override
-    public List<LearningPathResponse> getLearningPath(Long spaceId) {
+    public List<LearningPathResponse> getLearningPath(Long spaceId, Long studentId) {
         return learningPathRepository
                 .findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.ACTIVE)
                 .stream()
-                .map(this::toResponse)
+                .map(path -> toResponse(path, studentId))
                 .toList();
     }
 
 
     @Override
-    public LearningPathResponse getLearningPathDetail(Long spaceId, Long pathId) {
-        return toResponse(findPathInSpace(spaceId, pathId));
+    public LearningPathResponse getLearningPathDetail(Long spaceId, Long pathId, Long studentId) {
+        return toResponse(findPathInSpace(spaceId, pathId), studentId);
     }
 
 
@@ -90,7 +94,7 @@ public class LearningPathServiceImpl implements LearningPathService {
             path.setDescription(request.getDescription());
         }
 
-        return toResponse(path); // Hibernate tự động update dữ liệu nhờ @Transactional
+        return toResponse(path, null); // Hibernate tự động update dữ liệu nhờ @Transactional
     }
 
 
@@ -151,21 +155,37 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning Path trong Learning Space này"));
     }
 
-    private LearningPathResponse toResponse(LearningPath path) {
+    private LearningPathResponse toResponse(LearningPath path, Long studentId) {
         List<LearningNodeResponse> nodeResponses = new java.util.ArrayList<>();
         if (path.getNodes() != null) {
-            nodeResponses = path.getNodes().stream().map(node -> 
-                com.example.flippedclass.dto.response.LearningNodeResponse.builder()
+            nodeResponses = path.getNodes().stream().map(node -> {
+                Long prereqId = null;
+                var connections = nodeConnectionRepository.findByTargetNodeId(node.getId());
+                if (!connections.isEmpty()) {
+                    prereqId = connections.get(0).getSourceNode().getId();
+                }
+
+                String computedStatus = node.getStatus();
+                if (studentId != null && prereqId != null) {
+                    var progress = nodeProgressRepository.findByStudentIdAndLearningNodeId(studentId, prereqId).orElse(null);
+                    if (progress == null || !progress.getStatus().name().equals("COMPLETED")) {
+                        computedStatus = "LOCKED";
+                    }
+                }
+
+                return LearningNodeResponse.builder()
                     .id(node.getId())
                     .title(node.getTitle())
                     .description(node.getDescription())
                     .learningPathId(path.getId())
-                    .status(node.getStatus())
+                    .learningSpaceId(path.getLearningSpace() != null ? path.getLearningSpace().getId() : null)
+                    .status(computedStatus)
                     .nodeType(node.getNodeType())
+                    .prerequisiteNodeId(prereqId)
                     .createdAt(node.getCreatedAt())
                     .updatedAt(node.getUpdatedAt())
-                    .build()
-            ).toList();
+                    .build();
+            }).toList();
         }
 
         return LearningPathResponse.builder()
@@ -186,7 +206,7 @@ public class LearningPathServiceImpl implements LearningPathService {
         return learningPathRepository
                 .findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.ARCHIVED)
                 .stream()
-                .map(this::toResponse)
+                .map(path -> toResponse(path, null))
                 .toList();
     }
 }

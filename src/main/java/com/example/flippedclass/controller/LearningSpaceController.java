@@ -1,5 +1,6 @@
 package com.example.flippedclass.controller;
 
+import com.example.flippedclass.dto.request.CloneSpaceRequest;
 import com.example.flippedclass.dto.request.CreateLearningSpaceRequest;
 import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
 import com.example.flippedclass.dto.response.JoinLearningSpaceResponse;
@@ -42,7 +43,7 @@ public class LearningSpaceController {
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteLearningSpace (@PathVariable Long id){
         learningSpaceService.deleteLearningSpace(id);
-        return ResponseEntity.ok(new MessageResponse("Xóa thành công"));
+        return ResponseEntity.ok(new MessageResponse("Deleted successfully"));
     }
 
 
@@ -50,16 +51,16 @@ public class LearningSpaceController {
     @PutMapping("/{id}/restore")
     public ResponseEntity<?> restoreLearningSpace(@PathVariable Long id){
         learningSpaceService.restoreLearningSpace(id);
-        return ResponseEntity.ok(new MessageResponse("Khôi phục thành công "));
+        return ResponseEntity.ok(new MessageResponse("Restored successfully"));
     }
 
     @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")
     @PutMapping("/{id}/archive")
     public ResponseEntity<?> archiveLearningSpace(@PathVariable Long id){
         learningSpaceService.archiveLearningSpace(id);
-        return ResponseEntity.ok(new MessageResponse("Lưu trữ thành công "));
+        return ResponseEntity.ok(new MessageResponse("Archived successfully"));
     }
-    /////////
+
     @PostMapping("/join")
     public ResponseEntity<JoinLearningSpaceResponse>joinLearningSpace(@RequestBody JoinLearningSpaceRequest request){
         return ResponseEntity.ok(learningSpaceService.joinLearningSpace(request));
@@ -80,5 +81,11 @@ public class LearningSpaceController {
     @GetMapping("/invite-code/{inviteCode}")
     public ResponseEntity<LearningSpaceResponse> getSpaceByInviteCode(@PathVariable String inviteCode) {
         return ResponseEntity.ok(learningSpaceService.getSpaceByInviteCode(inviteCode));
+    }
+
+    @PostMapping("/{spaceId}/clone")
+    public ResponseEntity<LearningSpaceResponse> cloneSpace(@PathVariable Long spaceId, @Valid @RequestBody CloneSpaceRequest request){
+        LearningSpaceResponse response = learningSpaceService.cloneSpace(spaceId, request.getNewName());
+        return ResponseEntity.ok(response);
     }
 }

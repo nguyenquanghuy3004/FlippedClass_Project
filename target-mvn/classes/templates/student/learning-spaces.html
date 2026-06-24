@@ -207,8 +207,8 @@
           data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span
             class="nav-text">Dashboard</span></a></li>
       <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4 fw-bold" th:href="@{/student/learning-spaces}"
-          data-nav-key="learning-spaces" aria-current="page"><i class="ti ti-books fs-5"></i><span class="nav-text">My
-            Classes</span></a></li>
+          data-nav-key="learning-spaces" aria-current="page"><i class="ti ti-books fs-5"></i><span class="nav-text">
+            Learning Spaces</span></a></li>
       <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}"
           data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
       <li id="supporter-nav-item" style="display:none;"><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/supporter/dashboard}" data-nav-key="supporter"><i class="ti ti-heart-handshake fs-5"></i><span class="nav-text">Supporter Portal</span></a></li>
@@ -230,6 +230,7 @@
           <div class="student-menu-panel" role="menu">
             <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i
                 class="ti ti-help-circle"></i><span>Help</span></a>
+            <button class="student-menu-item" type="button" data-bs-toggle="modal" data-bs-target="#profileDetailModal" role="menuitem"><i class="ti ti-user-edit"></i><span>Edit Profile</span></button>
             <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i
                 class="ti ti-logout"></i><span>Logout</span></button>
           </div>
@@ -479,36 +480,42 @@
       );
     }
 
-    function renderNotifications(learningSpaces) {
+    function renderNotifications(learningSpaces, comments = []) {
       const badge = document.getElementById('notificationBadge');
       const summary = document.getElementById('notificationSummary');
       const list = document.getElementById('notificationList');
       const pending = flattenQuizzes(learningSpaces).filter((quiz) => !quiz.isCompleted);
+      const totalCount = pending.length + comments.length;
 
       if (badge) {
-        badge.textContent = pending.length;
-        badge.classList.toggle('d-none', pending.length === 0);
+        badge.textContent = totalCount;
+        badge.classList.toggle('d-none', totalCount === 0);
       }
 
       if (summary) {
-        summary.textContent = pending.length
-          ? `You have ${pending.length} quizzes to do.`
-          : 'No new notifications.';
+        if (totalCount > 0) {
+          summary.textContent = `You have ${totalCount} notifications.`;
+        } else {
+          summary.textContent = 'No new notifications.';
+        }
       }
 
       if (!list) return;
 
-      if (!pending.length) {
+      if (totalCount === 0) {
         list.innerHTML = `
         <div class="text-center text-muted py-4 px-3">
           <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
-          <h6 class="fw-bold text-dark mt-3 mb-1">No pending quizzes</h6>
-          <p class="small fw-semibold mb-0">All open quizzes are complete or no new quizzes are available.</p>
+          <h6 class="fw-bold text-dark mt-3 mb-1">No pending notifications</h6>
+          <p class="small fw-semibold mb-0">All open quizzes are complete and no new replies are available.</p>
         </div>`;
         return;
       }
 
-      const items = pending.slice(0, 5).map((quiz) => `
+      const allItems = [];
+
+      pending.forEach(quiz => {
+        allItems.push(`
       <a class="notification-item" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}">
         <div class="d-flex gap-3 align-items-start">
           <span class="notification-icon flex-shrink-0">
@@ -520,13 +527,29 @@
             <span class="small text-primary fw-bold">Start Quiz</span>
           </div>
         </div>
-      </a>`).join('');
+      </a>`);
+      });
 
-      const more = pending.length > 5
-        ? `<a class="notification-item text-center fw-bold text-primary" href="/student/my-quizzes">View ${pending.length - 5} more quizzes</a>`
-        : '';
+      comments.forEach(comment => {
+        const roadmapUrl = (comment.spaceId && comment.nodeId) 
+          ? `/student/learning-node?nodeId=${encodeURIComponent(comment.nodeId)}&spaceId=${encodeURIComponent(comment.spaceId)}&commentId=${encodeURIComponent(comment.id)}` 
+          : '#';
+        allItems.push(`
+      <a class="notification-item" href="${roadmapUrl}">
+        <div class="d-flex gap-3 align-items-start">
+          <span class="notification-icon flex-shrink-0 bg-info-subtle text-info">
+            <i class="ti ti-message-circle"></i>
+          </span>
+          <div class="min-w-0">
+            <h6 class="fw-bold mb-1">Reply from ${escapeHtml(comment.replierName || 'Someone')}</h6>
+            <p class="small text-muted fw-semibold mb-1 text-truncate">${escapeHtml(comment.content || 'New reply')}</p>
+            <span class="small text-info fw-bold">View Reply</span>
+          </div>
+        </div>
+      </a>`);
+      });
 
-      list.innerHTML = items + more;
+      list.innerHTML = allItems.join('');
     }
 
     function renderNotificationError(message) {
@@ -597,9 +620,8 @@
 
         const data = await response.json();
         window.setStudentMenuUser?.(data.user);
-        // Lọc hiển thị chỉ những không gian ACTIVE
         state.spaces = (data.learningSpaces || []).filter(space => space.status === 'ACTIVE');
-        renderNotifications(state.spaces);
+        renderNotifications(state.spaces, data.commentNotifications || []);
         renderSpaces();
 
         const preferred = Number(preferredSpaceId);
@@ -770,9 +792,9 @@
 
       return `
       <article class="path-card">
-        <header class="path-header">
+        <header class="path-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#timeline-${path.id || index}" aria-expanded="true" aria-controls="timeline-${path.id || index}" onclick="const i=this.querySelector('.chevron-toggle'); if(i.classList.contains('ti-chevron-down')){i.classList.replace('ti-chevron-down','ti-chevron-right')}else{i.classList.replace('ti-chevron-right','ti-chevron-down')}">
           <div>
-            <span class="path-kicker">Course ${index + 1}</span>
+            <span class="path-kicker">Course ${index + 1} <i class="ti ti-chevron-down chevron-toggle" style="margin-left: 6px; font-weight: bold;"></i></span>
             <h3 class="path-title">${escapeHtml(path.title || 'Untitled Course')}</h3>
           </div>
           <div class="path-progress">
@@ -783,7 +805,7 @@
             <div class="small text-muted fw-semibold mt-2">${nodes.length} node</div>
           </div>
         </header>
-        <div class="node-timeline">
+        <div class="node-timeline collapse show" id="timeline-${path.id || index}">
           ${nodes.length ? nodes.map((node, nodeIndex) => nodeTemplate(node, nodeIndex)).join('') : emptyNodesTemplate()}
         </div>
       </article>`;
@@ -817,22 +839,30 @@
         nodeId: node.id,
         spaceId: state.selectedSpaceId || ''
       });
-      
       const isDoc = node.nodeType === 'DOCUMENT';
-      const clickHandler = isDoc ? `onclick="window.openDocumentNode(${node.id}, event)"` : '';
+      const isLocked = node.status === 'LOCKED';
+      let linkProps = '';
+      if (isLocked) {
+          linkProps = `style="opacity: 0.6; cursor: not-allowed; background-color: #f1f5f9;" onclick="event.preventDefault(); Swal.fire('Locked', 'Please complete the prerequisite lesson first.', 'warning');"`;
+      } else {
+          linkProps = `href="/student/learning-node?${params.toString()}"`;
+          if (isDoc) {
+              linkProps += ` onclick="window.openDocumentNode(${node.id}, event)"`;
+          }
+      }
 
       return `
-      <a class="node-card" href="/student/learning-node?${params.toString()}" ${clickHandler}>
-        <div class="node-index">${index + 1}</div>
+      <a class="node-card" ${linkProps}>
+        <div class="node-index" ${isLocked ? 'style="background-color: #cbd5e1; color: #64748b;"' : ''}>${index + 1}</div>
         <div>
           <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
-          <p class="node-content">${escapeHtml(node.content || 'Click to open this node learning page.')}</p>
+          <p class="node-content" style="white-space: pre-wrap;">${isLocked ? 'Complete the prerequisite lesson to unlock.' : escapeHtml(node.content || 'Click to open this node learning page.')}</p>
         </div>
         <div class="node-badges">
           <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-          <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
+          <span class="soft-chip"><i class="ti ${isLocked ? 'ti-lock' : 'ti-lock-open'}"></i>${isLocked ? 'Locked' : escapeHtml(statusLabel(node.status))}</span>
         </div>
-        <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
+        <span class="node-open" aria-hidden="true"><i class="ti ${isLocked ? 'ti-lock' : 'ti-arrow-up-right'}"></i></span>
       </a>`;
     }
 
