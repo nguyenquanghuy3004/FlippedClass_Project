@@ -6,14 +6,14 @@ public class StudentDashboardResponse {
     private DashboardUserResponse user;
     private StudentProfileResponse studentProfile;
     private List<DashboardLearningSpaceResponse> learningSpaces;
-    private List<RecentDocumentResponse> recentDocuments;
+    private List<CourseDocumentResponse> recentDocuments;
     private List<CommentNotificationResponse> commentNotifications;
 
     public StudentDashboardResponse(
             DashboardUserResponse user,
             StudentProfileResponse studentProfile,
             List<DashboardLearningSpaceResponse> learningSpaces,
-            List<RecentDocumentResponse> recentDocuments,
+            List<CourseDocumentResponse> recentDocuments,
             List<CommentNotificationResponse> commentNotifications
     ) {
         this.user = user;
@@ -35,7 +35,7 @@ public class StudentDashboardResponse {
         return learningSpaces;
     }
 
-    public List<RecentDocumentResponse> getRecentDocuments() {
+    public List<CourseDocumentResponse> getRecentDocuments() {
         return recentDocuments;
     }
 
