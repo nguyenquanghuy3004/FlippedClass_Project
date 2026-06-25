@@ -2,6 +2,9 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
 <head>
     <title>Space Members</title>
+    <th:block layout:fragment="head">
+        <link rel="stylesheet" th:href="@{/assets/css/lecturer-learningPath.css}">
+    </th:block>
 </head>
 <body>
     <div layout:fragment="content">
@@ -17,18 +20,18 @@
         <input type="hidden" id="spaceId" th:value="${spaceId}">
         
         <!-- Classroom Style Tabs -->
-        <ul class="nav nav-tabs mb-4 border-bottom-0 gap-3 fw-bold" style="font-size: 0.95rem;">
+        <ul class="nav page-tabs mb-4">
             <li class="nav-item">
-                <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/dashboard" style="transition: color 0.2s;"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
+                <a class="nav-link" href="/lecturer/dashboard"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/space/' + ${spaceId}}">Classwork / Roadmap</a>
+                <a class="nav-link" th:href="@{'/lecturer/space/' + ${spaceId}}">Classwork / Roadmap</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active text-primary border-0 border-bottom border-primary border-3 pb-3 px-3" href="#" style="color: #1a73e8 !important; border-color: #1a73e8 !important;">People</a>
+                <a class="nav-link active" href="#">People</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/spaces/' + ${spaceId} + '/analytics'}">Analytics</a>
+                <a class="nav-link" th:href="@{'/lecturer/spaces/' + ${spaceId} + '/analytics'}">Analytics</a>
             </li>
         </ul>
         

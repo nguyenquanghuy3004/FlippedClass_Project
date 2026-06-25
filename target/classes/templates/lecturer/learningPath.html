@@ -40,7 +40,6 @@
                         <span class="banner-chip"><i class="ti ti-books"></i>
                             <span th:text="${paths != null ? paths.size() : 0}">0</span> Modules
                         </span>
-                        <span class="banner-chip"><i class="ti ti-writing"></i> Roadmap Builder</span>
                     </div>
                     <h1 class="mt-2">Learning Roadmap</h1>
                     <p class="sub">Design &nbsp;/&nbsp; Structure &nbsp;/&nbsp; Publish</p>
@@ -138,6 +137,7 @@
                                                         <i class="ti ti-pencil text-indigo"></i> Edit Module
                                                     </a>
                                                 </li>
+
                                                 <li>
                                                     <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 text-warning archive-path-btn"
                                                        href="#" th:data-id="${path.id}">
@@ -188,6 +188,7 @@
 
             </div>
         </div>
+
 
 
 
@@ -309,6 +310,7 @@
                 // Update stats from rendered DOM
                 $('#totalModules').text($('.edit-path-btn').length);
                 $('#totalLessons').text($('.edit-node-btn').length);
+
 
 
                 // BIND EVENT LISTENERS (DOM already rendered by Thymeleaf)

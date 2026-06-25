@@ -5,6 +5,7 @@
     <th:block layout:fragment="head">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="stylesheet" th:href="@{/assets/css/lecturer-learningPath.css}">
         <link rel="stylesheet" th:href="@{/assets/css/lecturer-analytics.css}">
     </th:block>
 </head>
@@ -13,19 +14,19 @@
         <input type="hidden" id="spaceId" th:value="${spaceId}" />
         
         <div class="container-fluid py-4">
-            <!-- Nav Tabs -->
-            <ul class="nav nav-tabs mb-4 border-bottom-0 gap-3 fw-bold" style="font-size: 0.95rem;">
+            <!-- Tabs -->
+            <ul class="nav page-tabs mb-4">
                 <li class="nav-item">
-                    <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/dashboard"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
+                    <a class="nav-link" href="/lecturer/dashboard"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/space/' + ${spaceId}}">Roadmap</a>
+                    <a class="nav-link" th:href="@{'/lecturer/space/' + ${spaceId}}">Classwork / Roadmap</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/space-members?spaceId=' + ${spaceId}}">People</a>
+                    <a class="nav-link" th:href="@{'/lecturer/space-members?spaceId=' + ${spaceId}}">People</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active text-primary border-0 border-bottom border-primary border-3 pb-3 px-3" href="#" style="color: #7c3aed !important; border-color: #7c3aed !important;">Analytics</a>
+                    <a class="nav-link active" href="#">Analytics</a>
                 </li>
             </ul>
 
