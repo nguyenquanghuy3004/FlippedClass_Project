@@ -4,30 +4,47 @@
     <title>Admin Dashboard</title>
     <style>
         .stat-card {
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
             text-decoration: none;
             color: inherit;
             display: block;
+            background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(248,249,250,1) 100%);
+            border: 1px solid rgba(0,0,0,0.05) !important;
+            border-radius: 12px;
         }
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
             color: inherit;
         }
+        .stat-card:hover .stat-icon i {
+            transform: scale(1.15);
+        }
         .stat-icon {
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            font-size: 24px;
+            border-radius: 12px;
+            font-size: 26px;
+        }
+        .stat-icon i {
+            transition: transform 0.3s ease;
+        }
+        @keyframes pulseGlow {
+            0% { background-color: rgba(13, 110, 253, 0.2); box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
+            70% { background-color: rgba(13, 110, 253, 0.05); box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
+            100% { background-color: transparent; box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+        }
+        .highlight-new {
+            animation: pulseGlow 2.5s ease-out forwards;
         }
     </style>
 </head>
 <body>
-<div layout:fragment="content">
+<div layout:fragment="content" class="fade-in-up">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="fs-3 mb-0">System Overview</h1>
     </div>
@@ -272,9 +289,8 @@
 
         function appendActivity(activity, isNew) {
             const date = new Date(activity.createdAt).toLocaleString();
-            // We'll use custom CSS for transition
             const itemHtml = `
-                <tr id="act-${activity.id}" style="${isNew ? 'background-color: #fff3cd; transition: background-color 3s;' : ''}">
+                <tr id="act-${activity.id}" class="${isNew ? 'highlight-new' : ''}">
                     <td class="text-muted small">${date}</td>
                     <td><span class="badge bg-primary bg-opacity-10 text-primary">${activity.actionType}</span></td>
                     <td>${activity.description}</td>
@@ -284,8 +300,8 @@
             if (isNew) {
                 $('#globalActivityList').prepend(itemHtml);
                 setTimeout(() => {
-                    $(`#act-${activity.id}`).css('background-color', '');
-                }, 100); // Trigger transition start
+                    $(`#act-${activity.id}`).removeClass('highlight-new');
+                }, 2500);
             } else {
                 $('#globalActivityList').append(itemHtml);
             }
