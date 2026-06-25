@@ -96,13 +96,13 @@
                 <h6 class="fw-900 text-dark mb-1">Notifications</h6>
                 <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Loading notifications...</p>
               </div>
-              <i class="ti ti-bell text-primary fs-4"></i>
+              <button onclick="markAllAsRead(event)" class="btn btn-sm btn-light text-primary fw-bold border-0 p-1" title="Mark all as read"><i class="ti ti-checks fs-5"></i></button>
             </div>
           </div>
           <div id="notificationList" class="notification-list">
             <div class="text-center text-muted py-4 px-3">
               <div class="spinner-border text-primary mb-2" role="status"></div>
-              <p class="small fw-semibold mb-0">Loading pending quizzes...</p>
+              <p class="small fw-semibold mb-0">Loading notifications...</p>
             </div>
           </div>
         </div>
@@ -254,75 +254,107 @@
         .replace(/'/g, '&#039;');
     }
 
-    function renderNotifications(quizzes, comments = []) {
+    async function fetchNotifications() {
+      if (!token) return;
+      try {
+        const res = await fetch('/api/notifications', { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) {
+          const notifications = await res.json();
+          renderNotificationsAPI(notifications);
+        }
+      } catch (e) {
+        console.error('Failed to fetch notifications', e);
+      }
+    }
+
+    async function pollUnreadCount() {
+      if (!token) return;
+      try {
+        const res = await fetch('/api/notifications/unread-count', { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) {
+          const count = await res.json();
+          updateNotificationBadge(count);
+        }
+      } catch (e) {}
+    }
+
+    function updateNotificationBadge(count) {
       const badge = document.getElementById('notificationBadge');
       const summary = document.getElementById('notificationSummary');
-      const list = document.getElementById('notificationList');
-      const pending = (quizzes || []).filter((quiz) => !quiz.isCompleted);
-      const totalCount = pending.length + comments.length;
-
       if (badge) {
-        badge.textContent = totalCount;
-        badge.classList.toggle('d-none', totalCount === 0);
+        badge.textContent = count;
+        badge.classList.toggle('d-none', count === 0);
       }
-
       if (summary) {
-        if (totalCount > 0) {
-          summary.textContent = `You have ${totalCount} notifications.`;
-        } else {
-          summary.textContent = 'No new notifications.';
-        }
+        summary.textContent = count > 0 ? `You have ${count} unread notifications.` : 'No unread notifications.';
       }
+    }
 
+    window.markReadAndGo = async function(event, id, url) {
+        event.preventDefault();
+        try {
+            await fetch(`/api/notifications/${id}/read`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` } });
+        } catch (e) {}
+        if (url && url !== 'null') {
+            window.location.href = url;
+        }
+    };
+
+    window.markAllAsRead = async function(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        try {
+            const res = await fetch('/api/notifications/read-all', { method: 'PUT', headers: { Authorization: `Bearer ${token}` } });
+            if (res.ok) {
+                fetchNotifications();
+                pollUnreadCount();
+            }
+        } catch (e) {}
+    };
+
+    function renderNotificationsAPI(notifications) {
+      const list = document.getElementById('notificationList');
       if (!list) return;
 
-      if (totalCount === 0) {
+      if (!notifications || notifications.length === 0) {
         list.innerHTML = `
             <div class="text-center text-muted py-4 px-3">
-              <i class="ti ti-circle-check text-success" style="font-size: 2.5rem;"></i>
-              <h6 class="fw-bold text-dark mt-3 mb-1">No pending notifications</h6>
-              <p class="small fw-semibold mb-0">All open quizzes are complete and no new replies are available.</p>
+              <i class="ti ti-bell-off text-success" style="font-size: 2.5rem;"></i>
+              <h6 class="fw-bold text-dark mt-3 mb-1">All caught up!</h6>
+              <p class="small fw-semibold mb-0">You have no notifications right now.</p>
             </div>`;
         return;
       }
 
-      const allItems = [];
+      const allItems = notifications.map(n => {
+        let icon = 'ti-bell';
+        let bg = 'bg-primary-subtle text-primary';
+        
+        if (n.type === 'COMMENT_REPLY') {
+          icon = 'ti-message-circle';
+          bg = 'bg-info-subtle text-info';
+        } else if (n.type === 'QUIZ_ASSIGNED') {
+          icon = 'ti-file-pencil';
+          bg = 'bg-warning-subtle text-warning';
+        }
+        
+        const opacityClass = n.isRead ? 'opacity-75' : 'fw-bold bg-light';
 
-      pending.forEach(quiz => {
-        allItems.push(`
-          <a class="notification-item" href="/student/take-quiz?quizId=${encodeURIComponent(quiz.id)}">
+        return `
+          <a class="notification-item ${opacityClass}" href="#" onclick="markReadAndGo(event, ${n.id}, '${n.targetUrl}')">
             <div class="d-flex gap-3 align-items-start">
-              <span class="stat-icon-bg flex-shrink-0" style="width: 42px; height: 42px; border-radius: 14px; font-size: 1.25rem;">
-                <i class="ti ti-file-pencil"></i>
+              <span class="stat-icon-bg flex-shrink-0 ${bg}" style="width: 42px; height: 42px; border-radius: 14px; font-size: 1.25rem;">
+                <i class="ti ${icon}"></i>
               </span>
               <div class="min-w-0">
-                <h6 class="fw-bold mb-1">${escapeHtml(quiz.title || 'Untitled Quiz')}</h6>
-                <p class="small text-muted fw-semibold mb-1">${escapeHtml(quiz.space?.name || quiz.learningSpaceName || 'Learning space')}</p>
-                <span class="small text-primary fw-bold">Start Quiz</span>
+                <p class="small text-muted fw-semibold mb-1 text-wrap">${escapeHtml(n.message)}</p>
+                <span class="small text-primary fw-bold">${n.isRead ? '' : 'New'}</span>
               </div>
             </div>
-          </a>`);
+          </a>`;
       });
-
-      comments.forEach(comment => {
-        const roadmapUrl = (comment.spaceId && comment.nodeId) 
-          ? `/student/learning-node?nodeId=${encodeURIComponent(comment.nodeId)}&spaceId=${encodeURIComponent(comment.spaceId)}&commentId=${encodeURIComponent(comment.id)}` 
-          : '#';
-        allItems.push(`
-          <a class="notification-item" href="${roadmapUrl}">
-            <div class="d-flex gap-3 align-items-start">
-              <span class="stat-icon-bg flex-shrink-0 bg-info-subtle text-info" style="width: 42px; height: 42px; border-radius: 14px; font-size: 1.25rem;">
-                <i class="ti ti-message-circle"></i>
-              </span>
-              <div class="min-w-0">
-                <h6 class="fw-bold mb-1">Reply from ${escapeHtml(comment.replierName || 'Someone')}</h6>
-                <p class="small text-muted fw-semibold mb-1 text-truncate">${escapeHtml(comment.content || 'New reply')}</p>
-                <span class="small text-info fw-bold">View Reply</span>
-              </div>
-            </div>
-          </a>`);
-      });
-
       list.innerHTML = allItems.join('');
     }
 
@@ -582,6 +614,14 @@
       setupLayoutControls();
       setActiveSidebarLink();
       refreshStudentMenuUser();
+      
+      pollUnreadCount();
+      setInterval(pollUnreadCount, 30000);
+
+      const notificationDropdown = document.getElementById('notificationDropdown');
+      if (notificationDropdown) {
+          notificationDropdown.addEventListener('show.bs.dropdown', fetchNotifications);
+      }
 
       // Dropdown toggle handler
       document.querySelectorAll('[data-user-menu]').forEach((menu) => {
@@ -652,10 +692,7 @@
       window.addEventListener('hashchange', setActiveSidebarLink);
     }
 
-    // Expose helpers
-    window.setStudentMenuUser = setStudentMenuUser;
-    window.studentLogout = studentLogout;
-    window.renderNotifications = renderNotifications;
+    // window.renderNotifications = renderNotifications; // Deprecated
     if (!window.logout) window.logout = studentLogout;
 
     document.addEventListener('DOMContentLoaded', initStudentLayout);

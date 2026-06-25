@@ -29,6 +29,7 @@ public class LecturerGroupActivityServiceImpl implements LecturerGroupActivitySe
     private final StudyGroupRepository groupRepository;
     private final ActivitySubmissionRepository submissionRepository;
     private final LearningPathRepository pathRepository;
+    private final NotificationRepository notificationRepository;
 
     @Override
     @Transactional
@@ -216,6 +217,24 @@ public class LecturerGroupActivityServiceImpl implements LecturerGroupActivitySe
 
         submissionRepository.save(submission);
         group.setSubmission(submission); // Update relationship in memory
+        
+        // Notify all group members
+        if (group.getMembers() != null && group.getActivity() != null) {
+            String activityTitle = group.getActivity().getTitle();
+            Long nodeId = group.getActivity().getLearningNode() != null ? group.getActivity().getLearningNode().getId() : null;
+            Long spaceId = group.getActivity().getLearningSpace() != null ? group.getActivity().getLearningSpace().getId() : null;
+            String targetUrl = "/student/learning-node?nodeId=" + nodeId + "&spaceId=" + spaceId;
+            
+            for (StudyGroupMember member : group.getMembers()) {
+                Notification notification = Notification.builder()
+                        .recipient(member.getStudent())
+                        .type(com.example.flippedclass.enums.NotificationType.GROUP_ACTIVITY_GRADED)
+                        .message("Your group activity '" + activityTitle + "' has been graded.")
+                        .targetUrl(targetUrl)
+                        .build();
+                notificationRepository.save(notification);
+            }
+        }
         
         return mapToReviewResponse(group);
     }

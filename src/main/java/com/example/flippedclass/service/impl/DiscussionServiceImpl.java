@@ -28,6 +28,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     private final LearningNodeRepository nodeRepository;
     private final UserRepository userRepository;
     private final StudyGroupRepository groupRepository;
+    private final com.example.flippedclass.repository.NotificationRepository notificationRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -65,6 +66,38 @@ public class DiscussionServiceImpl implements DiscussionService {
         }
 
         NodeDiscussion saved = discussionRepository.save(discussion);
+        
+        // Trigger notification if this is a reply to someone else
+        if (saved.getParentDiscussion() != null) {
+            NodeDiscussion parent = saved.getParentDiscussion();
+            java.util.Set<User> participants = new java.util.HashSet<>();
+            participants.add(parent.getUser());
+            if (parent.getReplies() != null) {
+                for (NodeDiscussion rep : parent.getReplies()) {
+                    participants.add(rep.getUser());
+                }
+            }
+            // Remove the user who is making the comment
+            participants.remove(user);
+
+            if (!participants.isEmpty()) {
+                String targetUrl = "/student/learning-node?nodeId=" + node.getId() + "&commentId=" + saved.getId();
+                if (node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null) {
+                    targetUrl += "&spaceId=" + node.getLearningPath().getLearningSpace().getId();
+                }
+
+                for (User participant : participants) {
+                    com.example.flippedclass.entity.Notification notification = com.example.flippedclass.entity.Notification.builder()
+                            .recipient(participant)
+                            .type(com.example.flippedclass.enums.NotificationType.COMMENT_REPLY)
+                            .message(user.getFullName() + " replied in a discussion you are following.")
+                            .targetUrl(targetUrl)
+                            .build();
+                    notificationRepository.save(notification);
+                }
+            }
+        }
+        
         return mapToResponse(saved);
     }
 

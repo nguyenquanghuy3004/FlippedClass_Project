@@ -401,7 +401,7 @@
                 // Xử lý tạo mới Learning Space
                 $('#btnCreateSpace').click(function () {
                     $('#createSpaceError').hide();
-                    if (!checkValid(['#spaceName', '#spaceDescription'])) return;
+                    if (!checkValid(['#spaceName'])) return;
 
                     const btn = $(this);
                     const requestBody = {
@@ -433,7 +433,7 @@
                             fetchSpaces();
                         })
                         .catch(err => {
-                            errorDiv.text("Error: " + err.message).show();
+                            $('#createSpaceError').text("Error: " + err.message).show();
                         })
                         .finally(() => {
                             btn.prop('disabled', false).text('Create Space');
@@ -492,7 +492,7 @@
                 // Lưu thông tin Edit Space
                 $('#btnUpdateSpace').click(function () {
                     $('#editSpaceError').hide();
-                    if (!checkValid(['#editSpaceName', '#editSpaceDescription'])) return;
+                    if (!checkValid(['#editSpaceName'])) return;
 
                     const btn = $(this);
                     const id = $('#editSpaceId').val();

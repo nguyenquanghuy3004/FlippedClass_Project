@@ -46,6 +46,7 @@ public class QuizServiceImpl implements QuizService {
     private final com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository;
     private final QuizValidator quizValidator;
     private final com.example.flippedclass.repository.LearningSpaceMemberRepository memberRepository;
+    private final com.example.flippedclass.repository.NotificationRepository notificationRepository;
 
     public QuizServiceImpl(QuizRepository quizRepository,
                            QuizQuestionRepository questionRepository,
@@ -54,7 +55,8 @@ public class QuizServiceImpl implements QuizService {
                            LearningNodeRepository learningNodeRepository,
                            com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository,
                            QuizValidator quizValidator,
-                           com.example.flippedclass.repository.LearningSpaceMemberRepository memberRepository) {
+                           com.example.flippedclass.repository.LearningSpaceMemberRepository memberRepository,
+                           com.example.flippedclass.repository.NotificationRepository notificationRepository) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.attemptRepository = attemptRepository;
@@ -63,6 +65,7 @@ public class QuizServiceImpl implements QuizService {
         this.interactionLogRepository = interactionLogRepository;
         this.quizValidator = quizValidator;
         this.memberRepository = memberRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -90,7 +93,28 @@ public class QuizServiceImpl implements QuizService {
                 .difficulty(request.getDifficulty())
                 .thumbnailUrl(request.getThumbnailUrl())
                 .build();
-        return toResponse(quizRepository.save(quiz));
+        
+        Quiz savedQuiz = quizRepository.save(quiz);
+        
+        if (savedQuiz.isActive() && node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null) {
+            Long spaceId = node.getLearningPath().getLearningSpace().getId();
+            List<com.example.flippedclass.entity.LearningSpaceMember> students = memberRepository.findByLearningSpaceId(spaceId).stream()
+                .filter(m -> m.getRole() == com.example.flippedclass.enums.MemberRole.MEMBER || m.getRole() == com.example.flippedclass.enums.MemberRole.SUPPORTER)
+                .collect(Collectors.toList());
+                
+            String targetUrl = "/student/take-quiz?quizId=" + savedQuiz.getId();
+            for (com.example.flippedclass.entity.LearningSpaceMember student : students) {
+                com.example.flippedclass.entity.Notification notification = com.example.flippedclass.entity.Notification.builder()
+                        .recipient(student.getUser())
+                        .type(com.example.flippedclass.enums.NotificationType.QUIZ_ASSIGNED)
+                        .message("New Quiz Assigned: " + savedQuiz.getTitle())
+                        .targetUrl(targetUrl)
+                        .build();
+                notificationRepository.save(notification);
+            }
+        }
+
+        return toResponse(savedQuiz);
     }
 
     @Override
