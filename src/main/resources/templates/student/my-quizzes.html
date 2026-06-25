@@ -176,7 +176,7 @@
                 <h6 class="fw-900 text-dark mb-1">Notifications</h6>
                 <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Loading notifications...</p>
               </div>
-              <i class="ti ti-bell text-primary fs-4"></i>
+              <button onclick="markAllAsRead(event)" class="btn btn-sm btn-light text-primary fw-bold border-0 p-1" title="Mark all as read"><i class="ti ti-checks fs-5"></i></button>
             </div>
           </div>
           <div id="notificationList" class="notification-list">
@@ -203,7 +203,7 @@
   </div>
   <ul class="nav flex-column mt-2">
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
-    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Learning Space</span></a></li>
     <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4 fw-bold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz" aria-current="page"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
     <li id="supporter-nav-item" style="display:none;"><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/supporter/dashboard}" data-nav-key="supporter"><i class="ti ti-heart-handshake fs-5"></i><span class="nav-text">Supporter Portal</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
@@ -528,9 +528,119 @@ const token = localStorage.getItem('jwt_token');
     renderQuizzes();
   });
 
+  async function fetchNotifications() {
+    if (!token) return;
+    try {
+      const res = await fetch('/api/notifications', { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
+        const notifications = await res.json();
+        renderNotificationsAPI(notifications);
+      }
+    } catch (e) {
+      console.error('Failed to fetch notifications', e);
+    }
+  }
+
+  async function pollUnreadCount() {
+    if (!token) return;
+    try {
+      const res = await fetch('/api/notifications/unread-count', { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
+        const count = await res.json();
+        updateNotificationBadge(count);
+      }
+    } catch (e) {}
+  }
+
+  function updateNotificationBadge(count) {
+    const badge = document.getElementById('notificationBadge');
+    const summary = document.getElementById('notificationSummary');
+    if (badge) {
+      badge.textContent = count;
+      badge.classList.toggle('d-none', count === 0);
+    }
+    if (summary) {
+      summary.textContent = count > 0 ? `You have ${count} unread notifications.` : 'No unread notifications.';
+    }
+  }
+
+  window.markReadAndGo = async function(event, id, url) {
+      event.preventDefault();
+      try {
+          await fetch(`/api/notifications/${id}/read`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` } });
+      } catch (e) {}
+      if (url && url !== 'null') {
+          window.location.href = url;
+      }
+  };
+
+  window.markAllAsRead = async function(event) {
+      if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+      }
+      try {
+          const res = await fetch('/api/notifications/read-all', { method: 'PUT', headers: { Authorization: `Bearer ${token}` } });
+          if (res.ok) {
+              fetchNotifications();
+              pollUnreadCount();
+          }
+      } catch (e) {}
+  };
+
+  function renderNotificationsAPI(notifications) {
+    const list = document.getElementById('notificationList');
+    if (!list) return;
+
+    if (!notifications || notifications.length === 0) {
+      list.innerHTML = `
+          <div class="text-center text-muted py-4 px-3">
+            <i class="ti ti-bell-off text-success" style="font-size: 2.5rem;"></i>
+            <h6 class="fw-bold text-dark mt-3 mb-1">All caught up!</h6>
+            <p class="small fw-semibold mb-0">You have no notifications right now.</p>
+          </div>`;
+      return;
+    }
+
+    const allItems = notifications.map(n => {
+      let icon = 'ti-bell';
+      let bg = 'bg-primary-subtle text-primary';
+      
+      if (n.type === 'COMMENT_REPLY') {
+        icon = 'ti-message-circle';
+      } else if (n.type === 'QUIZ_ASSIGNED') {
+        icon = 'ti-file-pencil';
+      }
+      
+      const opacityClass = n.isRead ? 'opacity-75' : 'fw-bold bg-light';
+
+      return `
+        <a class="notification-item ${opacityClass}" href="#" onclick="markReadAndGo(event, ${n.id}, '${n.targetUrl}')">
+          <div class="d-flex gap-3 align-items-start">
+            <span class="stat-icon-bg flex-shrink-0 ${bg}" style="width: 42px; height: 42px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+              <i class="ti ${icon}"></i>
+            </span>
+            <div class="min-w-0" style="flex: 1;">
+              <p class="small text-muted fw-semibold mb-1 text-wrap">${escapeHtml(n.message)}</p>
+              <span class="small text-primary fw-bold">${n.isRead ? '' : 'New'}</span>
+            </div>
+          </div>
+        </a>`;
+    });
+    list.innerHTML = allItems.join('');
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     setupLayoutControls();
     loadMyQuizzes();
+
+    pollUnreadCount();
+    setInterval(pollUnreadCount, 30000);
+
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    if (notificationDropdown) {
+        notificationDropdown.addEventListener('show.bs.dropdown', fetchNotifications);
+    }
   });
 
 </script>

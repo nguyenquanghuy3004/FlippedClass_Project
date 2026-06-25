@@ -18,6 +18,7 @@
     </script>
     <link rel="stylesheet" th:href="@{/assets/css/student-take-quiz.css}">
     <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/student-layout.css}">
     <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
     <style>
       .is-embedded #sidebar, .is-embedded #topbar { display: none !important; }
@@ -168,21 +169,28 @@
   <body>
     <div id="overlay" class="overlay"></div>
 
-    <nav id="topbar" class="topbar">
-      <button id="toggleBtn" class="icon-button" type="button" aria-label="Toggle sidebar">
+    <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm">
+      <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
         <i class="ti ti-layout-sidebar-left-expand"></i>
       </button>
-      <div class="topbar-title">
-        <strong>Take Quiz</strong>
-        <span>Answer each question before time runs out</span>
+      <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+        <i class="ti ti-layout-sidebar-left-expand"></i>
+      </button>
+
+      <div class="topbar-main w-100 d-flex justify-content-between align-items-center">
+        <div class="topbar-title-wrap d-flex align-items-center">
+          <h5 class="topbar-title fw-bold text-dark ms-1 mb-0">Take Quiz <span class="badge bg-primary-subtle text-primary rounded-pill fw-normal ms-2">Assessment</span></h5>
+        </div>
+        <div class="d-flex align-items-center">
+          <a class="btn btn-outline-primary btn-sm rounded-pill fw-semibold px-3" href="javascript:void(0)" onclick="goBackToQuizzes()">
+            <i class="ti ti-arrow-left me-1"></i> Exit Quiz
+          </a>
+        </div>
       </div>
-      <div class="topbar-spacer"></div>
-      <a class="btn-quiz btn-quiz-outline" href="javascript:void(0)" onclick="goBackToQuizzes()">
-        <i class="ti ti-arrow-left"></i> My Quizzes
-      </a>
     </nav>
 
-      <aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm">
       <div class="logo-area border-bottom border-light">
         <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
           <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2">
@@ -191,37 +199,33 @@
           <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">Flipped<span class="text-primary">Class</span></span>
         </a>
       </div>
-      <ul class="nav flex-column mt-4">
+      <ul class="nav flex-column mt-2">
         <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
         <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
-        <li><a class="nav-link active rounded-pill mx-3 mb-2 px-4 fw-bold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz" aria-current="page"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
+        <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
         <li id="supporter-nav-item" style="display:none;"><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/supporter/dashboard}" data-nav-key="supporter"><i class="ti ti-heart-handshake fs-5"></i><span class="nav-text">Supporter Portal</span></a></li>
         <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
+
         <li class="sidebar-user-slot">
           <div class="student-user-menu" data-user-menu>
-            <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false"
-              aria-label="Account menu">
-              <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}"
-                alt="Student avatar">
+            <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+              <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
               <span class="student-menu-info">
-                <span class="student-menu-name" data-user-name>Student</span>
-                <span class="student-menu-role">Student</span>
-              </span>
+            <span class="student-menu-name" data-user-name>Student</span>
+            <span class="student-menu-role">Student</span>
+          </span>
               <i class="ti ti-chevron-up student-menu-chevron"></i>
             </button>
             <div class="student-menu-panel" role="menu">
-              <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i
-                  class="ti ti-help-circle"></i><span>Help</span></a>
-              <button class="student-menu-item" type="button" data-bs-toggle="modal" data-bs-target="#profileDetailModal" role="menuitem"><i class="ti ti-user-edit"></i><span>Edit Profile</span></button>
-              <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i
-                  class="ti ti-logout"></i><span>Logout</span></button>
+              <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+              <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
             </div>
           </div>
         </li>
       </ul>
     </aside>
 
-    <main id="content" class="content">
+    <main id="content" class="content" style="padding-top: 80px;">
       <div class="page-wrap">
         <section class="quiz-hero">
           <div class="hero-stats">

@@ -17,7 +17,7 @@
   <div class="container-fluid px-xl-4">
     <div class="row g-4">
       <!-- MY LEARNING SPACES (APPLE STYLE CARDS) -->
-      <div class="col-xl-8">
+      <div class="col-xl-9">
         <div id="myQuizSection" class="d-flex justify-content-between align-items-end mb-3">
           <div>
             <h2 class="fc-section-title text-dark mb-0">My Learning Spaces</h2>
@@ -72,7 +72,7 @@
       </div>
 
       <!-- RIGHT COLUMN: RECENT DOCS -->
-      <div class="col-xl-4">
+      <div class="col-xl-3">
         <h2 class="fc-section-title text-dark mb-3">New Documents</h2>
         <div class="bento-card p-3" id="recentDocuments">
           <div class="text-center text-muted py-4">
@@ -221,6 +221,9 @@
         </div>`;
   }
 
+  let currentLearningSpacePage = 1;
+  const SPACES_PER_PAGE = 4;
+
   function renderLearningSpaces(learningSpaces) {
     const list = document.getElementById('learningSpaceList');
     if (!list) return;
@@ -228,15 +231,24 @@
     const joinedSpaces = getJoinedSpaces(learningSpaces);
     if (!joinedSpaces.length) {
       list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'No Classes Yet', 'Enter a class code on My Classes to join a learning space.')}</div>`;
+      renderLearningSpacePagination(0);
       return;
     }
+
+    const totalPages = Math.ceil(joinedSpaces.length / SPACES_PER_PAGE);
+    if (currentLearningSpacePage > totalPages) currentLearningSpacePage = totalPages;
+    if (currentLearningSpacePage < 1) currentLearningSpacePage = 1;
+
+    const startIndex = (currentLearningSpacePage - 1) * SPACES_PER_PAGE;
+    const paginatedSpaces = joinedSpaces.slice(startIndex, startIndex + SPACES_PER_PAGE);
 
     const banners = ['banner-green', 'banner-blue', 'banner-darkblue', 'banner-red', 'banner-gray'];
     const avatars = ['avatar-blue', 'avatar-orange', 'avatar-green', 'avatar-red'];
 
-    list.innerHTML = joinedSpaces.slice(0, 4).map((space, index) => {
-      const bannerClass = banners[index % banners.length];
-      const avatarClass = avatars[index % avatars.length];
+    list.innerHTML = paginatedSpaces.map((space, index) => {
+      const globalIndex = startIndex + index;
+      const bannerClass = banners[globalIndex % banners.length];
+      const avatarClass = avatars[globalIndex % avatars.length];
       const firstLetter = space.name ? space.name.charAt(0).toUpperCase() : 'S';
       
       const roadmapUrl = space.id
@@ -280,7 +292,52 @@
             </div>
           </div>`;
     }).join('');
+
+    renderLearningSpacePagination(totalPages);
   }
+
+  function renderLearningSpacePagination(totalPages) {
+    let container = document.getElementById('learningSpacePagination');
+    if (!container) {
+       const list = document.getElementById('learningSpaceList');
+       container = document.createElement('div');
+       container.id = 'learningSpacePagination';
+       container.className = 'd-flex justify-content-center mt-2 mb-4';
+       list.parentNode.insertBefore(container, list.nextSibling);
+    }
+    
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+
+    let html = '<ul class="pagination pagination-sm mb-0 shadow-sm">';
+    
+    html += `<li class="page-item ${currentLearningSpacePage === 1 ? 'disabled' : ''}">
+               <a class="page-link" href="#" onclick="changeLearningSpacePage(event, ${currentLearningSpacePage - 1})"><i class="ti ti-chevron-left"></i></a>
+             </li>`;
+
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<li class="page-item ${i === currentLearningSpacePage ? 'active' : ''}">
+                   <a class="page-link" href="#" onclick="changeLearningSpacePage(event, ${i})">${i}</a>
+                 </li>`;
+    }
+
+    html += `<li class="page-item ${currentLearningSpacePage === totalPages ? 'disabled' : ''}">
+               <a class="page-link" href="#" onclick="changeLearningSpacePage(event, ${currentLearningSpacePage + 1})"><i class="ti ti-chevron-right"></i></a>
+             </li>`;
+    
+    html += '</ul>';
+    container.innerHTML = html;
+  }
+
+  window.changeLearningSpacePage = function(event, page) {
+      event.preventDefault();
+      currentLearningSpacePage = page;
+      if (window.currentDashboardData && window.currentDashboardData.learningSpaces) {
+          renderLearningSpaces(window.currentDashboardData.learningSpaces);
+      }
+  };
 
   function quizAction(quiz) {
     return quiz.isCompleted

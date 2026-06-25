@@ -55,7 +55,8 @@ public class DiscussionServiceImpl implements DiscussionService {
                 .build();
 
         if (groupId != null) {
-            StudyGroup group = groupRepository.findById(groupId).orElseThrow(() -> new RuntimeException("Group not found"));
+            StudyGroup group = groupRepository.findById(groupId)
+                    .orElseThrow(() -> new RuntimeException("Group not found"));
             discussion.setStudyGroup(group);
         }
 
@@ -66,38 +67,26 @@ public class DiscussionServiceImpl implements DiscussionService {
         }
 
         NodeDiscussion saved = discussionRepository.save(discussion);
-        
+
         // Trigger notification if this is a reply to someone else
         if (saved.getParentDiscussion() != null) {
-            NodeDiscussion parent = saved.getParentDiscussion();
-            java.util.Set<User> participants = new java.util.HashSet<>();
-            participants.add(parent.getUser());
-            if (parent.getReplies() != null) {
-                for (NodeDiscussion rep : parent.getReplies()) {
-                    participants.add(rep.getUser());
-                }
-            }
-            // Remove the user who is making the comment
-            participants.remove(user);
-
-            if (!participants.isEmpty()) {
+            User parentAuthor = saved.getParentDiscussion().getUser();
+            if (!parentAuthor.getId().equals(user.getId())) {
                 String targetUrl = "/student/learning-node?nodeId=" + node.getId() + "&commentId=" + saved.getId();
                 if (node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null) {
                     targetUrl += "&spaceId=" + node.getLearningPath().getLearningSpace().getId();
                 }
-
-                for (User participant : participants) {
-                    com.example.flippedclass.entity.Notification notification = com.example.flippedclass.entity.Notification.builder()
-                            .recipient(participant)
-                            .type(com.example.flippedclass.enums.NotificationType.COMMENT_REPLY)
-                            .message(user.getFullName() + " replied in a discussion you are following.")
-                            .targetUrl(targetUrl)
-                            .build();
-                    notificationRepository.save(notification);
-                }
+                
+                com.example.flippedclass.entity.Notification notification = com.example.flippedclass.entity.Notification.builder()
+                        .recipient(parentAuthor)
+                        .type(com.example.flippedclass.enums.NotificationType.COMMENT_REPLY)
+                        .message(user.getFullName() + " replied to your comment.")
+                        .targetUrl(targetUrl)
+                        .build();
+                notificationRepository.save(notification);
             }
         }
-        
+
         return mapToResponse(saved);
     }
 
@@ -106,8 +95,12 @@ public class DiscussionServiceImpl implements DiscussionService {
     public DiscussionResponse markAsSolved(Long discussionId, String username) {
         NodeDiscussion discussion = discussionRepository.findById(discussionId)
                 .orElseThrow(() -> new RuntimeException("Discussion not found"));
-        // TODO: verify user is lecturer/mentor
-        discussion.setStatus(discussion.getStatus() == DiscussionStatus.OPEN ? DiscussionStatus.SOLVED : DiscussionStatus.OPEN);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        validateLecturerOrAdmin(user);
+        
+        discussion.setStatus(
+                discussion.getStatus() == DiscussionStatus.OPEN ? DiscussionStatus.SOLVED : DiscussionStatus.OPEN);
         return mapToResponse(discussionRepository.save(discussion));
     }
 
@@ -116,7 +109,10 @@ public class DiscussionServiceImpl implements DiscussionService {
     public DiscussionResponse togglePin(Long discussionId, String username) {
         NodeDiscussion discussion = discussionRepository.findById(discussionId)
                 .orElseThrow(() -> new RuntimeException("Discussion not found"));
-        // TODO: verify user is lecturer/mentor
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        validateLecturerOrAdmin(user);
+
         discussion.setPinned(!discussion.isPinned());
         return mapToResponse(discussionRepository.save(discussion));
     }
@@ -126,8 +122,29 @@ public class DiscussionServiceImpl implements DiscussionService {
     public void deleteDiscussion(Long discussionId, String username) {
         NodeDiscussion discussion = discussionRepository.findById(discussionId)
                 .orElseThrow(() -> new RuntimeException("Discussion not found"));
-        // TODO: verify user
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        validateDiscussionOwnerOrLecturer(discussion, user);
+
         discussionRepository.delete(discussion);
+        notificationRepository.deleteByTargetUrlContaining("commentId=" + discussionId);
+    }
+
+    private void validateDiscussionOwnerOrLecturer(NodeDiscussion discussion, User currentUser) {
+        boolean isOwner = discussion.getUser().getId().equals(currentUser.getId());
+        boolean isLecturerOrAdmin = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getName().name().equals("LECTURER") || role.getName().name().equals("ADMIN"));
+        if (!isOwner && !isLecturerOrAdmin) {
+            throw new com.example.flippedclass.exception.BusinessException("FORBIDDEN: You do not have permission to modify this discussion.");
+        }
+    }
+
+    private void validateLecturerOrAdmin(User currentUser) {
+        boolean isLecturerOrAdmin = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getName().name().equals("LECTURER") || role.getName().name().equals("ADMIN"));
+        if (!isLecturerOrAdmin) {
+            throw new com.example.flippedclass.exception.BusinessException("FORBIDDEN: You do not have permission to perform this action.");
+        }
     }
 
     private DiscussionResponse mapToResponse(NodeDiscussion discussion) {

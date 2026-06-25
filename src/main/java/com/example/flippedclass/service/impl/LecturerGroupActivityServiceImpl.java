@@ -199,6 +199,15 @@ public class LecturerGroupActivityServiceImpl implements LecturerGroupActivitySe
     public LecturerReviewResponse gradeGroup(Long currentUserId, Long groupId, LecturerGradeRequest request) {
         StudyGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException("Group not found"));
+        
+        if (group.getActivity() == null || group.getActivity().getLearningSpace() == null || group.getActivity().getLearningSpace().getOwner() == null) {
+            throw new com.example.flippedclass.exception.BusinessException("INVALID_STATE: Group or Activity lacks a Learning Space owner.");
+        }
+        
+        if (!group.getActivity().getLearningSpace().getOwner().getId().equals(currentUserId)) {
+            throw new com.example.flippedclass.exception.BusinessException("FORBIDDEN: You cannot grade groups outside your assigned Learning Space.");
+        }
+
         User lecturer = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -229,7 +238,7 @@ public class LecturerGroupActivityServiceImpl implements LecturerGroupActivitySe
                 Notification notification = Notification.builder()
                         .recipient(member.getStudent())
                         .type(com.example.flippedclass.enums.NotificationType.GROUP_ACTIVITY_GRADED)
-                        .message("Your group activity '" + activityTitle + "' has been graded.")
+                        .message("Your group activity '" + activityTitle + "' has been graded. Score: " + request.getScore() + "/10")
                         .targetUrl(targetUrl)
                         .build();
                 notificationRepository.save(notification);
@@ -305,5 +314,35 @@ public class LecturerGroupActivityServiceImpl implements LecturerGroupActivitySe
                 .totalStudents(totalStudents)
                 .submittedGroups(submittedGroups)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void forceAssignLeader(Long currentUserId, Long groupId, Long newLeaderId) {
+        StudyGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException("Group not found"));
+
+        if (group.getActivity() == null || group.getActivity().getLearningSpace() == null || group.getActivity().getLearningSpace().getOwner() == null) {
+            throw new com.example.flippedclass.exception.BusinessException("INVALID_STATE: Group or Activity lacks a Learning Space owner.");
+        }
+        if (!group.getActivity().getLearningSpace().getOwner().getId().equals(currentUserId)) {
+            throw new com.example.flippedclass.exception.BusinessException("FORBIDDEN: You cannot manage groups outside your assigned Learning Space.");
+        }
+
+        StudyGroupMember currentLeaderMember = group.getMembers().stream()
+                .filter(m -> m.getStudent().getId().equals(group.getLeader().getId()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Current leader not found in member list"));
+
+        StudyGroupMember newLeaderMember = group.getMembers().stream()
+                .filter(m -> m.getStudent().getId().equals(newLeaderId))
+                .findFirst()
+                .orElseThrow(() -> new com.example.flippedclass.exception.BusinessException("NEW_LEADER_NOT_IN_GROUP: The assigned student is not a member of this group."));
+
+        currentLeaderMember.setRole(com.example.flippedclass.enums.GroupRole.MEMBER);
+        newLeaderMember.setRole(com.example.flippedclass.enums.GroupRole.LEADER);
+        group.setLeader(newLeaderMember.getStudent());
+
+        groupRepository.save(group);
     }
 }

@@ -34,6 +34,7 @@ public class SubmissionServiceImpl implements SubmissionService {
                 .orElseThrow(() -> new NotFoundException("Group not found"));
 
         validator.validateLeaderRole(currentUserId, group);
+        validator.validateActivityOpen(group.getActivity());
         validator.validateDeadline(group.getActivity());
 
         ActivitySubmission submission = group.getSubmission();
