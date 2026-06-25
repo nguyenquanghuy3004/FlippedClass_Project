@@ -15,7 +15,7 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
     long countByQuizId(Long quizId);
 
     @Query("SELECT AVG(a.score) FROM QuizAttempt a WHERE a.quiz.id = :quizId")
-    BigDecimal averageScoreByQuizId(@Param("quizId") Long quizId);
+    Double averageScoreByQuizId(@Param("quizId") Long quizId);
 
     List<QuizAttempt> findByStudent_Id(Long studentId);
 

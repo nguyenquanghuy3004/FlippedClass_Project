@@ -44,9 +44,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .learningSpaceId(learningPath.getLearningSpace() != null ? learningPath.getLearningSpace().getId() : null)
                 .status(savedNode.getStatus())
                 .nodeType(savedNode.getNodeType())
-                .content(savedNode.getContent())
-                .starterCode(savedNode.getStarterCode())
-                .solutionCode(savedNode.getSolutionCode())
                 .createdAt(savedNode.getCreatedAt())
                 .updatedAt(savedNode.getUpdatedAt())
                 .build();
@@ -70,15 +67,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         node.setTitle(request.getTitle());
         node.setDescription(request.getDescription());
 
-        if (request.getContent() != null) {
-            node.setContent(request.getContent());
-        }
-        if (request.getStarterCode() != null) {
-            node.setStarterCode(request.getStarterCode());
-        }
-        if (request.getSolutionCode() != null) {
-            node.setSolutionCode(request.getSolutionCode());
-        }
 
         if (request.getNodeType() != null) {
             node.setNodeType(request.getNodeType());
@@ -94,9 +82,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .learningSpaceId((savedNode.getLearningPath() != null && savedNode.getLearningPath().getLearningSpace() != null) ? savedNode.getLearningPath().getLearningSpace().getId() : null)
                 .status(savedNode.getStatus())
                 .nodeType(savedNode.getNodeType())
-                .content(savedNode.getContent())
-                .starterCode(savedNode.getStarterCode())
-                .solutionCode(savedNode.getSolutionCode())
                 .createdAt(savedNode.getCreatedAt())
                 .updatedAt(savedNode.getUpdatedAt())
                 .build();

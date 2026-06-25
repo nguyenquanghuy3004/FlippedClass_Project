@@ -343,18 +343,9 @@
     }
 
     function renderPaginatedQuizzes() {
-      const totalItems = currentFilteredQuizzes.length;
-      const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-      
-      if (currentPage > totalPages) currentPage = totalPages;
-      if (currentPage < 1) currentPage = 1;
-      
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      const paginated = currentFilteredQuizzes.slice(startIndex, endIndex);
-      
-      renderQuizzes(paginated);
-      renderPaginationControls(totalItems, totalPages);
+      // Bỏ phân trang vì đã gộp nhóm
+      renderQuizzes(currentFilteredQuizzes);
+      renderPaginationControls(0, 0);
     }
 
     function goToPage(page) {
@@ -408,79 +399,110 @@
           </div>`;
         return;
       }
+      
       const groups = {};
       quizzes.forEach(q => {
-        const key = q.learningSpaceName || 'Uncategorized';
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(q);
+        const ls = q.learningSpaceName || 'Uncategorized';
+        const course = q.courseName || 'General';
+        if (!groups[ls]) groups[ls] = {};
+        if (!groups[ls][course]) groups[ls][course] = [];
+        groups[ls][course].push(q);
       });
-      for (const [spaceName, list] of Object.entries(groups)) {
-        const activeCount = list.filter(q => q.active).length;
+      
+      for (const ls in groups) {
+        // Count active and total for this space
+        let activeCount = 0;
+        let totalSpaceCount = 0;
+        for (const course in groups[ls]) {
+          totalSpaceCount += groups[ls][course].length;
+          activeCount += groups[ls][course].filter(q => q.active).length;
+        }
+
         const section = document.createElement('div');
-        section.className = 'mb-5';
-        section.innerHTML = `
-          <div class="section-header">
-            <div class="section-title">
-              <i class="ti ti-folder" style="color:#7c3aed;"></i>
-              ${spaceName}
-              <span class="section-badge">${list.length} quiz${list.length !== 1 ? 'zes' : ''}</span>
+        section.className = 'learning-space-section mb-5 bg-white p-4 rounded-4 shadow-sm border border-light';
+        
+        let html = `
+          <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+            <div class="d-flex align-items-center">
+               <div class="bg-primary-subtle text-primary rounded p-2 me-3 d-flex align-items-center justify-content-center">
+                 <i class="ti ti-books fs-3"></i>
+               </div>
+               <h3 class="fw-bold mb-0 text-dark">Class: ${ls}</h3>
             </div>
-            <small class="text-muted">${activeCount} active</small>
+            <div class="text-end">
+               <span class="badge bg-light text-dark border me-2">${totalSpaceCount} quiz${totalSpaceCount !== 1 ? 'zes' : ''}</span>
+               <small class="text-muted">${activeCount} active</small>
+            </div>
           </div>
-          <div class="row g-4"></div>`;
+        `;
+        
+        for (const course in groups[ls]) {
+          html += `
+            <div class="course-section ms-0 ms-md-2 mb-4">
+              <div class="d-flex align-items-center mb-3">
+                <div class="bg-light text-secondary rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                  <i class="ti ti-template fs-5"></i>
+                </div>
+                <h4 class="fw-bold mb-0 text-secondary fs-5">Module: ${course}</h4>
+              </div>
+              <div class="row g-4">`;
+              
+          groups[ls][course].forEach(quiz => {
+            const passRate = (quiz.passRate || 0).toFixed(0);
+            const escapedTitle = (quiz.title || '').replace(/"/g, '&quot;');
+            const escapedDesc = (quiz.description || 'No description provided.').replace(/"/g, '&quot;');
+            html += `
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="quiz-card" style="cursor: pointer;" onclick="window.location.href='/lecturer/quizzes/${quiz.id}/statistics'">
+                  <div class="card-top" style="justify-content: flex-end;">
+                    <span class="status-badge ${quiz.active ? 'active' : 'inactive'}">
+                      ${quiz.active ? '● Active' : '○ Inactive'}
+                    </span>
+                  </div>
+                  <h4 class="quiz-title-text">${escapedTitle}</h4>
+                  <p class="quiz-desc">${escapedDesc}</p>
+                  <div class="quiz-metrics">
+                    <div class="metric">
+                      <div class="metric-val" style="color:#d97706;">${quiz.questionCount || 0}</div>
+                      <div class="metric-lbl">Questions</div>
+                    </div>
+                    <div class="metric">
+                      <div class="metric-val" style="color:#2563eb;">${quiz.durationMinutes}m</div>
+                      <div class="metric-lbl">Duration</div>
+                    </div>
+                    <div class="metric">
+                      <div class="metric-val" style="color:#059669;">${quiz.totalAttempts || 0}</div>
+                      <div class="metric-lbl">Attempts</div>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    ${diffChip(quiz.difficulty)}
+                    <small class="text-muted fw-semibold">Pass: ${quiz.passScore}% &nbsp;|&nbsp; Rate: ${passRate}%</small>
+                  </div>
+                  <div class="pass-bar">
+                    <div class="pass-fill" style="width:${passRate}%;"></div>
+                  </div>
+                  <div class="card-actions mt-3">
+                    <button class="btn-build" onclick="event.stopPropagation(); window.location.href='/lecturer/quizzes/${quiz.id}/builder'">
+                      <i class="ti ti-tools"></i> Build Questions
+                    </button>
+                    <div class="d-flex gap-1">
+                      <button class="btn-icon-sm" onclick="event.stopPropagation(); openEditModal(${quiz.id})" title="Edit">
+                        <i class="ti ti-pencil"></i>
+                      </button>
+                      <button class="btn-icon-sm danger" onclick="event.stopPropagation(); openDeleteConfirm(${quiz.id})" title="Delete">
+                        <i class="ti ti-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>`;
+          });
+          html += `</div></div>`;
+        }
+        
+        section.innerHTML = html;
         container.appendChild(section);
-        const grid = section.querySelector('.row');
-        list.forEach(quiz => {
-          const passRate = (quiz.passRate || 0).toFixed(0);
-          const col = document.createElement('div');
-          col.className = 'col-12 col-md-6 col-xl-4';
-          col.innerHTML = `
-            <div class="quiz-card" style="cursor: pointer;" onclick="window.location.href='/lecturer/quizzes/${quiz.id}/statistics'">
-              <div class="card-top">
-                <span class="course-tag">${quiz.courseName || 'General'}</span>
-                <span class="status-badge ${quiz.active ? 'active' : 'inactive'}">
-                  ${quiz.active ? '● Active' : '○ Inactive'}
-                </span>
-              </div>
-              <h4 class="quiz-title-text">${quiz.title}</h4>
-              <p class="quiz-desc">${quiz.description || 'No description provided.'}</p>
-              <div class="quiz-metrics">
-                <div class="metric">
-                  <div class="metric-val" style="color:#d97706;">${quiz.questionCount || 0}</div>
-                  <div class="metric-lbl">Questions</div>
-                </div>
-                <div class="metric">
-                  <div class="metric-val" style="color:#2563eb;">${quiz.durationMinutes}m</div>
-                  <div class="metric-lbl">Duration</div>
-                </div>
-                <div class="metric">
-                  <div class="metric-val" style="color:#059669;">${quiz.totalAttempts || 0}</div>
-                  <div class="metric-lbl">Attempts</div>
-                </div>
-              </div>
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                ${diffChip(quiz.difficulty)}
-                <small class="text-muted fw-semibold">Pass: ${quiz.passScore}% &nbsp;|&nbsp; Rate: ${passRate}%</small>
-              </div>
-              <div class="pass-bar">
-                <div class="pass-fill" style="width:${passRate}%;"></div>
-              </div>
-              <div class="card-actions mt-3">
-                <button class="btn-build" onclick="event.stopPropagation(); window.location.href='/lecturer/quizzes/${quiz.id}/builder'">
-                  <i class="ti ti-tools"></i> Build Questions
-                </button>
-                <div class="d-flex gap-1">
-                  <button class="btn-icon-sm" onclick="event.stopPropagation(); openEditModal(${quiz.id})" title="Edit">
-                    <i class="ti ti-pencil"></i>
-                  </button>
-                  <button class="btn-icon-sm danger" onclick="event.stopPropagation(); openDeleteConfirm(${quiz.id})" title="Delete">
-                    <i class="ti ti-trash"></i>
-                  </button>
-                </div>
-              </div>
-            </div>`;
-          grid.appendChild(col);
-        });
       }
     }
 

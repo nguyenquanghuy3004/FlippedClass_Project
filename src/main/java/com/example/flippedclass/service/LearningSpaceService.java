@@ -29,6 +29,6 @@ public interface LearningSpaceService {
 
     void restoreLearningSpace(Long id);
 
-    LearningSpaceResponse cloneSpace(Long sourceSpaceId, String newName);
+    LearningSpaceResponse cloneSpace(Long sourseSpaceId, String newName);
 
 }

@@ -650,12 +650,45 @@
           const qData = bankQuestions.find(x => x.id === qId);
           if (!qData) continue;
           
+          let optsStr = qData.options || '';
+          let finalOptions = optsStr;
+          let finalCorrectAnswer = qData.correctAnswer || '';
+
+          if (qData.questionType === 'SINGLE_CHOICE' || qData.questionType === 'MULTIPLE_CHOICE') {
+             try {
+                let parsed = JSON.parse(optsStr);
+                if (Array.isArray(parsed)) {
+                   let obj = {};
+                   let correctKey = finalCorrectAnswer;
+                   parsed.forEach((val, idx) => {
+                      let key = String.fromCharCode(65 + idx);
+                      obj[key] = val;
+                      if (String(val).trim().toUpperCase() === String(qData.correctAnswer).trim().toUpperCase()) {
+                         correctKey = key;
+                      }
+                   });
+                   finalOptions = JSON.stringify(obj);
+                   finalCorrectAnswer = correctKey;
+                } else if (typeof parsed === 'object' && parsed !== null) {
+                   let foundKey = Object.keys(parsed).find(k => String(parsed[k]).trim().toUpperCase() === String(qData.correctAnswer).trim().toUpperCase());
+                   if (foundKey && !parsed[finalCorrectAnswer]) {
+                       finalCorrectAnswer = foundKey;
+                   }
+                }
+             } catch(e) {}
+          } else if (qData.questionType === 'TRUE_FALSE') {
+             let up = String(finalCorrectAnswer).toUpperCase();
+             if (up === 'TRUE' || up === '1') finalCorrectAnswer = 'TRUE';
+             else if (up === 'FALSE' || up === '0') finalCorrectAnswer = 'FALSE';
+             finalOptions = JSON.stringify({ "TRUE": "True", "FALSE": "False" });
+          }
+
           const payload = {
             content: qData.content,
-            options: qData.options || '',
-            correctAnswer: qData.correctAnswer,
+            options: finalOptions,
+            correctAnswer: finalCorrectAnswer,
             points: qData.points,
-            questionType: qData.questionType,
+            questionType: qData.questionType === 'MULTIPLE_CHOICE' ? 'SINGLE_CHOICE' : qData.questionType,
             sortOrder: questions.length + successCount // append to end
           };
           

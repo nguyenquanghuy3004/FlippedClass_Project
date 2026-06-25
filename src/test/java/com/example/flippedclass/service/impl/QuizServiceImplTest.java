@@ -236,7 +236,7 @@ public class QuizServiceImplTest {
         QuizAttempt a3 = QuizAttempt.builder().score(new BigDecimal("0.00")).build();
 
         when(attemptRepository.findByQuizId(1L)).thenReturn(Arrays.asList(a1, a2, a3));
-        when(attemptRepository.averageScoreByQuizId(1L)).thenReturn(new BigDecimal("50.00"));
+        when(attemptRepository.averageScoreByQuizId(1L)).thenReturn(50.00);
 
         QuizStatisticsResponse stats = quizService.getStatistics(1L);
 

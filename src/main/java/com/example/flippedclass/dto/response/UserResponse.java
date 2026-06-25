@@ -16,5 +16,6 @@ public class UserResponse {
     private String avatarUrl;
     private String provider;
     private Set<String> roles;
+    private boolean isSupporter;
     private LocalDateTime createdAt;
 }

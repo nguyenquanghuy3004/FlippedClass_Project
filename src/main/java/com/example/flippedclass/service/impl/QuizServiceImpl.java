@@ -45,6 +45,7 @@ public class QuizServiceImpl implements QuizService {
     private final LearningNodeRepository learningNodeRepository;
     private final com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository;
     private final QuizValidator quizValidator;
+    private final com.example.flippedclass.repository.LearningSpaceMemberRepository memberRepository;
 
     public QuizServiceImpl(QuizRepository quizRepository,
                            QuizQuestionRepository questionRepository,
@@ -52,7 +53,8 @@ public class QuizServiceImpl implements QuizService {
                            UserRepository userRepository,
                            LearningNodeRepository learningNodeRepository,
                            com.example.flippedclass.repository.InteractionLogRepository interactionLogRepository,
-                           QuizValidator quizValidator) {
+                           QuizValidator quizValidator,
+                           com.example.flippedclass.repository.LearningSpaceMemberRepository memberRepository) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.attemptRepository = attemptRepository;
@@ -60,11 +62,20 @@ public class QuizServiceImpl implements QuizService {
         this.learningNodeRepository = learningNodeRepository;
         this.interactionLogRepository = interactionLogRepository;
         this.quizValidator = quizValidator;
+        this.memberRepository = memberRepository;
     }
 
     @Override
     public QuizResponse createForCurrentUser(Long currentUserId, CreateQuizRequest request) {
         User lecturer = UserServiceImpl.findUser(userRepository, currentUserId);
+        
+        // Security check for STUDENTs: Must be a SUPPORTER in at least one space
+        if (lecturer.getRoles().stream().noneMatch(r -> r.getName() == com.example.flippedclass.enums.RoleName.MENTOR || r.getName() == com.example.flippedclass.enums.RoleName.ADMIN)) {
+            if (!memberRepository.existsByUser_IdAndRole(lecturer.getId(), com.example.flippedclass.enums.MemberRole.SUPPORTER)) {
+                throw new IllegalArgumentException("Chỉ những sinh viên được thăng cấp (Supporter) mới có quyền tạo Quiz.");
+            }
+        }
+        
         LearningNode node = learningNodeRepository.findById(request.getLearningNodeId())
                 .orElseThrow(() -> new NotFoundException("Learning node not found: " + request.getLearningNodeId()));
 
@@ -226,10 +237,8 @@ public class QuizServiceImpl implements QuizService {
         List<QuizAttempt> attempts = attemptRepository.findByQuizId(quizId);
         long total = attempts.size();
 
-        BigDecimal avg = attemptRepository.averageScoreByQuizId(quizId);
-        if (avg == null) {
-            avg = BigDecimal.ZERO;
-        }
+        Double avgScoreObj = attemptRepository.averageScoreByQuizId(quizId);
+        BigDecimal avg = avgScoreObj != null ? BigDecimal.valueOf(avgScoreObj) : BigDecimal.ZERO;
 
         BigDecimal highest = attempts.stream()
                 .map(QuizAttempt::getScore)
@@ -310,8 +319,8 @@ public class QuizServiceImpl implements QuizService {
 
     private QuizResponse toResponse(Quiz quiz) {
         long totalAttempts = attemptRepository.countByQuizId(quiz.getId());
-        BigDecimal avgScore = attemptRepository.averageScoreByQuizId(quiz.getId());
-        double avg = avgScore != null ? avgScore.doubleValue() : 0.0;
+        Double avgScore = attemptRepository.averageScoreByQuizId(quiz.getId());
+        double avg = avgScore != null ? avgScore : 0.0;
 
         Integer passScore = quiz.getPassScore() != null ? quiz.getPassScore() : 50;
         long passedCount = attemptRepository.findByQuizId(quiz.getId()).stream()

@@ -28,7 +28,7 @@ public class EvaluationSession {
     @JoinColumn(name = "lecturer_id", nullable = false)
     private User lecturer;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String title;
 
     private LocalDateTime gradingStartAt;

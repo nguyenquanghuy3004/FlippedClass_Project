@@ -65,7 +65,7 @@ public class WebSecurityConfig {
             // Public UI Pages (Authentication, Landing, etc.)
             "/", "/index", "/login", "/register", "/signin", "/signup", 
             // Feature UI Routes (Bypass JWT for HTML load)
-            "/inventory", "/create-product", "/reports", "/lecturer/**", "/student/**", "/admin/**", "/mentor/**"
+            "/inventory", "/create-product", "/reports", "/lecturer/**", "/student/**", "/admin/**", "/mentor/**", "/supporter/**"
     };
 
     @Bean
@@ -89,7 +89,8 @@ public class WebSecurityConfig {
                         .requestMatchers(PUBLIC_URLS).permitAll()
                         .requestMatchers("/api/test/**").permitAll()
                         .anyRequest().authenticated()
-                );
+                )
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
