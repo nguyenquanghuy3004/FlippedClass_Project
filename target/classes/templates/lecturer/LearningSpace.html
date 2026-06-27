@@ -103,6 +103,32 @@
             </div>
         </div>
 
+        <!-- Clone Space Modal -->
+        <div class="modal fade" id="cloneSpaceModal" tabindex="-1" aria-labelledby="cloneSpaceModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title fw-bold" id="cloneSpaceModalLabel">Nhân bản Không gian học tập</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="cloneSpaceForm">
+                            <input type="hidden" id="cloneSpaceId">
+                            <div class="mb-3">
+                                <label for="cloneSpaceName" class="form-label fw-bold">Tên Không gian học tập mới</label>
+                                <input type="text" class="form-control bg-light border-0" id="cloneSpaceName" required minlength="3" maxlength="100">
+                                <div class="invalid-feedback">Vui lòng nhập tên hợp lệ</div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnCloneSpace" style="background-color: #6366f1; border-color: #6366f1;">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Popup Hiển thị và Copy Mã mời (Invite Code Modal) -->
         <div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
@@ -583,39 +609,54 @@
                     e.preventDefault();
                     const spaceId = $(this).data('id');
                     const oldName = $(this).data('name');
-
-                    const newName = prompt("Vui lòng nhập tên cho Không gian học tập mới:", oldName + " (Copy)");
                     
-                    if (newName && newName.trim() !== "") {
-                        Swal.fire({
-                            title: 'Đang nhân bản...',
-                            text: 'Vui lòng đợi trong giây lát.',
-                            allowOutsideClick: false,
-                            didOpen: () => { Swal.showLoading(); }
-                        });
+                    $('#cloneSpaceId').val(spaceId);
+                    $('#cloneSpaceName').val(oldName + ' (Copy)');
+                    $('#cloneSpaceName').removeClass('is-invalid');
+                    $('#cloneSpaceModal').modal('show');
+                });
 
-                        fetch(`/api/learning-spaces/${spaceId}/clone`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer ' + token
-                            },
-                            body: JSON.stringify({ newName: newName })
-                        })
-                        .then(res => {
-                            if (!res.ok) {
-                                return res.json().then(err => { throw new Error(err.message || "Lỗi khi clone"); });
-                            }
-                            return res.json();
-                        })
-                        .then(data => {
-                            Swal.fire('Thành công!', 'Đã nhân bản Không gian học tập thành công.', 'success');
-                            fetchSpaces(); 
-                        })
-                        .catch(err => {
-                            Swal.fire('Lỗi!', err.message, 'error');
-                        });
+                $('#btnCloneSpace').click(function () {
+                    const spaceId = $('#cloneSpaceId').val();
+                    const newName = $('#cloneSpaceName').val().trim();
+
+                    if (!newName) {
+                        $('#cloneSpaceName').addClass('is-invalid');
+                        return;
+                    } else {
+                        $('#cloneSpaceName').removeClass('is-invalid');
                     }
+
+                    $('#cloneSpaceModal').modal('hide');
+
+                    Swal.fire({
+                        title: 'Đang nhân bản...',
+                        text: 'Vui lòng đợi trong giây lát.',
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+
+                    fetch(`/api/learning-spaces/${spaceId}/clone`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({ newName: newName })
+                    })
+                    .then(res => {
+                        if (!res.ok) {
+                            return res.json().then(err => { throw new Error(err.message || "Lỗi khi clone"); });
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        Swal.fire('Thành công!', 'Đã nhân bản Không gian học tập thành công.', 'success');
+                        fetchSpaces(); 
+                    })
+                    .catch(err => {
+                        Swal.fire('Lỗi!', err.message, 'error');
+                    });
                 });
 
             });

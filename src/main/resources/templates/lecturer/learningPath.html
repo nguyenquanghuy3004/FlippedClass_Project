@@ -140,6 +140,11 @@
                                         <span th:if="${path.status == 'PUBLISHED'}" class="badge-published">Published</span>
                                         <span th:if="${path.status != 'PUBLISHED'}" class="badge-in-progress">In Progress</span>
 
+                                        <!-- Collapse/Expand Button -->
+                                        <button class="btn btn-sm text-muted path-collapse-btn me-1" th:data-pathid="${path.id}" title="Thu gọn" style="padding: 2px 6px; background: rgba(0,0,0,0.03); border-radius: 4px; transition: all 0.3s; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="ti ti-chevron-down" style="transition: transform 0.3s;"></i>
+                                        </button>
+
                                         <div class="dropdown">
                                             <button class="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center"
                                                     data-bs-toggle="dropdown"
@@ -175,7 +180,8 @@
                                 </div>
 
                                 <!-- Nodes area -->
-                                <div class="card-body px-4 pb-4 pt-2">
+                                <div class="path-content-collapse" th:id="'pathContent-' + ${path.id}" style="overflow:hidden; transition: max-height 0.35s ease, opacity 0.3s ease; max-height: 5000px; opacity: 1;">
+                                    <div class="card-body px-4 pb-4 pt-2">
                                     <!-- Has lessons -->
                                     <div th:if="${path.nodes != null and !path.nodes.empty}" class="nodes-container">
                                         <th:block th:each="node : ${path.nodes}">
@@ -197,6 +203,7 @@
                                         <span class="d-flex align-items-center justify-content-center gap-2">
                                             <i class="ti ti-plus"></i> Add New Lesson
                                         </span>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -1076,6 +1083,32 @@
                         })
                         .catch(err => console.error('Failed to load items for node', nodeId, err));
                 });
+            });
+
+            // -------------------------------------------------------------------
+            // Module (Path) Collapse / Expand Toggle
+            // -------------------------------------------------------------------
+            $(document).on('click', '.path-collapse-btn', function () {
+                const pathId = $(this).data('pathid');
+                const content = document.getElementById('pathContent-' + pathId);
+                const icon = $(this).find('i');
+                const isCollapsed = $(this).hasClass('is-collapsed');
+
+                if (isCollapsed) {
+                    // Expand
+                    content.style.maxHeight = '5000px';
+                    content.style.opacity = '1';
+                    icon.css('transform', 'rotate(0deg)');
+                    $(this).removeClass('is-collapsed');
+                    $(this).attr('title', 'Thu gọn');
+                } else {
+                    // Collapse
+                    content.style.maxHeight = '0';
+                    content.style.opacity = '0';
+                    icon.css('transform', 'rotate(-90deg)');
+                    $(this).addClass('is-collapsed');
+                    $(this).attr('title', 'Mở rộng');
+                }
             });
         </script>
     </th:block>
