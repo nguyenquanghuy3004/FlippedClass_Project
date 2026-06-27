@@ -3,7 +3,7 @@
 
     <!-- ── Node Card Fragment ── -->
     <div th:fragment="nodeCard(node, path)">
-        <div class="node-card" th:style="${node.nodeType == 'PRACTICE'} ? 'background: linear-gradient(to right, #0f172a, #1e293b); border: 1px solid #334155; border-left: 4px solid #4f46e5; box-shadow: 0 4px 15px rgba(0,0,0,0.2);' : ''" th:data-nodeid="${node.id}">
+        <div class="node-card" th:style="${node.nodeType == 'PRACTICE'} ? 'background: linear-gradient(to right, #0f172a, #1e293b); border: 1px solid #334155; border-left: 4px solid #4f46e5; box-shadow: 0 4px 15px rgba(0,0,0,0.2);' : ''">
             <div class="p-3 px-4">
                 <div class="d-flex justify-content-between align-items-center">
 
@@ -29,78 +29,63 @@
                         </div>
                     </a>
 
-                    <!-- Right: collapse toggle + options menu -->
-                    <div class="d-flex align-items-center gap-1">
-                        <!-- Collapse / Expand button -->
-                        <button class="btn btn-sm rounded-circle border-0 node-collapse-btn"
-                                th:id="'collapseBtn-' + ${node.id}"
-                                th:attr="data-nodeid=${node.id}"
-                                type="button"
-                                title="Thu gọn / Mở rộng"
-                                th:style="${node.nodeType == 'PRACTICE'} ? 'width:34px;height:34px;background:rgba(79,70,229,0.15);color:#94a3b8;display:flex;align-items:center;justify-content:center;transition:all 0.2s;' : 'width:34px;height:34px;background:rgba(79,70,229,0.08);color:#6366f1;display:flex;align-items:center;justify-content:center;transition:all 0.2s;'">
-                            <i class="ti ti-chevron-down" style="transition:transform 0.3s;"></i>
+                    <!-- Right: options menu -->
+                    <div class="dropdown">
+                        <button class="node-options-btn" data-bs-toggle="dropdown" th:style="${node.nodeType == 'PRACTICE'} ? 'color: #94a3b8;' : ''">
+                            <i class="ti ti-dots-vertical"></i>
                         </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2"
+                            style="min-width:200px;">
+                            <li>
+                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 edit-node-btn"
+                                   href="#"
+                                   th:data-pathid="${path.id}"
+                                   th:data-nodeid="${node.id}"
+                                   th:data-title="${node.title}"
+                                   th:data-description="${node.description}"
+                                   th:data-type="${node.nodeType}"
+                                   th:data-prereq="${node.prerequisiteNodeId}">
+                                    <i class="ti ti-pencil" style="color:#4f46e5;"></i> Edit Lesson
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 text-danger delete-node-btn"
+                                   href="#" th:data-pathid="${path.id}" th:data-nodeid="${node.id}">
+                                    <i class="ti ti-trash"></i> Delete Lesson
+                                </a>
+                            </li>
 
-                        <!-- Options dropdown -->
-                        <div class="dropdown">
-                            <button class="node-options-btn" data-bs-toggle="dropdown" th:style="${node.nodeType == 'PRACTICE'} ? 'color: #94a3b8;' : ''">
-                                <i class="ti ti-dots-vertical"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2"
-                                style="min-width:200px;">
-                                <li>
-                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 edit-node-btn"
-                                       href="#"
-                                       th:data-pathid="${path.id}"
-                                       th:data-nodeid="${node.id}"
-                                       th:data-title="${node.title}"
-                                       th:data-description="${node.description}"
-                                       th:data-type="${node.nodeType}"
-                                       th:data-prereq="${node.prerequisiteNodeId}">
-                                        <i class="ti ti-pencil" style="color:#4f46e5;"></i> Edit Lesson
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 text-danger delete-node-btn"
-                                       href="#" th:data-pathid="${path.id}" th:data-nodeid="${node.id}">
-                                        <i class="ti ti-trash"></i> Delete Lesson
-                                    </a>
-                                </li>
-
-                                <li th:if="${node.nodeType == 'VIDEO'}">
-                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-video-btn"
-                                       href="#" th:data-nodeid="${node.id}">
-                                        <i class="ti ti-upload" style="color:#4f46e5;"></i> Upload Video (MP4)
-                                    </a>
-                                </li>
-                                <li th:if="${node.nodeType == 'VIDEO'}">
-                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 add-youtube-btn"
-                                       href="#" th:data-nodeid="${node.id}" style="color:#ef4444;">
-                                        <i class="ti ti-brand-youtube"></i> Add Youtube Link
-                                    </a>
-                                </li>
-                                <li th:if="${node.nodeType == 'DOCUMENT'}">
-                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-document-btn"
-                                       href="#" th:data-nodeid="${node.id}" style="color:#059669;">
-                                        <i class="ti ti-file-upload"></i> Upload Document (PDF)
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                            <li th:if="${node.nodeType == 'VIDEO'}">
+                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-video-btn"
+                                   href="#" th:data-nodeid="${node.id}">
+                                    <i class="ti ti-upload" style="color:#4f46e5;"></i> Upload Video (MP4)
+                                </a>
+                            </li>
+                            <li th:if="${node.nodeType == 'VIDEO'}">
+                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 add-youtube-btn"
+                                   href="#" th:data-nodeid="${node.id}" style="color:#ef4444;">
+                                    <i class="ti ti-brand-youtube"></i> Add Youtube Link
+                                </a>
+                            </li>
+                            <li th:if="${node.nodeType == 'DOCUMENT'}">
+                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-document-btn"
+                                   href="#" th:data-nodeid="${node.id}" style="color:#059669;">
+                                    <i class="ti ti-file-upload"></i> Upload Document (PDF)
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
-                <!-- Content area (collapsible) -->
-                <div class="node-content-collapse" th:id="'nodeContent-' + ${node.id}" style="overflow:hidden; transition: max-height 0.35s ease, opacity 0.3s ease; max-height: 2000px; opacity: 1;">
-                    <div class="node-items-container" th:if="${node.nodeType != 'PRACTICE'}" th:data-nodeid="${node.id}" th:data-nodetype="${node.nodeType}">
-                        <!-- Placeholder shown until JS renders items -->
-                        <div class="node-placeholder" th:style="${node.nodeType == 'PRACTICE'} ? 'color: #94a3b8; opacity: 0.8;' : ''">
-                            <i th:class="'ti '
-                                + (${node.nodeType == 'VIDEO'}    ? 'ti-player-play'
-                                : (${node.nodeType == 'QUIZ'}     ? 'ti-help-circle'
-                                : 'ti-file-text'))"></i>
-                            <span>No content added yet</span>
-                        </div>
+                <!-- Content area -->
+                <div class="node-items-container" th:if="${node.nodeType != 'PRACTICE'}" th:data-nodeid="${node.id}" th:data-nodetype="${node.nodeType}">
+                    <!-- Placeholder shown until JS renders items -->
+                    <div class="node-placeholder" th:style="${node.nodeType == 'PRACTICE'} ? 'color: #94a3b8; opacity: 0.8;' : ''">
+                        <i th:class="'ti '
+                            + (${node.nodeType == 'VIDEO'}    ? 'ti-player-play'
+                            : (${node.nodeType == 'QUIZ'}     ? 'ti-help-circle'
+                            : 'ti-file-text'))"></i>
+                        <span>No content added yet</span>
                     </div>
                 </div>
             </div>

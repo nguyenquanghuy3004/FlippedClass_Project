@@ -1077,32 +1077,6 @@
                         .catch(err => console.error('Failed to load items for node', nodeId, err));
                 });
             });
-
-                // -------------------------------------------------------------------
-                // Node Collapse / Expand Toggle
-                // -------------------------------------------------------------------
-                $(document).on('click', '.node-collapse-btn', function () {
-                    const nodeId = $(this).data('nodeid');
-                    const content = document.getElementById('nodeContent-' + nodeId);
-                    const icon = $(this).find('i');
-                    const isCollapsed = $(this).hasClass('is-collapsed');
-
-                    if (isCollapsed) {
-                        // Expand
-                        content.style.maxHeight = '2000px';
-                        content.style.opacity = '1';
-                        icon.css('transform', 'rotate(0deg)');
-                        $(this).removeClass('is-collapsed');
-                        $(this).attr('title', 'Thu gọn');
-                    } else {
-                        // Collapse
-                        content.style.maxHeight = '0';
-                        content.style.opacity = '0';
-                        icon.css('transform', 'rotate(-90deg)');
-                        $(this).addClass('is-collapsed');
-                        $(this).attr('title', 'Mở rộng');
-                    }
-                });
         </script>
     </th:block>
 </body>

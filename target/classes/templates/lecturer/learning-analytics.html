@@ -166,10 +166,8 @@
         <script>
             let currentStudents = [];
             let selectedStudent = null;
-            let detailModal;
 
             $(document).ready(function() {
-                detailModal = new bootstrap.Modal(document.getElementById('studentDetailModal'));
                 // Fetch when tab is opened
                 if ($('#kpi-total-students').is(':visible') && $('#kpi-total-students').text() === '--') {
                     fetchAnalytics();
@@ -351,14 +349,13 @@
                 const listDiv = document.getElementById('completed-nodes-list');
                 const contentDiv = document.getElementById('completed-nodes-content');
                 const icon = document.getElementById('completed-nodes-icon');
+                const $listDiv = $(listDiv);
                 
-                const bsCollapse = bootstrap.Collapse.getInstance(listDiv) || new bootstrap.Collapse(listDiv, {toggle: false});
-                
-                if (listDiv.classList.contains('show')) {
-                    bsCollapse.hide();
+                if ($listDiv.hasClass('show')) {
+                    $listDiv.collapse('hide');
                     icon.classList.replace('ti-chevron-up', 'ti-chevron-down');
                 } else {
-                    bsCollapse.show();
+                    $listDiv.collapse('show');
                     icon.classList.replace('ti-chevron-down', 'ti-chevron-up');
                     contentDiv.innerHTML = '<div class="text-center text-muted small py-2"><div class="spinner-border spinner-border-sm text-primary"></div> Loading nodes...</div>';
                     
