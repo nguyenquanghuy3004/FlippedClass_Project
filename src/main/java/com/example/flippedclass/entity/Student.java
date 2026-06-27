@@ -14,6 +14,7 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @OneToOne(fetch = jakarta.persistence.FetchType.LAZY)

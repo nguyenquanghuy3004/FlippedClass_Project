@@ -1,88 +1,0 @@
-[INFO] Scanning for projects...
-Downloading from central: https://repo.maven.apache.org/maven2/org/flywaydb/maven-metadata.xml
-Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/maven-metadata.xml
-Downloading from central: https://repo.maven.apache.org/maven2/org/cyclonedx/maven-metadata.xml
-Downloading from central: https://repo.maven.apache.org/maven2/io/github/git-commit-id/maven-metadata.xml
-Progress (1): 243 BProgress (2): 243 B | 255 BProgress (3): 243 B | 255 B | 234 BProgress (4): 243 B | 255 B | 234 B | 249 B                                           Downloaded from central: https://repo.maven.apache.org/maven2/io/github/git-commit-id/maven-metadata.xml (255 B at 687 B/s)
-Downloaded from central: https://repo.maven.apache.org/maven2/org/flywaydb/maven-metadata.xml (234 B at 629 B/s)
-Downloaded from central: https://repo.maven.apache.org/maven2/org/cyclonedx/maven-metadata.xml (243 B at 653 B/s)
-Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/maven-metadata.xml (249 B at 665 B/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/jooq/maven-metadata.xml
-Downloading from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/maven-metadata.xml
-Downloading from central: https://repo.maven.apache.org/maven2/org/liquibase/maven-metadata.xml
-Downloading from central: https://repo.maven.apache.org/maven2/org/graalvm/buildtools/maven-metadata.xml
-Progress (1): 394 BProgress (2): 394 B | 242 B                           Downloaded from central: https://repo.maven.apache.org/maven2/org/liquibase/maven-metadata.xml (394 B at 6.7 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-metadata.xml
-Progress (2): 242 B | 398 BProgress (3): 242 B | 398 B | 375 B                                   Downloaded from central: https://repo.maven.apache.org/maven2/org/graalvm/buildtools/maven-metadata.xml (242 B at 4.1 kB/s)
-Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/maven-metadata.xml
-Downloaded from central: https://repo.maven.apache.org/maven2/org/jooq/maven-metadata.xml (398 B at 6.3 kB/s)
-Downloaded from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/maven-metadata.xml (375 B at 6.0 kB/s)
-Progress (1): 3.1 kBProgress (1): 7.7 kBProgress (1): 12 kB Progress (1): 17 kBProgress (1): 20 kBProgress (1): 21 kBProgress (2): 21 kB | 4.6 kBProgress (2): 21 kB | 9.7 kBProgress (2): 21 kB | 14 kB                            Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-metadata.xml (14 kB at 193 kB/s)
-Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/maven-metadata.xml (21 kB at 162 kB/s)
-[INFO] 
-[INFO] ----------------------< com.example:FlippedClass >----------------------
-[INFO] Building FlippedClass 0.0.1-SNAPSHOT
-[INFO]   from pom.xml
-[INFO] --------------------------------[ jar ]---------------------------------
-[INFO] 
-[INFO] >>> spring-boot:4.0.6:run (default-cli) > test-compile @ FlippedClass >>>
-[INFO] 
-[INFO] --- resources:3.3.1:resources (default-resources) @ FlippedClass ---
-[INFO] Copying 1 resource from src\main\resources to target\classes
-[INFO] Copying 115 resources from src\main\resources to target\classes
-[INFO] 
-[INFO] --- compiler:3.14.1:compile (default-compile) @ FlippedClass ---
-[INFO] Recompiling the module because of changed source code.
-[INFO] Compiling 244 source files with javac [debug parameters release 21] to target\classes
-[INFO] 
-[INFO] --- resources:3.3.1:testResources (default-testResources) @ FlippedClass ---
-[INFO] skip non existing resourceDirectory D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\test\resources
-[INFO] 
-[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ FlippedClass ---
-[INFO] Recompiling the module because of changed dependency.
-[INFO] Compiling 2 source files with javac [debug parameters release 21] to target\test-classes
-[INFO] 
-[INFO] <<< spring-boot:4.0.6:run (default-cli) < test-compile @ FlippedClass <<<
-[INFO] 
-[INFO] 
-[INFO] --- spring-boot:4.0.6:run (default-cli) @ FlippedClass ---
-[INFO] Attaching agents: []
-
-  .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
- \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
-
- :: Spring Boot ::                (v4.0.6)
-
-2026-06-21T21:49:32.441+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] c.e.f.FlippedClassApplication            : Starting FlippedClassApplication using Java 26.0.1 with PID 18036 (D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\target\classes started by ADMIN in D:\FLIPPED_CLASS\DONG4\FlippedClass_Project)
-2026-06-21T21:49:32.443+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] c.e.f.FlippedClassApplication            : No active profile set, falling back to 1 default profile: "default"
-2026-06-21T21:49:32.608+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2026-06-21T21:49:32.608+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2026-06-21T21:49:33.229+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-06-21T21:49:33.301+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 65 ms. Found 25 JPA repository interfaces.
-2026-06-21T21:49:33.799+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
-2026-06-21T21:49:33.809+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-06-21T21:49:33.810+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.21]
-2026-06-21T21:49:33.841+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1232 ms
-2026-06-21T21:49:33.978+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
-2026-06-21T21:49:34.017+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.12.Final
-2026-06-21T21:49:34.352+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-06-21T21:49:34.383+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-06-21T21:49:34.649+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection ConnectionID:1 ClientConnectionId: 335ec253-fc2c-472b-9d77-65682734e5b2
-2026-06-21T21:49:34.651+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-06-21T21:49:34.710+07:00  WARN 18036 --- [FlippedClass] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: SQLServerDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-06-21T21:49:34.727+07:00  INFO 18036 --- [FlippedClass] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-	Database JDBC URL [jdbc:sqlserver://localhost:1433;concatNullYieldsNull=ON;quotedIdentifier=ON;connectRetryInterval=10;connectRetryCount=1;maxResultBuffer=-1;sendTemporalDataTypesAsStringForBulkCopy=true;delayLoadingLobs=true;useFmtOnly=false;vectorTypeSupport=v1;cacheBulkCopyMetadata=false;bulkCopyForBatchInsertAllowEncryptedValueModifications=false;bulkCopyForBatchInsertTableLock=false;bulkCopyForBatchInsertKeepNulls=false;bulkCopyForBatchInsertKeepIdentity=false;bulkCopyForBatchInsertFireTriggers=false;bulkCopyForBatchInsertCheckConstraints=false;bulkCopyForBatchInsertBatchSize=0;useBulkCopyForBatchInsert=false;cancelQueryTimeout=-1;sslProtocol=TLS;calcBigDecimalPrecision=false;useDefaultJaasConfig=false;jaasConfigurationName=SQLJDBCDriver;statementPoolingCacheSize=0;serverPreparedStatementDiscardThreshold=10;enablePrepareOnFirstPreparedStatementCall=false;fips=false;socketTimeout=0;authentication=NotSpecified;authenticationScheme=nativeAuthentication;xopenStates=false;datetimeParameterType=datetime2;sendTimeAsDatetime=true;replication=false;trustStoreType=JKS;trustServerCertificate=true;TransparentNetworkIPResolution=true;iPAddressPreference=IPv4First;serverNameAsACE=false;sendStringParametersAsUnicode=true;selectMethod=direct;responseBuffering=adaptive;queryTimeout=-1;packetSize=8000;multiSubnetFailover=false;loginTimeout=30;lockTimeout=-1;lastUpdateCount=true;useDefaultGSSCredential=false;prepareMethod=prepexec;encrypt=true;disableStatementPooling=true;databaseName=FlippedClassDB;columnEncryptionSetting=Disabled;applicationName=Microsoft JDBC Driver for SQL Server;applicationIntent=readwrite;]
-	Database driver: Microsoft JDBC Driver 13.2 for SQL Server
-	Database dialect: SQLServerDialect
-	Database version: 15.0
-	Default catalog/schema: FlippedClassDB/dbo
-	Autocommit mode: undefined/unknown
-	Isolation level: READ_COMMITTED [default READ_COMMITTED]
-	JDBC fetch size: 128
-	Pool: DataSourceConnectionProvider
-	Minimum pool size: undefined/unknown
-	Maximum pool size: undefined/unknown

@@ -61,9 +61,29 @@ public class TemplateController {
         return "lecturer/quiz-builder";
     }
 
+    @GetMapping("/lecturer/mentoring")
+    public String peerMentoring() {
+        return "lecturer/mentoring";
+    }
+
+    @GetMapping("/supporter/dashboard")
+    public String supporterDashboard() {
+        return "supporter/dashboard";
+    }
+
     @GetMapping("/lecturer/quizzes/{id}/statistics")
     public String quizStatistics() {
         return "lecturer/quiz-statistics";
+    }
+
+    @GetMapping("/supporter/quizzes/{id}/builder")
+    public String supporterQuizBuilder() {
+        return "supporter/quiz-builder";
+    }
+
+    @GetMapping("/supporter/quizzes/{id}/statistics")
+    public String supporterQuizStatistics() {
+        return "supporter/quiz-statistics";
     }
 
     @GetMapping("/student/dashboard")
@@ -120,15 +140,32 @@ public class TemplateController {
     @Autowired
     private LearningPathService learningPathService;
 
-    @GetMapping("/lecturer/space/{spaceId}")
-    public String learningPath(@PathVariable Long spaceId, Model model) {
+    private void loadSpaceCommonData(Long spaceId, String activeTab, Model model) {
         model.addAttribute("spaceId", spaceId);
+        model.addAttribute("activeTab", activeTab);
         try {
             model.addAttribute("paths", learningPathService.getLearningPath(spaceId, null));
         } catch(Exception e) {
             model.addAttribute("paths", java.util.Collections.emptyList());
         }
+    }
+
+    @GetMapping("/lecturer/space/{spaceId}")
+    public String learningPath(@PathVariable Long spaceId, Model model) {
+        loadSpaceCommonData(spaceId, "roadmap", model);
         return "lecturer/learningPath";
+    }
+
+    @GetMapping("/supporter/space/{spaceId}")
+    public String supporterLearningPath(@PathVariable Long spaceId, Model model) {
+        model.addAttribute("spaceId", spaceId);
+        model.addAttribute("isSupporter", true);
+        try {
+            model.addAttribute("paths", learningPathService.getLearningPath(spaceId, null));
+        } catch(Exception e) {
+            model.addAttribute("paths", java.util.Collections.emptyList());
+        }
+        return "supporter/learningPath";
     }
 
     @GetMapping("/lecturer/learning-nodes/{nodeId}/preview")
@@ -139,14 +176,39 @@ public class TemplateController {
 
     @GetMapping("/lecturer/space-members")
     public String spaceMembers(@RequestParam("spaceId") Long spaceId, Model model) {
-        model.addAttribute("spaceId", spaceId);
-        return "lecturer/space-members";
+        loadSpaceCommonData(spaceId, "people", model);
+        return "lecturer/learningPath";
     }
+
+    @GetMapping("/supporter/space-members")
+    public String supporterSpaceMembers(@RequestParam("spaceId") Long spaceId, Model model) {
+        model.addAttribute("spaceId", spaceId);
+        return "supporter/space-members";
+    }
+
 
     @GetMapping("/lecturer/spaces/{spaceId}/analytics")
     public String learningAnalytics(@PathVariable Long spaceId, Model model) {
-        model.addAttribute("spaceId", spaceId);
-        return "lecturer/learning-analytics";
+        loadSpaceCommonData(spaceId, "analytics", model);
+        return "lecturer/learningPath";
+    }
+
+    @GetMapping("/lecturer/spaces/{spaceId}/group-activities")
+    public String lecturerGroupActivities(@PathVariable Long spaceId, Model model) {
+        loadSpaceCommonData(spaceId, "activities", model);
+        return "lecturer/learningPath";
+    }
+
+    @GetMapping("/lecturer/group-activities/{activityId}")
+    public String lecturerActivityDetail(@PathVariable Long activityId, Model model) {
+        model.addAttribute("activityId", activityId);
+        return "lecturer/activity-detail";
+    }
+
+    @GetMapping("/lecturer/groups/{groupId}/review")
+    public String lecturerGroupReview(@PathVariable Long groupId, Model model) {
+        model.addAttribute("groupId", groupId);
+        return "lecturer/group-review";
     }
 
     @GetMapping("/lecturer/summaries/{summaryId}/review")

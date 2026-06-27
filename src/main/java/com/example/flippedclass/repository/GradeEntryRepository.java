@@ -13,4 +13,6 @@ public interface GradeEntryRepository extends JpaRepository<GradeEntry, Long> {
     List<GradeEntry> findByStudentId(Long studentId);
 
     Optional<GradeEntry> findBySessionIdAndStudentIdAndCriterionId(Long sessionId, Long studentId, Long criterionId);
+
+    List<GradeEntry> findBySession_LearningPath_LearningSpace_IdAndStudentId(Long spaceId, Long studentId);
 }

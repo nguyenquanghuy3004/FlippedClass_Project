@@ -334,3 +334,37 @@
 
 .cursor-pointer { cursor: pointer; }
 .drag-handle    { cursor: grab; }
+
+/* ------------------------------------------
+   NODE COLLAPSE BUTTON
+------------------------------------------ */
+.node-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(79,70,229,0.15);
+}
+
+.node-collapse-btn:hover {
+  transform: scale(1.12);
+  box-shadow: 0 4px 16px rgba(79,70,229,0.3);
+  filter: brightness(1.08);
+}
+
+.node-collapse-btn i {
+  transition: transform 0.25s ease;
+  font-size: 1.05rem;
+}
+
+/* Animate the content area */
+.collapse {
+  transition: height 0.3s ease;
+}

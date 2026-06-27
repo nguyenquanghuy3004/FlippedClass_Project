@@ -96,6 +96,7 @@ public class DiscussionServiceImpl implements DiscussionService {
         List<DiscussionResponse> replyResponses = null;
         if (discussion.getReplies() != null && !discussion.getReplies().isEmpty()) {
             replyResponses = discussion.getReplies().stream()
+                .sorted(java.util.Comparator.comparing(NodeDiscussion::getCreatedAt))
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
         }

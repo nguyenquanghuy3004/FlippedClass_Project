@@ -38,6 +38,7 @@ public interface LearningSpaceRepository extends JpaRepository<LearningSpace, Lo
     
     int countByOwnerId(Long ownerId);
 
+    @EntityGraph(attributePaths = {"owner"})
     List<LearningSpace> findByVisibilityAndStatus(VisibilityType visibility, LearningSpaceStatus status);
 
 

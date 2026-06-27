@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
+<head>
+    <title>Review & Grade Group</title>
+    <th:block layout:fragment="head">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+        <style>
+            .info-card {
+                border-radius: 12px;
+                border: 1px solid rgba(0,0,0,0.05);
+                box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+                height: 100%;
+            }
+            .section-title {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #2b3440;
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid #f1f5f9;
+            }
+            .split-pane-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1.5rem;
+                align-items: stretch;
+            }
+            .split-pane-left {
+                flex: 1;
+                min-width: 300px;
+            }
+            .split-pane-right {
+                flex: 1.2;
+                min-width: 300px;
+            }
+            .score-input {
+                font-size: 2rem;
+                font-weight: 700;
+                text-align: center;
+                color: #10b981;
+                border-color: #10b981;
+            }
+            .score-input:focus {
+                border-color: #10b981;
+                box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25);
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <input type="hidden" id="groupId" th:value="${groupId}" />
+        
+        <div class="container-fluid py-4">
+            <!-- Breadcrumb / Header -->
+            <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-light me-3 shadow-sm rounded-circle d-flex align-items-center justify-content-center p-0" 
+                        style="width: 40px; height: 40px;" onclick="history.back()">
+                    <i class="ti ti-arrow-left fs-4"></i>
+                </button>
+                <div>
+                    <h3 class="fw-bold mb-0">Review & Grade</h3>
+                    <p class="text-muted mb-0">Evaluate group submission and provide feedback</p>
+                </div>
+                <div class="ms-auto" id="submissionStatusContainer">
+                    <!-- Status Badge -->
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Main Content: Split Pane -->
+            <div id="mainContent" class="split-pane-container d-none">
+                <!-- Left Pane: Group Information -->
+                <div class="split-pane-left">
+                    <div class="card info-card">
+                        <div class="card-body p-4">
+                            <h5 class="section-title"><i class="ti ti-users text-primary me-2"></i>Group Information</h5>
+                            
+                            <h4 class="fw-bold text-dark mb-4" id="groupName">--</h4>
+                            
+                            <div class="mb-4">
+                                <h6 class="text-muted small fw-bold text-uppercase mb-2">Members</h6>
+                                <ul class="list-group list-group-flush border-top-0" id="groupMembers">
+                                    <!-- Render members here -->
+                                </ul>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6 class="text-muted small fw-bold text-uppercase mb-2">GitHub Repository</h6>
+                                <div id="githubUrlContainer">
+                                    <p class="text-muted mb-0"><i class="ti ti-brand-github me-1"></i>Not submitted</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <h6 class="text-muted small fw-bold text-uppercase mb-1">Submitted By</h6>
+                                    <p class="mb-0 fw-bold" id="submittedBy">--</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <h6 class="text-muted small fw-bold text-uppercase mb-1">Submitted At</h6>
+                                    <p class="mb-0 fw-bold" id="submittedAt">--</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Pane: Review & Grade -->
+                <div class="split-pane-right">
+                    <div class="card info-card bg-light border-0">
+                        <div class="card-body p-4">
+                            <h5 class="section-title"><i class="ti ti-checklist text-success me-2"></i>Evaluation</h5>
+                            
+                            <form id="gradeForm" onsubmit="submitGrade(event)">
+                                <div class="mb-4 text-center">
+                                    <label class="form-label text-muted fw-bold text-uppercase mb-3">Score (0-10)</label>
+                                    <div class="d-flex justify-content-center">
+                                        <input type="number" class="form-control score-input shadow-sm w-50" 
+                                               id="scoreInput" min="0" max="10" step="0.5" placeholder="--" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label text-muted fw-bold text-uppercase mb-2">Feedback</label>
+                                    <textarea class="form-control border-0 shadow-sm rounded-3 p-3" id="feedbackInput" 
+                                              rows="6" placeholder="Write your feedback and comments for the group here..."></textarea>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success py-3 fw-bold rounded-3 shadow-sm fs-5" id="saveGradeBtn">
+                                        <i class="ti ti-device-floppy me-2"></i> Save Grade
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                loadReviewDetails();
+            });
+
+            async function loadReviewDetails() {
+                const groupId = document.getElementById('groupId').value;
+                const loading = document.getElementById('loadingIndicator');
+                const mainContent = document.getElementById('mainContent');
+
+                try {
+                    const token = localStorage.getItem('jwt_token');
+                    const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+
+                    const response = await fetch(`/api/lecturer/group-activities/groups/${groupId}/review`, { headers });
+                    if (!response.ok) throw new Error('Failed to load review details');
+                    
+                    const data = await response.json();
+                    
+                    // Format dates
+                    const formatDate = (dateString) => {
+                        if (!dateString) return '--';
+                        return new Date(dateString).toLocaleDateString('vi-VN', {
+                            day: '2-digit', month: '2-digit', year: 'numeric', 
+                            hour: '2-digit', minute: '2-digit'
+                        });
+                    };
+
+                    // Populate UI
+                    document.getElementById('groupName').textContent = data.groupName;
+                    
+                    // Status Badge
+                    let statusHtml = '';
+                    if (data.status === 'GRADED') {
+                        statusHtml = `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-4 py-2 rounded-pill fs-6"><i class="ti ti-check me-1"></i>Graded</span>`;
+                    } else if (data.status === 'SUBMITTED') {
+                        statusHtml = `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-4 py-2 rounded-pill fs-6"><i class="ti ti-file-check me-1"></i>Submitted</span>`;
+                    } else {
+                        statusHtml = `<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-4 py-2 rounded-pill fs-6"><i class="ti ti-clock me-1"></i>Not Submitted</span>`;
+                    }
+                    document.getElementById('submissionStatusContainer').innerHTML = statusHtml;
+
+                    // Members List
+                    const membersUl = document.getElementById('groupMembers');
+                    membersUl.innerHTML = '';
+                    if (data.members && data.members.length > 0) {
+                        data.members.forEach(member => {
+                            membersUl.innerHTML += `<li class="list-group-item bg-transparent px-0 py-2 border-light"><i class="ti ti-user me-2 text-muted"></i>${member}</li>`;
+                        });
+                    } else {
+                        membersUl.innerHTML = '<li class="list-group-item bg-transparent px-0 text-muted">No members</li>';
+                    }
+
+                    // GitHub
+                    const ghContainer = document.getElementById('githubUrlContainer');
+                    if (data.githubUrl) {
+                        ghContainer.innerHTML = `<a href="${data.githubUrl}" target="_blank" class="btn btn-outline-dark fw-bold rounded-pill"><i class="ti ti-brand-github me-1"></i> View Repository</a>`;
+                    } else {
+                        ghContainer.innerHTML = `<p class="text-danger fw-bold mb-0"><i class="ti ti-alert-circle me-1"></i>No submission link</p>`;
+                    }
+
+                    document.getElementById('submittedBy').textContent = data.submittedBy || '--';
+                    document.getElementById('submittedAt').textContent = formatDate(data.submittedAt);
+
+                    // Form Values
+                    if (data.score !== null) {
+                        document.getElementById('scoreInput').value = data.score;
+                    }
+                    if (data.feedback) {
+                        document.getElementById('feedbackInput').value = data.feedback;
+                    }
+
+                    // Show content
+                    loading.classList.add('d-none');
+                    mainContent.classList.remove('d-none');
+                } catch (error) {
+                    console.error('Error:', error);
+                    loading.innerHTML = `<div class="alert alert-danger">Error loading group details. Please try again.</div>`;
+                }
+            }
+
+            async function submitGrade(event) {
+                event.preventDefault();
+                
+                const groupId = document.getElementById('groupId').value;
+                const score = parseFloat(document.getElementById('scoreInput').value);
+                const feedback = document.getElementById('feedbackInput').value;
+                const btn = document.getElementById('saveGradeBtn');
+                
+                if (score < 0 || score > 10) {
+                    Swal.fire('Invalid Score', 'Score must be between 0 and 10', 'error');
+                    return;
+                }
+
+                // UI loading state
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Saving...`;
+                btn.disabled = true;
+
+                try {
+                    const token = localStorage.getItem('jwt_token');
+                    const headers = { 'Content-Type': 'application/json' };
+                    if (token) headers['Authorization'] = 'Bearer ' + token;
+
+                    const response = await fetch(`/api/lecturer/group-activities/groups/${groupId}/grade`, {
+                        method: 'PUT',
+                        headers: headers,
+                        body: JSON.stringify({ score, feedback })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to save grade');
+                    
+                    const result = await response.json();
+                    
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Grade has been saved successfully.',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#10b981'
+                    });
+                    
+                    // Update status badge locally
+                    document.getElementById('submissionStatusContainer').innerHTML = `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-4 py-2 rounded-pill fs-6"><i class="ti ti-check me-1"></i>Graded</span>`;
+                    
+                } catch (error) {
+                    console.error('Error saving grade:', error);
+                    Swal.fire('Error', 'An error occurred while saving the grade.', 'error');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>

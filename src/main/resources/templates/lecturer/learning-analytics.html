@@ -1,202 +1,190 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
-<head>
-    <title>Learning Analytics - Premium View</title>
-    <th:block layout:fragment="head">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <link rel="stylesheet" th:href="@{/assets/css/lecturer-learningPath.css}">
-        <link rel="stylesheet" th:href="@{/assets/css/lecturer-analytics.css}">
-    </th:block>
-</head>
-<body>
-    <div layout:fragment="content">
+<div th:fragment="content">
         <input type="hidden" id="spaceId" th:value="${spaceId}" />
         
-        <div class="container-fluid py-4">
-            <!-- Tabs -->
-            <ul class="nav page-tabs mb-4">
-                <li class="nav-item">
-                    <a class="nav-link" href="/lecturer/dashboard"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{'/lecturer/space/' + ${spaceId}}">Classwork / Roadmap</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{'/lecturer/space-members?spaceId=' + ${spaceId}}">People</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">Analytics</a>
-                </li>
-            </ul>
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <h1 class="fs-3 mb-1">Learning Analytics</h1>
+                <p class="text-muted mb-0">Track student progress and performance across the space.</p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <button class="btn btn-outline-primary rounded-pill px-4" onclick="fetchAnalytics()">
+                    <i class="ti ti-refresh me-1"></i> Refresh Data
+                </button>
+            </div>
+        </div>
 
-            <!-- Premium Banner -->
-            <div class="analytics-banner mb-4 shadow-lg">
-                <div class="row align-items-center position-relative" style="z-index: 2;">
-                    <div class="col-lg-5 mb-4 mb-lg-0">
-                        <span class="badge bg-white text-primary mb-3 px-3 py-2 rounded-pill fw-bold"><i class="ti ti-sparkles text-warning"></i> AI Powered Overview</span>
-                        <h1 class="display-6 fw-bold mb-3 text-white">Class Intelligence</h1>
-                        <p class="text-white-50 fs-5 mb-4">Track engagement, monitor progress, and identify top talents instantly.</p>
-                        <div class="d-flex gap-3">
-                            <div class="kpi-glass flex-fill text-center">
-                                <i class="ti ti-users fs-2 mb-2 d-block text-white"></i>
-                                <h3 class="fw-bold mb-0" id="kpi-total-students">--</h3>
-                                <span class="small text-white-50">Enrolled</span>
-                            </div>
-                            <div class="kpi-glass flex-fill text-center">
-                                <i class="ti ti-activity fs-2 mb-2 d-block text-white"></i>
-                                <h3 class="fw-bold mb-0" id="kpi-active-students">--</h3>
-                                <span class="small text-white-50">Active Now</span>
-                            </div>
-                            <div class="kpi-glass flex-fill text-center">
-                                <i class="ti ti-star fs-2 mb-2 d-block text-warning"></i>
-                                <h3 class="fw-bold mb-0" id="kpi-candidates">--</h3>
-                                <span class="small text-white-50">Stars</span>
-                            </div>
+        <!-- Premium Banner -->
+        <div class="analytics-banner mb-4 shadow-lg">
+            <div class="row align-items-center position-relative" style="z-index: 2;">
+                <div class="col-lg-5 mb-4 mb-lg-0">
+                    <span class="badge bg-white text-primary mb-3 px-3 py-2 rounded-pill fw-bold"><i class="ti ti-sparkles text-warning"></i> AI Powered Overview</span>
+                    <h1 class="display-6 fw-bold mb-3 text-white">Class Intelligence</h1>
+                    <p class="text-white-50 fs-5 mb-4">Track engagement, monitor progress, and identify top talents instantly.</p>
+                    <div class="d-flex gap-3">
+                        <div class="kpi-glass flex-fill text-center">
+                            <i class="ti ti-users fs-2 mb-2 d-block text-white"></i>
+                            <h3 class="fw-bold mb-0" id="kpi-total-students">--</h3>
+                            <span class="small text-white-50">Enrolled</span>
                         </div>
+                        <div class="kpi-glass flex-fill text-center">
+                            <i class="ti ti-activity fs-2 mb-2 d-block text-white"></i>
+                            <h3 class="fw-bold mb-0" id="kpi-active-students">--</h3>
+                            <span class="small text-white-50">Active Now</span>
+                        </div>
+                        <div class="kpi-glass flex-fill text-center">
+                            <i class="ti ti-star fs-2 mb-2 d-block text-warning"></i>
+                            <h3 class="fw-bold mb-0" id="kpi-candidates">--</h3>
+                            <span class="small text-white-50">Stars</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-7">
+                    <div class="chart-card">
+                        <h5 class="fw-bold text-dark mb-3"><i class="ti ti-chart-area-line text-primary"></i> Engagement & Performance Trend</h5>
+                        <div style="position: relative; height: 220px; width: 100%;">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights & Leaderboard -->
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-end mb-3">
+                    <div>
+                        <h3 class="fw-bold mb-1"><i class="ti ti-trophy text-warning"></i> Student Leaderboard</h3>
+                        <p class="text-muted mb-0">Ranked by overall completion and quiz scores.</p>
+                    </div>
+                    <div class="ai-insight-box shadow-sm d-flex align-items-center gap-3">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="ti ti-bulb fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-success mb-0">Class is doing great!</h6>
+                            <span class="small text-success">Average progress is at <span id="kpi-avg-progress" class="fw-bold">--%</span>.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0 text-nowrap">
+                            <thead class="bg-light text-muted fw-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                                <tr>
+                                    <th class="ps-4 py-3 border-0 rounded-start">Rank</th>
+                                    <th class="py-3 border-0">Student</th>
+                                    <th class="py-3 border-0" style="width: 35%;">Learning Journey</th>
+                                    <th class="py-3 text-center border-0">Quiz Score</th>
+                                    <th class="py-3 text-center border-0">Status</th>
+                                    <th class="py-3 pe-4 text-end border-0 rounded-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analytics-table-body">
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                        Analyzing learning data...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Student Detail Modal -->
+    <div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-bottom-0 pb-0 pt-4 px-4 position-relative">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-primary opacity-10 rounded-top-4" style="z-index: 0;"></div>
+                    <h4 class="modal-title fw-bold position-relative" style="z-index: 1;"><i class="ti ti-user-scan text-primary"></i> 360° Student Profile</h4>
+                    <button type="button" class="btn-close position-relative" style="z-index: 1;" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-4">
+                        <img id="detail-avatar" src="" class="student-avatar mb-3" style="width: 80px; height: 80px; border-width: 3px; border-color: #7c3aed;">
+                        <h4 id="detail-name" class="fw-bold mb-1 text-dark">Student Name</h4>
+                        <span id="detail-badge-container"></span>
                     </div>
                     
-                    <div class="col-lg-7">
-                        <div class="chart-card">
-                            <h5 class="fw-bold text-dark mb-3"><i class="ti ti-chart-area-line text-primary"></i> Engagement & Performance Trend</h5>
-                            <div style="position: relative; height: 220px; width: 100%;">
-                                <canvas id="performanceChart"></canvas>
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="bg-light rounded-3 p-3 text-center border">
+                                <span class="d-block text-muted small fw-bold text-uppercase mb-1">Progress</span>
+                                <h4 id="detail-progress" class="fw-bold text-primary mb-0">0%</h4>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Insights & Leaderboard -->
-            <div class="row g-4">
-                <div class="col-12">
-                    <div class="d-flex justify-content-between align-items-end mb-3">
-                        <div>
-                            <h3 class="fw-bold mb-1"><i class="ti ti-trophy text-warning"></i> Student Leaderboard</h3>
-                            <p class="text-muted mb-0">Ranked by overall completion and quiz scores.</p>
-                        </div>
-                        <div class="ai-insight-box shadow-sm d-flex align-items-center gap-3">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                <i class="ti ti-bulb fs-4"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold text-success mb-0">Class is doing great!</h6>
-                                <span class="small text-success">Average progress is at <span id="kpi-avg-progress" class="fw-bold">--%</span>.</span>
+                        <div class="col-6">
+                            <div class="bg-light rounded-3 p-3 text-center border">
+                                <span class="d-block text-muted small fw-bold text-uppercase mb-1">Quiz Avg</span>
+                                <h4 id="detail-quiz" class="fw-bold text-info mb-0">0.0</h4>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
-                        <div class="table-responsive">
-                            <table class="table align-middle mb-0 text-nowrap">
-                                <thead class="bg-light text-muted fw-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
-                                    <tr>
-                                        <th class="ps-4 py-3 border-0 rounded-start">Rank</th>
-                                        <th class="py-3 border-0">Student</th>
-                                        <th class="py-3 border-0" style="width: 35%;">Learning Journey</th>
-                                        <th class="py-3 text-center border-0">Quiz Score</th>
-                                        <th class="py-3 text-center border-0">Status</th>
-                                        <th class="py-3 pe-4 text-end border-0 rounded-end">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="analytics-table-body">
-                                    <tr>
-                                        <td colspan="6" class="text-center py-5 text-muted">
-                                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                                            Analyzing learning data...
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="mb-3 border-bottom pb-2">
+                        <div class="d-flex justify-content-between align-items-center" style="cursor: pointer;" onclick="toggleCompletedNodes()">
+                            <span class="text-muted fw-semibold"><i class="ti ti-book me-1"></i> Completed Nodes <i id="completed-nodes-icon" class="ti ti-chevron-down ms-1" style="font-size: 0.8em;"></i></span>
+                            <span id="detail-completed" class="fw-bold text-primary bg-primary-subtle px-2 py-1 rounded border border-primary-subtle hover-shadow">0/0</span>
+                        </div>
+                        <div id="completed-nodes-list" class="collapse mt-3">
+                            <div class="p-3 bg-light rounded border" id="completed-nodes-content" style="max-height: 200px; overflow-y: auto;">
+                                <!-- Nodes loaded here -->
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Student Detail Modal -->
-        <div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg rounded-4">
-                    <div class="modal-header border-bottom-0 pb-0 pt-4 px-4 position-relative">
-                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-primary opacity-10 rounded-top-4" style="z-index: 0;"></div>
-                        <h4 class="modal-title fw-bold position-relative" style="z-index: 1;"><i class="ti ti-user-scan text-primary"></i> 360° Student Profile</h4>
-                        <button type="button" class="btn-close position-relative" style="z-index: 1;" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="mb-4 d-flex justify-content-between align-items-center border-bottom pb-2">
+                        <span class="text-muted fw-semibold"><i class="ti ti-clock me-1"></i> Last Active</span>
+                        <span id="detail-lastactive" class="fw-bold text-dark fs-7">N/A</span>
                     </div>
-                    <div class="modal-body p-4">
-                        <div class="text-center mb-4">
-                            <img id="detail-avatar" src="" class="student-avatar mb-3" style="width: 80px; height: 80px; border-width: 3px; border-color: #7c3aed;">
-                            <h4 id="detail-name" class="fw-bold mb-1 text-dark">Student Name</h4>
-                            <span id="detail-badge-container"></span>
-                        </div>
-                        
-                        <div class="row g-3 mb-4">
-                            <div class="col-6">
-                                <div class="bg-light rounded-3 p-3 text-center border">
-                                    <span class="d-block text-muted small fw-bold text-uppercase mb-1">Progress</span>
-                                    <h4 id="detail-progress" class="fw-bold text-primary mb-0">0%</h4>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="bg-light rounded-3 p-3 text-center border">
-                                    <span class="d-block text-muted small fw-bold text-uppercase mb-1">Quiz Avg</span>
-                                    <h4 id="detail-quiz" class="fw-bold text-info mb-0">0.0</h4>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="mb-3 border-bottom pb-2">
-                            <div class="d-flex justify-content-between align-items-center" style="cursor: pointer;" onclick="toggleCompletedNodes()">
-                                <span class="text-muted fw-semibold"><i class="ti ti-book me-1"></i> Completed Nodes <i id="completed-nodes-icon" class="ti ti-chevron-down ms-1" style="font-size: 0.8em;"></i></span>
-                                <span id="detail-completed" class="fw-bold text-primary bg-primary-subtle px-2 py-1 rounded border border-primary-subtle hover-shadow">0/0</span>
-                            </div>
-                            <div id="completed-nodes-list" class="collapse mt-3">
-                                <div class="p-3 bg-light rounded border" id="completed-nodes-content" style="max-height: 200px; overflow-y: auto;">
-                                    <!-- Nodes loaded here -->
-                                </div>
-                            </div>
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="ti ti-activity-heartbeat text-primary me-1"></i> Recent Learning Activity</h6>
+                        <div id="detail-interactions" class="rounded p-3 border" style="max-height: 250px; overflow-y: auto; background: #fafafa;">
+                            <div class="text-center text-muted small"><div class="spinner-border spinner-border-sm text-primary"></div> Loading...</div>
                         </div>
-                        <div class="mb-4 d-flex justify-content-between align-items-center border-bottom pb-2">
-                            <span class="text-muted fw-semibold"><i class="ti ti-clock me-1"></i> Last Active</span>
-                            <span id="detail-lastactive" class="fw-bold text-dark fs-7">N/A</span>
-                        </div>
+                    </div>
 
-                        <div class="mb-4">
-                            <h6 class="fw-bold text-dark mb-3"><i class="ti ti-activity-heartbeat text-primary me-1"></i> Recent Learning Activity</h6>
-                            <div id="detail-interactions" class="rounded p-3 border" style="max-height: 250px; overflow-y: auto; background: #fafafa;">
-                                <div class="text-center text-muted small"><div class="spinner-border spinner-border-sm text-primary"></div> Loading...</div>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 text-end d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Close</button>
-                            <button type="button" id="btn-promote-supporter" class="btn btn-warning text-dark fw-bold rounded-pill px-4 d-none shadow-sm">
-                                <i class="ti ti-star-filled me-1"></i> Promote to Supporter
-                            </button>
-                        </div>
+                    <div class="mt-4 text-end d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="btn-promote-supporter" class="btn btn-warning text-dark fw-bold rounded-pill px-4 d-none shadow-sm">
+                            <i class="ti ti-star-filled me-1"></i> Promote to Supporter
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
+</div>
 
-    <th:block layout:fragment="scripts">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <th:block th:fragment="scripts">
         <script>
-            const spaceId = document.getElementById('spaceId').value;
             let currentStudents = [];
             let selectedStudent = null;
             let detailModal;
 
-            document.addEventListener("DOMContentLoaded", () => {
+            $(document).ready(function() {
                 detailModal = new bootstrap.Modal(document.getElementById('studentDetailModal'));
-                fetchAnalytics();
+                // Fetch when tab is opened
+                if ($('#kpi-total-students').is(':visible') && $('#kpi-total-students').text() === '--') {
+                    fetchAnalytics();
+                }
+            });
+
+            $('a[data-bs-toggle="tab"][href="#analytics"]').on('shown.bs.tab', function (e) {
+                if ($('#kpi-total-students').text() === '--') {
+                    fetchAnalytics();
+                }
             });
 
             async function fetchAnalytics() {
                 try {
+                    const spaceId = document.getElementById('spaceId').value;
                     const token = localStorage.getItem('jwt_token');
                     const response = await fetch(`/api/spaces/${spaceId}/analytics`, {
                         headers: { 'Authorization': `Bearer ${token}` }
@@ -410,5 +398,3 @@
             }
         </script>
     </th:block>
-</body>
-</html>

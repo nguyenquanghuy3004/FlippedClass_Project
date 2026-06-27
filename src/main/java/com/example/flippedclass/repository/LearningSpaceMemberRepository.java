@@ -20,10 +20,17 @@ public interface LearningSpaceMemberRepository extends JpaRepository<LearningSpa
 
     boolean existsByLearningSpaceAndUser(LearningSpace learningSpace, User user);
 
+    boolean existsByUser_IdAndRole(Long userId, com.example.flippedclass.enums.MemberRole role);
+
+    long countByLearningSpaceIdAndRole(Long learningSpaceId, com.example.flippedclass.enums.MemberRole role);
+
+    boolean existsByLearningSpaceIdAndUserId(Long learningSpaceId, Long userId);
+
     List<LearningSpaceMember> findByUser_IdOrderByJoinedAtDesc(Long userId);
     int countByUser_Id(Long userId);
 
     Page<LearningSpaceMember> findByLearningSpaceId(Long learningSpaceId, Pageable pageable);
     List<LearningSpaceMember> findByLearningSpaceId(Long learningSpaceId);
     Optional<LearningSpaceMember> findByIdAndLearningSpaceId(Long id, Long learningSpaceId);
+    Optional<LearningSpaceMember> findByLearningSpace_IdAndUser_Id(Long learningSpaceId, Long userId);
 }

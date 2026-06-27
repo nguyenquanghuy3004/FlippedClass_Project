@@ -5,6 +5,15 @@
     <th:block layout:fragment="head">
         <link rel="stylesheet" th:href="@{/assets/css/lecturer-learningPath.css}">
         <link rel="stylesheet" th:href="@{/assets/css/lecturer-learningNode.css}">
+        <link rel="stylesheet" th:href="@{/assets/css/lecturer-analytics.css}">
+        <style>
+            .activity-card { border-radius: 12px; transition: transform 0.2s ease, box-shadow 0.2s ease; border: 1px solid rgba(0,0,0,0.05); }
+            .activity-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important; }
+            .status-badge { padding: 6px 12px; border-radius: 50rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+            .stat-box { background: #f8f9fa; border-radius: 8px; padding: 10px 15px; text-align: center; }
+            .stat-value { font-size: 1.25rem; font-weight: 700; color: #2b3440; margin-bottom: 0; }
+            .stat-label { font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+        </style>
     </th:block>
 </head>
 <body>
@@ -12,21 +21,31 @@
         <input type="hidden" id="spaceId" th:value="${spaceId}" />
         
         <div class="container-fluid py-4">
-            <!-- Tabs -->
-            <ul class="nav page-tabs mb-4">
+            <!-- Classroom Style Tabs -->
+            <ul class="nav nav-tabs mb-4 border-bottom-0 gap-3 fw-bold" style="font-size: 0.95rem;" role="tablist" th:with="currentTab=${activeTab != null ? activeTab : 'roadmap'}">
                 <li class="nav-item">
-                    <a class="nav-link" href="/lecturer/dashboard"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
+                    <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/dashboard" style="transition: color 0.2s;"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">Classwork / Roadmap</a>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'roadmap' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'roadmap' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#roadmap" role="tab" th:attr="data-url-path='/lecturer/space/' + ${spaceId}">Classwork / Roadmap</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/lecturer/space-members(spaceId=${spaceId})}">People</a>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'people' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'people' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#people" role="tab" th:attr="data-url-path='/lecturer/space-members?spaceId=' + ${spaceId}">People</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{'/lecturer/spaces/' + ${spaceId} + '/analytics'}">Analytics</a>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'analytics' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'analytics' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#analytics" role="tab" th:attr="data-url-path='/lecturer/spaces/' + ${spaceId} + '/analytics'">Analytics</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'activities' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'activities' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#activities" role="tab" th:attr="data-url-path='/lecturer/spaces/' + ${spaceId} + '/group-activities'">Group Activities</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'mentoring' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'mentoring' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#mentoring" role="tab" th:attr="data-url-path='/lecturer/mentoring?spaceId=' + ${spaceId}"><i class="ti ti-users me-1"></i> Peer Mentoring</a>
                 </li>
             </ul>
+
+            <div class="tab-content" th:with="currentTab=${activeTab != null ? activeTab : 'roadmap'}">
+                <!-- ROADMAP TAB -->
+                <div class="tab-pane fade" th:classappend="${currentTab == 'roadmap' ? 'show active' : ''}" id="roadmap" role="tabpanel">
 
             <!-- Hero Banner -->
             <div class="classroom-banner mb-5">
@@ -40,6 +59,7 @@
                         <span class="banner-chip"><i class="ti ti-books"></i>
                             <span th:text="${paths != null ? paths.size() : 0}">0</span> Modules
                         </span>
+                        <span class="banner-chip"><i class="ti ti-writing"></i> Roadmap Builder</span>
                     </div>
                     <h1 class="mt-2">Learning Roadmap</h1>
                     <p class="sub">Design &nbsp;/&nbsp; Structure &nbsp;/&nbsp; Publish</p>
@@ -98,14 +118,13 @@
 
                                 <!-- Top accent bar is handled by CSS ::before -->
                                 <div class="path-card-header d-flex justify-content-between align-items-start">
-                                    <div style="cursor: pointer;" data-bs-toggle="collapse" th:data-bs-target="'#timeline-' + ${path.id}" aria-expanded="true" onclick="const i=this.querySelector('.chevron-toggle'); if(i.classList.contains('ti-chevron-down')){i.classList.replace('ti-chevron-down','ti-chevron-right')}else{i.classList.replace('ti-chevron-right','ti-chevron-down')}">
+                                    <div>
                                         <!-- Week chip -->
                                         <span class="path-week-label">
                                             <i class="ti ti-calendar-week me-1"></i>
                                             Week <span th:text="${iterStat.count}">1</span>
                                             &nbsp;&middot;&nbsp;
                                             <span th:text="${path.nodes != null ? path.nodes.size() : 0}">0</span> lessons
-                                            <i class="ti ti-chevron-down chevron-toggle" style="margin-left: 6px; font-weight: bold; color: #6366f1;"></i>
                                         </span>
                                         <!-- Title -->
                                         <h5 class="card-title d-flex align-items-center gap-2 mt-1">
@@ -137,7 +156,6 @@
                                                         <i class="ti ti-pencil text-indigo"></i> Edit Module
                                                     </a>
                                                 </li>
-
                                                 <li>
                                                     <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 text-warning archive-path-btn"
                                                        href="#" th:data-id="${path.id}">
@@ -157,7 +175,7 @@
                                 </div>
 
                                 <!-- Nodes area -->
-                                <div class="card-body px-4 pb-4 pt-2 collapse show" th:id="'timeline-' + ${path.id}">
+                                <div class="card-body px-4 pb-4 pt-2">
                                     <!-- Has lessons -->
                                     <div th:if="${path.nodes != null and !path.nodes.empty}" class="nodes-container">
                                         <th:block th:each="node : ${path.nodes}">
@@ -187,8 +205,30 @@
                 </div>
 
             </div>
-        </div>
+                </div> <!-- End Roadmap Tab Pane -->
 
+                <!-- PEOPLE TAB -->
+                <div class="tab-pane fade" th:classappend="${currentTab == 'people' ? 'show active' : ''}" id="people" role="tabpanel">
+                    <div th:replace="~{lecturer/space-members :: content}"></div>
+                </div> <!-- End People Tab Pane -->
+
+                <!-- ANALYTICS TAB -->
+                <div class="tab-pane fade" th:classappend="${currentTab == 'analytics' ? 'show active' : ''}" id="analytics" role="tabpanel">
+                    <div th:replace="~{lecturer/learning-analytics :: content}"></div>
+                </div> <!-- End Analytics Tab Pane -->
+
+                <!-- ACTIVITIES TAB -->
+                <div class="tab-pane fade" th:classappend="${currentTab == 'activities' ? 'show active' : ''}" id="activities" role="tabpanel">
+                    <div th:replace="~{lecturer/group-activities :: content}"></div>
+                </div> <!-- End Activities Tab Pane -->
+
+                <!-- MENTORING TAB -->
+                <div class="tab-pane fade" th:classappend="${currentTab == 'mentoring' ? 'show active' : ''}" id="mentoring" role="tabpanel">
+                    <div th:replace="~{lecturer/mentoring :: content}"></div>
+                </div> <!-- End Mentoring Tab Pane -->
+                
+            </div> <!-- End Tab Content -->
+        </div>
 
 
 
@@ -281,10 +321,71 @@
 
     </div>
 
+    <!-- Scripts block for the entire layout -->
     <th:block layout:fragment="scripts">
+        <!-- Chart.js needed by analytics -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        
+        <!-- Tab Navigation Logic -->
+        <script>
+            $(document).ready(function() {
+                // Handle tab clicks to update URL
+                $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                    // Update active visual styles
+                    $('.space-tab-link').removeClass('active text-primary border-bottom border-primary border-3').addClass('text-muted');
+                    $('.space-tab-link').attr('style', '');
+                    $(e.target).removeClass('text-muted').addClass('active text-primary border-bottom border-primary border-3');
+                    $(e.target).attr('style', 'color: #1a73e8 !important; border-color: #1a73e8 !important;');
+                    
+                    // Update URL without reloading
+                    const newUrl = $(e.target).attr('data-url-path');
+                    if (newUrl) {
+                        window.history.pushState({path: newUrl}, '', newUrl);
+                    }
+                });
+                
+                // Handle browser back/forward buttons
+                window.addEventListener('popstate', function(event) {
+                    location.reload(); // Simple reload to handle back properly, or we can parse URL and switch tab
+                });
+            });
+        </script>
+
+        <!-- Included Fragments Scripts -->
+        <th:block th:replace="~{lecturer/space-members :: scripts}"></th:block>
+        <th:block th:replace="~{lecturer/learning-analytics :: scripts}"></th:block>
+        <th:block th:replace="~{lecturer/group-activities :: scripts}"></th:block>
+        <th:block th:replace="~{lecturer/mentoring :: scripts}"></th:block>
+
+        <!-- Existing Roadmap Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- Sortable.js for drag and drop -->
         <script>
 
             // LEARNING PATH JS (Logic quản lý đường dẫn học tập - Module)
+
+            window.deleteQuiz = function(quizId) {
+                Swal.fire({
+                    title: 'Delete Quiz?',
+                    text: "Bạn có chắc muốn xóa bài trắc nghiệm này?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Có, xóa nó!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const token = localStorage.getItem('jwt_token');
+                        fetch(`/api/quizzes/${quizId}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        }).then(res => {
+                            if (res.ok) window.location.reload();
+                            else Swal.fire('Error!', 'Lỗi xóa quiz', 'error');
+                        });
+                    }
+                });
+            };
 
             // Hàm kiểm tra input trống (Global utility)
             const checkValid = (selectors) => {
@@ -294,6 +395,17 @@
                 });
                 return valid;
             };
+
+            function launchQuiz(quizId) {
+                const launcher = document.getElementById('quiz-launcher-' + quizId);
+                const container = document.getElementById('quiz-iframe-container-' + quizId);
+                const iframe = document.getElementById('quiz-iframe-' + quizId);
+                if (launcher && container && iframe) {
+                    launcher.style.display = 'none';
+                    container.style.display = 'block';
+                    iframe.src = iframe.getAttribute('data-src');
+                }
+            }
 
             // --- Khởi tạo và xử lý sự kiện quản lý Module (Learning Path) ---
             $(document).ready(function() {
@@ -310,7 +422,6 @@
                 // Update stats from rendered DOM
                 $('#totalModules').text($('.edit-path-btn').length);
                 $('#totalLessons').text($('.edit-node-btn').length);
-
 
 
                 // BIND EVENT LISTENERS (DOM already rendered by Thymeleaf)
@@ -392,15 +503,18 @@
                         },
                         body: JSON.stringify({ title: title, description: desc })
                     })
-                    .then(res => {
-                        if (!res.ok) throw new Error("Failed to create module");
+                    .then(async res => {
+                        if (!res.ok) {
+                            const errData = await res.json().catch(() => ({}));
+                            throw new Error(errData.message || "Failed to create module");
+                        }
                         return res.json();
                     })
                     .then(data => {
                         window.location.reload();
                     })
                     .catch(err => {
-                        errorDiv.text(err.message).show();
+                        $('#createModuleError').text(err.message).show();
                         btn.prop('disabled', false).text('Create Module');
                     });
                 });
@@ -425,15 +539,18 @@
                         },
                         body: JSON.stringify({ title: title, description: desc })
                     })
-                    .then(res => {
-                        if (!res.ok) throw new Error("Failed to update module");
+                    .then(async res => {
+                        if (!res.ok) {
+                            const errData = await res.json().catch(() => ({}));
+                            throw new Error(errData.message || "Failed to update module");
+                        }
                         return res.json();
                     })
                     .then(data => {
                         window.location.reload();
                     })
                     .catch(err => {
-                        errorDiv.text(err.message).show();
+                        $('#editModuleError').text(err.message).show();
                         btn.prop('disabled', false).text('Save Changes');
                     });
                 });
@@ -526,7 +643,6 @@
                     $('#nodeTitle').val('');
                     $('#nodeDescription').val('');
                     $('#nodeType').val('VIDEO');
-                    $('#nodePrerequisite').val('');
                     $('#nodeTitle, #nodeDescription').removeClass('is-invalid');
                     $('#createNodeError').hide();
                     $('#createNodeModal').modal('show');
@@ -545,14 +661,12 @@
                     const title = $(this).data('title');
                     const description = $(this).data('description');
                     const type = $(this).data('type');
-                    const prereq = $(this).data('prereq');
 
                     $('#editNodePathId').val(pathId);
                     $('#editNodeId').val(nodeId);
                     $('#editNodeTitle').val(title);
                     $('#editNodeDescription').val(description !== 'null' ? description : '');
                     $('#editNodeType').val(type || 'VIDEO');
-                    $('#editNodePrerequisite').val(prereq || '');
                     $('#editNodeTitle, #editNodeDescription').removeClass('is-invalid');
                     $('#editNodeError').hide();
                     $('#editNodeModal').modal('show');
@@ -594,7 +708,6 @@
                     const title = $('#nodeTitle').val().trim();
                     const desc = $('#nodeDescription').val().trim();
                     const type = $('#nodeType').val();
-                    const prereq = $('#nodePrerequisite').val() || null;
 
                     btn.prop('disabled', true).text('Adding...');
 
@@ -604,14 +717,10 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId, prerequisiteNodeId: prereq })
+                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
                     })
-                        .then(async res => {
-                            if (!res.ok) {
-                                const errText = await res.text();
-                                console.error("Create node error:", errText);
-                                throw new Error("Failed to add lesson: " + errText);
-                            }
+                        .then(res => {
+                            if (!res.ok) throw new Error("Failed to add lesson");
                             return res.json();
                         })
                         .then(data => {
@@ -634,7 +743,6 @@
                     const title = $('#editNodeTitle').val().trim();
                     const desc = $('#editNodeDescription').val().trim();
                     const type = $('#editNodeType').val();
-                    const prereq = $('#editNodePrerequisite').val() || null;
 
                     btn.prop('disabled', true).text('Saving...');
 
@@ -644,14 +752,10 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId, prerequisiteNodeId: prereq })
+                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
                     })
-                        .then(async res => {
-                            if (!res.ok) {
-                                const errText = await res.text();
-                                console.error("Update node error:", errText);
-                                throw new Error("Failed to update lesson: " + errText);
-                            }
+                        .then(res => {
+                            if (!res.ok) throw new Error("Failed to update lesson");
                             return res.json();
                         })
                         .then(data => {
@@ -739,9 +843,62 @@
                             window.location.reload();
                         })
                         .catch(err => {
-                            errorDiv.text(err.message).show();
+                            $('#addYoutubeError').text(err.message).show();
                             btn.prop('disabled', false).text('Add Video');
                         });
+                });
+
+                // Click nút tạo Quiz
+                $(document).on('click', '.create-quiz-btn', function (e) {
+                    e.preventDefault();
+                    const nodeId = $(this).data('nodeid');
+                    $('#quizNodeId').val(nodeId);
+                    $('#quizTitle').val('Practice Quiz');
+                    $('#quizDuration').val(30);
+                    $('#quizPassScore').val(50);
+                    $('#createQuizModal').modal('show');
+                });
+
+                // Xử lý tạo Quiz
+                $('#btnSaveQuiz').click(function () {
+                    const btn = $(this);
+                    const nodeId = $('#quizNodeId').val();
+                    const title = $('#quizTitle').val().trim();
+                    const duration = $('#quizDuration').val();
+                    const passScore = $('#quizPassScore').val();
+
+                    if (!title) {
+                        alert("Vui lòng nhập tên Quiz");
+                        return;
+                    }
+
+                    btn.prop('disabled', true).text('Đang tạo...');
+
+                    fetch(`/api/quizzes`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({
+                            learningNodeId: nodeId,
+                            title: title,
+                            durationMinutes: duration,
+                            passScore: passScore,
+                            active: true
+                        })
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error("Lỗi tạo quiz");
+                        return res.json();
+                    })
+                    .then(data => {
+                        window.location.href = `/lecturer/quizzes/${data.id}/builder`;
+                    })
+                    .catch(err => {
+                        alert(err.message);
+                        btn.prop('disabled', false).text('Continue to Builder');
+                    });
                 });
 
                 // Hàm thực hiện upload file lên server
@@ -836,13 +993,13 @@
                     const nodeId = container.data('nodeid');
                     const nodeType = container.data('nodetype');
 
-                    fetch(`/api/learning-nodes/${nodeId}/items`, {
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    })
-                        .then(res => res.json())
-                        .then(items => {
+                    Promise.all([
+                        fetch(`/api/learning-nodes/${nodeId}/items`, { headers: { 'Authorization': 'Bearer ' + token } }).then(res => res.ok ? res.json() : []),
+                        fetch(`/api/quizzes/learning-node/${nodeId}/active`, { headers: { 'Authorization': 'Bearer ' + token } }).then(res => res.ok ? res.json() : [])
+                    ])
+                        .then(([items, quizzes]) => {
+                            let html = '';
                             if (items && items.length > 0) {
-                                let html = '';
                                 items.forEach(item => {
                                     if (item.itemType === 'VIDEO') {
                                         let videoHtml = '';
@@ -879,12 +1036,73 @@
                                     </div>`;
                                     }
                                 });
+                            }
+
+                            if (quizzes && quizzes.length > 0) {
+                                quizzes.forEach(quiz => {
+                                    html += `
+                                    <div class="mb-3 mt-4">
+                                        <div class="d-flex align-items-center justify-content-between p-3 bg-white border rounded-4 shadow-sm">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="bg-primary-subtle text-primary p-2 rounded-3">
+                                                    <i class="ti ti-brain fs-3"></i>
+                                                </div>
+                                                <div>
+                                                    <h5 class="mb-0 fw-bold text-dark">${quiz.title || 'Practice Quiz'}</h5>
+                                                    <small class="text-muted">Attached Quiz</small>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <a href="/lecturer/quizzes/${quiz.id}/statistics" class="btn btn-outline-info px-3 py-1 rounded-pill"><i class="ti ti-chart-bar"></i> Thống kê</a>
+                                                <a href="/lecturer/quizzes/${quiz.id}/builder" class="btn btn-outline-primary px-3 py-1 rounded-pill"><i class="ti ti-edit"></i> Edit Quiz</a>
+                                                <button class="btn btn-outline-danger px-3 py-1 rounded-pill" onclick="deleteQuiz(${quiz.id})"><i class="ti ti-trash"></i> Delete Quiz</button>
+                                            </div>
+                                        </div>
+                                        <div id="quiz-launcher-${quiz.id}" class="mt-3 text-center p-4 bg-light border rounded-4">
+                                            <button class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm" onclick="launchQuiz('${quiz.id}')">
+                                                <i class="ti ti-player-play me-2"></i> Take Quiz
+                                            </button>
+                                        </div>
+                                        <div id="quiz-iframe-container-${quiz.id}" class="quiz-iframe-container mt-2" style="display: none;">
+                                            <iframe id="quiz-iframe-${quiz.id}" src="" data-src="/student/take-quiz?quizId=${quiz.id}&embed=true" style="width: 100%; height: 600px; border: 1px solid #dee2e6; border-radius: 8px;"></iframe>
+                                        </div>
+                                    </div>`;
+                                });
+                            }
+
+                            if (html !== '') {
                                 container.html(html);
                             }
                         })
                         .catch(err => console.error('Failed to load items for node', nodeId, err));
                 });
             });
+
+                // -------------------------------------------------------------------
+                // Node Collapse / Expand Toggle
+                // -------------------------------------------------------------------
+                $(document).on('click', '.node-collapse-btn', function () {
+                    const nodeId = $(this).data('nodeid');
+                    const content = document.getElementById('nodeContent-' + nodeId);
+                    const icon = $(this).find('i');
+                    const isCollapsed = $(this).hasClass('is-collapsed');
+
+                    if (isCollapsed) {
+                        // Expand
+                        content.style.maxHeight = '2000px';
+                        content.style.opacity = '1';
+                        icon.css('transform', 'rotate(0deg)');
+                        $(this).removeClass('is-collapsed');
+                        $(this).attr('title', 'Thu gọn');
+                    } else {
+                        // Collapse
+                        content.style.maxHeight = '0';
+                        content.style.opacity = '0';
+                        icon.css('transform', 'rotate(-90deg)');
+                        $(this).addClass('is-collapsed');
+                        $(this).attr('title', 'Mở rộng');
+                    }
+                });
         </script>
     </th:block>
 </body>
