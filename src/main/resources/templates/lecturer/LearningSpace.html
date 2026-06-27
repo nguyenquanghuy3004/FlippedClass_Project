@@ -166,7 +166,9 @@
                         </a>
 
                         <div class="dropdown position-absolute" style="top: 12px; right: 8px; z-index: 10;">
-                            <button type="button" class="btn btn-link text-white p-0 border-0 shadow-none card-options-top" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
+                            <button type="button"
+                                class="btn btn-link text-white p-0 border-0 shadow-none card-options-top"
+                                data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
                                 <i class="ti ti-dots-vertical"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
@@ -174,8 +176,9 @@
                                             class="ti ti-pencil"></i> Edit Space</a></li>
                                 <li><a class="dropdown-item d-flex align-items-center gap-2 clone-space-btn" href="#"><i
                                             class="ti ti-copy"></i> Clone Space</a></li>
-                                <li><a class="dropdown-item d-flex align-items-center gap-2 archive-space-btn" href="#"><i
-                                            class="ti ti-archive"></i> <span class="archive-text">Archive Space</span></a>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 archive-space-btn"
+                                        href="#"><i class="ti ti-archive"></i> <span class="archive-text">Archive
+                                            Space</span></a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
@@ -387,7 +390,7 @@
                 // Hàm kiểm tra input trống
                 const checkValid = (selectors) => {
                     let valid = true;
-                    $(selectors.join(',')).removeClass('is-invalid').each(function() {
+                    $(selectors.join(',')).removeClass('is-invalid').each(function () {
                         if (!$(this).val().trim()) { $(this).addClass('is-invalid'); valid = false; }
                     });
                     return valid;
@@ -533,7 +536,7 @@
                     e.preventDefault();
                     const id = $(this).data('id');
                     const originalName = $(this).data('name');
-                    
+
                     Swal.fire({
                         title: 'Clone Space',
                         input: 'text',
@@ -558,7 +561,7 @@
                                     Swal.showLoading()
                                 }
                             });
-                            
+
                             fetch(`/api/learning-spaces/${id}/clone?newName=${encodeURIComponent(newName)}`, {
                                 method: 'POST',
                                 headers: { 'Authorization': 'Bearer ' + token }
@@ -614,10 +617,10 @@
                             fetch(`/api/learning-spaces/${id}/delete`, {
                                 method: 'DELETE',
                                 headers: { 'Authorization': 'Bearer ' + token }
-                            }).then(res => { 
+                            }).then(res => {
                                 if (res.ok) {
                                     Swal.fire('Deleted!', 'The space has been moved to trash.', 'success');
-                                    fetchSpaces(); 
+                                    fetchSpaces();
                                 } else {
                                     Swal.fire('Error', 'Failed to delete space.', 'error');
                                 }
@@ -633,5 +636,3 @@
 </body>
 
 </html>
-
-
