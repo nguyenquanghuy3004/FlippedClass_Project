@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -17,14 +17,17 @@
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
         <div class="modal-body text-center p-4">
-          <div style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 16px;">
+          <div
+            style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 16px;">
             <i class="ti ti-trash"></i>
           </div>
           <h5 style="font-weight: 700; font-size: 1.15rem; color: #1e293b; margin-bottom: 8px;">Delete Test Case?</h5>
           <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 24px;">This action cannot be undone.</p>
           <div class="d-flex justify-content-center gap-3">
-            <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 10px 24px; color: #475569; background: #f1f5f9; border: none;">Cancel</button>
-            <button type="button" class="btn btn-danger" id="btnConfirmDeleteTestCase" style="border-radius: 8px; font-weight: 600; padding: 10px 24px; background: #ef4444; border: none;">Delete</button>
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal"
+              style="border-radius: 8px; font-weight: 600; padding: 10px 24px; color: #475569; background: #f1f5f9; border: none;">Cancel</button>
+            <button type="button" class="btn btn-danger" id="btnConfirmDeleteTestCase"
+              style="border-radius: 8px; font-weight: 600; padding: 10px 24px; background: #ef4444; border: none;">Delete</button>
           </div>
         </div>
       </div>
@@ -41,36 +44,36 @@
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
   <link rel="stylesheet" th:href="@{/assets/css/node-preview.css}">
   <script>
-(function() {
-    function handleUnauthorized() {
+    (function () {
+      function handleUnauthorized() {
         console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
         localStorage.removeItem('jwt_token');
         sessionStorage.removeItem('jwt_token');
         window.location.href = '/signin';
-    }
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
+      }
+      const originalFetch = window.fetch;
+      window.fetch = async function (...args) {
         try {
-            const response = await originalFetch.apply(this, args);
-            if (response.status === 401) {
-                handleUnauthorized();
-            }
-            return response;
+          const response = await originalFetch.apply(this, args);
+          if (response.status === 401) {
+            handleUnauthorized();
+          }
+          return response;
         } catch (error) {
-            throw error;
+          throw error;
         }
-    };
-    const originalXhrOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function() {
-        this.addEventListener('load', function() {
-            if (this.status === 401) {
-                handleUnauthorized();
-            }
+      };
+      const originalXhrOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function () {
+        this.addEventListener('load', function () {
+          if (this.status === 401) {
+            handleUnauthorized();
+          }
         });
         originalXhrOpen.apply(this, arguments);
-    };
-})();
-</script>
+      };
+    })();
+  </script>
 </head>
 
 <body>
@@ -87,21 +90,28 @@
     <div class="topbar-user-menu">
       <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
         <li class="dropdown" style="list-style: none;">
-          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; color: #1e293b; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-            <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="rounded-circle border" style="width: 35px; height: 35px; object-fit: cover;" />
+          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+            style="text-decoration: none; color: #1e293b; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+            <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="rounded-circle border"
+              style="width: 35px; height: 35px; object-fit: cover;" />
             FCMS Mentor
           </a>
-          <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0" style="min-width: 200px; border-radius: 12px; margin-top: 10px;">
+          <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0"
+            style="min-width: 200px; border-radius: 12px; margin-top: 10px;">
             <div>
-              <div class="d-flex gap-3 align-items-center border-bottom px-3 py-3" style="border-bottom-style: dashed !important;">
-                <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;" />
+              <div class="d-flex gap-3 align-items-center border-bottom px-3 py-3"
+                style="border-bottom-style: dashed !important;">
+                <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="rounded-circle"
+                  style="width: 45px; height: 45px; object-fit: cover;" />
                 <div>
                   <h4 class="mb-0 small fw-bold">Mentor User</h4>
                   <p class="mb-0 small text-muted">@mentor</p>
                 </div>
               </div>
               <div class="p-3 d-flex flex-column gap-1 small lh-lg">
-                <a href="#!" class="text-danger" onclick="logout()" style="text-decoration: none; display: block; padding: 6px; border-radius: 6px; transition: background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
+                <a href="#!" class="text-danger" onclick="logout()"
+                  style="text-decoration: none; display: block; padding: 6px; border-radius: 6px; transition: background 0.2s;"
+                  onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
                   <span><i class="ti ti-logout me-2"></i>Log out</span>
                 </a>
               </div>
@@ -482,15 +492,15 @@
       if (node.nodeType === 'PRACTICE') {
         const shell = document.querySelector('.lesson-shell');
         if (shell) {
-            shell.style.maxWidth = 'none';
-            shell.style.width = '100%';
-            shell.style.padding = '0';
-            shell.style.margin = '0';
+          shell.style.maxWidth = 'none';
+          shell.style.width = '100%';
+          shell.style.padding = '0';
+          shell.style.margin = '0';
         }
         const topbar = document.querySelector('.lesson-topbar');
         if (topbar) {
-            topbar.style.maxWidth = 'none';
-            topbar.style.width = '100%';
+          topbar.style.maxWidth = 'none';
+          topbar.style.width = '100%';
         }
         document.body.style.overflow = 'hidden';
 
@@ -571,7 +581,7 @@
             </div>
         </section>
         `;
-        
+
         document.getElementById('problemDescriptionInput').value = node.content || '';
 
         // Add CSS active state cho tab tự làm
@@ -583,36 +593,36 @@
 
         // Lưu trữ code cho 2 tabs
         window.codeStore = {
-            starter: node.starterCode || "public class Main {\n    public static void main(String[] args) {\n        // Write starter code here...\n    }\n}",
-            solution: node.solutionCode || "public class Main {\n    public static void main(String[] args) {\n        // Write solution code here...\n    }\n}"
+          starter: node.starterCode || "public class Main {\n    public static void main(String[] args) {\n        // Write starter code here...\n    }\n}",
+          solution: node.solutionCode || "public class Main {\n    public static void main(String[] args) {\n        // Write solution code here...\n    }\n}"
         };
         window.currentEditorTab = 'starter';
 
         // Khởi tạo Monaco Editor
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
-        require(['vs/editor/editor.main'], function() {
-            const editorDiv = document.getElementById('editor');
-            if (editorDiv) {
-                window.myCodeEditor = monaco.editor.create(editorDiv, {
-                    value: window.codeStore.starter,
-                    language: "java",
-                    theme: "vs",
-                    automaticLayout: true,
-                    fontSize: 14,
-                    minimap: { enabled: false }
-                });
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+          const editorDiv = document.getElementById('editor');
+          if (editorDiv) {
+            window.myCodeEditor = monaco.editor.create(editorDiv, {
+              value: window.codeStore.starter,
+              language: "java",
+              theme: "vs",
+              automaticLayout: true,
+              fontSize: 14,
+              minimap: { enabled: false }
+            });
 
-                window.myCodeEditor.onDidChangeModelContent(() => {
-                    window.codeStore[window.currentEditorTab] = window.myCodeEditor.getValue();
-                });
-            }
+            window.myCodeEditor.onDidChangeModelContent(() => {
+              window.codeStore[window.currentEditorTab] = window.myCodeEditor.getValue();
+            });
+          }
         });
 
         // Hàm chuyển tab editor
-        window.switchEditorTab = function(tab) {
-            if (!window.myCodeEditor || window.currentEditorTab === tab) return;
-            window.currentEditorTab = tab;
-            window.myCodeEditor.setValue(window.codeStore[tab]);
+        window.switchEditorTab = function (tab) {
+          if (!window.myCodeEditor || window.currentEditorTab === tab) return;
+          window.currentEditorTab = tab;
+          window.myCodeEditor.setValue(window.codeStore[tab]);
         };
 
         // JS logic thu gọn/mở rộng Test Case
@@ -621,34 +631,34 @@
         const terminalToggleIcon = document.getElementById('terminalToggleIcon');
 
         if (btnToggleTerminal) {
-            btnToggleTerminal.addEventListener('click', function() {
-                terminalCard.classList.toggle('collapsed');
-                if (terminalCard.classList.contains('collapsed')) {
-                    terminalToggleIcon.classList.replace('ti-chevron-down', 'ti-chevron-up');
-                } else {
-                    terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
-                }
-                setTimeout(() => { if (window.myCodeEditor) window.myCodeEditor.layout(); }, 350);
-            });
+          btnToggleTerminal.addEventListener('click', function () {
+            terminalCard.classList.toggle('collapsed');
+            if (terminalCard.classList.contains('collapsed')) {
+              terminalToggleIcon.classList.replace('ti-chevron-down', 'ti-chevron-up');
+            } else {
+              terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
+            }
+            setTimeout(() => { if (window.myCodeEditor) window.myCodeEditor.layout(); }, 350);
+          });
         }
 
         // Biến toàn cục lưu Test Cases
         window.testCases = [];
 
         // Hàm render Test Cases
-        window.renderTestCases = function() {
-            const container = document.getElementById('testCasesContainer');
-            if (window.testCases.length === 0) {
-                container.innerHTML = `
+        window.renderTestCases = function () {
+          const container = document.getElementById('testCasesContainer');
+          if (window.testCases.length === 0) {
+            container.innerHTML = `
                     <div class="text-center text-muted" style="padding: 40px 0;">
                         <i class="ti ti-database-off" style="font-size: 2rem; opacity: 0.5;"></i>
                         <p class="mt-2 mb-0">No test cases found. Click "Add Test Case" to begin.</p>
                     </div>
                 `;
-                return;
-            }
+            return;
+          }
 
-            container.innerHTML = window.testCases.map((tc, index) => `
+          container.innerHTML = window.testCases.map((tc, index) => `
                 <div style="background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                     <div style="padding: 6px 12px; background: #fafafa; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-weight: bold; color: #262626; font-size: 0.85rem;"><i class="ti ti-check text-success"></i> Test Case #${index + 1}</span>
@@ -680,127 +690,127 @@
             `).join('');
         };
 
-        window.addTestCaseUI = function() {
-            window.testCases.push({ inputData: '', expectedOutput: '', isHidden: false, points: 10 });
-            window.renderTestCases();
-            const container = document.getElementById('testCasesContainer');
-            setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
+        window.addTestCaseUI = function () {
+          window.testCases.push({ inputData: '', expectedOutput: '', isHidden: false, points: 10 });
+          window.renderTestCases();
+          const container = document.getElementById('testCasesContainer');
+          setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
         };
 
         let testCaseToDelete = null;
         let deleteTestCaseModal = null;
 
-        window.removeTestCase = function(index) {
-            testCaseToDelete = index;
-            if (!deleteTestCaseModal) {
-                deleteTestCaseModal = new bootstrap.Modal(document.getElementById('confirmDeleteTestCaseModal'));
-                document.getElementById('btnConfirmDeleteTestCase').addEventListener('click', function() {
-                    if (testCaseToDelete !== null) {
-                        window.testCases.splice(testCaseToDelete, 1);
-                        window.renderTestCases();
-                        deleteTestCaseModal.hide();
-                        testCaseToDelete = null;
-                    }
-                });
-            }
-            deleteTestCaseModal.show();
+        window.removeTestCase = function (index) {
+          testCaseToDelete = index;
+          if (!deleteTestCaseModal) {
+            deleteTestCaseModal = new bootstrap.Modal(document.getElementById('confirmDeleteTestCaseModal'));
+            document.getElementById('btnConfirmDeleteTestCase').addEventListener('click', function () {
+              if (testCaseToDelete !== null) {
+                window.testCases.splice(testCaseToDelete, 1);
+                window.renderTestCases();
+                deleteTestCaseModal.hide();
+                testCaseToDelete = null;
+              }
+            });
+          }
+          deleteTestCaseModal.show();
         };
 
-        window.updateTestCase = function(index, field, value) {
-            if (field === 'points') value = parseInt(value) || 0;
-            window.testCases[index][field] = value;
+        window.updateTestCase = function (index, field, value) {
+          if (field === 'points') value = parseInt(value) || 0;
+          window.testCases[index][field] = value;
         };
 
-        window.runTestCase = function(index) {
-            const tc = window.testCases[index];
-            const codeString = window.codeStore.solution || window.myCodeEditor.getValue();
-            const btn = document.getElementById(`btnRunTest-${index}`);
-            
-            if (btn) {
-                btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
-                btn.disabled = true;
-            }
+        window.runTestCase = function (index) {
+          const tc = window.testCases[index];
+          const codeString = window.codeStore.solution || window.myCodeEditor.getValue();
+          const btn = document.getElementById(`btnRunTest-${index}`);
 
-            fetch('/api/compiler/execute', {
-                method: 'POST',
-                headers: authHeaders(true),
-                body: JSON.stringify({ script: codeString, stdin: tc.inputData })
-            })
+          if (btn) {
+            btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
+            btn.disabled = true;
+          }
+
+          fetch('/api/compiler/execute', {
+            method: 'POST',
+            headers: authHeaders(true),
+            body: JSON.stringify({ script: codeString, stdin: tc.inputData })
+          })
             .then(res => res.json())
             .then(result => {
-                let out = result.output || '';
-                if (result.error) { out = "Error: " + result.error; }
-                window.testCases[index].expectedOutput = out.trim();
-                window.renderTestCases();
+              let out = result.output || '';
+              if (result.error) { out = "Error: " + result.error; }
+              window.testCases[index].expectedOutput = out.trim();
+              window.renderTestCases();
             })
             .catch(err => alert("Error running code: " + err.message))
             .finally(() => {
-                if (btn) {
-                    btn.innerHTML = '<i class="ti ti-player-play-filled"></i> Run';
-                    btn.disabled = false;
-                }
+              if (btn) {
+                btn.innerHTML = '<i class="ti ti-player-play-filled"></i> Run';
+                btn.disabled = false;
+              }
             });
         };
 
         // Load Test Cases từ API
         fetch(`/api/learning-nodes/${node.id}/test-cases`, { headers: authHeaders(false) })
-            .then(res => res.json())
-            .then(data => {
-                window.testCases = data || [];
-                window.renderTestCases();
-            })
-            .catch(err => console.error("Error loading Test Cases:", err));
+          .then(res => res.json())
+          .then(data => {
+            window.testCases = data || [];
+            window.renderTestCases();
+          })
+          .catch(err => console.error("Error loading Test Cases:", err));
 
         // Save Logic (Update to save everything)
-        document.getElementById('btnSaveLab').addEventListener('click', async function() {
-            const btn = this;
-            const content = document.getElementById('problemDescriptionInput').value;
-            
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
-            btn.disabled = true;
+        document.getElementById('btnSaveLab').addEventListener('click', async function () {
+          const btn = this;
+          const content = document.getElementById('problemDescriptionInput').value;
 
-            try {
-                // Determine spaceId
-                const spaceIdParams = urlParams.get('spaceId');
-                const spaceId = node.learningSpaceId || spaceIdParams || '1'; // Fallback
-                
-                // 1. Lưu Node Details (Content, Starter Code, Solution Code)
-                const resNode = await fetch(`/api/learning-spaces/${spaceId}/learning-paths/${node.learningPathId}/learning-nodes/${node.id}`, {
-                    method: 'PUT',
-                    headers: authHeaders(true),
-                    body: JSON.stringify({
-                        title: node.title,
-                        description: node.description,
-                        nodeType: node.nodeType,
-                        content: content,
-                        starterCode: window.codeStore.starter,
-                        solutionCode: window.codeStore.solution
-                    })
-                });
-                if (!resNode.ok) throw new Error(await readError(resNode));
+          btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+          btn.disabled = true;
 
-                // 2. Lưu Test Cases
-                const resTestCases = await fetch(`/api/learning-nodes/${node.id}/test-cases`, {
-                    method: 'PUT',
-                    headers: authHeaders(true),
-                    body: JSON.stringify(window.testCases)
-                });
-                if (!resTestCases.ok) throw new Error(await readError(resTestCases));
-                
-                // Show success
-                btn.innerHTML = '<i class="ti ti-check"></i> Saved!';
-                btn.classList.replace('btn-primary', 'btn-success');
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
-                    btn.classList.replace('btn-success', 'btn-primary');
-                    btn.disabled = false;
-                }, 2000);
-                
-            } catch (err) {
-                alert("Error saving Lab: " + err.message);
-                btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
-                btn.disabled = false;
-            }
+          try {
+            // Determine spaceId
+            const spaceIdParams = urlParams.get('spaceId');
+            const spaceId = node.learningSpaceId || spaceIdParams || '1'; // Fallback
+
+            // 1. Lưu Node Details (Content, Starter Code, Solution Code)
+            const resNode = await fetch(`/api/learning-spaces/${spaceId}/learning-paths/${node.learningPathId}/learning-nodes/${node.id}`, {
+              method: 'PUT',
+              headers: authHeaders(true),
+              body: JSON.stringify({
+                title: node.title,
+                description: node.description,
+                nodeType: node.nodeType,
+                content: content,
+                starterCode: window.codeStore.starter,
+                solutionCode: window.codeStore.solution
+              })
+            });
+            if (!resNode.ok) throw new Error(await readError(resNode));
+
+            // 2. Lưu Test Cases
+            const resTestCases = await fetch(`/api/learning-nodes/${node.id}/test-cases`, {
+              method: 'PUT',
+              headers: authHeaders(true),
+              body: JSON.stringify(window.testCases)
+            });
+            if (!resTestCases.ok) throw new Error(await readError(resTestCases));
+
+            // Show success
+            btn.innerHTML = '<i class="ti ti-check"></i> Saved!';
+            btn.classList.replace('btn-primary', 'btn-success');
+            setTimeout(() => {
+              btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
+              btn.classList.replace('btn-success', 'btn-primary');
+              btn.disabled = false;
+            }, 2000);
+
+          } catch (err) {
+            alert("Error saving Lab: " + err.message);
+            btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
+            btn.disabled = false;
+          }
         });
 
         return; // Dừng việc render UI bình thường
@@ -893,19 +903,19 @@
         ]);
 
         if (nodeResponse.status === 401 || itemsResponse.status === 401) {
-            localStorage.removeItem('jwt_token');
-            window.location.href = '/login?message=Session expired, please login again';
-            return;
+          localStorage.removeItem('jwt_token');
+          window.location.href = '/login?message=Session expired, please login again';
+          return;
         }
 
         if (!nodeResponse.ok) throw new Error(await readError(nodeResponse));
 
         const node = await nodeResponse.json();
-      
-      const currentSpaceId = urlParams.get('spaceId');
-      if (!currentSpaceId && node.spaceId) {
+
+        const currentSpaceId = urlParams.get('spaceId');
+        if (!currentSpaceId && node.spaceId) {
           document.getElementById('backLink').href = `/lecturer/space/${node.spaceId}`;
-      }
+        }
         const items = itemsResponse.ok ? await itemsResponse.json() : [];
 
         renderNodePage(node, items);
@@ -1102,8 +1112,47 @@
       window.location.href = '/signin';
     }
 
+    // --- WEBSOCKET LOGIC cho Discussion ---
+    function shouldPausePolling() {
+      const rootInput = document.getElementById('discussion-input');
+      if (rootInput && (document.activeElement === rootInput || rootInput.value.trim().length > 0)) return true;
+
+      const replyInputs = document.querySelectorAll('textarea[id^="reply-input-"]');
+      for (let input of replyInputs) {
+        if (document.activeElement === input || input.value.trim().length > 0) return true;
+      }
+      return false;
+    }
+
+
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/assets/js/notification.js?v=2"></script>
+  <script>
+    // Independent STOMP connection for discussion updates
+    (function() {
+      if (typeof nodeId === 'undefined' || !nodeId) return;
+      const socket = new SockJS('/ws');
+      const stompClientNode = Stomp.over(socket);
+      stompClientNode.debug = null;
+      stompClientNode.connect({}, function (frame) {
+        stompClientNode.subscribe('/topic/nodes/' + nodeId + '/discussions', function (message) {
+          if (message.body) {
+             const payload = JSON.parse(message.body);
+             if (payload.action === 'UPDATE') {
+                 if (typeof shouldPausePolling === 'function' && !shouldPausePolling()) {
+                     if (typeof loadDiscussions === 'function') loadDiscussions();
+                 }
+             }
+          }
+        });
+      }, function(error) {
+        console.error('WebSocket discussion error:', error);
+      });
+    })();
   </script>
 </body>
-
 </html>
-

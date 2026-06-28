@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -13,36 +13,36 @@
   </script>
   <link rel="stylesheet" th:href="@{/assets/css/summary-review.css}">
   <script>
-(function() {
-    function handleUnauthorized() {
+    (function () {
+      function handleUnauthorized() {
         console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
         localStorage.removeItem('jwt_token');
         sessionStorage.removeItem('jwt_token');
         window.location.href = '/signin';
-    }
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
+      }
+      const originalFetch = window.fetch;
+      window.fetch = async function (...args) {
         try {
-            const response = await originalFetch.apply(this, args);
-            if (response.status === 401) {
-                handleUnauthorized();
-            }
-            return response;
+          const response = await originalFetch.apply(this, args);
+          if (response.status === 401) {
+            handleUnauthorized();
+          }
+          return response;
         } catch (error) {
-            throw error;
+          throw error;
         }
-    };
-    const originalXhrOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function() {
-        this.addEventListener('load', function() {
-            if (this.status === 401) {
-                handleUnauthorized();
-            }
+      };
+      const originalXhrOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function () {
+        this.addEventListener('load', function () {
+          if (this.status === 401) {
+            handleUnauthorized();
+          }
         });
         originalXhrOpen.apply(this, arguments);
-    };
-})();
-</script>
+      };
+    })();
+  </script>
 </head>
 
 <body>
@@ -56,22 +56,25 @@
       <i class="ti ti-arrow-left"></i>
       Back
     </a>
-    
+
     <div class="topbar-spacer"></div>
 
-      <div class="student-user-menu topbar-user-menu" data-user-menu>
-        <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
-          <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Lecturer avatar">
-          <span class="student-menu-info">
-            <span class="student-menu-name" data-user-name>Lecturer View</span>
-          </span>
-          <i class="ti ti-chevron-down student-menu-chevron ms-1"></i>
-        </button>
-        <div class="student-menu-panel" role="menu">
-          <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
-          <button class="student-menu-item student-menu-item-danger" type="button" onclick="logout()" role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
-        </div>
+    <div class="student-user-menu topbar-user-menu" data-user-menu>
+      <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false"
+        aria-label="Account menu">
+        <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Lecturer avatar">
+        <span class="student-menu-info">
+          <span class="student-menu-name" data-user-name>Lecturer View</span>
+        </span>
+        <i class="ti ti-chevron-down student-menu-chevron ms-1"></i>
+      </button>
+      <div class="student-menu-panel" role="menu">
+        <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i
+            class="ti ti-help-circle"></i><span>Help</span></a>
+        <button class="student-menu-item student-menu-item-danger" type="button" onclick="logout()" role="menuitem"><i
+            class="ti ti-logout"></i><span>Logout</span></button>
       </div>
+    </div>
   </header>
 
   <div id="mainContent">
@@ -303,4 +306,3 @@
 </body>
 
 </html>
-

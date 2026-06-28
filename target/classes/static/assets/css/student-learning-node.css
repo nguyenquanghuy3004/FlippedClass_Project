@@ -108,7 +108,8 @@ a {
 }
 
 .lesson-shell {
-  width: min(1500px, calc(100% - 2rem));
+  width: calc(100% - 3rem);
+  max-width: 1920px;
   margin: 1.4rem auto 2.2rem;
 }
 
