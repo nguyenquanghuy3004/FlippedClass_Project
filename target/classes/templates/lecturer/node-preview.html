@@ -1102,28 +1102,6 @@
       window.location.href = '/signin';
     }
 
-    // --- POLLING LOGIC cho Discussion ---
-    function shouldPausePolling() {
-      const rootInput = document.getElementById('discussion-input');
-      if (rootInput && (document.activeElement === rootInput || rootInput.value.trim().length > 0)) return true;
-
-      const replyInputs = document.querySelectorAll('textarea[id^="reply-input-"]');
-      for (let input of replyInputs) {
-        if (document.activeElement === input || input.value.trim().length > 0) return true;
-      }
-
-      const feedbackModalEl = document.getElementById('feedbackModal');
-      if (feedbackModalEl && feedbackModalEl.classList.contains('show')) return true;
-
-      return false;
-    }
-
-    setInterval(() => {
-      if (!shouldPausePolling()) {
-        loadDiscussions();
-      }
-    }, 2000);
-
   </script>
 </body>
 
