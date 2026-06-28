@@ -11,6 +11,7 @@ import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.NodeCommentRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.NodeCommentService;
+import com.example.flippedclass.controller.NotificationController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class NodeCommentServiceImpl implements NodeCommentService {
     private final LearningNodeRepository learningNodeRepository;
     private final UserRepository userRepository;
     private final LearningSpaceMemberRepository learningSpaceMemberRepository;
+    private final NotificationController notificationController;
 
     @Override
     @Transactional(readOnly = true)
@@ -80,6 +82,16 @@ public class NodeCommentServiceImpl implements NodeCommentService {
 
         comment = nodeCommentRepository.save(comment);
 
+        // Đẩy thông báo cho giảng viên nếu người comment không phải là giảng viên
+        Long lecturerId = node.getLearningPath().getLecturer().getId();
+        if (!user.getId().equals(lecturerId)) {
+            notificationController.pushNotification(
+                lecturerId,
+                user.getFullName() + " vừa bình luận trong bài học: " + node.getTitle(),
+                "/lecturer/learning-nodes/" + node.getId()
+            );
+        }
+
         return mapToResponse(comment);
     }
 
@@ -111,6 +123,16 @@ public class NodeCommentServiceImpl implements NodeCommentService {
                 .build();
 
         reply = nodeCommentRepository.save(reply);
+
+        // Đẩy thông báo
+        Long lecturerId = node.getLearningPath().getLecturer().getId();
+        if (!user.getId().equals(lecturerId)) {
+            notificationController.pushNotification(
+                lecturerId,
+                user.getFullName() + " vừa trả lời bình luận trong bài: " + node.getTitle(),
+                "/lecturer/learning-nodes/" + node.getId()
+            );
+        }
 
         return mapToResponse(reply);
     }

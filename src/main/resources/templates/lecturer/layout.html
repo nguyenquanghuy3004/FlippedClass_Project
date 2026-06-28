@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <head>
@@ -15,6 +15,9 @@
   <!-- FontAwesome for fallback -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- SockJS & STOMP for Notifications -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <link rel="stylesheet" th:href="@{/assets/css/lecturer-layout.css}">
   <th:block layout:fragment="head"></th:block>
   <script>
@@ -48,6 +51,23 @@
     };
 })();
 </script>
+<style>
+.premium-toast {
+    border-left: 4px solid #4f46e5 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    padding: 12px 16px !important;
+    background: #ffffff !important;
+}
+.premium-toast .swal2-title {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+}
+.premium-toast .swal2-timer-progress-bar {
+    background-color: #4f46e5 !important;
+}
+</style>
 </head>
 
 <body>
@@ -64,6 +84,24 @@
     </button>
     <div>
       <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
+        <!-- Notification Bell -->
+        <li class="nav-item position-relative pt-1 dropdown">
+            <a href="#" id="bellIcon" class="nav-link text-dark position-relative" data-bs-toggle="dropdown" aria-expanded="false" onclick="markAsReadOnOpen()">
+                <i class="ti ti-bell fs-4"></i>
+                <span id="notifBadge" class="badge bg-danger position-absolute top-0 start-100 translate-middle" style="display:none; font-size: 0.6rem;">!</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0" style="width: 350px; border-radius: 12px; overflow: hidden;">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center text-white" style="background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);">
+                    <h6 class="mb-0 fw-bold"><i class="ti ti-bell-ringing me-2"></i>Thông báo mới</h6>
+                </div>
+                <div id="notifList" class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
+                    <div class="text-center p-4 text-muted small">
+                        <i class="ti ti-inbox fs-1 mb-2 d-block text-light"></i>
+                        Không có thông báo nào
+                    </div>
+                </div>
+            </div>
+        </li>
         <!-- Dropdown -->
         <li class="ms-3 dropdown">
           <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -207,6 +245,105 @@
         $('.sidebar .nav-link[data-nav-path="/lecturer/dashboard"]').addClass('active');
       }
     });
+  </script>
+  <script>
+    const notifUserId = localStorage.getItem('user_id');
+
+    // Cập nhật giao diện list thông báo
+    function renderNotifItem(notif) {
+        const timeStr = new Date(notif.createdAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+        return `
+            <a href="${notif.link || '#'}" class="list-group-item list-group-item-action p-3 border-bottom-0 border-bottom">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.65rem;">Mới</span>
+                    <small class="text-muted" style="font-size: 0.75rem;"><i class="ti ti-clock me-1"></i>${timeStr}</small>
+                </div>
+                <p class="mb-0 text-dark small" style="font-weight: 500; line-height: 1.4;">${notif.message}</p>
+            </a>
+        `;
+    }
+
+    function markAsReadOnOpen() {
+        const badge = document.getElementById('notifBadge');
+        if (badge) badge.style.display = 'none';
+        badge.innerText = '0';
+    }
+
+    if (notifUserId) {
+        // Fetch notifications on load
+        fetch('/api/notifications', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const listEl = document.getElementById('notifList');
+            if (data && data.length > 0) {
+                listEl.innerHTML = data.map(n => renderNotifItem(n)).join('');
+            }
+            
+            const unreadCount = data.filter(n => !n.read).length;
+            if (unreadCount > 0) {
+                const badge = document.getElementById('notifBadge');
+                if (badge) {
+                    badge.innerText = unreadCount;
+                    badge.style.display = 'inline-block';
+                }
+            }
+        })
+        .catch(err => console.error("Error fetching notifications", err));
+
+        // Setup WebSocket for real-time notifications
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+        stompClient.debug = null; 
+
+        stompClient.connect({}, function() {
+            stompClient.subscribe('/topic/notifications/' + notifUserId, function(res) {
+                const notif = JSON.parse(res.body);
+                
+                // Cập nhật danh sách
+                const listEl = document.getElementById('notifList');
+                // Xóa dòng "Không có thông báo" nếu đang hiển thị
+                if (listEl.innerHTML.includes('Không có thông báo')) {
+                    listEl.innerHTML = '';
+                }
+                listEl.insertAdjacentHTML('afterbegin', renderNotifItem(notif));
+
+                // Cập nhật số đếm
+                const badge = document.getElementById('notifBadge');
+                if (badge) {
+                    let currentCount = parseInt(badge.innerText) || 0;
+                    badge.innerText = currentCount + 1;
+                    badge.style.display = 'inline-block';
+                }
+                
+                // Hiện popup đẹp hơn
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'info',
+                        iconColor: '#4f46e5',
+                        title: notif.message,
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        showCloseButton: true,
+                        customClass: {
+                            popup: 'premium-toast'
+                        },
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                }
+            });
+        });
+    }
   </script>
   <th:block layout:fragment="scripts"></th:block>
 </body>

@@ -33,6 +33,7 @@ D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedcla
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\NodeCommentController.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\NodeConnectionController.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\NodeController.java
+D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\NotificationController.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\PeerMentoringController.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\QuestionBankController.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\QuizController.java
@@ -165,6 +166,7 @@ D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedcla
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\NodeConnection.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\NodeDiscussion.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\NodeProgress.java
+D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\Notification.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\PeerPairing.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\QuestionBank.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\Quiz.java
@@ -221,6 +223,7 @@ D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedcla
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\NodeDiscussionRepository.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\NodeProgressRepository.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\NodeRepository.java
+D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\NotificationRepository.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\PeerPairingRepository.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\QuestionBankRepository.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\QuizAttemptRepository.java

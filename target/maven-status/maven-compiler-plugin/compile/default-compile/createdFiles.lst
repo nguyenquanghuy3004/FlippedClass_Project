@@ -90,6 +90,7 @@ com\example\flippedclass\dto\request\CreateEvaluationSessionRequest.class
 com\example\flippedclass\dto\response\RoadmapGraphResponse$Edge$EdgeBuilder.class
 com\example\flippedclass\controller\LearningAnalyticsController.class
 com\example\flippedclass\service\LearningPathService.class
+com\example\flippedclass\repository\NotificationRepository.class
 com\example\flippedclass\dto\request\UpdateProfileRequest.class
 com\example\flippedclass\exception\BusinessException.class
 com\example\flippedclass\dto\request\NodeRequest.class
@@ -177,6 +178,7 @@ com\example\flippedclass\dto\response\NodeResponse.class
 com\example\flippedclass\controller\NodeController.class
 com\example\flippedclass\service\impl\PeerMentoringServiceImpl$StudentGpaInfo.class
 com\example\flippedclass\service\LecturerGroupActivityService.class
+com\example\flippedclass\entity\Notification$NotificationBuilder.class
 com\example\flippedclass\dto\response\GradeEntryResponse.class
 com\example\flippedclass\dto\response\activity\GroupActivityResponse.class
 com\example\flippedclass\controller\QuestionBankController.class
@@ -274,6 +276,7 @@ com\example\flippedclass\service\AdminDashboardService.class
 com\example\flippedclass\repository\CourseDocumentRepository.class
 com\example\flippedclass\dto\response\MessageResponse.class
 com\example\flippedclass\dto\response\StudentDetailResponse.class
+com\example\flippedclass\controller\NotificationController.class
 com\example\flippedclass\dto\response\DashboardUserResponse.class
 com\example\flippedclass\dto\request\UpdateLearningSpaceRequest.class
 com\example\flippedclass\dto\response\activity\GroupActivityResponse$GroupActivityResponseBuilder.class
@@ -286,6 +289,7 @@ com\example\flippedclass\config\WebSocketConfig.class
 com\example\flippedclass\dto\response\TestResultResponse.class
 com\example\flippedclass\dto\response\TestResultResponse$TestCaseResult$TestCaseResultBuilder.class
 com\example\flippedclass\dto\response\activity\LecturerGroupResponse.class
+com\example\flippedclass\entity\Notification.class
 com\example\flippedclass\repository\PeerPairingRepository.class
 com\example\flippedclass\service\impl\LecturerSubmissionServiceImpl.class
 com\example\flippedclass\dto\request\CompleteProfileRequest.class
