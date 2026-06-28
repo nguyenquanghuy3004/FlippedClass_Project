@@ -88,7 +88,7 @@ public class NodeCommentServiceImpl implements NodeCommentService {
             notificationController.pushNotification(
                 lecturerId,
                 user.getFullName() + " vừa bình luận trong bài học: " + node.getTitle(),
-                "/lecturer/learning-nodes/" + node.getId()
+                "/lecturer/learning-nodes/" + node.getId() + "/preview"
             );
         }
 
@@ -130,7 +130,7 @@ public class NodeCommentServiceImpl implements NodeCommentService {
             notificationController.pushNotification(
                 lecturerId,
                 user.getFullName() + " vừa trả lời bình luận trong bài: " + node.getTitle(),
-                "/lecturer/learning-nodes/" + node.getId()
+                "/lecturer/learning-nodes/" + node.getId() + "/preview"
             );
         }
 

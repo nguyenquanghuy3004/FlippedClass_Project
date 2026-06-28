@@ -69,7 +69,7 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
         notificationController.pushNotification(
             lecturerId,
             student.getFullName() + " vừa nộp bài tóm tắt: " + learningNode.getTitle(),
-            "/lecturer/submissions"
+            "/lecturer/summaries/" + summary.getId() + "/review"
         );
 
         return mapToResponse(summary);
