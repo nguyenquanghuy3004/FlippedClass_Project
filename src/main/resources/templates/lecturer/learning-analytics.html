@@ -93,6 +93,7 @@
                                         <th class="ps-4 py-3 border-0 rounded-start">Rank</th>
                                         <th class="py-3 border-0">Student</th>
                                         <th class="py-3 border-0" style="width: 35%;">Learning Journey</th>
+                                        <th class="py-3 text-center border-0">Active Time</th>
                                         <th class="py-3 text-center border-0">Quiz Score</th>
                                         <th class="py-3 text-center border-0">Status</th>
                                         <th class="py-3 pe-4 text-end border-0 rounded-end">Action</th>
@@ -286,6 +287,9 @@
                                     </div>
                                     <span class="fw-bold text-dark small" style="width: 40px;">${s.progressPercentage}%</span>
                                 </div>
+                            </td>
+                            <td class="text-center py-4 text-muted fw-bold small">
+                                <i class="ti ti-clock me-1"></i> ${s.totalActiveTimeFormatted || '0h 0m'}
                             </td>
                             <td class="text-center py-4">
                                 <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle fw-bold fs-6" style="width: 40px; height: 40px; color: ${colorStart}; border: 1px solid ${colorEnd}40;">

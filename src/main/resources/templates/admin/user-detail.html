@@ -76,13 +76,17 @@
                         
                         <h6 class="fw-bold mb-3">Learning Stats</h6>
                         <div class="row text-center">
-                            <div class="col-6 border-end">
+                            <div class="col-4 border-end">
                                 <h3 class="fw-bold text-primary mb-1" id="u-joined">0</h3>
                                 <div class="small text-muted">Spaces Joined</div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4 border-end">
                                 <h3 class="fw-bold text-success mb-1" id="u-owned">0</h3>
                                 <div class="small text-muted">Spaces Owned</div>
+                            </div>
+                            <div class="col-4">
+                                <h3 class="fw-bold text-info mb-1" id="u-time">0m</h3>
+                                <div class="small text-muted">Active Time</div>
                             </div>
                         </div>
                     </div>
@@ -158,6 +162,7 @@
                         $('#u-roles').text(data.user.roles.join(', '));
                         $('#u-joined').text(data.spacesJoined);
                         $('#u-owned').text(data.spacesOwned);
+                        $('#u-time').text(data.totalActiveTimeFormatted || '0m');
                     }
                 });
             }

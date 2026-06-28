@@ -17,4 +17,5 @@ public class UserResponse {
     private String provider;
     private Set<String> roles;
     private LocalDateTime createdAt;
+    private String totalActiveTimeFormatted;
 }

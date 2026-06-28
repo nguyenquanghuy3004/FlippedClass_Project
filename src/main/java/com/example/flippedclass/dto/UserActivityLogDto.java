@@ -10,5 +10,6 @@ public class UserActivityLogDto {
     private Long id;
     private String actionType;
     private String description;
+    private String userEmail;
     private LocalDateTime createdAt;
 }

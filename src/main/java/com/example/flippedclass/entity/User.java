@@ -64,4 +64,8 @@ public class User {
     @Column
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @Column(name = "total_active_time")
+    @Builder.Default
+    private Long totalActiveTime = 0L;
 }

@@ -43,6 +43,7 @@ public class GlobalLearningNodeController {
         return ResponseEntity.ok(response);
     }
 
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "VIEW_NODE", description = "'Học bài học: ' + #result.body.title")
     @GetMapping("/{nodeId}")
     public ResponseEntity<LearningNodeResponse> getNodeDetail(@PathVariable Long nodeId) {
         return learningNodeRepository.findById(nodeId)

@@ -80,6 +80,18 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(findUser(id));
     }
 
+    @Override
+    public void updateActiveTime(Long userId, int activeSeconds) {
+        if (activeSeconds <= 0 || activeSeconds > 120) {
+            return;
+        }
+        User user = findUser(userId);
+        Long current = user.getTotalActiveTime();
+        if (current == null) current = 0L;
+        user.setTotalActiveTime(current + activeSeconds);
+        userRepository.save(user);
+    }
+
     static User findUser(UserRepository repo, Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found: " + id));
@@ -93,6 +105,15 @@ public class UserServiceImpl implements UserService {
         Set<String> roleNames = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(Collectors.toSet());
+
+        Long totalActiveSecs = user.getTotalActiveTime();
+        String formattedTime = "0h 0m";
+        if (totalActiveSecs != null && totalActiveSecs > 0) {
+            long hours = totalActiveSecs / 3600;
+            long minutes = (totalActiveSecs % 3600) / 60;
+            formattedTime = hours + "h " + minutes + "m";
+        }
+
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -102,6 +123,7 @@ public class UserServiceImpl implements UserService {
                 .provider(user.getProvider() != null ? user.getProvider().name() : null)
                 .roles(roleNames)
                 .createdAt(user.getCreatedAt())
+                .totalActiveTimeFormatted(formattedTime)
                 .build();
     }
 }
