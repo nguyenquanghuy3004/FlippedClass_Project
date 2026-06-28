@@ -21,11 +21,19 @@
                                 : 'ti-book-2'))))"
                                th:style="${node.nodeType == 'PRACTICE'} ? 'color: #10b981;' : ''"></i>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <span class="fw-semibold" th:text="${node.title}"
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-semibold node-title-hover" th:text="${node.title}"
                                   th:style="${node.nodeType == 'PRACTICE'} ? 'font-size:0.98rem;color:#f8fafc;letter-spacing:0.2px;transition:all 0.2s;' : 'font-size:0.98rem;color:#1e293b;letter-spacing:0.2px;transition:all 0.2s;'"
                                   th:onmouseover="${node.nodeType == 'PRACTICE'} ? 'this.style.color=\'#818cf8\'; this.style.transform=\'translateX(2px)\'' : 'this.style.color=\'#4f46e5\'; this.style.transform=\'translateX(2px)\''" 
                                   th:onmouseout="${node.nodeType == 'PRACTICE'} ? 'this.style.color=\'#f8fafc\'; this.style.transform=\'translateX(0)\'' : 'this.style.color=\'#1e293b\'; this.style.transform=\'translateX(0)\''">Node Title</span>
+                            
+                            <!-- Bổ sung Nút CTA / Badge hiển thị lời kêu gọi hành động -->
+                            <span th:if="${node.nodeType == 'VIDEO'}" class="badge rounded-pill" style="font-size: 0.75rem; font-weight: 500; background: rgba(79,70,229,0.1); color: #4f46e5; border: 1px solid rgba(79,70,229,0.2); transition: all 0.2s;">
+                                <i class="ti ti-player-play me-1"></i>Vào xem Video
+                            </span>
+                            <span th:if="${node.nodeType == 'PRACTICE'}" class="badge rounded-pill" style="font-size: 0.75rem; font-weight: 500; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;">
+                                <i class="ti ti-code me-1"></i>Vào làm Bài tập
+                            </span>
                         </div>
                     </a>
 
