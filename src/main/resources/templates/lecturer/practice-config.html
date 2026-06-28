@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -20,6 +20,37 @@
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
   <link rel="stylesheet" th:href="@{/assets/css/node-preview.css}">
+  <script>
+(function() {
+    function handleUnauthorized() {
+        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
+        localStorage.removeItem('jwt_token');
+        sessionStorage.removeItem('jwt_token');
+        window.location.href = '/signin';
+    }
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch.apply(this, args);
+            if (response.status === 401) {
+                handleUnauthorized();
+            }
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+    const originalXhrOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function() {
+        this.addEventListener('load', function() {
+            if (this.status === 401) {
+                handleUnauthorized();
+            }
+        });
+        originalXhrOpen.apply(this, arguments);
+    };
+})();
+</script>
 </head>
 
 <body>
@@ -818,3 +849,4 @@
 </body>
 
 </html>
+

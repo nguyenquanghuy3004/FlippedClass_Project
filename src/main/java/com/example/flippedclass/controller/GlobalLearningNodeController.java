@@ -51,6 +51,9 @@ public class GlobalLearningNodeController {
     private NodeConnectionRepository nodeConnectionRepository;
 
     @Autowired
+    private com.example.flippedclass.repository.UserRepository userRepository;
+
+    @Autowired
     private NodeProgressRepository nodeProgressRepository;
 
     @PreAuthorize("hasAuthority('MENTOR')")
@@ -150,7 +153,7 @@ public class GlobalLearningNodeController {
     }
 
     @PostMapping("/{nodeId}/submit-code")
-    public ResponseEntity<?> submitCode(@PathVariable Long nodeId, @RequestBody SubmitCodeRequest request) {
+    public ResponseEntity<?> submitCode(@PathVariable Long nodeId, @RequestBody SubmitCodeRequest request, Authentication authentication) {
         LearningNode node = learningNodeRepository.findById(nodeId).orElse(null);
         if (node == null) {
             return ResponseEntity.notFound().build();
@@ -216,8 +219,27 @@ public class GlobalLearningNodeController {
             }
         }
 
+        boolean allPassed = (passedCount == testCases.size());
+
+        if (allPassed && authentication != null && authentication.getName() != null) {
+            String username = authentication.getName();
+            com.example.flippedclass.entity.User user = userRepository.findByUsername(username).orElse(null);
+            if (user != null) {
+                com.example.flippedclass.entity.NodeProgress progress = nodeProgressRepository
+                        .findByStudentIdAndLearningNodeId(user.getId(), nodeId)
+                        .orElseGet(() -> com.example.flippedclass.entity.NodeProgress.builder()
+                                .student(user)
+                                .learningNode(node)
+                                .build());
+                
+                progress.setStatus(com.example.flippedclass.enums.ProgressStatus.COMPLETED);
+                progress.setCompletedAt(java.time.LocalDateTime.now());
+                nodeProgressRepository.save(progress);
+            }
+        }
+
         TestResultResponse finalResponse = TestResultResponse.builder()
-                .allPassed(passedCount == testCases.size())
+                .allPassed(allPassed)
                 .totalScore(totalScore)
                 .maxScore(maxScore)
                 .passedCount(passedCount)

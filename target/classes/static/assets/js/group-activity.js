@@ -61,7 +61,7 @@ window.renderGroupActivityPage = async function(node, nodeId) {
 
     const styles = `
         <style>
-            #pageRoot.lesson-layout { display: flex; flex-direction: row; min-height: calc(100vh - 65px); background-image: url('/uploads/anh/group_activies.jpg'); background-size: cover; background-position: center; background-attachment: fixed; gap: 24px; padding: 24px; align-items: stretch; }
+            #pageRoot.lesson-layout { display: flex; flex-direction: row; min-height: calc(100vh - 65px); background-image: url('/assets/images/group_activies.jpg'); background-size: cover; background-position: center; background-attachment: fixed; gap: 24px; padding: 24px; align-items: stretch; }
             @media (max-width: 992px) { #pageRoot.lesson-layout { flex-direction: column; } }
             .ga-left-col { flex: 1; display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 800px; margin: 0 auto; }
             .ga-right-col { flex: 1; display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 800px; margin: 0 auto; }

@@ -139,6 +139,37 @@
 
   </script>
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+  <script>
+    (function () {
+      function handleUnauthorized() {
+        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
+        localStorage.removeItem('jwt_token');
+        sessionStorage.removeItem('jwt_token');
+        window.location.href = '/signin';
+      }
+      const originalFetch = window.fetch;
+      window.fetch = async function (...args) {
+        try {
+          const response = await originalFetch.apply(this, args);
+          if (response.status === 401) {
+            handleUnauthorized();
+          }
+          return response;
+        } catch (error) {
+          throw error;
+        }
+      };
+      const originalXhrOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function () {
+        this.addEventListener('load', function () {
+          if (this.status === 401) {
+            handleUnauthorized();
+          }
+        });
+        originalXhrOpen.apply(this, arguments);
+      };
+    })();
+  </script>
 </head>
 
 <body>
@@ -184,9 +215,32 @@
         <p class="mt-3 mb-0">Loading node content...</p>
       </div>
     </div>
+
+    <!-- Modal Share Solution -->
+    <div class="modal fade" id="shareSolutionModal" tabindex="-1" aria-labelledby="shareSolutionModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="shareSolutionModalLabel">Congratulations! 🎉</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>You have successfully passed all test cases! Would you like to share your solution with the class to help others learn?</p>
+            <div class="mb-3">
+              <label for="shareSolutionTitle" class="form-label">Title/Description</label>
+              <input type="text" class="form-control" id="shareSolutionTitle" placeholder="E.g., O(n) solution using HashMap">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Maybe Later</button>
+            <button type="button" class="btn btn-primary" id="btnConfirmShareSolution">Share My Solution</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
-  <script src="/assets/js/student-practice-ui.js"></script>
   <script>
     /* --- Inlined from student-learning-node.js --- */
     let myCodeEditor; // Biến toàn cục để lưu instance của editor
@@ -662,30 +716,30 @@
 
     // Hàm hiển thị giao diện Practice Node
     function renderNodePage(node, items) {
-        const shell = document.querySelector('.lesson-shell');
-        if (shell) {
-            shell.style.maxWidth = 'none';
-            shell.style.width = '100%';
-            shell.style.padding = '0';
-            shell.style.margin = '0';
-        }
-        const topbar = document.querySelector('.lesson-topbar');
-        if (topbar) {
-            topbar.style.maxWidth = 'none';
-            topbar.style.width = '100%';
-        }
-        document.body.style.overflow = 'hidden';
+      const shell = document.querySelector('.lesson-shell');
+      if (shell) {
+        shell.style.maxWidth = 'none';
+        shell.style.width = '100%';
+        shell.style.padding = '0';
+        shell.style.margin = '0';
+      }
+      const topbar = document.querySelector('.lesson-topbar');
+      if (topbar) {
+        topbar.style.maxWidth = 'none';
+        topbar.style.width = '100%';
+      }
+      document.body.style.overflow = 'hidden';
 
-        pageRoot.className = 'lesson-layout practice-layout';
-        pageRoot.style.padding = '0';
-        pageRoot.style.gap = '0';
-        pageRoot.style.background = '#f8fafc';
+      pageRoot.className = 'lesson-layout practice-layout';
+      pageRoot.style.padding = '0';
+      pageRoot.style.gap = '0';
+      pageRoot.style.background = '#f8fafc';
 
-        setTimeout(() => {
-          initMonaco(node.starterCode);
-        }, 100);
+      setTimeout(() => {
+        initMonaco(node.starterCode);
+      }, 100);
 
-        pageRoot.innerHTML = `
+      pageRoot.innerHTML = `
         <style>
           /* Clean, light-themed LeetCode style CSS */
           .practice-layout { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr) !important; align-items: stretch !important; height: calc(100vh - 65px); gap: 8px !important; padding: 8px !important; background: #f0f0f0 !important; }
@@ -864,14 +918,14 @@
             const tabs = document.querySelectorAll('.lc-tab');
             const panes = document.querySelectorAll('.lc-pane-content');
             tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    const targetId = tab.getAttribute('data-target');
-                    panes.forEach(pane => {
-                        pane.style.display = pane.id === targetId ? 'block' : 'none';
-                    });
+              tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                const targetId = tab.getAttribute('data-target');
+                panes.forEach(pane => {
+                  pane.style.display = pane.id === targetId ? 'block' : 'none';
                 });
+              });
             });
 
             // Auto-save
@@ -898,24 +952,24 @@
         const terminalToggleIcon = document.getElementById('terminalToggleIcon');
 
         if (btnToggleTerminal) {
-            btnToggleTerminal.addEventListener('click', function() {
-                terminalCard.classList.toggle('collapsed');
-                if (terminalCard.classList.contains('collapsed')) {
-                    terminalToggleIcon.classList.replace('ti-chevron-down', 'ti-chevron-up');
-                } else {
-                    terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
-                }
-                // Notify Monaco Editor to resize
-                setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
-            });
+          btnToggleTerminal.addEventListener('click', function () {
+            terminalCard.classList.toggle('collapsed');
+            if (terminalCard.classList.contains('collapsed')) {
+              terminalToggleIcon.classList.replace('ti-chevron-down', 'ti-chevron-up');
+            } else {
+              terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
+            }
+            // Notify Monaco Editor to resize
+            setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
+          });
         }
 
         function expandTerminal() {
-            if (terminalCard && terminalCard.classList.contains('collapsed')) {
-                terminalCard.classList.remove('collapsed');
-                terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
-                setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
-            }
+          if (terminalCard && terminalCard.classList.contains('collapsed')) {
+            terminalCard.classList.remove('collapsed');
+            terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
+            setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
+          }
         }
 
         if (btnRunCode) {
@@ -954,35 +1008,35 @@
         }
 
         if (btnSubmitCode) {
-            btnSubmitCode.addEventListener('click', function() {
-                expandTerminal();
-                testResultTab.show();
-                const container = document.getElementById('testResultContainer');
-                container.innerHTML = `
+          btnSubmitCode.addEventListener('click', function () {
+            expandTerminal();
+            testResultTab.show();
+            const container = document.getElementById('testResultContainer');
+            container.innerHTML = `
                     <div class="text-center text-muted" style="padding-top: 40px;">
                         <i class="ti ti-loader-2 ti-spin" style="font-size: 2rem; color: #3b82f6;"></i>
                         <p class="mt-2 text-white">Submitting code for grading...</p>
                     </div>
                 `;
-                btnSubmitCode.disabled = true;
+            btnSubmitCode.disabled = true;
 
-                if (typeof myCodeEditor !== 'undefined') {
-                    const codeString = myCodeEditor.getValue();
+            if (typeof myCodeEditor !== 'undefined') {
+              const codeString = myCodeEditor.getValue();
 
-                    fetch(`/api/learning-nodes/${nodeId}/submit-code`, {
-                        method: 'POST',
-                        headers: authHeaders(),
-                        body: JSON.stringify({ code: codeString })
-                    })
-                    .then(async res => {
-                        if (!res.ok) throw new Error(await readError(res));
-                        return res.json();
-                    })
-                    .then(result => {
-                        const scoreColor = result.allPassed ? '#10b981' : (result.passedCount > 0 ? '#f59e0b' : '#ef4444');
-                        const statusText = result.allPassed ? 'Accepted' : 'Wrong Answer';
-                        
-                        let html = `
+              fetch(`/api/learning-nodes/${nodeId}/submit-code`, {
+                method: 'POST',
+                headers: authHeaders(),
+                body: JSON.stringify({ code: codeString })
+              })
+                .then(async res => {
+                  if (!res.ok) throw new Error(await readError(res));
+                  return res.json();
+                })
+                .then(result => {
+                  const scoreColor = result.allPassed ? '#10b981' : (result.passedCount > 0 ? '#f59e0b' : '#ef4444');
+                  const statusText = result.allPassed ? 'Accepted' : 'Wrong Answer';
+
+                  let html = `
                             <div style="margin-bottom: 16px;">
                                 <h3 style="color: ${scoreColor}; font-weight: bold; margin: 0;">${statusText}</h3>
                                 <div style="color: #aaa; font-size: 0.9rem; margin-top: 4px;">
@@ -992,13 +1046,13 @@
                             </div>
                         `;
 
-                        if (result.results && result.results.length > 0) {
-                            html += `<div style="display: flex; flex-direction: column; gap: 12px;">`;
-                            result.results.forEach((tc, index) => {
-                                const passColor = tc.passed ? '#10b981' : '#ef4444';
-                                const passIcon = tc.passed ? 'ti-check' : 'ti-x';
-                                
-                                html += `
+                  if (result.results && result.results.length > 0) {
+                    html += `<div style="display: flex; flex-direction: column; gap: 12px;">`;
+                    result.results.forEach((tc, index) => {
+                      const passColor = tc.passed ? '#10b981' : '#ef4444';
+                      const passIcon = tc.passed ? 'ti-check' : 'ti-x';
+
+                      html += `
                                 <div style="background: #2d2d2d; border-radius: 8px; border: 1px solid #444; overflow: hidden;">
                                     <div style="padding: 8px 16px; background: #333; display: flex; justify-content: space-between; align-items: center;">
                                         <div style="font-weight: 600; color: #fff; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
@@ -1009,14 +1063,14 @@
                                     <div style="padding: 12px;">
                                 `;
 
-                                if (tc.hidden) {
-                                    html += `
+                      if (tc.hidden) {
+                        html += `
                                         <div style="color: #94a3b8; font-size: 0.85rem; font-style: italic; display: flex; align-items: center; gap: 6px;">
                                             <i class="ti ti-lock"></i> Hidden Test Case. ${tc.passed ? 'Passed.' : 'Failed.'}
                                         </div>
                                     `;
-                                } else {
-                                    html += `
+                      } else {
+                        html += `
                                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
                                             <div>
                                                 <label style="color: #aaa; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 2px;">Input</label>
@@ -1032,39 +1086,52 @@
                                             </div>
                                         </div>
                                     `;
-                                }
+                      }
 
-                                html += `</div></div>`;
-                            });
-                            html += `</div>`;
-                        }
+                      html += `</div></div>`;
+                    });
+                    html += `</div>`;
+                  }
 
-                        container.innerHTML = html;
+                  container.innerHTML = html;
 
-                        // Unlock Solution if allPassed
-                        if (result.allPassed && currentNode) {
-                            const solutionsPane = document.getElementById('lc-solutions-pane');
-                            if (solutionsPane) {
-                                const solutionContent = currentNode.solutionCode 
-                                    ? `<pre style="background: #2d2d2d; color: #fff; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${escapeHtml(currentNode.solutionCode)}</code></pre>` 
-                                    : '<p class="text-muted">No solution provided by the instructor.</p>';
-                                solutionsPane.innerHTML = `<h3>Instructor's Solution</h3><p class="text-success"><i class="ti ti-check"></i> You have unlocked the solution!</p>${solutionContent}`;
-                            }
-                        }
-                    })
-                    .catch(err => {
-                        container.innerHTML = `
+                  // Unlock Solution if allPassed
+                  if (result.allPassed && currentNode) {
+                    const editorialPane = document.getElementById('lc-editorial-pane');
+                    if (editorialPane) {
+                      const solutionContent = currentNode.solutionCode
+                        ? `<pre style="background: #2d2d2d; color: #fff; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${escapeHtml(currentNode.solutionCode)}</code></pre>`
+                        : '<p class="text-muted">No solution provided by the instructor.</p>';
+                      editorialPane.innerHTML = `<h3>Instructor's Solution</h3><p class="text-success"><i class="ti ti-check"></i> You have unlocked the solution!</p>${solutionContent}`;
+                    }
+
+                    const solutionsPane = document.getElementById('lc-solutions-pane');
+                    if (solutionsPane) {
+                      solutionsPane.innerHTML = ''; // Clear locked message
+                      loadSharedSolutions();
+                    }
+
+                    // Show Share Solution modal if they haven't shared yet
+                    const shareModalEl = document.getElementById('shareSolutionModal');
+                    if (shareModalEl) {
+                       const shareModal = new bootstrap.Modal(shareModalEl);
+                       shareModal.show();
+                    }
+                  }
+                })
+                .catch(err => {
+                  container.innerHTML = `
                             <div class="text-center text-danger" style="padding-top: 40px;">
                                 <i class="ti ti-alert-circle" style="font-size: 2rem;"></i>
                                 <p class="mt-2">${err.message}</p>
                             </div>
                         `;
-                    })
-                    .finally(() => {
-                        btnSubmitCode.disabled = false;
-                    });
-                }
-            });
+                })
+                .finally(() => {
+                  btnSubmitCode.disabled = false;
+                });
+            }
+          });
         }
       } // Đóng function initMonaco
       // --- END: INIT MONACO EDITOR ---
@@ -1116,7 +1183,116 @@
         });
       }
       // --- END: HANDLE SUMMARY SUBMIT ---
+
+      // --- START: HANDLE SHARE SOLUTION SUBMIT ---
+      const btnConfirmShareSolution = document.getElementById('btnConfirmShareSolution');
+      if (btnConfirmShareSolution) {
+        btnConfirmShareSolution.addEventListener('click', async () => {
+          const title = document.getElementById('shareSolutionTitle').value.trim();
+          if (!title) {
+            alert("Please enter a title for your solution!");
+            return;
+          }
+          const codeContent = myCodeEditor ? myCodeEditor.getValue() : '';
+          
+          btnConfirmShareSolution.disabled = true;
+          btnConfirmShareSolution.innerText = 'Sharing...';
+
+          try {
+            const res = await fetch(`/api/shared-solutions/node/${nodeId}`, {
+              method: 'POST',
+              headers: authHeaders(),
+              body: JSON.stringify({ title, codeContent })
+            });
+
+            if (!res.ok) throw new Error(await readError(res));
+
+            // Close modal
+            const shareModalEl = document.getElementById('shareSolutionModal');
+            if (shareModalEl) {
+               const shareModal = bootstrap.Modal.getInstance(shareModalEl);
+               if (shareModal) shareModal.hide();
+            }
+            alert("Your solution has been shared successfully!");
+            // Refresh solutions pane if open
+            loadSharedSolutions();
+          } catch (err) {
+            alert('Failed to share solution: ' + err.message);
+          } finally {
+            btnConfirmShareSolution.disabled = false;
+            btnConfirmShareSolution.innerText = 'Share My Solution';
+          }
+        });
+      }
+      // --- END: HANDLE SHARE SOLUTION SUBMIT ---
     }
+
+    async function loadSharedSolutions() {
+      if (!nodeId) return;
+      const solutionsPane = document.getElementById('lc-solutions-pane');
+      if (!solutionsPane) return;
+      
+      try {
+        const res = await fetch(`/api/shared-solutions/node/${nodeId}`, { headers: authHeaders() });
+        if (!res.ok) return;
+        const solutions = await res.json();
+        
+        let html = '';
+        if (solutions.length === 0) {
+          html = '<p class="text-muted mt-3">No student solutions shared yet. Be the first!</p>';
+        } else {
+          html = '<h4 class="mt-4">Community Solutions</h4><div style="display:flex; flex-direction:column; gap: 12px; margin-top: 12px;">';
+          solutions.forEach(sol => {
+            html += `
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <h5 style="margin: 0; font-size: 1rem; color: #0f172a;">${escapeHtml(sol.title)}</h5>
+                  <button onclick="upvoteSolution(${sol.id}, this)" style="background: none; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; cursor: pointer; color: #475569; display: flex; align-items: center; gap: 4px;">
+                    <i class="ti ti-thumb-up"></i> <span>${sol.upvotes}</span>
+                  </button>
+                </div>
+                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
+                  Shared by <span style="font-weight: 500; color: #3b82f6;">${escapeHtml(sol.studentName)}</span>
+                </div>
+                <pre style="background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; overflow-x: auto; margin: 0;"><code>${escapeHtml(sol.codeContent)}</code></pre>
+              </div>
+            `;
+          });
+          html += '</div>';
+        }
+        
+        // Find or create the community-solutions container
+        let commDiv = document.getElementById('community-solutions-container');
+        if (!commDiv) {
+          commDiv = document.createElement('div');
+          commDiv.id = 'community-solutions-container';
+          solutionsPane.appendChild(commDiv);
+        }
+        commDiv.innerHTML = html;
+
+      } catch (err) {
+        console.error("Failed to load shared solutions", err);
+      }
+    }
+
+    window.upvoteSolution = async function(solId, btnEl) {
+      try {
+        const res = await fetch(`/api/shared-solutions/${solId}/upvote`, {
+          method: 'POST',
+          headers: authHeaders()
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const span = btnEl.querySelector('span');
+          if (span) span.innerText = data.upvotes;
+          btnEl.style.color = '#3b82f6';
+          btnEl.style.borderColor = '#3b82f6';
+          btnEl.disabled = true;
+        }
+      } catch (err) {
+        console.error("Failed to upvote", err);
+      }
+    };
 
     // Hàm chính: Tải thông tin của bài học (node) và các tài liệu/item liên quan từ backend
     async function loadNodePage() {
@@ -1164,6 +1340,30 @@
         // Hiển thị nội dung ra giao diện
         renderNodePage(node, sortedItems);
         loadComments();
+        
+        // Fetch solution status to see if student already passed
+        try {
+          const statusRes = await fetch(`/api/shared-solutions/node/${nodeId}/status`, { headers: authHeaders() });
+          if (statusRes.ok) {
+            const statusData = await statusRes.json();
+            if (statusData.isPassed) {
+              const editorialPane = document.getElementById('lc-editorial-pane');
+              if (editorialPane) {
+                const solutionContent = node.solutionCode
+                  ? `<pre style="background: #2d2d2d; color: #fff; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${escapeHtml(node.solutionCode)}</code></pre>`
+                  : '<p class="text-muted">No solution provided by the instructor.</p>';
+                editorialPane.innerHTML = `<h3>Instructor's Solution</h3><p class="text-success"><i class="ti ti-check"></i> You have unlocked the solution!</p>${solutionContent}`;
+              }
+              
+              const solutionsPane = document.getElementById('lc-solutions-pane');
+              if (solutionsPane) {
+                solutionsPane.innerHTML = ''; // Clear the "Locked" message
+                loadSharedSolutions();
+              }
+            }
+          }
+        } catch(e) { console.error("Error fetching solution status", e); }
+
       } catch (error) {
         renderError('Could not load node', error.message || 'Please try again later.');
       }
@@ -1195,17 +1395,17 @@
         stompClient.subscribe('/topic/nodes/' + nodeId + '/discussions', function (message) {
           console.log('Received WebSocket message:', message.body);
           if (message.body) {
-             const payload = JSON.parse(message.body);
-             if (payload.action === 'UPDATE') {
-                 console.log('Action is UPDATE. Should pause? ', shouldPauseWebSocketUpdate());
-                 if (!shouldPauseWebSocketUpdate()) {
-                     console.log('Reloading comments...');
-                     loadComments();
-                 }
-             }
+            const payload = JSON.parse(message.body);
+            if (payload.action === 'UPDATE') {
+              console.log('Action is UPDATE. Should pause? ', shouldPauseWebSocketUpdate());
+              if (!shouldPauseWebSocketUpdate()) {
+                console.log('Reloading comments...');
+                loadComments();
+              }
+            }
           }
         });
-      }, function(error) {
+      }, function (error) {
         console.error('WebSocket connection error:', error);
         setTimeout(connectWebSocket, 5000);
       });

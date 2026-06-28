@@ -36,6 +36,7 @@ D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedcla
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\PeerMentoringController.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\QuestionBankController.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\QuizController.java
+D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\SharedSolutionRestController.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\StudentDashboardController.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\StudentProfileController.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\controller\StudyGroupController.java
@@ -141,6 +142,7 @@ D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedcla
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\response\StudentProfileResponse.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\response\TestResultResponse.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\response\UserResponse.java
+D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\SharedSolutionDto.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\StudentProgressDTO.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\UserActivityLogDto.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\dto\UserDTO.java
@@ -169,6 +171,7 @@ D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedcla
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\QuizAttempt.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\QuizQuestion.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\Role.java
+D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\SharedSolution.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\Student.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\StudentProfile.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\entity\StudyGroup.java
@@ -224,6 +227,7 @@ D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedcla
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\QuizQuestionRepository.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\QuizRepository.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\RoleRepository.java
+D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\SharedSolutionRepository.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\StudentProfileRepository.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\StudentRepository.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\repository\StudyGroupMemberRepository.java
@@ -270,6 +274,7 @@ D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedcla
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\ProgressEvaluationServiceImpl.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\QuestionBankServiceImpl.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\QuizServiceImpl.java
+D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\SharedSolutionServiceImpl.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\StudentDashboardServiceImpl.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\StudentProfileServiceImpl.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\impl\StudyGroupMemberServiceImpl.java
@@ -297,6 +302,7 @@ D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedcla
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\ProgressEvaluationService.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\QuestionBankService.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\QuizService.java
+D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\SharedSolutionService.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\StudentDashboardService.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\StudentProfileService.java
 D:\FLIPPED_CLASS\DONG4\FlippedClass_Project\src\main\java\com\example\flippedclass\service\StudyGroupMemberService.java
