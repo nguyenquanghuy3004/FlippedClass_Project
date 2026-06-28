@@ -41,7 +41,8 @@ build/
 uploads/
 .tomcat/
 *.class
-
+.idea/
+.vscode/
 target/
 target-mvn/
 =======
@@ -63,3 +64,4 @@ target-mvn/
 temp_exec/
 uploads/
 >>>>>>> origin/Quanh1
+

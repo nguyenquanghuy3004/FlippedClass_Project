@@ -20,4 +20,7 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
     boolean existsByGroupIdAndStudentId(Long groupId, Long studentId);
     
     Optional<StudyGroupMember> findByGroupIdAndStudentId(Long groupId, Long studentId);
+
+    @Query("SELECT m FROM StudyGroupMember m WHERE m.student.id = :studentId AND m.group.activity.learningSpace.id = :spaceId")
+    java.util.List<StudyGroupMember> findByStudentIdAndLearningSpaceId(@Param("studentId") Long studentId, @Param("spaceId") Long spaceId);
 }

@@ -284,10 +284,6 @@
         state.allSpaces = data.learningSpaces || [];
         state.spaces = getJoinedSpaces(state.allSpaces);
 
-        // Let layout helper run notifications update
-        if (typeof window.renderNotifications === 'function') {
-          window.renderNotifications(flattenQuizzes(state.allSpaces), data.commentNotifications || []);
-        }
         renderSpaces();
         const preferred = Number(preferredSpaceId);
         const preferredSpace = state.allSpaces.find((space) => space.id === preferred);

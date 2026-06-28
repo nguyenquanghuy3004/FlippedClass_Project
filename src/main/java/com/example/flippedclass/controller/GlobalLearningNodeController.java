@@ -44,6 +44,7 @@ public class GlobalLearningNodeController {
     }
 
     @GetMapping("/{nodeId}")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<LearningNodeResponse> getNodeDetail(@PathVariable Long nodeId) {
         return learningNodeRepository.findById(nodeId)
                 .map(node -> ResponseEntity.ok(LearningNodeResponse.builder()
@@ -54,6 +55,7 @@ public class GlobalLearningNodeController {
                         .status(node.getStatus())
                         .nodeType(node.getNodeType())
                         .content(node.getContent() != null ? node.getContent() : node.getDescription())
+                        .quizzes(node.getQuizzes() != null ? node.getQuizzes().stream().map(q -> java.util.Map.<String, Object>of("id", q.getId(), "title", q.getTitle())).collect(java.util.stream.Collectors.toList()) : java.util.Collections.emptyList())
                         .createdAt(node.getCreatedAt())
                         .updatedAt(node.getUpdatedAt())
                         .build()))

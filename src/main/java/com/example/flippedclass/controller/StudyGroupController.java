@@ -79,7 +79,7 @@ public class StudyGroupController {
     @PreAuthorize("hasAuthority('STUDENT')")
     public void submitWork(
             @PathVariable Long groupId, 
-            @RequestBody SubmissionRequest request,
+            @jakarta.validation.Valid @RequestBody SubmissionRequest request,
             @AuthenticationPrincipal UserDetailsImpl currentUser) {
         submissionService.submitWork(groupId, currentUser.getId(), request);
     }

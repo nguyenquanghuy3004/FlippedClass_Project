@@ -18,6 +18,7 @@ public class LearningNodeResponse {
     private String status;
     private String nodeType;
     private String content;
+    private java.util.List<java.util.Map<String, Object>> quizzes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

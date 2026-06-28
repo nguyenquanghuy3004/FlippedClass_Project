@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class LearningSpaceMemberManagementServiceImpl implements LearningSpaceMemberManagementService {
 
     private final LearningSpaceMemberRepository memberRepository;
+    private final com.example.flippedclass.repository.StudyGroupMemberRepository studyGroupMemberRepository;
+    private final com.example.flippedclass.service.StudyGroupMemberService studyGroupMemberService;
 
     @Override
     public Page<MemberDto> getSpaceMembers(Long spaceId, Pageable pageable) {
@@ -65,6 +67,14 @@ public class LearningSpaceMemberManagementServiceImpl implements LearningSpaceMe
             throw new RuntimeException("Cannot remove OWNER from the space");
         }
         
+        // Remove from all study groups within this space
+        java.util.List<com.example.flippedclass.entity.StudyGroupMember> groupMembers = 
+                studyGroupMemberRepository.findByStudentIdAndLearningSpaceId(member.getUser().getId(), spaceId);
+        
+        for (com.example.flippedclass.entity.StudyGroupMember gm : groupMembers) {
+            studyGroupMemberService.leaveGroup(gm.getGroup().getId(), member.getUser().getId());
+        }
+
         memberRepository.delete(member);
     }
     

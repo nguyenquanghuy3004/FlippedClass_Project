@@ -690,6 +690,23 @@
             </form>
           </section>
           <!-- END: LESSON SUMMARY UI -->
+          
+          ${node.quizzes && node.quizzes.length > 0 ? `
+          <!-- START: TAKE QUIZ UI -->
+          <section class="content-card mt-3" style="text-align: center; background: #f8fafc; border: 1px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.25rem; border-radius: 12px;">
+            <i class="ti ti-brain" style="font-size: 2rem; color: #6366f1; margin-bottom: 0.5rem;"></i>
+            <h3 style="font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 0.25rem;">Knowledge Check</h3>
+            <p style="color: #64748b; margin-bottom: 1rem; font-size: 0.85rem;">${node.quizzes.length > 1 ? 'There are multiple quizzes available.' : 'There is a quiz available to test your understanding of this lesson.'}</p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+              ${node.quizzes.map((quiz, index) => `
+                <a href="/student/take-quiz?quizId=${quiz.id}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: 6px;">
+                  <i class="ti ti-player-play-filled"></i> ${node.quizzes.length > 1 ? escapeHtml(quiz.title || ('Quiz ' + (index + 1))) : 'Take Quiz Now'}
+                </a>
+              `).join('')}
+            </div>
+          </section>
+          <!-- END: TAKE QUIZ UI -->
+          ` : ''}
         </section>
 
         <aside class="side-column">
