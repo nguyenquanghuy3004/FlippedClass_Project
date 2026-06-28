@@ -504,14 +504,36 @@
           .lc-terminal-card.collapsed { height: 45px !important; min-height: 45px !important; }
         </style>
         
-        <!-- CỘT TRÁI: ĐỀ BÀI -->
+        <!-- CỘT TRÁI: ĐỀ BÀI / Q&A / SUBMISSIONS -->
         <section class="lc-left-pane">
             <div class="lc-tabs-header">
-              <div class="lc-tab active"><i class="ti ti-file-description" style="color: #007bff;"></i> Problem Description</div>
+              <div class="lc-tab active" onclick="switchLeftTab('problem')" id="tab-problem"><i class="ti ti-file-description" style="color: #007bff;"></i> Problem Description</div>
+              <div class="lc-tab" onclick="switchLeftTab('qa')" id="tab-qa"><i class="ti ti-messages" style="color: #facc15;"></i> Q&A</div>
+              <div class="lc-tab" onclick="switchLeftTab('submissions')" id="tab-submissions"><i class="ti ti-checklist" style="color: #2cbb5d;"></i> Submissions</div>
             </div>
-          <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 16px;">
+          
+          <!-- TAB: PROBLEM -->
+          <div id="pane-problem" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 16px;">
             <label style="font-size: 0.8rem; font-weight: 600; color: #8c8c8c; margin-bottom: 8px;">Markdown Content</label>
             <textarea id="problemDescriptionInput" style="flex: 1; width: 100%; border: 1px solid #e5e7eb; border-radius: 6px; background: #f7f9fa; color: #262626; resize: none; font-size: 0.95rem; line-height: 1.6; padding: 16px; outline: none;" placeholder="Write problem description in Markdown..."></textarea>
+          </div>
+
+          <!-- TAB: Q&A -->
+          <div id="pane-qa" style="flex: 1; overflow-y: auto; display: none; flex-direction: column; padding: 16px;">
+            <div id="nodeCommentsContainer">
+              <div class="empty-light">
+                <div><i class="ti ti-loader-2 ti-spin"></i> Loading Q&A...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: SUBMISSIONS -->
+          <div id="pane-submissions" style="flex: 1; overflow-y: auto; display: none; flex-direction: column; padding: 16px; background: #f8fafc;">
+            <div id="summaries-container">
+              <div class="empty-light">
+                <div><i class="ti ti-loader-2 ti-spin"></i> Loading submissions...</div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -595,6 +617,18 @@
             if (!window.myCodeEditor || window.currentEditorTab === tab) return;
             window.currentEditorTab = tab;
             window.myCodeEditor.setValue(window.codeStore[tab]);
+        };
+
+        // Hàm chuyển tab trái (Problem, Q&A, Submissions)
+        window.switchLeftTab = function(tabId) {
+            document.querySelectorAll('.lc-left-pane .lc-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            document.getElementById('pane-problem').style.display = 'none';
+            document.getElementById('pane-qa').style.display = 'none';
+            document.getElementById('pane-submissions').style.display = 'none';
+            
+            document.getElementById('pane-' + tabId).style.display = 'flex';
         };
 
         // JS logic thu gọn/mở rộng Test Case
@@ -845,8 +879,10 @@
               <iframe id="quiz-iframe-${quizItem.quizId}" src="" data-src="/student/take-quiz?quizId=${encodeURIComponent(quizItem.quizId)}&embed=true" style="width: 100%; height: 600px; border: 1px solid #dee2e6; border-radius: 8px;"></iframe>
             </div>
           </section>
+          </section>
         `;
       }
+
 
       pageRoot.innerHTML = `
       <section class="player-column">
@@ -871,30 +907,45 @@
           <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
         </section>
         
-        <section class="content-card mt-3">
-            <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-              <i class="ti ti-notebook" style="color: var(--fc-primary);"></i> Student Summaries
-            </h2>
-            <div id="summaries-container">
-              <div class="empty-light">
-                <div><i class="ti ti-loader-2 ti-spin"></i> Loading summaries...</div>
-              </div>
-            </div>
-        </section>
-        
+        <!-- Submissions moved to side column -->        
         ${quizHtml}
       </section>
       
       <aside class="side-column">
-        <section class="side-card">
-          <div class="side-card-header">
+        <div class="d-flex bg-white rounded-pill p-1 mb-3 shadow-sm border" style="gap: 4px;">
+          <button class="btn flex-fill rounded-pill active fw-bold d-flex align-items-center justify-content-center gap-2" id="tabBtnQA" onclick="switchRightTab('qa')" style="transition: 0.3s; color: white; background-color: #d97755; border: none;">
+            <i class="ti ti-messages"></i> Q&A
+          </button>
+          <button class="btn flex-fill rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 text-muted" id="tabBtnSubmissions" onclick="switchRightTab('submissions')" style="transition: 0.3s; background-color: transparent; border: none;">
+            <i class="ti ti-checklist"></i> Submissions
+          </button>
+        </div>
+
+        <section class="side-card" id="sidePaneQA" style="display: flex; flex-direction: column; flex: 1;">
+          <div class="side-card-header" style="padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #eee;">
             <div>
-              <h2>Comments</h2>
-              <p>Discussions and questions related to this node.</p>
+              <h2 style="font-size: 1.05rem; font-weight: bold; margin-bottom: 4px;">Moderation & Q&A</h2>
+              <p style="font-size: 0.8rem; color: #6c757d; margin-bottom: 0;">Reply to students, pin important answers, or mark questions as solved.</p>
             </div>
-            <span class="soft-chip discussions-count">0 comments</span>
+            <span class="soft-chip discussions-count" style="display: none;">0 comments</span>
           </div>
-          ${commentsTemplate()}
+          <div style="flex: 1; overflow-y: auto;">
+             ${commentsTemplate()}
+          </div>
+        </section>
+
+        <section class="side-card" id="sidePaneSubmissions" style="display: none; flex-direction: column; flex: 1;">
+          <div class="side-card-header" style="padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #eee;">
+            <div>
+              <h2 style="font-size: 1.05rem; font-weight: bold; margin-bottom: 4px;">Student Submissions</h2>
+              <p style="font-size: 0.8rem; color: #6c757d; margin-bottom: 0;">Review and grade lesson summaries submitted by students.</p>
+            </div>
+          </div>
+          <div id="summaries-container" style="flex: 1; overflow-y: auto; padding: 10px;">
+            <div class="empty-light">
+              <div><i class="ti ti-loader-2 ti-spin"></i> Loading submissions...</div>
+            </div>
+          </div>
         </section>
       </aside>
       
@@ -1173,6 +1224,36 @@
       }
     }, 2000);
 
+    window.switchRightTab = function(tabId) {
+      const btnQA = document.getElementById('tabBtnQA');
+      const btnSub = document.getElementById('tabBtnSubmissions');
+      const paneQA = document.getElementById('sidePaneQA');
+      const paneSub = document.getElementById('sidePaneSubmissions');
+      
+      if (tabId === 'qa') {
+          btnQA.style.backgroundColor = '#d97755';
+          btnQA.style.color = 'white';
+          btnQA.classList.remove('text-muted');
+          
+          btnSub.style.backgroundColor = 'transparent';
+          btnSub.style.color = '';
+          btnSub.classList.add('text-muted');
+          
+          paneQA.style.display = 'flex';
+          paneSub.style.display = 'none';
+      } else {
+          btnSub.style.backgroundColor = '#d97755';
+          btnSub.style.color = 'white';
+          btnSub.classList.remove('text-muted');
+          
+          btnQA.style.backgroundColor = 'transparent';
+          btnQA.style.color = '';
+          btnQA.classList.add('text-muted');
+          
+          paneSub.style.display = 'flex';
+          paneQA.style.display = 'none';
+      }
+    };
   </script>
 </body>
 
