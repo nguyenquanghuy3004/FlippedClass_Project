@@ -26,7 +26,6 @@ public class Notification {
     private String message;
 
     private String link;   // Link chuyển hướng khi click
-
     private boolean isRead;
 
     @CreationTimestamp

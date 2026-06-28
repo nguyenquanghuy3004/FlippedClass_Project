@@ -702,10 +702,47 @@
                     $('#editNodeId').val(nodeId);
                     $('#editNodeTitle').val(title);
                     $('#editNodeDescription').val(description !== 'null' ? description : '');
-                    $('#editNodeType').val(type || 'VIDEO');
+                    $('#editNodeType').val(type || 'VIDEO').trigger('change');
+                    
+                    $('#editYoutubeUrl').val('').removeData('original').removeData('itemid');
+                    $('#editDocumentFile').val('').removeData('itemid');
+                    $('#currentDocumentInfo').text('');
                     $('#editNodeTitle, #editNodeDescription').removeClass('is-invalid');
                     $('#editNodeError').hide();
+
+                    // Fetch existing items to pre-fill
+                    fetch(`/api/learning-nodes/${nodeId}/items`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    })
+                    .then(res => res.json())
+                    .then(items => {
+                        if (items && items.length > 0) {
+                            const item = items[0]; // assume 1 main item
+                            if (type === 'VIDEO' && item.itemType === 'VIDEO') {
+                                $('#editYoutubeUrl').val(item.url).data('original', item.url).data('itemid', item.id);
+                            } else if (type === 'DOCUMENT' && item.itemType === 'PDF') {
+                                $('#currentDocumentInfo').html(`<i class="ti ti-file-pdf"></i> Current file: ${item.title}`);
+                                $('#editDocumentFile').data('itemid', item.id);
+                            }
+                        }
+                    });
+
                     $('#editNodeModal').modal('show');
+                });
+
+                // Toggle logic for edit node type
+                $('#editNodeType').change(function() {
+                    const type = $(this).val();
+                    if (type === 'VIDEO') {
+                        $('#editVideoSection').show();
+                        $('#editDocumentSection').hide();
+                    } else if (type === 'DOCUMENT') {
+                        $('#editVideoSection').hide();
+                        $('#editDocumentSection').show();
+                    } else {
+                        $('#editVideoSection').hide();
+                        $('#editDocumentSection').hide();
+                    }
                 });
 
                 // Xóa bài học
@@ -780,6 +817,9 @@
                     const desc = $('#editNodeDescription').val().trim();
                     const type = $('#editNodeType').val();
 
+                    const youtubeUrl = $('#editYoutubeUrl').val().trim();
+                    const docFile = $('#editDocumentFile')[0].files[0];
+
                     btn.prop('disabled', true).text('Saving...');
 
                     fetch(`/api/learning-spaces/${spaceId}/learning-paths/${pathId}/learning-nodes/${nodeId}`, {
@@ -790,17 +830,58 @@
                         },
                         body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
                     })
-                        .then(res => {
-                            if (!res.ok) throw new Error("Failed to update lesson");
-                            return res.json();
-                        })
-                        .then(data => {
-                            window.location.reload();
-                        })
-                        .catch(err => {
-                            $('#editNodeError').text(err.message).show();
-                            btn.prop('disabled', false).text('Save Changes');
-                        });
+                    .then(res => {
+                        if (!res.ok) throw new Error("Failed to update lesson");
+                        return res.json();
+                    })
+                    .then(data => {
+                        let promises = [];
+                        const oldVideoItemId = $('#editYoutubeUrl').data('itemid');
+                        const originalYoutubeUrl = $('#editYoutubeUrl').data('original');
+                        const oldDocItemId = $('#editDocumentFile').data('itemid');
+
+                        if (type === 'VIDEO' && youtubeUrl && youtubeUrl !== originalYoutubeUrl) {
+                            if (oldVideoItemId) {
+                                promises.push(fetch(`/api/learning-nodes/items/${oldVideoItemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
+                            }
+                            promises.push(
+                                fetch(`/api/learning-nodes/${nodeId}/items`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                    body: JSON.stringify({ title: 'Youtube Video', itemType: 'VIDEO', url: youtubeUrl, learningNodeId: nodeId })
+                                })
+                            );
+                        } else if (type === 'DOCUMENT' && docFile) {
+                            if (oldDocItemId) {
+                                promises.push(fetch(`/api/learning-nodes/items/${oldDocItemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
+                            }
+                            let formData = new FormData();
+                            formData.append('file', docFile);
+                            let uploadPromise = fetch(`/api/learning-nodes/${nodeId}/items/upload-document`, {
+                                method: 'POST',
+                                headers: { 'Authorization': 'Bearer ' + token },
+                                body: formData
+                            })
+                            .then(r => r.json())
+                            .then(uploadData => {
+                                return fetch(`/api/learning-nodes/${nodeId}/items`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                    body: JSON.stringify({ title: docFile.name, itemType: 'PDF', url: uploadData.url, learningNodeId: nodeId })
+                                });
+                            });
+                            promises.push(uploadPromise);
+                        }
+                        
+                        return Promise.all(promises);
+                    })
+                    .then(() => {
+                        window.location.reload();
+                    })
+                    .catch(err => {
+                        $('#editNodeError').text(err.message).show();
+                        btn.prop('disabled', false).text('Save Changes');
+                    });
                 });
 
 

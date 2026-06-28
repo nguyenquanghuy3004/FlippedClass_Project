@@ -209,6 +209,18 @@
 <!--                                    <option value="REVIEW">🔁 Review Session</option>-->
                                 </select>
                             </div>
+                            <!-- Video Section -->
+                            <div id="editVideoSection" style="display: none;" class="mb-3">
+                                <label class="form-label fw-semibold small" style="color:#312e81;">Youtube URL</label>
+                                <input type="url" class="form-control border-0 rounded-3" style="background:#f4f5fb;" id="editYoutubeUrl" placeholder="https://www.youtube.com/watch?v=...">
+                                <div class="form-text">Paste the full Youtube video link here.</div>
+                            </div>
+                            <!-- Document Section -->
+                            <div id="editDocumentSection" style="display: none;" class="mb-3">
+                                <label class="form-label fw-semibold small" style="color:#312e81;">Upload Document (PDF)</label>
+                                <input type="file" class="form-control border-0 rounded-3" style="background:#f4f5fb;" id="editDocumentFile" accept=".pdf">
+                                <div id="currentDocumentInfo" class="form-text text-primary mt-1"></div>
+                            </div>
                             <div class="mb-3">
                                 <label for="editNodePrerequisite" class="form-label fw-semibold small" style="color:#312e81;">Prerequisite Lesson (Optional)</label>
                                 <select class="form-select border-0 rounded-3" style="background:#f4f5fb;" id="editNodePrerequisite">
