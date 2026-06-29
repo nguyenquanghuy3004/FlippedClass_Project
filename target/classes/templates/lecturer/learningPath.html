@@ -858,7 +858,7 @@
 
                         if (type === 'VIDEO' && youtubeUrl && youtubeUrl !== originalYoutubeUrl) {
                             if (oldVideoItemId) {
-                                promises.push(fetch(`/api/learning-nodes/items/${oldVideoItemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
+                                promises.push(fetch(`/api/learning-nodes/${nodeId}/items/item/${oldVideoItemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
                             }
                             promises.push(
                                 fetch(`/api/learning-nodes/${nodeId}/items`, {
@@ -869,7 +869,7 @@
                             );
                         } else if (type === 'DOCUMENT' && docFile) {
                             if (oldDocItemId) {
-                                promises.push(fetch(`/api/learning-nodes/items/${oldDocItemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
+                                promises.push(fetch(`/api/learning-nodes/${nodeId}/items/item/${oldDocItemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
                             }
                             let formData = new FormData();
                             formData.append('file', docFile);
