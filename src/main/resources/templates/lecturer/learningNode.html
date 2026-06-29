@@ -174,7 +174,7 @@
                                 <label for="nodeType" class="form-label fw-semibold small" style="color:#312e81;">Lesson Type</label>
                                 <select class="form-select border-0 rounded-3" style="background:#f4f5fb;" id="nodeType">
                                     <option value="LESSON" th:unless="${isSupporter != null and isSupporter}">📖 Theory Lesson</option>
-                                    <option value="PRACTICE" th:if="${isSupporter != null and isSupporter}">💻 Practice Module</option>
+                                    <option value="PRACTICE">💻 Practice Module</option>
                                     <option value="VIDEO">▶️ Video Lesson</option>
                                     <option value="DOCUMENT">📄 Document</option>
                                     <option value="REVIEW" th:unless="${isSupporter != null and isSupporter}">🔁 Review Session</option>
@@ -240,7 +240,7 @@
                                 <label for="editNodeType" class="form-label fw-semibold small" style="color:#312e81;">Lesson Type</label>
                                 <select class="form-select border-0 rounded-3" style="background:#f4f5fb;" id="editNodeType">
                                     <option value="LESSON" th:unless="${isSupporter != null and isSupporter}">📖 Theory Lesson</option>
-                                    <option value="PRACTICE" th:if="${isSupporter != null and isSupporter}">💻 Practice Module</option>
+                                    <option value="PRACTICE">💻 Practice Module</option>
                                     <option value="VIDEO">▶️ Video Lesson</option>
                                     <option value="DOCUMENT">📄 Document</option>
                                     <option value="REVIEW" th:unless="${isSupporter != null and isSupporter}">🔁 Review Session</option>

@@ -71,4 +71,26 @@ public class NotificationServiceImpl implements NotificationService {
         
         notificationRepository.markAllAsReadForUser(user.getId());
     }
+
+    @Override
+    @Transactional
+    public void pushNotification(Long recipientId, String message, String targetUrl) {
+        User recipient = userRepository.findById(recipientId)
+                .orElseThrow(() -> new RuntimeException("Recipient not found"));
+
+        com.example.flippedclass.enums.NotificationType type = com.example.flippedclass.enums.NotificationType.COMMENT_REPLY;
+        if (message != null && message.toLowerCase().contains("tóm tắt")) {
+            type = com.example.flippedclass.enums.NotificationType.REVIEW_MENTOR;
+        }
+
+        Notification notification = Notification.builder()
+                .recipient(recipient)
+                .type(type)
+                .message(message)
+                .targetUrl(targetUrl)
+                .isRead(false)
+                .build();
+
+        notificationRepository.save(notification);
+    }
 }

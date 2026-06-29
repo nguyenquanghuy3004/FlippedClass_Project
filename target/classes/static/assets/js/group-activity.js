@@ -61,7 +61,7 @@ window.renderGroupActivityPage = async function(node, nodeId) {
 
     const styles = `
         <style>
-            #pageRoot.lesson-layout { display: flex; flex-direction: row; min-height: calc(100vh - 65px); background-image: url('/assets/images/group_activies.jpg'); background-size: cover; background-position: center; background-attachment: fixed; gap: 24px; padding: 24px; align-items: stretch; }
+            #pageRoot.lesson-layout { display: flex; flex-direction: row; min-height: calc(100vh - 65px); background-image: url('/uploads/anh/group_activies.jpg'); background-size: cover; background-position: center; background-attachment: fixed; gap: 24px; padding: 24px; align-items: stretch; }
             @media (max-width: 992px) { #pageRoot.lesson-layout { flex-direction: column; } }
             .ga-left-col { flex: 1; display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 800px; margin: 0 auto; }
             .ga-right-col { flex: 1; display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 800px; margin: 0 auto; }
@@ -182,17 +182,20 @@ window.renderGroupActivityPage = async function(node, nodeId) {
                         <h3 style="font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">Thành viên</h3>
                         <div class="member-list">
                             ${myGroup.members.map(m => `
-                                <div class="member-item">
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: white;">
                                     <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="width: 36px; height: 36px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #475569;">
-                                            ${m.fullName.charAt(0).toUpperCase()}
+                                        <div style="width: 36px; height: 36px; background: #e0e7ff; color: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                            ${m.fullName ? m.fullName.charAt(0).toUpperCase() : 'U'}
                                         </div>
                                         <div>
                                             <div style="font-weight: 600; font-size: 0.9rem; color: #0f172a;">${escapeHtml(m.fullName)} ${m.userId === parseInt(userId) ? '(You)' : ''}</div>
                                             <div style="font-size: 0.75rem; color: #64748b;">Tham gia lúc: ${new Date(m.joinedAt).toLocaleDateString('vi-VN')}</div>
                                         </div>
                                     </div>
-                                    ${m.role === 'LEADER' ? '<div style="color: #eab308;"><i class="ti ti-crown"></i></div>' : ''}
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        ${isLeader && m.userId !== parseInt(userId) ? `<button class="btn btn-sm btn-outline-primary py-0" style="font-size: 0.7rem;" onclick="transferLeader(${myGroup.id}, ${m.userId})">Chuyển Leader</button>` : ''}
+                                        ${m.role === 'LEADER' ? '<div style="color: #eab308;"><i class="ti ti-crown"></i></div>' : ''}
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
@@ -200,35 +203,41 @@ window.renderGroupActivityPage = async function(node, nodeId) {
 
                     <div>
                         <h3 style="font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">Nộp bài</h3>
-                        ${myGroup.submission ? `
-                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
-                                <div style="font-size: 0.8rem; color: #10b981; font-weight: bold; margin-bottom: 8px;"><i class="ti ti-check"></i> Đã nộp bài</div>
-                                <div style="font-size: 0.9rem; color: #0f172a; margin-bottom: 4px; word-break: break-all;">
-                                    <a href="${myGroup.submission.githubRepoUrl}" target="_blank" style="color: #4f46e5;"><i class="ti ti-brand-github"></i> ${escapeHtml(myGroup.submission.githubRepoUrl)}</a>
-                                </div>
-                                ${myGroup.submission.score ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1; font-weight: bold; color: #0f172a;">Điểm: ${myGroup.submission.score}</div>` : ''}
-                                ${myGroup.submission.feedback ? `<div style="font-size: 0.85rem; color: #475569; margin-top: 4px;">Feedback: ${escapeHtml(myGroup.submission.feedback)}</div>` : ''}
-                                
-                                ${isLeader && activity.status === 'OPEN' ? `
-                                    <button class="ga-btn ga-btn-outline" style="width: 100%; margin-top: 12px;" onclick="document.getElementById('submitForm').style.display='block'">Cập nhật Repo</button>
-                                ` : ''}
-                            </div>
-                        ` : `
-                            ${isLeader && activity.status === 'OPEN' ? `
-                                <div style="background: #fefce8; border: 1px dashed #ca8a04; border-radius: 12px; padding: 16px; text-align: center;">
-                                    <i class="ti ti-cloud-upload text-warning" style="font-size: 2rem;"></i>
-                                    <p style="color: #854d0e; font-size: 0.85rem; margin-top: 8px;">Nhóm chưa nộp bài. Chỉ có LEADER mới có quyền nộp.</p>
-                                    <button class="ga-btn ga-btn-primary" style="margin-top: 12px;" onclick="document.getElementById('submitForm').style.display='block'">Nộp bài ngay</button>
-                                </div>
-                            ` : `
-                                <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 16px; text-align: center;">
-                                    <i class="ti ti-lock text-muted" style="font-size: 2rem;"></i>
-                                    <p style="color: #64748b; font-size: 0.85rem; margin-top: 8px;">
-                                        ${!isLeader ? 'Chỉ Leader mới có quyền nộp bài.' : 'Hoạt động đang bị khóa hoặc chưa mở.'}
-                                    </p>
-                                </div>
-                            `}
-                        `}
+                        ${(() => {
+                            const isExpired = activity.deadline && new Date() > new Date(activity.deadline);
+                            if (myGroup.submission) {
+                                return `
+                                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                                        <div style="font-size: 0.8rem; color: #10b981; font-weight: bold; margin-bottom: 8px;"><i class="ti ti-check"></i> Đã nộp bài</div>
+                                        <div style="font-size: 0.9rem; color: #0f172a; margin-bottom: 4px; word-break: break-all;">
+                                            <a href="${myGroup.submission.githubRepoUrl}" target="_blank" style="color: #4f46e5;"><i class="ti ti-brand-github"></i> ${escapeHtml(myGroup.submission.githubRepoUrl)}</a>
+                                        </div>
+                                        ${myGroup.submission.score ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1; font-weight: bold; color: #0f172a;">Điểm: ${myGroup.submission.score}</div>` : ''}
+                                        ${myGroup.submission.feedback ? `<div style="font-size: 0.85rem; color: #475569; margin-top: 4px;">Feedback: ${escapeHtml(myGroup.submission.feedback)}</div>` : ''}
+                                        
+                                        ${isLeader && activity.status === 'OPEN' && !isExpired ? `
+                                            <button class="ga-btn ga-btn-outline" style="width: 100%; margin-top: 12px;" onclick="document.getElementById('submitForm').style.display='block'">Cập nhật Repo</button>
+                                        ` : ''}
+                                        ${isExpired ? '<div style="color: #ef4444; font-size: 0.85rem; margin-top: 8px;">Đã hết hạn nộp bài.</div>' : ''}
+                                    </div>
+                                `;
+                            } else {
+                                return isLeader && activity.status === 'OPEN' && !isExpired ? `
+                                    <div style="background: #fefce8; border: 1px dashed #ca8a04; border-radius: 12px; padding: 16px; text-align: center;">
+                                        <i class="ti ti-cloud-upload text-warning" style="font-size: 2rem;"></i>
+                                        <p style="color: #854d0e; font-size: 0.85rem; margin-top: 8px;">Nhóm chưa nộp bài. Chỉ có LEADER mới có quyền nộp.</p>
+                                        <button class="ga-btn ga-btn-primary" style="margin-top: 12px;" onclick="document.getElementById('submitForm').style.display='block'">Nộp bài ngay</button>
+                                    </div>
+                                ` : `
+                                    <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 16px; text-align: center;">
+                                        <i class="ti ti-lock text-muted" style="font-size: 2rem;"></i>
+                                        <p style="color: #64748b; font-size: 0.85rem; margin-top: 8px;">
+                                            ${isExpired ? 'Đã hết hạn nộp bài.' : (!isLeader ? 'Chỉ Leader mới có quyền nộp bài.' : 'Hoạt động đang bị khóa hoặc chưa mở.')}
+                                        </p>
+                                    </div>
+                                `;
+                            }
+                        })()}
                         
                         <!-- Bảng nộp bài ẩn -->
                         <div id="submitForm" style="display: none; margin-top: 16px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">

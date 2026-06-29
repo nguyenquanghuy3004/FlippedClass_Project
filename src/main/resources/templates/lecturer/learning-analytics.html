@@ -171,13 +171,13 @@
             $(document).ready(function() {
                 detailModal = new bootstrap.Modal(document.getElementById('studentDetailModal'));
                 // Fetch when tab is opened
-                if ($('#kpi-total-students').is(':visible') && $('#kpi-total-students').text() === '0') {
+                if ($('#kpi-total-students').is(':visible') && ($('#kpi-total-students').text() === '0' || $('#kpi-total-students').text() === '--')) {
                     fetchAnalytics();
                 }
             });
 
             $('a[data-bs-toggle="tab"][href="#analytics"]').on('shown.bs.tab', function (e) {
-                if ($('#kpi-total-students').text() === '0') {
+                if ($('#kpi-total-students').text() === '0' || $('#kpi-total-students').text() === '--') {
                     fetchAnalytics();
                 }
             });

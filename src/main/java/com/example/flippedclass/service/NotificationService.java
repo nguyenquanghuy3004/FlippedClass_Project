@@ -9,4 +9,5 @@ public interface NotificationService {
     long getUnreadCount(String username);
     void markAsRead(Long id, String username);
     void markAllAsRead(String username);
+    void pushNotification(Long recipientId, String message, String targetUrl);
 }
