@@ -37,6 +37,17 @@ public class LearningNodeItemServiceImpl implements LearningNodeItemService {
         String normalizedUrl = normalizeItemUrl(request.getItemType(), request.getUrl());
 
         List<LearningNodeItem> existingItems = learningNodeItemRepository.findByLearningNodeIdOrderByPosition(nodeId);
+
+        if (request.getItemType() == ItemType.VIDEO || request.getItemType() == ItemType.PDF) {
+            List<LearningNodeItem> itemsToRemove = existingItems.stream()
+                    .filter(i -> i.getItemType() == request.getItemType())
+                    .toList();
+            if (!itemsToRemove.isEmpty()) {
+                learningNodeItemRepository.deleteAll(itemsToRemove);
+                existingItems.removeAll(itemsToRemove);
+            }
+        }
+
         int nextPosition = existingItems.isEmpty() ? 1 : existingItems.get(existingItems.size() - 1).getPosition() + 1;
 
         LearningNodeItem item = LearningNodeItem.builder()

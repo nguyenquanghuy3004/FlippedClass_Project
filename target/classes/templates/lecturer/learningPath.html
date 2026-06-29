@@ -697,12 +697,14 @@
                     const title = $(this).data('title');
                     const description = $(this).data('description');
                     const type = $(this).data('type');
+                    const prereq = $(this).data('prereq');
 
                     $('#editNodePathId').val(pathId);
                     $('#editNodeId').val(nodeId);
                     $('#editNodeTitle').val(title);
                     $('#editNodeDescription').val(description !== 'null' ? description : '');
                     $('#editNodeType').val(type || 'VIDEO').trigger('change');
+                    $('#editNodePrerequisite').val(prereq || '');
                     
                     $('#editYoutubeUrl').val('').removeData('original').removeData('itemid');
                     $('#editDocumentFile').val('').removeData('itemid');
@@ -781,6 +783,7 @@
                     const title = $('#nodeTitle').val().trim();
                     const desc = $('#nodeDescription').val().trim();
                     const type = $('#nodeType').val();
+                    const prereq = $('#nodePrerequisite').val();
 
                     btn.prop('disabled', true).text('Adding...');
 
@@ -790,7 +793,13 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
+                        body: JSON.stringify({ 
+                            title: title, 
+                            description: desc, 
+                            nodeType: type, 
+                            learningPathId: pathId,
+                            prerequisiteNodeId: prereq ? parseInt(prereq) : null
+                        })
                     })
                         .then(res => {
                             if (!res.ok) throw new Error("Failed to add lesson");
@@ -816,6 +825,7 @@
                     const title = $('#editNodeTitle').val().trim();
                     const desc = $('#editNodeDescription').val().trim();
                     const type = $('#editNodeType').val();
+                    const prereq = $('#editNodePrerequisite').val();
 
                     const youtubeUrl = $('#editYoutubeUrl').val().trim();
                     const docFile = $('#editDocumentFile')[0].files[0];
@@ -828,7 +838,13 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
+                        body: JSON.stringify({ 
+                            title: title, 
+                            description: desc, 
+                            nodeType: type, 
+                            learningPathId: pathId,
+                            prerequisiteNodeId: prereq ? parseInt(prereq) : null
+                        })
                     })
                     .then(res => {
                         if (!res.ok) throw new Error("Failed to update lesson");

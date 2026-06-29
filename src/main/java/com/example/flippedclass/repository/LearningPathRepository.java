@@ -21,6 +21,9 @@ public interface LearningPathRepository extends JpaRepository<LearningPath, Long
 
     Optional<LearningPath> findFirstByLearningSpaceIdAndStatusOrderByPositionDesc(Long learningSpaceId, LearningPathStatus status);
 
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM LearningPath p WHERE p.learningSpace.id = :spaceId AND p.status IN :statuses ORDER BY p.position ASC")
+    List<LearningPath> findByLearningSpaceIdAndStatusInOrderByPositionAsc(@org.springframework.data.repository.query.Param("spaceId") Long spaceId, @org.springframework.data.repository.query.Param("statuses") List<LearningPathStatus> statuses);
+
     @org.springframework.data.jpa.repository.Query("SELECT p FROM LearningPath p WHERE " +
             "(:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
             "(:status IS NULL OR p.status = :status)")
