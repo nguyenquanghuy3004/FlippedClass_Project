@@ -49,13 +49,27 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .build();
     }
 
+    @Autowired
+    private com.example.flippedclass.repository.LearningNodeItemRepository learningNodeItemRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.QuizRepository quizRepository;
+
     @Override
     @Transactional
     public void deleteNode(Long nodeId) {
-        if(!learningNodeRepository.existsById(nodeId)){
-            throw new IllegalArgumentException("Không tìm thấy bài học");
+        LearningNode node = learningNodeRepository.findById(nodeId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài học"));
+        
+        // Explicitly delete children to avoid JPA orphanRemoval bidirectional quirks
+        if (node.getItems() != null && !node.getItems().isEmpty()) {
+            learningNodeItemRepository.deleteAllInBatch(node.getItems());
         }
-        learningNodeRepository.deleteById(nodeId);
+        if (node.getQuizzes() != null && !node.getQuizzes().isEmpty()) {
+            quizRepository.deleteAllInBatch(node.getQuizzes());
+        }
+        
+        learningNodeRepository.delete(node);
     }
 
     @Override

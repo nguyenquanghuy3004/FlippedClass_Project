@@ -55,31 +55,13 @@
             <!-- Classroom Style Tabs -->
             <ul class="nav nav-tabs mb-4 border-bottom-0 gap-3 fw-bold" style="font-size: 0.95rem;" role="tablist" th:with="currentTab=${activeTab != null ? activeTab : 'roadmap'}">
                 <li class="nav-item">
-<<<<<<<< HEAD:src/main/resources/templates/supporter/learningPath.html
                     <a class="nav-link" href="/supporter/dashboard"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
-========
-                    <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/dashboard" style="transition: color 0.2s;"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
->>>>>>>> origin/Nguyenhuy:target/classes/templates/lecturer/learningPath.html
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'roadmap' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'roadmap' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#roadmap" role="tab" th:attr="data-url-path='/lecturer/space/' + ${spaceId}">Classwork / Roadmap</a>
                 </li>
-<<<<<<<< HEAD:src/main/resources/templates/supporter/learningPath.html
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/supporter/space-members(spaceId=${spaceId})}">People</a>
-========
-                <li class="nav-item" role="presentation">
-                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'people' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'people' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#people" role="tab" th:attr="data-url-path='/lecturer/space-members?spaceId=' + ${spaceId}">People</a>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'analytics' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'analytics' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#analytics" role="tab" th:attr="data-url-path='/lecturer/spaces/' + ${spaceId} + '/analytics'">Analytics</a>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'activities' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'activities' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#activities" role="tab" th:attr="data-url-path='/lecturer/spaces/' + ${spaceId} + '/group-activities'">Group Activities</a>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'mentoring' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'mentoring' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#mentoring" role="tab" th:attr="data-url-path='/lecturer/mentoring?spaceId=' + ${spaceId}"><i class="ti ti-users me-1"></i> Peer Mentoring</a>
->>>>>>>> origin/Nguyenhuy:target/classes/templates/lecturer/learningPath.html
                 </li>
             </ul>
 
@@ -164,83 +146,34 @@
                                         <span th:if="${path.status == 'PUBLISHED'}" class="badge-published">Published</span>
                                         <span th:if="${path.status != 'PUBLISHED'}" class="badge-in-progress">In Progress</span>
 
-<<<<<<<< HEAD:src/main/resources/templates/supporter/learningPath.html
                                         <!-- Module actions hidden for Supporter -->
-========
                                         <!-- Collapse/Expand Button -->
                                         <button class="module-action-btn path-collapse-btn me-1" th:data-pathid="${path.id}" title="Thu gọn">
                                             <i class="ti ti-chevron-down"></i>
                                         </button>
-
-                                        <div class="dropdown">
-                                            <button class="module-action-btn" data-bs-toggle="dropdown" title="Lựa chọn Module">
-                                                <i class="ti ti-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2" style="min-width:190px;">
-                                                <li>
-                                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 edit-path-btn"
-                                                       href="#"
-                                                       th:data-id="${path.id}"
-                                                       th:data-title="${path.title}"
-                                                       th:data-description="${path.description}">
-                                                        <i class="ti ti-pencil text-indigo"></i> Edit Module
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 text-warning archive-path-btn"
-                                                       href="#" th:data-id="${path.id}">
-                                                        <i class="ti ti-archive"></i> Archive
-                                                    </a>
-                                                </li>
-                                                <li><hr class="dropdown-divider my-1"></li>
-                                                <li>
-                                                    <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 text-danger delete-path-btn"
-                                                       href="#" th:data-id="${path.id}">
-                                                        <i class="ti ti-trash"></i> Delete
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
->>>>>>>> origin/Nguyenhuy:target/classes/templates/lecturer/learningPath.html
                                     </div>
                                 </div>
 
                                 <!-- Nodes area -->
-<<<<<<<< HEAD:src/main/resources/templates/supporter/learningPath.html
-                                <div class="card-body px-4 pb-4 pt-2">
-========
                                 <div class="path-content-collapse" th:id="'pathContent-' + ${path.id}" style="overflow:hidden; transition: max-height 0.35s ease, opacity 0.3s ease; max-height: 5000px; opacity: 1;">
                                     <div class="card-body px-4 pb-4 pt-2">
->>>>>>>> origin/Nguyenhuy:target/classes/templates/lecturer/learningPath.html
-                                    <!-- Has lessons -->
-                                    <div th:if="${path.nodes != null and !path.nodes.empty}" class="nodes-container">
-                                        <th:block th:each="node : ${path.nodes}">
-                                            <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
-                                        </th:block>
-                                    </div>
-
-                                    <!-- No lessons yet -->
-                                    <div th:if="${path.nodes == null or path.nodes.empty}" class="module-empty-box mb-3">
-                                        <div class="module-empty-icon">
-                                            <i class="ti ti-layer-difference"></i>
+                                        <!-- Has lessons -->
+                                        <div th:if="${path.nodes != null and !path.nodes.empty}" class="nodes-container">
+                                            <th:block th:each="node : ${path.nodes}">
+                                                <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
+                                            </th:block>
                                         </div>
-                                        <h6 class="fw-bold mb-1" style="color:#312e81;">Module is empty</h6>
-                                        <p class="text-muted small mb-0">Add your first lesson below.</p>
-                                    </div>
 
-<<<<<<<< HEAD:src/main/resources/templates/supporter/learningPath.html
-                                    <!-- Add lesson hidden for Supporter -->
-========
-                                    <!-- Add lesson button -->
-                                    <div class="create-node-btn mt-2" th:data-pathid="${path.id}">
-                                        <span class="d-flex align-items-center justify-content-center gap-2">
-                                            <i class="ti ti-plus"></i> Add New Lesson
-                                        </span>
+                                        <!-- No lessons yet -->
+                                        <div th:if="${path.nodes == null or path.nodes.empty}" class="module-empty-box mb-3">
+                                            <div class="module-empty-icon">
+                                                <i class="ti ti-layer-difference"></i>
+                                            </div>
+                                            <h6 class="fw-bold mb-1" style="color:#312e81;">Module is empty</h6>
+                                            <p class="text-muted small mb-0">Add your first lesson below.</p>
+                                        </div>
                                     </div>
-                                    </div>
->>>>>>>> origin/Nguyenhuy:target/classes/templates/lecturer/learningPath.html
                                 </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -252,21 +185,6 @@
                 <div class="tab-pane fade" th:classappend="${currentTab == 'people' ? 'show active' : ''}" id="people" role="tabpanel">
                     <div th:replace="~{lecturer/space-members :: content}"></div>
                 </div> <!-- End People Tab Pane -->
-
-                <!-- ANALYTICS TAB -->
-                <div class="tab-pane fade" th:classappend="${currentTab == 'analytics' ? 'show active' : ''}" id="analytics" role="tabpanel">
-                    <div th:replace="~{lecturer/learning-analytics :: content}"></div>
-                </div> <!-- End Analytics Tab Pane -->
-
-                <!-- ACTIVITIES TAB -->
-                <div class="tab-pane fade" th:classappend="${currentTab == 'activities' ? 'show active' : ''}" id="activities" role="tabpanel">
-                    <div th:replace="~{lecturer/group-activities :: content}"></div>
-                </div> <!-- End Activities Tab Pane -->
-
-                <!-- MENTORING TAB -->
-                <div class="tab-pane fade" th:classappend="${currentTab == 'mentoring' ? 'show active' : ''}" id="mentoring" role="tabpanel">
-                    <div th:replace="~{lecturer/mentoring :: content}"></div>
-                </div> <!-- End Mentoring Tab Pane -->
                 
             </div> <!-- End Tab Content -->
         </div>
@@ -1108,14 +1026,8 @@
                                                 </div>
                                             </div>
                                             <div class="d-flex gap-2">
-<<<<<<<< HEAD:src/main/resources/templates/supporter/learningPath.html
                                                 <a href="/supporter/quizzes/${quiz.id}/statistics" class="btn btn-outline-info px-3 py-1 rounded-pill"><i class="ti ti-chart-bar"></i> Thống kê</a>
                                                 <a href="/supporter/quizzes/${quiz.id}/builder" class="btn btn-outline-primary px-3 py-1 rounded-pill"><i class="ti ti-edit"></i> Edit Quiz</a>
-========
-                                                <a href="/lecturer/quizzes/${quiz.id}/statistics" class="btn btn-outline-info px-3 py-1 rounded-pill"><i class="ti ti-chart-bar"></i> Thống kê</a>
-                                                <a href="/lecturer/quizzes/${quiz.id}/builder" class="btn btn-outline-primary px-3 py-1 rounded-pill"><i class="ti ti-edit"></i> Edit Quiz</a>
->>>>>>>> origin/Nguyenhuy:target/classes/templates/lecturer/learningPath.html
-                                                <button class="btn btn-outline-danger px-3 py-1 rounded-pill" onclick="deleteQuiz(${quiz.id})"><i class="ti ti-trash"></i> Delete Quiz</button>
                                             </div>
                                         </div>
                                         <div id="quiz-launcher-${quiz.id}" class="mt-3 text-center p-4 bg-light border rounded-4">
