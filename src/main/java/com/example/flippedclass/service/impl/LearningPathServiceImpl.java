@@ -166,7 +166,7 @@ public class LearningPathServiceImpl implements LearningPathService {
                 }
 
                 String computedStatus = node.getStatus();
-                if (studentId != null && prereqId != null) {
+                if (studentId != null && prereqId != null && !"DOCUMENT".equals(node.getNodeType())) {
                     var progress = nodeProgressRepository.findByStudentIdAndLearningNodeId(studentId, prereqId).orElse(null);
                     if (progress == null || !progress.getStatus().name().equals("COMPLETED")) {
                         computedStatus = "LOCKED";

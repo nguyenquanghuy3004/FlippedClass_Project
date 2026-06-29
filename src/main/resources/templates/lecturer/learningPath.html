@@ -689,21 +689,29 @@
                     $(this).removeClass('is-invalid');
                 });
 
-                // Mở popup Sửa bài học
+                // Mở Modal Cập nhật bài học
                 $('.edit-node-btn').click(function (e) {
                     e.preventDefault();
-                    const pathId = $(this).data('pathid');
-                    const nodeId = $(this).data('nodeid');
-                    const title = $(this).data('title');
-                    const description = $(this).data('description');
-                    const type = $(this).data('type');
+                    $('#editNodeError').hide();
 
-                    $('#editNodePathId').val(pathId);
+                    const nodeId = $(this).data('nodeid');
+                    const pathId = $(this).data('pathid');
+                    const title = $(this).data('title');
+                    const desc = $(this).data('description');
+                    const type = $(this).data('type');
+                    const prereq = $(this).data('prereq');
+
                     $('#editNodeId').val(nodeId);
+                    $('#editNodePathId').val(pathId);
                     $('#editNodeTitle').val(title);
-                    $('#editNodeDescription').val(description !== 'null' ? description : '');
-                    $('#editNodeType').val(type || 'VIDEO').trigger('change');
-                    
+                    $('#editNodeDescription').val(desc !== 'null' ? desc : '');
+                    $('#editNodeType').val(type).trigger('change');
+                    if (prereq) {
+                        $('#editNodePrerequisite').val(prereq);
+                    } else {
+                        $('#editNodePrerequisite').val('');
+                    }
+
                     $('#editYoutubeUrl').val('').removeData('original').removeData('itemid');
                     $('#editDocumentFile').val('').removeData('itemid');
                     $('#currentDocumentInfo').text('');
@@ -774,15 +782,21 @@
                 // Lưu bài học mới (Create)
                 $('#btnSaveNode').click(function () {
                     $('#createNodeError').hide();
-                    if (!checkValid(['#nodeTitle', '#nodeDescription'])) return;
+                    if (!checkValid(['#nodeTitle'])) return;
 
                     const btn = $(this);
                     const pathId = $('#nodePathId').val();
                     const title = $('#nodeTitle').val().trim();
                     const desc = $('#nodeDescription').val().trim();
                     const type = $('#nodeType').val();
+                    const prereq = $('#nodePrerequisite').val();
 
                     btn.prop('disabled', true).text('Adding...');
+
+                    const payload = { title: title, description: desc, nodeType: type, learningPathId: pathId };
+                    if (prereq && prereq !== "") {
+                        payload.prerequisiteNodeId = prereq;
+                    }
 
                     fetch(`/api/learning-spaces/${spaceId}/learning-paths/${pathId}/learning-nodes`, {
                         method: 'POST',
@@ -790,7 +804,7 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
+                        body: JSON.stringify(payload)
                     })
                         .then(res => {
                             if (!res.ok) throw new Error("Failed to add lesson");
@@ -808,7 +822,7 @@
                 // Cập nhật bài học (Edit)
                 $('#btnUpdateNode').click(function () {
                     $('#editNodeError').hide();
-                    if (!checkValid(['#editNodeTitle', '#editNodeDescription'])) return;
+                    if (!checkValid(['#editNodeTitle'])) return;
 
                     const btn = $(this);
                     const pathId = $('#editNodePathId').val();
@@ -816,11 +830,17 @@
                     const title = $('#editNodeTitle').val().trim();
                     const desc = $('#editNodeDescription').val().trim();
                     const type = $('#editNodeType').val();
+                    const prereq = $('#editNodePrerequisite').val();
 
                     const youtubeUrl = $('#editYoutubeUrl').val().trim();
                     const docFile = $('#editDocumentFile')[0].files[0];
 
                     btn.prop('disabled', true).text('Saving...');
+
+                    const payload = { title: title, description: desc, nodeType: type, learningPathId: pathId };
+                    if (prereq && prereq !== "") {
+                        payload.prerequisiteNodeId = prereq;
+                    }
 
                     fetch(`/api/learning-spaces/${spaceId}/learning-paths/${pathId}/learning-nodes/${nodeId}`, {
                         method: 'PUT',
@@ -828,7 +848,7 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
+                        body: JSON.stringify(payload)
                     })
                     .then(res => {
                         if (!res.ok) throw new Error("Failed to update lesson");

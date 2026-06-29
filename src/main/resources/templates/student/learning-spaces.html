@@ -540,14 +540,18 @@
     }
     function nodeTemplate(node, index) {
       const isDocument = node.nodeType === 'DOCUMENT';
+      const isLocked = node.status === 'LOCKED';
       const params = new URLSearchParams({
         nodeId: node.id,
         spaceId: state.selectedSpaceId || ''
       });
 
+      const cardStyle = isLocked ? 'opacity: 0.6; pointer-events: none; cursor: not-allowed; background: #f8fafc;' : 'cursor: pointer;';
+      const statusIcon = isLocked ? 'ti-lock text-danger' : 'ti-lock-open';
+
       if (isDocument) {
         return `
-        <a class="node-card" href="javascript:void(0)" onclick="openDocumentNode(event, ${node.id})" style="cursor: pointer;">
+        <a class="node-card" href="javascript:void(0)" onclick="openDocumentNode(event, ${node.id})" style="${cardStyle}">
           <div class="node-index">${index + 1}</div>
           <div>
             <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
@@ -555,16 +559,16 @@
           </div>
           <div class="node-badges">
             <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-            <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
+            <span class="soft-chip ${isLocked ? 'text-danger bg-danger-subtle' : ''}"><i class="ti ${statusIcon}"></i>${escapeHtml(statusLabel(node.status))}</span>
           </div>
           <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
         </a>`;
       }
 
-      const href = `/student/learning-node?${params.toString()}`;
+      const href = isLocked ? 'javascript:void(0)' : `/student/learning-node?${params.toString()}`;
 
       return `
-      <a class="node-card" href="${href}">
+      <a class="node-card" href="${href}" style="${cardStyle}">
         <div class="node-index">${index + 1}</div>
         <div>
           <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
@@ -572,7 +576,7 @@
         </div>
         <div class="node-badges">
           <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-          <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
+          <span class="soft-chip ${isLocked ? 'text-danger bg-danger-subtle border-danger' : ''}"><i class="ti ${statusIcon}"></i>${escapeHtml(statusLabel(node.status))}</span>
         </div>
         <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
       </a>`;

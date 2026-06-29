@@ -28,16 +28,14 @@
                                   th:onmouseout="${node.nodeType == 'PRACTICE'} ? 'this.style.color=\'#f8fafc\'; this.style.transform=\'translateX(0)\'' : 'this.style.color=\'#1e293b\'; this.style.transform=\'translateX(0)\''">Node Title</span>
                             
                             <!-- Bổ sung Nút CTA / Badge hiển thị lời kêu gọi hành động -->
+                            <span th:if="${node.prerequisiteNodeId != null}" class="badge rounded-pill" style="font-size: 0.75rem; font-weight: 500; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); transition: all 0.2s;" title="Yêu cầu hoàn thành bài trước đó">
+                                <i class="ti ti-lock me-1"></i>Bị khóa
+                            </span>
                             <span th:if="${node.nodeType == 'VIDEO'}" class="badge rounded-pill" style="font-size: 0.75rem; font-weight: 500; background: rgba(79,70,229,0.1); color: #4f46e5; border: 1px solid rgba(79,70,229,0.2); transition: all 0.2s;">
                                 <i class="ti ti-player-play me-1"></i>Vào xem Video
                             </span>
                             <span th:if="${node.nodeType == 'PRACTICE'}" class="badge rounded-pill" style="font-size: 0.75rem; font-weight: 500; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;">
                                 <i class="ti ti-code me-1"></i>Vào làm Bài tập
-                            </span>
-                            
-                            <!-- Prerequisite Badge -->
-                            <span th:if="${node.prerequisiteNodeId != null}" class="badge rounded-pill" style="font-size: 0.75rem; font-weight: 500; background: rgba(245,158,11,0.1); color: #d97706; border: 1px solid rgba(245,158,11,0.2); transition: all 0.2s; margin-left: 5px;" title="This lesson has a prerequisite">
-                                <i class="ti ti-lock me-1"></i>Has Prerequisite
                             </span>
                         </div>
                     </a>

@@ -89,7 +89,7 @@ public class GlobalLearningNodeController {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
             boolean isStudent = userDetails.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals("STUDENT"));
-            if (isStudent && prereqId != null) {
+            if (isStudent && prereqId != null && !"DOCUMENT".equals(node.getNodeType())) {
                 var progress = nodeProgressRepository.findByStudentIdAndLearningNodeId(userDetails.getId(), prereqId).orElse(null);
                 if (progress == null || !progress.getStatus().name().equals("COMPLETED")) {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn chưa hoàn thành bài học trước đó!");

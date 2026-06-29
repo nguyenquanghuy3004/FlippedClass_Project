@@ -546,35 +546,39 @@
         spaceId: state.selectedSpaceId || ''
       });
 
-      let onClick = '';
-      let href = `/student/learning-node?${params.toString()}`;
-      let lockIcon = '<i class="ti ti-lock-open"></i>';
-      
-      if (isLocked) {
-        href = 'javascript:void(0)';
-        onClick = 'onclick="Swal.fire(\'Locked\', \'This lesson is locked. You must complete the prerequisite lesson first.\', \'warning\'); return false;"';
-        lockIcon = '<i class="ti ti-lock text-danger"></i>';
-      } else if (isDocument) {
-        href = 'javascript:void(0)';
-        onClick = `onclick="openDocumentNode(event, ${node.id})"`;
+      const cardStyle = isLocked ? 'opacity: 0.6; pointer-events: none; cursor: not-allowed; background: #f8fafc;' : 'cursor: pointer;';
+      const statusIcon = isLocked ? 'ti-lock text-danger' : 'ti-lock-open';
+
+      if (isDocument) {
+        return `
+        <a class="node-card" href="javascript:void(0)" onclick="openDocumentNode(event, ${node.id})" style="${cardStyle}">
+          <div class="node-index">${index + 1}</div>
+          <div>
+            <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
+            <p class="node-content">${escapeHtml(node.content || 'Click to open document in new tab.')}</p>
+          </div>
+          <div class="node-badges">
+            <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+            <span class="soft-chip ${isLocked ? 'text-danger bg-danger-subtle' : ''}"><i class="ti ${statusIcon}"></i>${escapeHtml(statusLabel(node.status))}</span>
+          </div>
+          <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
+        </a>`;
       }
-      
-      const badgeHtml = `
-        <div class="node-badges">
-          <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-          <span class="soft-chip">${lockIcon}${escapeHtml(statusLabel(node.status))}</span>
-        </div>
-      `;
+
+      const href = isLocked ? 'javascript:void(0)' : `/student/learning-node?${params.toString()}`;
 
       return `
-      <a class="node-card ${isLocked ? 'locked-node' : ''}" href="${href}" ${onClick} ${isLocked ? 'style="opacity: 0.65; cursor: not-allowed; background-color: #f8fafc;"' : (isDocument ? 'style="cursor: pointer;"' : '')}>
+      <a class="node-card" href="${href}" style="${cardStyle}">
         <div class="node-index">${index + 1}</div>
         <div>
-          <h4 class="node-title ${isLocked ? 'text-muted' : ''}">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
-          <p class="node-content">${escapeHtml(node.content || (isLocked ? 'This lesson is currently locked.' : (isDocument ? 'Click to open document in new tab.' : 'Click to open this node learning page.')))}</p>
+          <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
+          <p class="node-content">${escapeHtml(node.content || 'Click to open this node learning page.')}</p>
         </div>
-        ${badgeHtml}
-        <span class="node-open" aria-hidden="true" ${isLocked ? 'style="display:none;"' : ''}><i class="ti ti-arrow-up-right"></i></span>
+        <div class="node-badges">
+          <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+          <span class="soft-chip ${isLocked ? 'text-danger bg-danger-subtle border-danger' : ''}"><i class="ti ${statusIcon}"></i>${escapeHtml(statusLabel(node.status))}</span>
+        </div>
+        <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
       </a>`;
     }
 
