@@ -100,7 +100,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
                 .build();
         LearningSpace savedSpace = learningSpaceRepository.save(learningSpace);
 
-        // tạo luôn OWNER trong bảng member (không bắt buộc spec join, nhưng nên có)
+        // tạo luôn OWNER trong bảng member
         LearningSpaceMember ownerMember = new LearningSpaceMember();
         ownerMember.setLearningSpace(savedSpace);
         ownerMember.setUser(owner);
@@ -153,11 +153,11 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
                 .id(space.getId())
                 .name(space.getName())
                 .description(space.getDescription())
-                .inviteCode(space.getInviteCode())
-                .visibility(space.getVisibility())
                 .ownerId(space.getOwner().getId())
                 .ownerUsername(space.getOwner().getUsername())
                 .createdAt(space.getCreatedAt())
+                .inviteCode(space.getInviteCode())
+                .visibility(space.getVisibility())
                 .status(space.getStatus())
                 .build()).collect(Collectors.toList());
     }

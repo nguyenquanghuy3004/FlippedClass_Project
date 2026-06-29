@@ -1,5 +1,10 @@
+<<<<<<<< HEAD:src/main/resources/templates/supporter/quiz-statistics.html
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{supporter/layout}">
+========
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
+>>>>>>>> origin/Nguyenhuy:target/classes/templates/lecturer/quiz-statistics.html
 
 <head>
   <meta charset="UTF-8" />
@@ -10,6 +15,37 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <link rel="stylesheet" th:href="@{/assets/css/lecturer-quiz-statistics.css}">
   </th:block>
+  <script>
+(function() {
+    function handleUnauthorized() {
+        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
+        localStorage.removeItem('jwt_token');
+        sessionStorage.removeItem('jwt_token');
+        window.location.href = '/signin';
+    }
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch.apply(this, args);
+            if (response.status === 401) {
+                handleUnauthorized();
+            }
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+    const originalXhrOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function() {
+        this.addEventListener('load', function() {
+            if (this.status === 401) {
+                handleUnauthorized();
+            }
+        });
+        originalXhrOpen.apply(this, arguments);
+    };
+})();
+</script>
 </head>
 
 <body>
@@ -256,6 +292,8 @@
   </th:block>
 </body>
 </html>
+
+
 
 
 

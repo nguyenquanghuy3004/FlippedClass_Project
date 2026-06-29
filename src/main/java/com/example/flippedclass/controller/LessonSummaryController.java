@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class LessonSummaryController {
 
     private final LessonSummaryService lessonSummaryService;
+    private NotificationController notifController;
 
     @PostMapping
     public ResponseEntity<LessonSummaryResponse> submitSummary(

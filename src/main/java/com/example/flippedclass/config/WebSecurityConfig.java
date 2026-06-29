@@ -88,6 +88,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(PUBLIC_URLS).permitAll()
                         .requestMatchers("/api/test/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));

@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+  <meta charset="UTF-8" />
+  <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">FCMS Mentor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
+  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
+  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
+  <link rel="manifest" th:href="@{/assets/site.webmanifest}">
+
+  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
+  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  <!-- FontAwesome for fallback -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <link rel="stylesheet" th:href="@{/assets/css/lecturer-layout.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+
+  <th:block layout:fragment="head"></th:block>
+  <script>
+(function() {
+    function handleUnauthorized() {
+        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
+        localStorage.removeItem('jwt_token');
+        sessionStorage.removeItem('jwt_token');
+        window.location.href = '/signin';
+    }
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch.apply(this, args);
+            if (response.status === 401) {
+                handleUnauthorized();
+            }
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+    const originalXhrOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function() {
+        this.addEventListener('load', function() {
+            if (this.status === 401) {
+                handleUnauthorized();
+            }
+        });
+        originalXhrOpen.apply(this, arguments);
+    };
+})();
+</script>
+</head>
+
+<body>
+  <div id="overlay" class="overlay"></div>
+
+  <!-- TOPBAR -->
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+
+    <div class="topbar-main">
+      <div class="topbar-title-wrap d-none d-md-block">
+        <h5 class="topbar-title fw-bold text-dark ms-1">Supporter <span class="badge bg-success-subtle text-success rounded-pill">Portal</span></h5>
+      </div>
+    </div>
+  </nav>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm">
+    <div class="logo-area border-bottom border-light">
+      <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
+        <div class="bg-success text-white rounded p-1 d-flex align-items-center justify-content-center me-2">
+          <i class="ti ti-heart-handshake fs-3"></i>
+        </div>
+        <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">FCMS<span class="text-success">Supporter</span></span>
+      </a>
+    </div>
+    <ul class="nav flex-column mt-4">
+      <li>
+        <a class="nav-link rounded-pill mx-3 mb-2 px-4 active fw-bold" href="/supporter/dashboard" data-nav-path="/supporter/dashboard">
+          <i class="ti ti-box-seam fs-5"></i><span class="nav-text">My Mentoring Spaces</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" href="/student/dashboard" data-nav-path="/student/dashboard">
+          <i class="ti ti-arrow-back-up fs-5"></i><span class="nav-text">Back to Student</span>
+        </a>
+      </li>
+
+      <li class="sidebar-user-slot mt-auto">
+        <div class="student-user-menu" data-user-menu>
+          <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" onclick="logout()">
+            <span class="student-menu-info ms-0">
+              <span class="student-menu-name text-danger"><i class="ti ti-logout"></i> Logout</span>
+            </span>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main id="content" class="content py-10">
+    <div class="container-fluid">
+
+      <div layout:fragment="content">
+        <!-- Dynamic Content goes here -->
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <footer class="text-center py-2 mt-6 text-secondary ">
+            <p class="mb-0">FCMS Supporter Workspace. Powered by InApp Theme</p>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // Setup AJAX to include JWT token if stored in localStorage
+    $.ajaxSetup({
+      beforeSend: function (xhr) {
+        const token = localStorage.getItem('jwt_token');
+        if (token) {
+          xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        }
+      }
+    });
+
+    function checkAuth() {
+      const token = localStorage.getItem('jwt_token');
+      if (!token) {
+        window.location.href = '/signin';
+        return;
+      }
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const path = window.location.pathname;
+        const isSupporterAllowed = path.startsWith('/supporter') || 
+                                   path.startsWith('/lecturer/space') || 
+                                   path.startsWith('/lecturer/quizzes') || 
+                                   path.startsWith('/lecturer/learning-nodes');
+        if (!payload.roles || (!isSupporterAllowed && !payload.roles.includes('MENTOR') && !payload.roles.includes('ROLE_MENTOR') && !payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
+          window.location.href = '/signin';
+        }
+      } catch (e) {
+        window.location.href = '/signin';
+      }
+    }
+    checkAuth();
+
+    function logout() {
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('user_id');
+      window.location.href = '/signin';
+    }
+
+    // Auto-highlight active sidebar menu item
+    $(document).ready(function() {
+      const path = window.location.pathname;
+      $('.sidebar .nav-link').removeClass('active fw-bold').addClass('text-secondary fw-semibold');
+      
+      let matched = false;
+      $('.sidebar .nav-link').each(function() {
+        const navPath = $(this).attr('data-nav-path');
+        if (navPath && path.startsWith(navPath)) {
+          $(this).removeClass('text-secondary fw-semibold').addClass('active fw-bold');
+          matched = true;
+        }
+      });
+      // Fallback
+      if (!matched) {
+        $('.sidebar .nav-link[data-nav-path="/supporter/dashboard"]').removeClass('text-secondary fw-semibold').addClass('active fw-bold');
+      }
+    });
+  </script>
+  <th:block layout:fragment="scripts"></th:block>
+</body>
+
+</html>
+
+
