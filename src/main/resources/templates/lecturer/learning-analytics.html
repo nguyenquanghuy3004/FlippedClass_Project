@@ -169,7 +169,10 @@
             let detailModal;
 
             $(document).ready(function() {
-                detailModal = new bootstrap.Modal(document.getElementById('studentDetailModal'));
+                const modalEl = document.getElementById('studentDetailModal');
+                if (modalEl) {
+                    detailModal = new bootstrap.Modal(modalEl);
+                }
                 // Fetch when tab is opened
                 if ($('#kpi-total-students').is(':visible') && ($('#kpi-total-students').text() === '0' || $('#kpi-total-students').text() === '--')) {
                     fetchAnalytics();

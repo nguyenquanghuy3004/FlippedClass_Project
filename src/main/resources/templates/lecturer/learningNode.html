@@ -9,8 +9,7 @@
 
                     <!-- Left: icon + title -->
                     <a class="d-flex align-items-center gap-3 text-decoration-none" 
-                       th:href="${(isSupporter != null and isSupporter and node.nodeType != 'VIDEO' and node.nodeType != 'PRACTICE') ? null : (isSupporter != null and isSupporter ? '/lecturer/learning-nodes/' + node.id + '/preview?role=supporter' : '/lecturer/learning-nodes/' + node.id + '/preview')}"
-                       th:style="${(isSupporter != null and isSupporter and node.nodeType != 'VIDEO' and node.nodeType != 'PRACTICE') ? 'cursor: default; pointer-events: none;' : ''}">
+                       th:href="${(isSupporter != null and isSupporter) ? '/lecturer/learning-nodes/' + node.id + '/preview?role=supporter' : '/lecturer/learning-nodes/' + node.id + '/preview'}">
                         <!-- Icon: shape depends on type -->
                         <div class="node-icon" th:style="${node.nodeType == 'PRACTICE'} ? 'background: #1e293b; border: 1px solid #334155; box-shadow: 0 0 10px rgba(16,185,129,0.2);' : ''">
                             <i th:class="'ti fs-5 '
