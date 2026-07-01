@@ -87,6 +87,12 @@
                                 <i class="ti ti-file-upload"></i> Upload Document (PDF)
                             </a>
                         </li>
+                        <li th:if="${node.nodeType == 'QUIZ'}">
+                            <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 create-quiz-btn"
+                               href="#" th:data-nodeid="${node.id}" style="color:#8b5cf6;">
+                                <i class="ti ti-brain"></i> Create Quick Quiz
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
