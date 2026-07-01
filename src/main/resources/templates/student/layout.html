@@ -42,8 +42,19 @@
             localStorage.removeItem('user_id');
             window.location.href = '/login';
           } else if (!payload.roles || (!payload.roles.includes('STUDENT') && !payload.roles.includes('ROLE_STUDENT'))) {
-            // Không đúng vai trò học sinh, chuyển về trang đăng nhập
-            window.location.href = '/login';
+            // Không đúng vai trò học sinh, xử lý redirect thông minh
+            if (payload.roles.includes('MENTOR') || payload.roles.includes('ROLE_MENTOR')) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const pathMatch = window.location.pathname.match(/\/student\/learning-nodes\/(\d+)/);
+                const nodeId = urlParams.get('nodeId') || (pathMatch ? pathMatch[1] : null);
+                if (nodeId) {
+                    window.location.href = '/lecturer/learning-nodes/' + nodeId + '/preview';
+                } else {
+                    window.location.href = '/lecturer/dashboard';
+                }
+            } else {
+                window.location.href = '/login';
+            }
           }
         } catch (e) {
           // Token không hợp lệ, chuyển về trang đăng nhập

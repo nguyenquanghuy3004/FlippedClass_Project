@@ -74,9 +74,17 @@ public class DiscussionServiceImpl implements DiscussionService {
         if (saved.getParentDiscussion() != null) {
             User parentAuthor = saved.getParentDiscussion().getUser();
             if (!parentAuthor.getId().equals(user.getId())) {
-                String targetUrl = "/student/learning-node?nodeId=" + node.getId() + "&commentId=" + saved.getId();
-                if (node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null) {
-                    targetUrl += "&spaceId=" + node.getLearningPath().getLearningSpace().getId();
+                boolean isLecturer = parentAuthor.getRoles().stream()
+                        .anyMatch(r -> r.getName().name().equals("MENTOR"));
+                String targetUrl;
+                
+                if (isLecturer) {
+                    targetUrl = "/lecturer/learning-nodes/" + node.getId() + "/preview";
+                } else {
+                    targetUrl = "/student/learning-node?nodeId=" + node.getId() + "&commentId=" + saved.getId();
+                    if (node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null) {
+                        targetUrl += "&spaceId=" + node.getLearningPath().getLearningSpace().getId();
+                    }
                 }
                 
                 com.example.flippedclass.entity.Notification notification = com.example.flippedclass.entity.Notification.builder()
