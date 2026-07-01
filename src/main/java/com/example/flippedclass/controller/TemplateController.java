@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
+import java.util.List;
+import java.util.Collections;
+import com.example.flippedclass.dto.response.LearningPathResponse;
 
 @Controller
 public class TemplateController {
@@ -139,9 +142,11 @@ public class TemplateController {
         model.addAttribute("spaceId", spaceId);
         model.addAttribute("activeTab", activeTab);
         try {
-            model.addAttribute("paths", learningPathService.getLearningPath(spaceId));
-        } catch(Exception e) {
-            model.addAttribute("paths", java.util.Collections.emptyList());
+            List<LearningPathResponse> paths = learningPathService.getLearningPath(spaceId);
+            model.addAttribute("paths", paths);
+        } catch (Exception e) {
+            List<LearningPathResponse> emptyPaths = Collections.emptyList();
+            model.addAttribute("paths", emptyPaths);
         }
     }
 
@@ -153,13 +158,8 @@ public class TemplateController {
 
     @GetMapping("/supporter/space/{spaceId}")
     public String supporterLearningPath(@PathVariable Long spaceId, Model model) {
-        model.addAttribute("spaceId", spaceId);
+        loadSpaceCommonData(spaceId, "roadmap", model);
         model.addAttribute("isSupporter", true);
-        try {
-            model.addAttribute("paths", learningPathService.getLearningPath(spaceId));
-        } catch(Exception e) {
-            model.addAttribute("paths", java.util.Collections.emptyList());
-        }
         return "supporter/learningPath";
     }
 
@@ -177,8 +177,9 @@ public class TemplateController {
 
     @GetMapping("/supporter/space-members")
     public String supporterSpaceMembers(@RequestParam("spaceId") Long spaceId, Model model) {
-        model.addAttribute("spaceId", spaceId);
-        return "supporter/space-members";
+        loadSpaceCommonData(spaceId, "people", model);
+        model.addAttribute("isSupporter", true);
+        return "supporter/learningPath";
     }
 
 
