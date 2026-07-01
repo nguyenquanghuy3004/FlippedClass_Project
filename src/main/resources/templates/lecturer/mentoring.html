@@ -1,3 +1,11 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
+<head>
+    <title>Peer Mentoring Management</title>
+</head>
+<body>
+
+<div layout:fragment="content">
 <div th:fragment="content">
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
@@ -6,7 +14,9 @@
                 <p class="text-muted mb-0">Manage supporters and assign mentoring pairs.</p>
             </div>
             <div class="d-flex align-items-center gap-3">
-                <select id="spaceSelector" class="form-select rounded-pill shadow-sm border-primary text-primary fw-bold" style="min-width: 200px;" onchange="changeSpace()">
+                <select id="spaceSelector"
+                    class="form-select rounded-pill shadow-sm border-primary text-primary fw-bold"
+                    style="min-width: 200px;" onchange="changeSpace()">
                     <option value="" disabled selected>Select Workspace...</option>
                 </select>
                 <button class="btn btn-primary rounded-pill shadow-sm" onclick="autoMatchPairs()">
@@ -64,7 +74,9 @@
 
     </div>
 </div>
+</div>
 
+<th:block layout:fragment="scripts">
 <th:block th:fragment="scripts">
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -82,7 +94,7 @@
                 });
                 if (!res.ok) throw new Error('Failed to load spaces');
                 const spaces = await res.json();
-                
+
                 const selector = document.getElementById('spaceSelector');
                 spaces.forEach(s => {
                     const opt = document.createElement('option');
@@ -101,7 +113,7 @@
                     document.getElementById('spaceSelector').innerHTML = '<option disabled selected>No spaces available</option>';
                     document.getElementById('loader').classList.add('d-none');
                 }
-            } catch(err) {
+            } catch (err) {
                 console.error(err);
             }
         }
@@ -115,7 +127,7 @@
         async function loadStudents() {
             const loader = document.getElementById('loader');
             const content = document.getElementById('mentoringContent');
-            
+
             loader.classList.remove('d-none');
             content.classList.add('d-none');
 
@@ -124,10 +136,10 @@
                 const response = await fetch(`/api/learning-spaces/${spaceId}/mentoring/students`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
+
                 if (!response.ok) throw new Error('Failed to load students');
                 const data = await response.json();
-                
+
                 renderList('strongList', data.STRONG || [], true);
                 renderList('averageList', data.AVERAGE || [], false);
                 renderList('weakList', data.WEAK || [], false);
@@ -143,7 +155,7 @@
         function renderList(listId, studentEntries, isStrong) {
             const list = document.getElementById(listId);
             list.innerHTML = '';
-            
+
             if (!studentEntries || studentEntries.length === 0) {
                 list.innerHTML = '<li class="list-group-item text-muted text-center py-4">No students in this category.</li>';
                 return;
@@ -153,16 +165,16 @@
                 const s = entry.user;
                 const isSupporter = entry.isSupporter;
                 const mentees = entry.mentees || [];
-                
+
                 const name = s.fullName || (s.firstName + ' ' + s.lastName);
                 let btnHtml = '';
-                
+
                 if (isStrong && !isSupporter) {
                     btnHtml = `<button class="btn btn-sm btn-outline-primary rounded-pill mt-2" onclick="promoteToSupporter(${s.id})"><i class="ti ti-arrow-up"></i> Promote to Supporter</button>`;
                 } else if (isSupporter) {
                     btnHtml = `<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill mt-2 px-2 py-1"><i class="ti ti-check me-1"></i>Supporter</span>`;
                 }
-                
+
                 let menteesHtml = '';
                 if (isSupporter && mentees.length > 0) {
                     menteesHtml = `<div class="mt-2 small text-muted"><strong>Mentees:</strong><ul class="mb-0 ps-3">`;
@@ -202,9 +214,9 @@
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Yes, promote!'
             });
-            
-            if(!result.isConfirmed) return;
-            
+
+            if (!result.isConfirmed) return;
+
             try {
                 const token = localStorage.getItem('jwt_token');
                 const response = await fetch(`/api/learning-spaces/${spaceId}/mentoring/promote/${studentId}`, {
@@ -230,9 +242,9 @@
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Yes, proceed!'
             });
-            
-            if(!result.isConfirmed) return;
-            
+
+            if (!result.isConfirmed) return;
+
             try {
                 const token = localStorage.getItem('jwt_token');
                 const response = await fetch(`/api/learning-spaces/${spaceId}/mentoring/auto-match`, {
@@ -249,3 +261,7 @@
         }
     </script>
 </th:block>
+</th:block>
+
+</body>
+</html>

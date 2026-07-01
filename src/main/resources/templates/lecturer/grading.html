@@ -225,8 +225,8 @@
 
       // Student Info
       if(data.student) {
-        document.getElementById('studentName').innerText = `${data.student.firstName} ${data.student.lastName}`;
-        document.getElementById('studentRoll').innerText = data.student.username;
+        document.getElementById('studentName').innerText = data.student.fullName || data.student.username || 'Unknown Student';
+        document.getElementById('studentRoll').innerText = data.student.username || data.student.email;
       }
 
       // Interactions Timeline

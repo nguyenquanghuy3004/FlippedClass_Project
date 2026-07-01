@@ -20,8 +20,7 @@
             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content border-0 shadow">
-                    <div Organize your modules sequentially. Drag and drop to rearrange the syllabus at any
-                        time.class="modal-header border-bottom-0">
+                    <div class="modal-header border-bottom-0">
                         <h5 class="modal-title fw-bold" id="createSpaceModalLabel">Create New Learning Space</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -103,32 +102,6 @@
             </div>
         </div>
 
-        <!-- Clone Space Modal -->
-        <div class="modal fade" id="cloneSpaceModal" tabindex="-1" aria-labelledby="cloneSpaceModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg rounded-4">
-                    <div class="modal-header border-bottom-0">
-                        <h5 class="modal-title fw-bold" id="cloneSpaceModalLabel">Nhân bản Không gian học tập</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="cloneSpaceForm">
-                            <input type="hidden" id="cloneSpaceId">
-                            <div class="mb-3">
-                                <label for="cloneSpaceName" class="form-label fw-bold">Tên Không gian học tập mới</label>
-                                <input type="text" class="form-control bg-light border-0" id="cloneSpaceName" required minlength="3" maxlength="100">
-                                <div class="invalid-feedback">Vui lòng nhập tên hợp lệ</div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer border-top-0">
-                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
-                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnCloneSpace" style="background-color: #6366f1; border-color: #6366f1;">OK</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Popup Hiển thị và Copy Mã mời (Invite Code Modal) -->
         <div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
@@ -192,22 +165,28 @@
                             <div class="course-subtitle"></div>
                         </a>
 
-                        <div class="card-options-top" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="ti ti-dots-vertical"></i>
+                        <div class="dropdown position-absolute" style="top: 12px; right: 8px; z-index: 10;">
+                            <button type="button"
+                                class="btn btn-link text-white p-0 border-0 shadow-none card-options-top"
+                                data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
+                                <i class="ti ti-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 edit-space-btn" href="#"><i
+                                            class="ti ti-pencil"></i> Edit Space</a></li>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 clone-space-btn" href="#"><i
+                                            class="ti ti-copy"></i> Clone Space</a></li>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 archive-space-btn"
+                                        href="#"><i class="ti ti-archive"></i> <span class="archive-text">Archive
+                                            Space</span></a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger delete-space-btn"
+                                        href="#"><i class="ti ti-trash"></i> Delete Space</a></li>
+                            </ul>
                         </div>
-                        <ul class="dropdown-menu shadow-sm border-0 rounded-3">
-                            <li><a class="dropdown-item d-flex align-items-center gap-2 edit-space-btn" href="#"><i
-                                        class="ti ti-pencil"></i> Edit Space</a></li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2 clone-space-btn" href="#"><i class="ti ti-copy"></i> Clone Space</a></li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2 archive-space-btn" href="#"><i
-                                        class="ti ti-archive"></i> <span class="archive-text">Archive Space</span></a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger delete-space-btn"
-                                    href="#"><i class="ti ti-trash"></i> Delete Space</a></li>
-                        </ul>
                     </div>
 
                     <div class="card-avatar"></div>
@@ -257,8 +236,6 @@
                 // Hàm lấy danh sách Learning Space của giảng viên từ API
                 function fetchSpaces() {
                     fetch('/api/learning-spaces/my-spaces', {
-                        method: 'GET',
-                        cache: 'no-store',
                         headers: {
                             'Authorization': 'Bearer ' + token
                         }
@@ -338,7 +315,6 @@
                                 }
 
                                 clone.querySelector('.delete-space-btn').dataset.id = space.id;
-                                clone.querySelector('.delete-space-btn').dataset.status = status;
 
                                 grid.appendChild(clone);
                             });
@@ -414,7 +390,7 @@
                 // Hàm kiểm tra input trống
                 const checkValid = (selectors) => {
                     let valid = true;
-                    $(selectors.join(',')).removeClass('is-invalid').each(function() {
+                    $(selectors.join(',')).removeClass('is-invalid').each(function () {
                         if (!$(this).val().trim()) { $(this).addClass('is-invalid'); valid = false; }
                     });
                     return valid;
@@ -428,7 +404,7 @@
                 // Xử lý tạo mới Learning Space
                 $('#btnCreateSpace').click(function () {
                     $('#createSpaceError').hide();
-                    if (!checkValid(['#spaceName', '#spaceDescription'])) return;
+                    if (!checkValid(['#spaceName'])) return;
 
                     const btn = $(this);
                     const requestBody = {
@@ -460,7 +436,7 @@
                             fetchSpaces();
                         })
                         .catch(err => {
-                            errorDiv.text("Error: " + err.message).show();
+                            $('#createSpaceError').text("Error: " + err.message).show();
                         })
                         .finally(() => {
                             btn.prop('disabled', false).text('Create Space');
@@ -519,15 +495,16 @@
                 // Lưu thông tin Edit Space
                 $('#btnUpdateSpace').click(function () {
                     $('#editSpaceError').hide();
-                    if (!checkValid(['#editSpaceName', '#editSpaceDescription'])) return;
+                    if (!checkValid(['#editSpaceName'])) return;
 
                     const btn = $(this);
                     const id = $('#editSpaceId').val();
-                    const requestBody = { 
-                        name: $('#editSpaceName').val().trim(), 
-                        description: $('#editSpaceDescription').val().trim(), 
-                        visibility: $('#editSpaceVisibility').val() 
+                    const requestBody = {
+                        name: $('#editSpaceName').val().trim(),
+                        description: $('#editSpaceDescription').val().trim(),
+                        visibility: $('#editSpaceVisibility').val()
                     };
+
                     btn.prop('disabled', true).text('Saving...');
 
                     fetch(`/api/learning-spaces/${id}/update`, {
@@ -539,15 +516,67 @@
                         body: JSON.stringify(requestBody)
                     })
                         .then(res => {
-                            if (res.ok) {
-                                $('#editSpaceModal').modal('hide');
-                                fetchSpaces(); // reload UI
-                            } else {
-                                res.json().then(data => errorDiv.text(data.message || "Error updating space").show());
-                            }
+                            if (!res.ok) throw new Error("Update failed");
+                            return res.json();
                         })
-                        .catch(err => errorDiv.text("Connection error").show())
-                        .finally(() => btn.prop('disabled', false).text('Save Changes'));
+                        .then(data => {
+                            $('#editSpaceModal').modal('hide');
+                            fetchSpaces();
+                        })
+                        .catch(err => {
+                            $('#editSpaceError').text("Error: " + err.message).show();
+                        })
+                        .finally(() => {
+                            btn.prop('disabled', false).text('Save Changes');
+                        });
+                });
+
+                // Clone Space
+                $(document).on('click', '.clone-space-btn', function (e) {
+                    e.preventDefault();
+                    const id = $(this).data('id');
+                    const originalName = $(this).data('name');
+
+                    Swal.fire({
+                        title: 'Clone Space',
+                        input: 'text',
+                        inputLabel: 'New Space Name',
+                        inputValue: originalName + ' - Copy',
+                        showCancelButton: true,
+                        confirmButtonText: 'Clone',
+                        confirmButtonColor: '#6366f1',
+                        inputValidator: (value) => {
+                            if (!value || value.trim().length === 0) {
+                                return 'You need to write something!'
+                            }
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const newName = result.value.trim();
+                            Swal.fire({
+                                title: 'Cloning...',
+                                text: 'Please wait while we clone the space and all its contents.',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading()
+                                }
+                            });
+
+                            fetch(`/api/learning-spaces/${id}/clone?newName=${encodeURIComponent(newName)}`, {
+                                method: 'POST',
+                                headers: { 'Authorization': 'Bearer ' + token }
+                            }).then(res => {
+                                if (res.ok) {
+                                    Swal.fire('Success!', 'The space has been cloned successfully.', 'success');
+                                    fetchSpaces();
+                                } else {
+                                    return res.text().then(text => { throw new Error(text) });
+                                }
+                            }).catch(err => {
+                                Swal.fire('Error', 'Failed to clone space. ' + err.message, 'error');
+                            });
+                        }
+                    });
                 });
 
                 // Archive / Unarchive Space
@@ -574,13 +603,6 @@
                 // Delete Space (Xóa tạm vào thùng rác)
                 $(document).on('click', '.delete-space-btn', function (e) {
                     e.preventDefault();
-                    
-                    const status = $(this).data('status');
-                    if (status === 'ARCHIVE') {
-                        Swal.fire('Cảnh báo!', 'Không thể xóa Không gian học tập đang bị lưu trữ. Vui lòng mở lưu trữ (Unarchive) trước khi xóa.', 'warning');
-                        return;
-                    }
-
                     Swal.fire({
                         title: 'Delete Space?',
                         text: "Are you sure you want to delete this space?",
@@ -595,75 +617,22 @@
                             fetch(`/api/learning-spaces/${id}/delete`, {
                                 method: 'DELETE',
                                 headers: { 'Authorization': 'Bearer ' + token }
-                            }).then(res => { 
+                            }).then(res => {
                                 if (res.ok) {
-                                    Swal.fire('Deleted!', 'Space has been deleted.', 'success');
-                                    fetchSpaces(); 
+                                    Swal.fire('Deleted!', 'The space has been moved to trash.', 'success');
+                                    fetchSpaces();
+                                } else {
+                                    Swal.fire('Error', 'Failed to delete space.', 'error');
                                 }
+                            }).catch(err => {
+                                Swal.fire('Error', 'An error occurred.', 'error');
                             });
                         }
                     });
                 });
-
-                $(document).on('click', '.clone-space-btn', function (e) {
-                    e.preventDefault();
-                    const spaceId = $(this).data('id');
-                    const oldName = $(this).data('name');
-                    
-                    $('#cloneSpaceId').val(spaceId);
-                    $('#cloneSpaceName').val(oldName + ' (Copy)');
-                    $('#cloneSpaceName').removeClass('is-invalid');
-                    $('#cloneSpaceModal').modal('show');
-                });
-
-                $('#btnCloneSpace').click(function () {
-                    const spaceId = $('#cloneSpaceId').val();
-                    const newName = $('#cloneSpaceName').val().trim();
-
-                    if (!newName) {
-                        $('#cloneSpaceName').addClass('is-invalid');
-                        return;
-                    } else {
-                        $('#cloneSpaceName').removeClass('is-invalid');
-                    }
-
-                    $('#cloneSpaceModal').modal('hide');
-
-                    Swal.fire({
-                        title: 'Đang nhân bản...',
-                        text: 'Vui lòng đợi trong giây lát.',
-                        allowOutsideClick: false,
-                        didOpen: () => { Swal.showLoading(); }
-                    });
-
-                    fetch(`/api/learning-spaces/${spaceId}/clone`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + token
-                        },
-                        body: JSON.stringify({ newName: newName })
-                    })
-                    .then(res => {
-                        if (!res.ok) {
-                            return res.json().then(err => { throw new Error(err.message || "Lỗi khi clone"); });
-                        }
-                        return res.json();
-                    })
-                    .then(data => {
-                        Swal.fire('Thành công!', 'Đã nhân bản Không gian học tập thành công.', 'success');
-                        fetchSpaces(); 
-                    })
-                    .catch(err => {
-                        Swal.fire('Lỗi!', err.message, 'error');
-                    });
-                });
-
             });
         </script>
     </th:block>
 </body>
 
 </html>
-
-

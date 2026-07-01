@@ -44,6 +44,7 @@ public class LearningPathController {
         return ResponseEntity.ok(learningNodeService.createLearningNode(pathId, request));
     }
 
+    @PreAuthorize("@spaceSecurity.isMemberInSpace(#spaceId)")
     @GetMapping
     public ResponseEntity<List<LearningPathResponse>> getLearningPath(@PathVariable Long spaceId, Authentication authentication) {
         Long userId = null;
@@ -54,7 +55,7 @@ public class LearningPathController {
                 .ok(learningPathService.getLearningPath(spaceId, userId));
     }
 
-
+    @PreAuthorize("@spaceSecurity.isMemberInSpace(#spaceId)")
     @GetMapping("/{pathId}")
     public ResponseEntity<LearningPathResponse> getDetail(@PathVariable Long spaceId, @PathVariable Long pathId, Authentication authentication) {
         Long userId = null;
@@ -65,7 +66,6 @@ public class LearningPathController {
                 .ok(learningPathService.getLearningPathDetail(spaceId, pathId, userId));
     }
 
-
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PutMapping("/{pathId}")
     public ResponseEntity<LearningPathResponse> update(@PathVariable Long spaceId, @PathVariable Long pathId,
@@ -74,42 +74,40 @@ public class LearningPathController {
                 .ok(learningPathService.updateLearningPath(spaceId, pathId, request));
     }
 
-
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PutMapping("/{pathId}/archive")
     public ResponseEntity<?> archive(@PathVariable Long spaceId, @PathVariable Long pathId) {
         learningPathService.archiveLearningPath(spaceId, pathId);
         return ResponseEntity
-                .ok(new MessageResponse("Module archived successfully"));
+                .ok(new MessageResponse("Lưu trữ module thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PutMapping("/{pathId}/restore")
     public ResponseEntity<?> restore(@PathVariable Long spaceId, @PathVariable Long pathId) {
         learningPathService.restoreLearningPath(spaceId, pathId);
-        return ResponseEntity.ok(new MessageResponse("Module restored successfully"));
+        return ResponseEntity.ok(new MessageResponse("Khôi phục module thành công"));
     }
-
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER')")
     @DeleteMapping("/{pathId}")
     public ResponseEntity<?> delete(@PathVariable Long spaceId, @PathVariable Long pathId) {
         learningPathService.deleteLearningPathModul(spaceId, pathId);
-        return ResponseEntity.ok(new MessageResponse("Module deleted successfully"));
+        return ResponseEntity.ok(new MessageResponse("Xóa module thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER')")
     @DeleteMapping
     public ResponseEntity<?> deleteAll(@PathVariable Long spaceId) {
         learningPathService.deleteAllLearningPaths(spaceId);
-        return ResponseEntity.ok(new MessageResponse("Roadmap deleted successfully"));
+        return ResponseEntity.ok(new MessageResponse("Xóa toàn bộ roadmap thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PutMapping("/reorder")
     public ResponseEntity<?> reorder(@PathVariable Long spaceId, @Valid @RequestBody ReorderLearningPathRequest request) {
         learningPathService.reorderLearningPaths(spaceId, request);
-        return ResponseEntity.ok(new MessageResponse("Order updated successfully"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật thứ tự thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
@@ -117,7 +115,7 @@ public class LearningPathController {
     public ResponseEntity<?> deleteNode( @PathVariable Long spaceId,@PathVariable Long pathId,
             @PathVariable Long nodeId) {
         learningNodeService.deleteNode(nodeId);
-        return ResponseEntity.ok(new MessageResponse("Node deleted successfully"));
+        return ResponseEntity.ok(new MessageResponse("Xóa bài học thành công"));
     }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")

@@ -1,6 +1,6 @@
 package com.example.flippedclass.entity;
 
-
+import com.example.flippedclass.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -8,26 +8,37 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "notifications")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "notifications")
 public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long recipientId; // Chỉ cần lưu ID người nhận cho đơn giản
-    
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipient_id", nullable = false)
+    private User recipient;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private NotificationType type;
+
+    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String message;
 
-    private String link;   // Link chuyển hướng khi click
-    private boolean isRead;
+    @Column(name = "target_url", length = 500)
+    private String targetUrl;
+
+    @Column(name = "is_read", nullable = false)
+    @Builder.Default
+    private Boolean isRead = false;
 
     @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 }

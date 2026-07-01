@@ -1,0 +1,75 @@
+/* ── Topbar ── */
+:root {
+  --fc-primary: #5b5ce2;
+  --fc-accent: #ff5fa8;
+  --fc-primary-dark: #090b4f;
+  --fc-shadow-sm: 0 10px 24px rgba(31, 41, 55, 0.08);
+}
+
+.lesson-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem clamp(1rem, 3vw, 2rem);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--fc-shadow-sm);
+  backdrop-filter: blur(18px);
+  width: 100%;
+}
+
+.brand-link, .back-link, .review-chip {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.brand-link {
+  gap: 0.65rem;
+  min-width: max-content;
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: var(--fc-primary-dark);
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary) 58%, var(--fc-accent));
+  box-shadow: 0 12px 24px rgba(9, 11, 79, 0.18);
+}
+
+.brand-link span span {
+  color: var(--fc-primary-dark);
+}
+
+.back-link {
+  gap: 0.45rem;
+  padding: 0.62rem 1rem;
+  border: 1px solid rgba(229, 231, 235, 0.95);
+  border-radius: 999px;
+  color: var(--fc-primary-dark);
+  background: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.back-link:hover {
+  background: var(--primary-light, #eef2ff);
+  border-color: var(--primary, #4f46e5);
+  color: var(--fc-primary-dark);
+  transform: translateY(-1px);
+}
+
+.topbar-spacer {
+  flex: 1;
+}

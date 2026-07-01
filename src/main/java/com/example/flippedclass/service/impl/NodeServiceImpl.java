@@ -97,7 +97,7 @@ public class NodeServiceImpl implements NodeService {
         node.setTitle(request.getTitle().trim());
         node.setDescription(request.getDescription());
         node.setContent(request.getContent());
-        node.setNodeType((request.getNodeType() == null ? NodeType.VIDEO : request.getNodeType()).name());
+        node.setNodeType((request.getNodeType() == null ? NodeType.LESSON : request.getNodeType()).name());
         node.setStatus((request.getStatus() == null ? NodeStatus.DRAFT : request.getStatus()).name());
         node.setDisplayOrder(request.getDisplayOrder());
         node.setEstimatedMinutes(request.getEstimatedMinutes());

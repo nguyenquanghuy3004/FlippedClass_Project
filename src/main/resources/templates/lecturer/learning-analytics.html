@@ -166,16 +166,21 @@
         <script>
             let currentStudents = [];
             let selectedStudent = null;
+            let detailModal;
 
             $(document).ready(function() {
+                const modalEl = document.getElementById('studentDetailModal');
+                if (modalEl) {
+                    detailModal = new bootstrap.Modal(modalEl);
+                }
                 // Fetch when tab is opened
-                if ($('#kpi-total-students').is(':visible') && $('#kpi-total-students').text() === '--') {
+                if ($('#kpi-total-students').is(':visible') && ($('#kpi-total-students').text() === '0' || $('#kpi-total-students').text() === '--')) {
                     fetchAnalytics();
                 }
             });
 
             $('a[data-bs-toggle="tab"][href="#analytics"]').on('shown.bs.tab', function (e) {
-                if ($('#kpi-total-students').text() === '--') {
+                if ($('#kpi-total-students').text() === '0' || $('#kpi-total-students').text() === '--') {
                     fetchAnalytics();
                 }
             });
@@ -349,13 +354,14 @@
                 const listDiv = document.getElementById('completed-nodes-list');
                 const contentDiv = document.getElementById('completed-nodes-content');
                 const icon = document.getElementById('completed-nodes-icon');
-                const $listDiv = $(listDiv);
                 
-                if ($listDiv.hasClass('show')) {
-                    $listDiv.collapse('hide');
+                const bsCollapse = bootstrap.Collapse.getInstance(listDiv) || new bootstrap.Collapse(listDiv, {toggle: false});
+                
+                if (listDiv.classList.contains('show')) {
+                    bsCollapse.hide();
                     icon.classList.replace('ti-chevron-up', 'ti-chevron-down');
                 } else {
-                    $listDiv.collapse('show');
+                    bsCollapse.show();
                     icon.classList.replace('ti-chevron-down', 'ti-chevron-up');
                     contentDiv.innerHTML = '<div class="text-center text-muted small py-2"><div class="spinner-border spinner-border-sm text-primary"></div> Loading nodes...</div>';
                     

@@ -10,6 +10,7 @@ public class StudentDetailResponse {
     private String email;
     private String fullName;
     private String avatarUrl;
+
     private String studentCode;
     private String className;
     private String major;

@@ -16,11 +16,13 @@ public class StudentDashboardController {
 
     private final StudentDashboardService studentDashboardService;
 
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "VIEW_DASHBOARD", description = "Student viewed their dashboard")
     @GetMapping("/api/students/{studentId}/dashboard")
     public StudentDashboardResponse getDashboard(@PathVariable Long studentId) {
         return studentDashboardService.getDashboard(studentId);
     }
 
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "UPDATE_PROFILE", description = "Student updated their profile")
     @PutMapping("/api/students/{studentId}/profile")
     public StudentDashboardResponse updateProfile(
             @PathVariable Long studentId,

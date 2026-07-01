@@ -9,6 +9,8 @@ import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.repository.LearningPathRepository;
 import com.example.flippedclass.repository.LearningSpaceRepository;
+import com.example.flippedclass.repository.NodeConnectionRepository;
+import com.example.flippedclass.repository.NodeProgressRepository;
 import com.example.flippedclass.service.LearningPathService;
 import com.example.flippedclass.enums.LearningPathStatus;
 import com.example.flippedclass.enums.LearningSpaceStatus;
@@ -22,14 +24,18 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class LearningPathServiceImpl implements LearningPathService {
+
     @Autowired
-     LearningSpaceRepository learningSpaceRepository;
+    private LearningSpaceRepository learningSpaceRepository;
+
     @Autowired
-     LearningPathRepository learningPathRepository;
+    private LearningPathRepository learningPathRepository;
+
     @Autowired
-    private com.example.flippedclass.repository.NodeConnectionRepository nodeConnectionRepository;
+    private NodeConnectionRepository nodeConnectionRepository;
+
     @Autowired
-    private com.example.flippedclass.repository.NodeProgressRepository nodeProgressRepository;
+    private NodeProgressRepository nodeProgressRepository;
 
     @Override
     public LearningPath getLearningPathEntity(Long id) {
@@ -40,16 +46,13 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Override
     @Transactional
     public LearningPathResponse createLearningPath(Long spaceId, CreateLearningPathRequest request) {
-
-
         LearningSpace space = learningSpaceRepository.findByIdAndStatus(spaceId, LearningSpaceStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning or Space đã bị xóa"));
 
         Integer nextPosition = learningPathRepository
                 .findFirstByLearningSpaceIdAndStatusOrderByPositionDesc(spaceId, LearningPathStatus.ACTIVE)
                 .map(lp -> lp.getPosition() + 1)
-
-                    .orElse(1);
+                .orElse(1);
 
         LearningPath path = new LearningPath();
         path.setTitle(request.getTitle());
@@ -71,12 +74,10 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .toList();
     }
 
-
     @Override
     public LearningPathResponse getLearningPathDetail(Long spaceId, Long pathId, Long studentId) {
         return toResponse(findPathInSpace(spaceId, pathId), studentId);
     }
-
 
     @Override
     @Transactional
@@ -94,9 +95,8 @@ public class LearningPathServiceImpl implements LearningPathService {
             path.setDescription(request.getDescription());
         }
 
-        return toResponse(path, null); // Hibernate tự động update dữ liệu nhờ @Transactional
+        return toResponse(path, null);
     }
-
 
     @Override
     @Transactional
@@ -108,7 +108,6 @@ public class LearningPathServiceImpl implements LearningPathService {
         path.setStatus(LearningPathStatus.ARCHIVED);
     }
 
-
     @Override
     @Transactional
     public void restoreLearningPath(Long spaceId, Long pathId) {
@@ -118,7 +117,6 @@ public class LearningPathServiceImpl implements LearningPathService {
         }
         path.setStatus(LearningPathStatus.ACTIVE);
     }
-
 
     @Override
     @Transactional
@@ -135,7 +133,6 @@ public class LearningPathServiceImpl implements LearningPathService {
         }
     }
 
-    //REORDER
     @Override
     @Transactional
     public void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request) {
@@ -149,7 +146,6 @@ public class LearningPathServiceImpl implements LearningPathService {
         }
     }
 
-    // helper
     private LearningPath findPathInSpace(Long spaceId, Long pathId) {
         return learningPathRepository.findByIdAndLearningSpaceId(pathId, spaceId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning Path trong Learning Space này"));
@@ -174,17 +170,17 @@ public class LearningPathServiceImpl implements LearningPathService {
                 }
 
                 return LearningNodeResponse.builder()
-                    .id(node.getId())
-                    .title(node.getTitle())
-                    .description(node.getDescription())
-                    .learningPathId(path.getId())
-                    .learningSpaceId(path.getLearningSpace() != null ? path.getLearningSpace().getId() : null)
-                    .status(computedStatus)
-                    .nodeType(node.getNodeType())
-                    .prerequisiteNodeId(prereqId)
-                    .createdAt(node.getCreatedAt())
-                    .updatedAt(node.getUpdatedAt())
-                    .build();
+                        .id(node.getId())
+                        .title(node.getTitle())
+                        .description(node.getDescription())
+                        .learningPathId(path.getId())
+                        .learningSpaceId(path.getLearningSpace() != null ? path.getLearningSpace().getId() : null)
+                        .status(computedStatus)
+                        .nodeType(node.getNodeType())
+                        .prerequisiteNodeId(prereqId)
+                        .createdAt(node.getCreatedAt())
+                        .updatedAt(node.getUpdatedAt())
+                        .build();
             }).toList();
         }
 

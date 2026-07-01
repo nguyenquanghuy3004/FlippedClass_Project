@@ -22,6 +22,7 @@ public class CourseDocumentResponse {
     private String url;
     private String description;
     private LocalDateTime createdAt;
+    private Long nodeId;
 
     public static CourseDocumentResponse from(CourseDocument document) {
         LearningPath learningPath = document.getLearningPath();
@@ -38,6 +39,26 @@ public class CourseDocumentResponse {
         response.url = document.getUrl();
         response.description = document.getDescription();
         response.createdAt = document.getCreatedAt();
+        return response;
+    }
+
+    public static CourseDocumentResponse from(com.example.flippedclass.entity.LearningNodeItem item) {
+        com.example.flippedclass.entity.LearningNode node = item.getLearningNode();
+        LearningPath learningPath = node != null ? node.getLearningPath() : null;
+        LearningSpace learningSpace = learningPath != null ? learningPath.getLearningSpace() : null;
+
+        CourseDocumentResponse response = new CourseDocumentResponse();
+        response.id = item.getId();
+        response.nodeId = node != null ? node.getId() : null;
+        response.learningPathId = learningPath != null ? learningPath.getId() : null;
+        response.learningPathTitle = learningPath != null ? learningPath.getTitle() : null;
+        response.learningSpaceId = learningSpace != null ? learningSpace.getId() : null;
+        response.learningSpaceName = learningSpace != null ? learningSpace.getName() : null;
+        response.title = item.getTitle();
+        response.documentType = parseDocumentType(item.getItemType() != null ? item.getItemType().name() : null);
+        response.url = item.getUrl();
+        response.description = item.getContent();
+        response.createdAt = node != null ? node.getCreatedAt() : null;
         return response;
     }
 

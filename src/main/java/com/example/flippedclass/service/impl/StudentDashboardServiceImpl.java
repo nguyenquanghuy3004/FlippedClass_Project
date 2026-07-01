@@ -7,11 +7,9 @@ import com.example.flippedclass.dto.response.CourseDocumentResponse;
 import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.dto.response.StudentProfileResponse;
 import com.example.flippedclass.dto.response.QuizResponse;
-import com.example.flippedclass.dto.response.CommentNotificationResponse;
 import com.example.flippedclass.entity.LearningSpaceMember;
 import com.example.flippedclass.entity.StudentProfile;
 import com.example.flippedclass.entity.User;
-import com.example.flippedclass.entity.NodeComment;
 import com.example.flippedclass.repository.CourseDocumentRepository;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.QuizQuestionRepository;
@@ -39,7 +37,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
     private final QuizQuestionRepository quizQuestionRepository;
     private final CourseDocumentRepository courseDocumentRepository;
-    private final com.example.flippedclass.repository.NodeCommentRepository nodeCommentRepository;
+    private final com.example.flippedclass.repository.LearningNodeItemRepository learningNodeItemRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -51,7 +49,9 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 .map(this::toStudentProfileResponse)
                 .orElse(null);
 
-        List<LearningSpaceMember> memberships = learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId);
+        List<LearningSpaceMember> memberships = learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId).stream()
+                .filter(m -> m.getLearningSpace().getStatus() == com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE)
+                .toList();
         List<Long> joinedSpaceIds = memberships.stream()
                 .map(member -> member.getLearningSpace().getId())
                 .distinct()
@@ -95,39 +95,24 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
         List<CourseDocumentResponse> recentDocuments = allSpaceIds.isEmpty()
                 ? List.of()
-                : courseDocumentRepository
-                        .findTop8ByLearningPath_LearningSpace_IdInOrderByCreatedAtDesc(allSpaceIds)
+                : learningNodeItemRepository
+                        .findRecentDocumentsBySpaceIds(
+                                allSpaceIds,
+                                List.of(
+                                        com.example.flippedclass.enums.ItemType.PDF,
+                                        com.example.flippedclass.enums.ItemType.VIDEO
+                                ),
+                                org.springframework.data.domain.PageRequest.of(0, 8)
+                        )
                         .stream()
                         .map(CourseDocumentResponse::from)
                         .toList();
-
-        List<NodeComment> replies = nodeCommentRepository.findRepliesToUser(studentId);
-        List<CommentNotificationResponse> commentNotifications = replies.stream()
-                .map(reply -> {
-                    String spaceName = "Learning Space";
-                    Long spaceId = null;
-                    if (reply.getLearningNode() != null && reply.getLearningNode().getLearningPath() != null && reply.getLearningNode().getLearningPath().getLearningSpace() != null) {
-                        spaceName = reply.getLearningNode().getLearningPath().getLearningSpace().getName();
-                        spaceId = reply.getLearningNode().getLearningPath().getLearningSpace().getId();
-                    }
-                    return CommentNotificationResponse.builder()
-                            .id(reply.getId())
-                            .nodeId(reply.getLearningNode() != null ? reply.getLearningNode().getId() : null)
-                            .replierName(reply.getUser() != null ? reply.getUser().getFullName() != null ? reply.getUser().getFullName() : reply.getUser().getUsername() : "Someone")
-                            .content(reply.getContent())
-                            .spaceName(spaceName)
-                            .spaceId(spaceId)
-                            .createdAt(reply.getCreatedAt())
-                            .build();
-                })
-                .toList();
 
         return new StudentDashboardResponse(
                 DashboardUserResponse.from(user),
                 profile,
                 learningSpaces,
-                recentDocuments,
-                commentNotifications
+                recentDocuments
         );
     }
 

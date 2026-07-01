@@ -12,6 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.example.flippedclass.entity.LearningNodeItem;
+import com.example.flippedclass.entity.Quiz;
+
 @Service
 public class LearningNodeServiceImpl implements LearningNodeService {
 
@@ -20,12 +26,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
     @Autowired
     private LearningPathRepository learningPathRepository;
-
-    @Autowired
-    private com.example.flippedclass.repository.NodeConnectionRepository nodeConnectionRepository;
-    
-    @Autowired
-    private com.example.flippedclass.repository.LearningSpaceRepository learningSpaceRepository;
 
     @Override
     public LearningNodeResponse createLearningNode(Long pathId, CreateLearningNodeRequest request) {
@@ -42,28 +42,40 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
         LearningNode savedNode = learningNodeRepository.save(node);
 
-        Long prereqId = null;
-        if (request.getPrerequisiteNodeId() != null) {
-            com.example.flippedclass.entity.NodeConnection conn = new com.example.flippedclass.entity.NodeConnection();
-            conn.setLearningPath(learningPath);
-            conn.setTargetNode(savedNode);
-            conn.setSourceNode(learningNodeRepository.findById(request.getPrerequisiteNodeId()).orElseThrow());
-            conn.setConditionType("COMPLETED");
-            nodeConnectionRepository.save(conn);
-            prereqId = request.getPrerequisiteNodeId();
-        }
-
-        return buildResponse(savedNode, prereqId);
+        return LearningNodeResponse.builder()
+                .id(savedNode.getId())
+                .title(savedNode.getTitle())
+                .description(savedNode.getDescription())
+                .learningPathId(learningPath.getId())
+                .learningSpaceId(learningPath.getLearningSpace() != null ? learningPath.getLearningSpace().getId() : null)
+                .status(savedNode.getStatus())
+                .nodeType(savedNode.getNodeType())
+                .createdAt(savedNode.getCreatedAt())
+                .updatedAt(savedNode.getUpdatedAt())
+                .build();
     }
+
+    @Autowired
+    private com.example.flippedclass.repository.LearningNodeItemRepository learningNodeItemRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.QuizRepository quizRepository;
 
     @Override
     @Transactional
     public void deleteNode(Long nodeId) {
-        if(!learningNodeRepository.existsById(nodeId)){
-            throw new IllegalArgumentException("Không tìm thấy bài học");
+        LearningNode node = learningNodeRepository.findById(nodeId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài học"));
+        
+        // Explicitly delete children to avoid JPA orphanRemoval bidirectional quirks
+        if (node.getItems() != null && !node.getItems().isEmpty()) {
+            learningNodeItemRepository.deleteAllInBatch(node.getItems());
         }
-        nodeConnectionRepository.deleteByTargetNodeId(nodeId);
-        learningNodeRepository.deleteById(nodeId);
+        if (node.getQuizzes() != null && !node.getQuizzes().isEmpty()) {
+            quizRepository.deleteAllInBatch(node.getQuizzes());
+        }
+        
+        learningNodeRepository.delete(node);
     }
 
     @Override
@@ -75,15 +87,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         node.setTitle(request.getTitle());
         node.setDescription(request.getDescription());
 
-        if (request.getContent() != null) {
-            node.setContent(request.getContent());
-        }
-        if (request.getStarterCode() != null) {
-            node.setStarterCode(request.getStarterCode());
-        }
-        if (request.getSolutionCode() != null) {
-            node.setSolutionCode(request.getSolutionCode());
-        }
 
         if (request.getNodeType() != null) {
             node.setNodeType(request.getNodeType());
@@ -91,22 +94,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
         LearningNode savedNode = learningNodeRepository.save(node);
 
-        nodeConnectionRepository.deleteByTargetNodeId(nodeId);
-        Long prereqId = null;
-        if (request.getPrerequisiteNodeId() != null) {
-            com.example.flippedclass.entity.NodeConnection conn = new com.example.flippedclass.entity.NodeConnection();
-            conn.setLearningPath(node.getLearningPath());
-            conn.setTargetNode(savedNode);
-            conn.setSourceNode(learningNodeRepository.findById(request.getPrerequisiteNodeId()).orElseThrow());
-            conn.setConditionType("COMPLETED");
-            nodeConnectionRepository.save(conn);
-            prereqId = request.getPrerequisiteNodeId();
-        }
-
-        return buildResponse(savedNode, prereqId);
-    }
-
-    private LearningNodeResponse buildResponse(LearningNode savedNode, Long prereqId) {
         return LearningNodeResponse.builder()
                 .id(savedNode.getId())
                 .title(savedNode.getTitle())
@@ -115,10 +102,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .learningSpaceId((savedNode.getLearningPath() != null && savedNode.getLearningPath().getLearningSpace() != null) ? savedNode.getLearningPath().getLearningSpace().getId() : null)
                 .status(savedNode.getStatus())
                 .nodeType(savedNode.getNodeType())
-                .content(savedNode.getContent())
-                .starterCode(savedNode.getStarterCode())
-                .solutionCode(savedNode.getSolutionCode())
-                .prerequisiteNodeId(prereqId)
                 .createdAt(savedNode.getCreatedAt())
                 .updatedAt(savedNode.getUpdatedAt())
                 .build();

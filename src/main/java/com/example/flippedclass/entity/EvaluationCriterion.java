@@ -22,7 +22,7 @@ public class EvaluationCriterion {
     @JoinColumn(name = "session_id", nullable = false)
     private EvaluationSession session;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")

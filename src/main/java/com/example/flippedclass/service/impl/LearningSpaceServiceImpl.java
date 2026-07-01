@@ -281,6 +281,12 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
             }
         }
 
+        // Không cho phép xóa nếu đã có học viên (MEMBER) tham gia
+        long memberCount = memberRepository.countByLearningSpaceIdAndRole(id, MemberRole.MEMBER);
+        if (memberCount > 0) {
+            throw new IllegalArgumentException("Không thể xóa Learning Space này vì đã có học viên (Mentee) tham gia.");
+        }
+
         learningSpace.setStatus(LearningSpaceStatus.DELETE);
         learningSpaceRepository.save(learningSpace);
     }

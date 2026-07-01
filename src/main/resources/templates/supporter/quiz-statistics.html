@@ -13,7 +13,7 @@
   <script>
 (function() {
     function handleUnauthorized() {
-        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
+        console.warn('PhiÃªn Ä‘Äƒng nháº­p Ä‘Ã£ háº¿t háº¡n hoáº·c khÃ´ng há»£p lá»‡. Äang chuyá»ƒn hÆ°á»›ng vá» trang Ä‘Äƒng nháº­p...');
         localStorage.removeItem('jwt_token');
         sessionStorage.removeItem('jwt_token');
         window.location.href = '/signin';

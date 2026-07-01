@@ -17,17 +17,14 @@
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
         <div class="modal-body text-center p-4">
-          <div
-            style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 16px;">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 16px;">
             <i class="ti ti-trash"></i>
           </div>
           <h5 style="font-weight: 700; font-size: 1.15rem; color: #1e293b; margin-bottom: 8px;">Delete Test Case?</h5>
           <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 24px;">This action cannot be undone.</p>
           <div class="d-flex justify-content-center gap-3">
-            <button type="button" class="btn btn-light" data-bs-dismiss="modal"
-              style="border-radius: 8px; font-weight: 600; padding: 10px 24px; color: #475569; background: #f1f5f9; border: none;">Cancel</button>
-            <button type="button" class="btn btn-danger" id="btnConfirmDeleteTestCase"
-              style="border-radius: 8px; font-weight: 600; padding: 10px 24px; background: #ef4444; border: none;">Delete</button>
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 10px 24px; color: #475569; background: #f1f5f9; border: none;">Cancel</button>
+            <button type="button" class="btn btn-danger" id="btnConfirmDeleteTestCase" style="border-radius: 8px; font-weight: 600; padding: 10px 24px; background: #ef4444; border: none;">Delete</button>
           </div>
         </div>
       </div>
@@ -43,37 +40,7 @@
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
   <link rel="stylesheet" th:href="@{/assets/css/node-preview.css}">
-  <script>
-    (function () {
-      function handleUnauthorized() {
-        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
-        localStorage.removeItem('jwt_token');
-        sessionStorage.removeItem('jwt_token');
-        window.location.href = '/signin';
-      }
-      const originalFetch = window.fetch;
-      window.fetch = async function (...args) {
-        try {
-          const response = await originalFetch.apply(this, args);
-          if (response.status === 401) {
-            handleUnauthorized();
-          }
-          return response;
-        } catch (error) {
-          throw error;
-        }
-      };
-      const originalXhrOpen = XMLHttpRequest.prototype.open;
-      XMLHttpRequest.prototype.open = function () {
-        this.addEventListener('load', function () {
-          if (this.status === 401) {
-            handleUnauthorized();
-          }
-        });
-        originalXhrOpen.apply(this, arguments);
-      };
-    })();
-  </script>
+  <link rel="stylesheet" th:href="@{/assets/css/lecturer-topbar.css}">
 </head>
 
 <body>
@@ -90,28 +57,21 @@
     <div class="topbar-user-menu">
       <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
         <li class="dropdown" style="list-style: none;">
-          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-            style="text-decoration: none; color: #1e293b; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-            <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="rounded-circle border"
-              style="width: 35px; height: 35px; object-fit: cover;" />
+          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; color: #1e293b; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+            <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="rounded-circle border" style="width: 35px; height: 35px; object-fit: cover;" />
             FCMS Mentor
           </a>
-          <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0"
-            style="min-width: 200px; border-radius: 12px; margin-top: 10px;">
+          <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0" style="min-width: 200px; border-radius: 12px; margin-top: 10px;">
             <div>
-              <div class="d-flex gap-3 align-items-center border-bottom px-3 py-3"
-                style="border-bottom-style: dashed !important;">
-                <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="rounded-circle"
-                  style="width: 45px; height: 45px; object-fit: cover;" />
+              <div class="d-flex gap-3 align-items-center border-bottom px-3 py-3" style="border-bottom-style: dashed !important;">
+                <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;" />
                 <div>
                   <h4 class="mb-0 small fw-bold">Mentor User</h4>
                   <p class="mb-0 small text-muted">@mentor</p>
                 </div>
               </div>
               <div class="p-3 d-flex flex-column gap-1 small lh-lg">
-                <a href="#!" class="text-danger" onclick="logout()"
-                  style="text-decoration: none; display: block; padding: 6px; border-radius: 6px; transition: background 0.2s;"
-                  onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
+                <a href="#!" class="text-danger" onclick="logout()" style="text-decoration: none; display: block; padding: 6px; border-radius: 6px; transition: background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
                   <span><i class="ti ti-logout me-2"></i>Log out</span>
                 </a>
               </div>
@@ -173,6 +133,18 @@
     const pathNodeMatch = window.location.pathname.match(/\/lecturer\/learning-nodes\/(\d+)\/preview/);
     const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
     const pageRoot = document.getElementById('pageRoot');
+    const isSupporter = urlParams.get('role') === 'supporter';
+
+    if (isSupporter) {
+        document.addEventListener('DOMContentLoaded', () => {
+            const brandText = document.querySelector('.brand-link').lastElementChild;
+            if (brandText && brandText.textContent.includes('Lecturer')) {
+                brandText.innerHTML = 'Flipped<span>Class</span> (Supporter)';
+            }
+            const roleViewText = document.querySelector('.topbar-user-menu .fw-bold');
+            if (roleViewText) roleViewText.textContent = 'Supporter View';
+        });
+    }
 
     function authHeaders(includeJson = true) {
       const headers = { Authorization: `Bearer ${token}` };
@@ -492,15 +464,15 @@
       if (node.nodeType === 'PRACTICE') {
         const shell = document.querySelector('.lesson-shell');
         if (shell) {
-          shell.style.maxWidth = 'none';
-          shell.style.width = '100%';
-          shell.style.padding = '0';
-          shell.style.margin = '0';
+            shell.style.maxWidth = 'none';
+            shell.style.width = '100%';
+            shell.style.padding = '0';
+            shell.style.margin = '0';
         }
         const topbar = document.querySelector('.lesson-topbar');
         if (topbar) {
-          topbar.style.maxWidth = 'none';
-          topbar.style.width = '100%';
+            topbar.style.maxWidth = 'none';
+            topbar.style.width = '100%';
         }
         document.body.style.overflow = 'hidden';
 
@@ -532,14 +504,36 @@
           .lc-terminal-card.collapsed { height: 45px !important; min-height: 45px !important; }
         </style>
         
-        <!-- CỘT TRÁI: ĐỀ BÀI -->
+        <!-- CỘT TRÁI: ĐỀ BÀI / Q&A / SUBMISSIONS -->
         <section class="lc-left-pane">
             <div class="lc-tabs-header">
-              <div class="lc-tab active"><i class="ti ti-file-description" style="color: #007bff;"></i> Problem Description</div>
+              <div class="lc-tab active" onclick="switchLeftTab('problem')" id="tab-problem"><i class="ti ti-file-description" style="color: #007bff;"></i> Problem Description</div>
+              <div class="lc-tab" onclick="switchLeftTab('qa')" id="tab-qa"><i class="ti ti-messages" style="color: #facc15;"></i> Q&A</div>
+              <div class="lc-tab" onclick="switchLeftTab('submissions')" id="tab-submissions"><i class="ti ti-checklist" style="color: #2cbb5d;"></i> Submissions</div>
             </div>
-          <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 16px;">
+          
+          <!-- TAB: PROBLEM -->
+          <div id="pane-problem" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 16px;">
             <label style="font-size: 0.8rem; font-weight: 600; color: #8c8c8c; margin-bottom: 8px;">Markdown Content</label>
             <textarea id="problemDescriptionInput" style="flex: 1; width: 100%; border: 1px solid #e5e7eb; border-radius: 6px; background: #f7f9fa; color: #262626; resize: none; font-size: 0.95rem; line-height: 1.6; padding: 16px; outline: none;" placeholder="Write problem description in Markdown..."></textarea>
+          </div>
+
+          <!-- TAB: Q&A -->
+          <div id="pane-qa" style="flex: 1; overflow-y: auto; display: none; flex-direction: column; padding: 16px;">
+            <div id="nodeCommentsContainer">
+              <div class="empty-light">
+                <div><i class="ti ti-loader-2 ti-spin"></i> Loading Q&A...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: SUBMISSIONS -->
+          <div id="pane-submissions" style="flex: 1; overflow-y: auto; display: none; flex-direction: column; padding: 16px; background: #f8fafc;">
+            <div id="summaries-container">
+              <div class="empty-light">
+                <div><i class="ti ti-loader-2 ti-spin"></i> Loading submissions...</div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -581,7 +575,7 @@
             </div>
         </section>
         `;
-
+        
         document.getElementById('problemDescriptionInput').value = node.content || '';
 
         // Add CSS active state cho tab tự làm
@@ -593,36 +587,48 @@
 
         // Lưu trữ code cho 2 tabs
         window.codeStore = {
-          starter: node.starterCode || "public class Main {\n    public static void main(String[] args) {\n        // Write starter code here...\n    }\n}",
-          solution: node.solutionCode || "public class Main {\n    public static void main(String[] args) {\n        // Write solution code here...\n    }\n}"
+            starter: node.starterCode || "public class Main {\n    public static void main(String[] args) {\n        // Write starter code here...\n    }\n}",
+            solution: node.solutionCode || "public class Main {\n    public static void main(String[] args) {\n        // Write solution code here...\n    }\n}"
         };
         window.currentEditorTab = 'starter';
 
         // Khởi tạo Monaco Editor
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
-        require(['vs/editor/editor.main'], function () {
-          const editorDiv = document.getElementById('editor');
-          if (editorDiv) {
-            window.myCodeEditor = monaco.editor.create(editorDiv, {
-              value: window.codeStore.starter,
-              language: "java",
-              theme: "vs",
-              automaticLayout: true,
-              fontSize: 14,
-              minimap: { enabled: false }
-            });
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            const editorDiv = document.getElementById('editor');
+            if (editorDiv) {
+                window.myCodeEditor = monaco.editor.create(editorDiv, {
+                    value: window.codeStore.starter,
+                    language: "java",
+                    theme: "vs",
+                    automaticLayout: true,
+                    fontSize: 14,
+                    minimap: { enabled: false }
+                });
 
-            window.myCodeEditor.onDidChangeModelContent(() => {
-              window.codeStore[window.currentEditorTab] = window.myCodeEditor.getValue();
-            });
-          }
+                window.myCodeEditor.onDidChangeModelContent(() => {
+                    window.codeStore[window.currentEditorTab] = window.myCodeEditor.getValue();
+                });
+            }
         });
 
         // Hàm chuyển tab editor
-        window.switchEditorTab = function (tab) {
-          if (!window.myCodeEditor || window.currentEditorTab === tab) return;
-          window.currentEditorTab = tab;
-          window.myCodeEditor.setValue(window.codeStore[tab]);
+        window.switchEditorTab = function(tab) {
+            if (!window.myCodeEditor || window.currentEditorTab === tab) return;
+            window.currentEditorTab = tab;
+            window.myCodeEditor.setValue(window.codeStore[tab]);
+        };
+
+        // Hàm chuyển tab trái (Problem, Q&A, Submissions)
+        window.switchLeftTab = function(tabId) {
+            document.querySelectorAll('.lc-left-pane .lc-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            document.getElementById('pane-problem').style.display = 'none';
+            document.getElementById('pane-qa').style.display = 'none';
+            document.getElementById('pane-submissions').style.display = 'none';
+            
+            document.getElementById('pane-' + tabId).style.display = 'flex';
         };
 
         // JS logic thu gọn/mở rộng Test Case
@@ -631,34 +637,34 @@
         const terminalToggleIcon = document.getElementById('terminalToggleIcon');
 
         if (btnToggleTerminal) {
-          btnToggleTerminal.addEventListener('click', function () {
-            terminalCard.classList.toggle('collapsed');
-            if (terminalCard.classList.contains('collapsed')) {
-              terminalToggleIcon.classList.replace('ti-chevron-down', 'ti-chevron-up');
-            } else {
-              terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
-            }
-            setTimeout(() => { if (window.myCodeEditor) window.myCodeEditor.layout(); }, 350);
-          });
+            btnToggleTerminal.addEventListener('click', function() {
+                terminalCard.classList.toggle('collapsed');
+                if (terminalCard.classList.contains('collapsed')) {
+                    terminalToggleIcon.classList.replace('ti-chevron-down', 'ti-chevron-up');
+                } else {
+                    terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
+                }
+                setTimeout(() => { if (window.myCodeEditor) window.myCodeEditor.layout(); }, 350);
+            });
         }
 
         // Biến toàn cục lưu Test Cases
         window.testCases = [];
 
         // Hàm render Test Cases
-        window.renderTestCases = function () {
-          const container = document.getElementById('testCasesContainer');
-          if (window.testCases.length === 0) {
-            container.innerHTML = `
+        window.renderTestCases = function() {
+            const container = document.getElementById('testCasesContainer');
+            if (window.testCases.length === 0) {
+                container.innerHTML = `
                     <div class="text-center text-muted" style="padding: 40px 0;">
                         <i class="ti ti-database-off" style="font-size: 2rem; opacity: 0.5;"></i>
                         <p class="mt-2 mb-0">No test cases found. Click "Add Test Case" to begin.</p>
                     </div>
                 `;
-            return;
-          }
+                return;
+            }
 
-          container.innerHTML = window.testCases.map((tc, index) => `
+            container.innerHTML = window.testCases.map((tc, index) => `
                 <div style="background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                     <div style="padding: 6px 12px; background: #fafafa; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-weight: bold; color: #262626; font-size: 0.85rem;"><i class="ti ti-check text-success"></i> Test Case #${index + 1}</span>
@@ -690,127 +696,127 @@
             `).join('');
         };
 
-        window.addTestCaseUI = function () {
-          window.testCases.push({ inputData: '', expectedOutput: '', isHidden: false, points: 10 });
-          window.renderTestCases();
-          const container = document.getElementById('testCasesContainer');
-          setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
+        window.addTestCaseUI = function() {
+            window.testCases.push({ inputData: '', expectedOutput: '', isHidden: false, points: 10 });
+            window.renderTestCases();
+            const container = document.getElementById('testCasesContainer');
+            setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
         };
 
         let testCaseToDelete = null;
         let deleteTestCaseModal = null;
 
-        window.removeTestCase = function (index) {
-          testCaseToDelete = index;
-          if (!deleteTestCaseModal) {
-            deleteTestCaseModal = new bootstrap.Modal(document.getElementById('confirmDeleteTestCaseModal'));
-            document.getElementById('btnConfirmDeleteTestCase').addEventListener('click', function () {
-              if (testCaseToDelete !== null) {
-                window.testCases.splice(testCaseToDelete, 1);
-                window.renderTestCases();
-                deleteTestCaseModal.hide();
-                testCaseToDelete = null;
-              }
-            });
-          }
-          deleteTestCaseModal.show();
+        window.removeTestCase = function(index) {
+            testCaseToDelete = index;
+            if (!deleteTestCaseModal) {
+                deleteTestCaseModal = new bootstrap.Modal(document.getElementById('confirmDeleteTestCaseModal'));
+                document.getElementById('btnConfirmDeleteTestCase').addEventListener('click', function() {
+                    if (testCaseToDelete !== null) {
+                        window.testCases.splice(testCaseToDelete, 1);
+                        window.renderTestCases();
+                        deleteTestCaseModal.hide();
+                        testCaseToDelete = null;
+                    }
+                });
+            }
+            deleteTestCaseModal.show();
         };
 
-        window.updateTestCase = function (index, field, value) {
-          if (field === 'points') value = parseInt(value) || 0;
-          window.testCases[index][field] = value;
+        window.updateTestCase = function(index, field, value) {
+            if (field === 'points') value = parseInt(value) || 0;
+            window.testCases[index][field] = value;
         };
 
-        window.runTestCase = function (index) {
-          const tc = window.testCases[index];
-          const codeString = window.codeStore.solution || window.myCodeEditor.getValue();
-          const btn = document.getElementById(`btnRunTest-${index}`);
+        window.runTestCase = function(index) {
+            const tc = window.testCases[index];
+            const codeString = window.codeStore.solution || window.myCodeEditor.getValue();
+            const btn = document.getElementById(`btnRunTest-${index}`);
+            
+            if (btn) {
+                btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
+                btn.disabled = true;
+            }
 
-          if (btn) {
-            btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
-            btn.disabled = true;
-          }
-
-          fetch('/api/compiler/execute', {
-            method: 'POST',
-            headers: authHeaders(true),
-            body: JSON.stringify({ script: codeString, stdin: tc.inputData })
-          })
+            fetch('/api/compiler/execute', {
+                method: 'POST',
+                headers: authHeaders(true),
+                body: JSON.stringify({ script: codeString, stdin: tc.inputData })
+            })
             .then(res => res.json())
             .then(result => {
-              let out = result.output || '';
-              if (result.error) { out = "Error: " + result.error; }
-              window.testCases[index].expectedOutput = out.trim();
-              window.renderTestCases();
+                let out = result.output || '';
+                if (result.error) { out = "Error: " + result.error; }
+                window.testCases[index].expectedOutput = out.trim();
+                window.renderTestCases();
             })
             .catch(err => alert("Error running code: " + err.message))
             .finally(() => {
-              if (btn) {
-                btn.innerHTML = '<i class="ti ti-player-play-filled"></i> Run';
-                btn.disabled = false;
-              }
+                if (btn) {
+                    btn.innerHTML = '<i class="ti ti-player-play-filled"></i> Run';
+                    btn.disabled = false;
+                }
             });
         };
 
         // Load Test Cases từ API
         fetch(`/api/learning-nodes/${node.id}/test-cases`, { headers: authHeaders(false) })
-          .then(res => res.json())
-          .then(data => {
-            window.testCases = data || [];
-            window.renderTestCases();
-          })
-          .catch(err => console.error("Error loading Test Cases:", err));
+            .then(res => res.json())
+            .then(data => {
+                window.testCases = data || [];
+                window.renderTestCases();
+            })
+            .catch(err => console.error("Error loading Test Cases:", err));
 
         // Save Logic (Update to save everything)
-        document.getElementById('btnSaveLab').addEventListener('click', async function () {
-          const btn = this;
-          const content = document.getElementById('problemDescriptionInput').value;
+        document.getElementById('btnSaveLab').addEventListener('click', async function() {
+            const btn = this;
+            const content = document.getElementById('problemDescriptionInput').value;
+            
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+            btn.disabled = true;
 
-          btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
-          btn.disabled = true;
+            try {
+                // Determine spaceId
+                const spaceIdParams = urlParams.get('spaceId');
+                const spaceId = node.learningSpaceId || spaceIdParams || '1'; // Fallback
+                
+                // 1. Lưu Node Details (Content, Starter Code, Solution Code)
+                const resNode = await fetch(`/api/learning-spaces/${spaceId}/learning-paths/${node.learningPathId}/learning-nodes/${node.id}`, {
+                    method: 'PUT',
+                    headers: authHeaders(true),
+                    body: JSON.stringify({
+                        title: node.title,
+                        description: node.description,
+                        nodeType: node.nodeType,
+                        content: content,
+                        starterCode: window.codeStore.starter,
+                        solutionCode: window.codeStore.solution
+                    })
+                });
+                if (!resNode.ok) throw new Error(await readError(resNode));
 
-          try {
-            // Determine spaceId
-            const spaceIdParams = urlParams.get('spaceId');
-            const spaceId = node.learningSpaceId || spaceIdParams || '1'; // Fallback
-
-            // 1. Lưu Node Details (Content, Starter Code, Solution Code)
-            const resNode = await fetch(`/api/learning-spaces/${spaceId}/learning-paths/${node.learningPathId}/learning-nodes/${node.id}`, {
-              method: 'PUT',
-              headers: authHeaders(true),
-              body: JSON.stringify({
-                title: node.title,
-                description: node.description,
-                nodeType: node.nodeType,
-                content: content,
-                starterCode: window.codeStore.starter,
-                solutionCode: window.codeStore.solution
-              })
-            });
-            if (!resNode.ok) throw new Error(await readError(resNode));
-
-            // 2. Lưu Test Cases
-            const resTestCases = await fetch(`/api/learning-nodes/${node.id}/test-cases`, {
-              method: 'PUT',
-              headers: authHeaders(true),
-              body: JSON.stringify(window.testCases)
-            });
-            if (!resTestCases.ok) throw new Error(await readError(resTestCases));
-
-            // Show success
-            btn.innerHTML = '<i class="ti ti-check"></i> Saved!';
-            btn.classList.replace('btn-primary', 'btn-success');
-            setTimeout(() => {
-              btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
-              btn.classList.replace('btn-success', 'btn-primary');
-              btn.disabled = false;
-            }, 2000);
-
-          } catch (err) {
-            alert("Error saving Lab: " + err.message);
-            btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
-            btn.disabled = false;
-          }
+                // 2. Lưu Test Cases
+                const resTestCases = await fetch(`/api/learning-nodes/${node.id}/test-cases`, {
+                    method: 'PUT',
+                    headers: authHeaders(true),
+                    body: JSON.stringify(window.testCases)
+                });
+                if (!resTestCases.ok) throw new Error(await readError(resTestCases));
+                
+                // Show success
+                btn.innerHTML = '<i class="ti ti-check"></i> Saved!';
+                btn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
+                    btn.classList.replace('btn-success', 'btn-primary');
+                    btn.disabled = false;
+                }, 2000);
+                
+            } catch (err) {
+                alert("Error saving Lab: " + err.message);
+                btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
+                btn.disabled = false;
+            }
         });
 
         return; // Dừng việc render UI bình thường
@@ -820,15 +826,50 @@
       const videoCount = items.some((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item)) ? 1 : 0;
 
       pageRoot.className = 'lesson-layout';
+      
+
+
+      let quizHtml = '';
+      const quizItem = items.find(item => normalizeItemType(item.itemType) === 'QUIZ' && item.quizId);
+      if (quizItem) {
+        let buttons = isSupporter ? `
+          <a href="/supporter/quizzes/${encodeURIComponent(quizItem.quizId)}/statistics" class="btn btn-outline-info px-4 rounded-pill d-flex align-items-center gap-1"><i class="ti ti-chart-bar"></i> Thống kê</a>
+          <a href="/supporter/quizzes/${encodeURIComponent(quizItem.quizId)}/builder" class="btn btn-outline-primary px-4 rounded-pill d-flex align-items-center gap-1"><i class="ti ti-edit"></i> Edit Quiz</a>
+          <button class="btn btn-outline-danger px-4 rounded-pill d-flex align-items-center gap-1" onclick="deleteQuiz(${quizItem.quizId})"><i class="ti ti-trash"></i> Delete Quiz</button>
+        ` : `
+          <a href="/lecturer/quizzes/${encodeURIComponent(quizItem.quizId)}/statistics" class="btn btn-outline-info px-4 rounded-pill d-flex align-items-center gap-1"><i class="ti ti-chart-bar"></i> Thống kê</a>
+          <a href="/lecturer/quizzes/${encodeURIComponent(quizItem.quizId)}/builder" class="btn btn-outline-primary px-4 rounded-pill d-flex align-items-center gap-1"><i class="ti ti-edit"></i> Edit Quiz</a>
+          <button class="btn btn-outline-danger px-4 rounded-pill d-flex align-items-center gap-1" onclick="deleteQuiz(${quizItem.quizId})"><i class="ti ti-trash"></i> Delete Quiz</button>
+        `;
+
+        quizHtml = `
+          <section class="mt-4">
+            <div class="d-flex align-items-center justify-content-between p-3 bg-white border rounded-4 shadow-sm">
+              <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle text-primary p-2 rounded-3">
+                  <i class="ti ti-brain fs-3"></i>
+                </div>
+                <div>
+                  <h5 class="mb-0 fw-bold text-dark">${escapeHtml(quizItem.title || 'Practice Quiz')}</h5>
+                  <small class="text-muted">Attached Quiz &bull; Preview Mode</small>
+                </div>
+              </div>
+              <div class="d-flex gap-2">
+                ${buttons}
+              </div>
+            </div>
+          </section>
+        `;
+      }
+
+
       pageRoot.innerHTML = `
       <section class="player-column">
         <section class="node-hero">
-          <span class="eyebrow"><i class="ti ti-eye"></i> Lecturer Preview Mode</span>
+          <span class="eyebrow"><i class="ti ti-eye"></i> ${isSupporter ? 'Supporter' : 'Lecturer'} Preview Mode</span>
           <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
-          <p class="node-description">${escapeHtml(node.content || 'No description.')}</p>
           <div class="meta-row">
             <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-            <span class="soft-chip discussions-count"><i class="ti ti-messages"></i>0 comments</span>
           </div>
         </section>
 
@@ -836,53 +877,55 @@
           ${videoTemplate(node, items)}
           <div class="player-controls">
             <button class="server-pill active" type="button">Lesson Video</button>
-            <button class="server-pill" type="button">${resources.length} resource</button>
-            <button class="server-pill discussions-count" type="button">0 comments</button>
+            <button class="server-pill" type="button" onclick="document.getElementById('hiddenResourceInput').click()"><i class="ti ti-upload"></i> Upload Resource</button>
           </div>
         </section>
-      </section>
 
-      <aside class="side-column d-flex flex-column" style="max-height: 100vh;">
-        <ul class="nav nav-pills mb-3" id="side-tabs" role="tablist" style="background: white; padding: 0.5rem; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-shrink: 0;">
-          <li class="nav-item flex-grow-1 text-center" role="presentation">
-            <button class="nav-link active w-100 rounded-pill py-2" id="tab-qa" data-bs-toggle="pill" data-bs-target="#pane-qa" type="button" role="tab" style="font-size: 0.9rem; font-weight: 600;"><i class="ti ti-messages"></i> Q&A</button>
-          </li>
-          <li class="nav-item flex-grow-1 text-center" role="presentation">
-            <button class="nav-link w-100 rounded-pill py-2" id="tab-summaries" data-bs-toggle="pill" data-bs-target="#pane-summaries" type="button" role="tab" style="font-size: 0.9rem; font-weight: 600;"><i class="ti ti-checklist"></i> Submissions</button>
-          </li>
-        </ul>
-        <div class="tab-content flex-grow-1 d-flex flex-column" id="side-tabs-content" style="min-height: 0;">
-          <div class="tab-pane fade show active h-100" id="pane-qa" role="tabpanel">
-            <div class="d-flex flex-column h-100" style="min-height: 0;">
-              <section class="side-card d-flex flex-column" style="min-height: 0; flex: 1;">
-                <div class="side-card-header flex-shrink-0">
-                  <div>
-                    <h2>Moderation & Q&A</h2>
-                    <p>Reply to students, pin important answers, or mark questions as solved.</p>
-                  </div>
-                  <span class="soft-chip"><i class="ti ti-shield-check text-primary"></i></span>
-                </div>
-                ${commentsTemplate()}
-              </section>
-            </div>
-          </div>
-          <div class="tab-pane fade h-100" id="pane-summaries" role="tabpanel">
-            <div class="d-flex flex-column h-100" style="min-height: 0;">
-              <section class="side-card d-flex flex-column" style="min-height: 0; flex: 1;">
-                <div class="side-card-header flex-shrink-0">
-                  <div>
-                    <h2>Student Submissions</h2>
-                    <p>Review and grade lesson summaries.</p>
-                  </div>
-                  <span class="soft-chip"><i class="ti ti-checklist text-primary"></i></span>
-                </div>
-                <div id="summaries-container" style="overflow-y: auto; flex: 1; height: 100%; padding: 0.75rem;">
-                  <div class="text-center text-muted py-4"><i class="ti ti-loader ti-spin"></i> Loading...</div>
-                </div>
-              </section>
-            </div>
-          </div>
+        <section class="content-card">
+          <h2>Node Content</h2>
+          <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
+        </section>
+        
+        <!-- Submissions moved to side column -->        
+        ${quizHtml}
+      </section>
+      
+      <aside class="side-column">
+        <div class="d-flex bg-white rounded-pill p-1 mb-3 shadow-sm border" style="gap: 4px;">
+          <button class="btn flex-fill rounded-pill active fw-bold d-flex align-items-center justify-content-center gap-2" id="tabBtnQA" onclick="switchRightTab('qa')" style="transition: 0.3s; color: white; background-color: #d97755; border: none;">
+            <i class="ti ti-messages"></i> Q&A
+          </button>
+          <button class="btn flex-fill rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 text-muted" id="tabBtnSubmissions" onclick="switchRightTab('submissions')" style="transition: 0.3s; background-color: transparent; border: none;">
+            <i class="ti ti-checklist"></i> Submissions
+          </button>
         </div>
+
+        <section class="side-card" id="sidePaneQA" style="display: flex; flex-direction: column; flex: 1;">
+          <div class="side-card-header" style="padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #eee;">
+            <div>
+              <h2 style="font-size: 1.05rem; font-weight: bold; margin-bottom: 4px;">Moderation & Q&A</h2>
+              <p style="font-size: 0.8rem; color: #6c757d; margin-bottom: 0;">Reply to students, pin important answers, or mark questions as solved.</p>
+            </div>
+            <span class="soft-chip discussions-count" style="display: none;">0 comments</span>
+          </div>
+          <div style="flex: 1; overflow-y: auto;">
+             ${commentsTemplate()}
+          </div>
+        </section>
+
+        <section class="side-card" id="sidePaneSubmissions" style="display: none; flex-direction: column; flex: 1;">
+          <div class="side-card-header" style="padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #eee;">
+            <div>
+              <h2 style="font-size: 1.05rem; font-weight: bold; margin-bottom: 4px;">Student Submissions</h2>
+              <p style="font-size: 0.8rem; color: #6c757d; margin-bottom: 0;">Review and grade lesson summaries submitted by students.</p>
+            </div>
+          </div>
+          <div id="summaries-container" style="flex: 1; overflow-y: auto; padding: 10px;">
+            <div class="empty-light">
+              <div><i class="ti ti-loader-2 ti-spin"></i> Loading submissions...</div>
+            </div>
+          </div>
+        </section>
       </aside>
       
       <!-- Hidden file input for uploading resources -->
@@ -897,30 +940,42 @@
       }
 
       try {
-        const [nodeResponse, itemsResponse] = await Promise.all([
+        const [nodeResponse, itemsResponse, quizResponse] = await Promise.all([
           fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}`, { headers: authHeaders(false) }),
-          fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}/items`, { headers: authHeaders(false) })
+          fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}/items`, { headers: authHeaders(false) }),
+          fetch(`/api/quizzes/learning-node/${encodeURIComponent(nodeId)}/active`, { headers: authHeaders(false) }).catch(() => null)
         ]);
 
         if (nodeResponse.status === 401 || itemsResponse.status === 401) {
-          localStorage.removeItem('jwt_token');
-          window.location.href = '/login?message=Session expired, please login again';
-          return;
+            localStorage.removeItem('jwt_token');
+            window.location.href = '/login?message=Session expired, please login again';
+            return;
         }
 
         if (!nodeResponse.ok) throw new Error(await readError(nodeResponse));
 
         const node = await nodeResponse.json();
-
-        const currentSpaceId = urlParams.get('spaceId');
-        if (!currentSpaceId && node.spaceId) {
-          document.getElementById('backLink').href = `/lecturer/space/${node.spaceId}`;
-        }
+      
+      const currentSpaceId = urlParams.get('spaceId');
+      if (!currentSpaceId && node.spaceId) {
+          document.getElementById('backLink').href = isSupporter ? `/supporter/space/${node.spaceId}` : `/lecturer/space/${node.spaceId}`;
+      }
         const items = itemsResponse.ok ? await itemsResponse.json() : [];
+        
+        if (quizResponse && quizResponse.ok) {
+          const quizzes = await quizResponse.json();
+          if (Array.isArray(quizzes)) {
+            quizzes.forEach(q => {
+              items.push({ itemType: 'QUIZ', quizId: q.id, title: q.title });
+            });
+          }
+        }
 
         renderNodePage(node, items);
-        loadDiscussions();
-        loadSummaries();
+        if (!isSupporter) {
+            loadDiscussions();
+            loadSummaries();
+        }
       } catch (error) {
         renderError('Could not load node', error.message || 'Please try again later.');
       }
@@ -970,6 +1025,20 @@
       } catch (err) {
         alert(err.message);
         if (btn) btn.innerHTML = '<i class="ti ti-upload"></i>';
+      }
+    }
+
+    async function deleteQuiz(quizId) {
+      if (!confirm('Are you sure you want to delete this quiz?')) return;
+      try {
+        const res = await fetch(`/api/quizzes/${quizId}`, {
+          method: 'DELETE',
+          headers: authHeaders(false)
+        });
+        if (!res.ok) throw new Error(await readError(res));
+        window.location.reload();
+      } catch(err) {
+        alert('Failed to delete quiz: ' + err.message);
       }
     }
 
@@ -1112,7 +1181,7 @@
       window.location.href = '/signin';
     }
 
-    // --- WEBSOCKET LOGIC cho Discussion ---
+    // --- POLLING LOGIC cho Discussion ---
     function shouldPausePolling() {
       const rootInput = document.getElementById('discussion-input');
       if (rootInput && (document.activeElement === rootInput || rootInput.value.trim().length > 0)) return true;
@@ -1121,38 +1190,50 @@
       for (let input of replyInputs) {
         if (document.activeElement === input || input.value.trim().length > 0) return true;
       }
+
+      const feedbackModalEl = document.getElementById('feedbackModal');
+      if (feedbackModalEl && feedbackModalEl.classList.contains('show')) return true;
+
       return false;
     }
 
+    setInterval(() => {
+      if (!isSupporter && !shouldPausePolling()) {
+        loadDiscussions();
+      }
+    }, 2000);
 
-
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="/assets/js/notification.js?v=2"></script>
-  <script>
-    // Independent STOMP connection for discussion updates
-    (function() {
-      if (typeof nodeId === 'undefined' || !nodeId) return;
-      const socket = new SockJS('/ws');
-      const stompClientNode = Stomp.over(socket);
-      stompClientNode.debug = null;
-      stompClientNode.connect({}, function (frame) {
-        stompClientNode.subscribe('/topic/nodes/' + nodeId + '/discussions', function (message) {
-          if (message.body) {
-             const payload = JSON.parse(message.body);
-             if (payload.action === 'UPDATE') {
-                 if (typeof shouldPausePolling === 'function' && !shouldPausePolling()) {
-                     if (typeof loadDiscussions === 'function') loadDiscussions();
-                 }
-             }
-          }
-        });
-      }, function(error) {
-        console.error('WebSocket discussion error:', error);
-      });
-    })();
+    window.switchRightTab = function(tabId) {
+      const btnQA = document.getElementById('tabBtnQA');
+      const btnSub = document.getElementById('tabBtnSubmissions');
+      const paneQA = document.getElementById('sidePaneQA');
+      const paneSub = document.getElementById('sidePaneSubmissions');
+      
+      if (tabId === 'qa') {
+          btnQA.style.backgroundColor = '#d97755';
+          btnQA.style.color = 'white';
+          btnQA.classList.remove('text-muted');
+          
+          btnSub.style.backgroundColor = 'transparent';
+          btnSub.style.color = '';
+          btnSub.classList.add('text-muted');
+          
+          paneQA.style.display = 'flex';
+          paneSub.style.display = 'none';
+      } else {
+          btnSub.style.backgroundColor = '#d97755';
+          btnSub.style.color = 'white';
+          btnSub.classList.remove('text-muted');
+          
+          btnQA.style.backgroundColor = 'transparent';
+          btnQA.style.color = '';
+          btnQA.classList.add('text-muted');
+          
+          paneSub.style.display = 'flex';
+          paneQA.style.display = 'none';
+      }
+    };
   </script>
 </body>
+
 </html>

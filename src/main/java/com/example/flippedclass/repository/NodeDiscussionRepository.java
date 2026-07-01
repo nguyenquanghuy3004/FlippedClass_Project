@@ -10,10 +10,10 @@ import java.util.List;
 
 public interface NodeDiscussionRepository extends JpaRepository<NodeDiscussion, Long> {
 
-    @Query("SELECT nd FROM NodeDiscussion nd WHERE nd.learningNode.id = :nodeId AND nd.studyGroup IS NULL AND nd.parentDiscussion IS NULL ORDER BY nd.isPinned DESC, nd.createdAt ASC")
+    @Query("SELECT nd FROM NodeDiscussion nd WHERE nd.learningNode.id = :nodeId AND nd.studyGroup IS NULL AND nd.parentDiscussion IS NULL ORDER BY nd.isPinned DESC, nd.createdAt DESC")
     List<NodeDiscussion> findRootDiscussionsByNodeId(@Param("nodeId") Long nodeId);
 
-    @Query("SELECT nd FROM NodeDiscussion nd WHERE nd.learningNode.id = :nodeId AND nd.studyGroup.id = :groupId AND nd.parentDiscussion IS NULL ORDER BY nd.isPinned DESC, nd.createdAt ASC")
+    @Query("SELECT nd FROM NodeDiscussion nd WHERE nd.learningNode.id = :nodeId AND nd.studyGroup.id = :groupId AND nd.parentDiscussion IS NULL ORDER BY nd.isPinned DESC, nd.createdAt DESC")
     List<NodeDiscussion> findRootDiscussionsByNodeIdAndGroupId(@Param("nodeId") Long nodeId, @Param("groupId") Long groupId);
     
     long countByLearningNodeIdAndParentDiscussionIsNull(Long nodeId);

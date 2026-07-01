@@ -32,7 +32,7 @@ public class NodeDiscussion {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id")
+    @JoinColumn(name = "group_id") //// trong database đang chưa có cột này
     private StudyGroup studyGroup;
 
     @Column(columnDefinition = "NVARCHAR(MAX)", nullable = false)

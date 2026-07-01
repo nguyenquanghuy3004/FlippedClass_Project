@@ -1,4 +1,4 @@
-﻿  <!DOCTYPE html>
+  <!DOCTYPE html>
   <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
   <head>
@@ -18,8 +18,21 @@
     </script>
     <link rel="stylesheet" th:href="@{/assets/css/student-take-quiz.css}">
     <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/student-layout.css}">
     <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+    <style>
+      .is-embedded #sidebar, .is-embedded #topbar { display: none !important; }
+      .is-embedded #content { margin-left: 0 !important; padding-top: 0 !important; width: 100% !important; }
+      .is-embedded .page-wrap { padding: 1rem !important; }
+    </style>
     <script th:inline="none">
+      document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('embed') === 'true' || window.self !== window.top) {
+          document.body.classList.add('is-embedded');
+        }
+      });
+
       /* --- Inlined from student-user-menu.js --- */
       (function () {
         const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
@@ -88,6 +101,9 @@
             if (!response.ok) return;
             const user = await response.json();
             setStudentMenuUser(user);
+            if (user.supporter) {
+              document.querySelectorAll('#supporter-nav-item').forEach(el => el.style.display = 'block');
+            }
           } catch (error) {
             console.warn('Could not load user menu profile.', error);
           }
@@ -134,99 +150,82 @@
         document.addEventListener('DOMContentLoaded', initStudentUserMenus);
       })();
 
+      function goBackToQuizzes() {
+        if (document.body.classList.contains('is-embedded')) {
+          if (window.parent && window.parent.$) {
+            window.parent.$('.quiz-iframe-container').slideUp();
+          } else {
+            document.body.innerHTML = '<div style="display:flex; height:100vh; align-items:center; justify-content:center; flex-direction:column;"><h2 style="color:#22c55e;">Quiz Completed!</h2><p>You can close this window now.</p></div>';
+          }
+        } else {
+          window.location.href = '/student/my-quizzes';
+        }
+      }
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-(function() {
-    function handleUnauthorized() {
-        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
-        localStorage.removeItem('jwt_token');
-        sessionStorage.removeItem('jwt_token');
-        window.location.href = '/signin';
-    }
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
-        try {
-            const response = await originalFetch.apply(this, args);
-            if (response.status === 401) {
-                handleUnauthorized();
-            }
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    };
-    const originalXhrOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function() {
-        this.addEventListener('load', function() {
-            if (this.status === 401) {
-                handleUnauthorized();
-            }
-        });
-        originalXhrOpen.apply(this, arguments);
-    };
-})();
-</script>
-</head>
+  </head>
 
   <body>
     <div id="overlay" class="overlay"></div>
 
-    <nav id="topbar" class="topbar">
-      <button id="toggleBtn" class="icon-button" type="button" aria-label="Toggle sidebar">
+    <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm">
+      <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
         <i class="ti ti-layout-sidebar-left-expand"></i>
       </button>
-      <div class="topbar-title">
-        <strong>Take Quiz</strong>
-        <span>Answer each question before time runs out</span>
+      <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+        <i class="ti ti-layout-sidebar-left-expand"></i>
+      </button>
+
+      <div class="topbar-main w-100 d-flex justify-content-between align-items-center">
+        <div class="topbar-title-wrap d-flex align-items-center">
+          <h5 class="topbar-title fw-bold text-dark ms-1 mb-0">Take Quiz <span class="badge bg-primary-subtle text-primary rounded-pill fw-normal ms-2">Assessment</span></h5>
+        </div>
+        <div class="d-flex align-items-center">
+          <a class="btn btn-outline-primary btn-sm rounded-pill fw-semibold px-3" href="javascript:void(0)" onclick="goBackToQuizzes()">
+            <i class="ti ti-arrow-left me-1"></i> Exit Quiz
+          </a>
+        </div>
       </div>
-      <div class="topbar-spacer"></div>
-      <a class="btn-quiz btn-quiz-outline" href="/student/my-quizzes">
-        <i class="ti ti-arrow-left"></i> My Quizzes
-      </a>
     </nav>
 
-    <aside id="sidebar" class="sidebar">
-      <div class="logo-area">
-        <a th:href="@{/}" class="logo-link">
-          <span class="logo-mark"><i class="ti ti-book-2 fs-3"></i></span>
-          <span>Flipped<span>Class</span></span>
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm">
+      <div class="logo-area border-bottom border-light">
+        <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
+          <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2">
+            <i class="ti ti-book-2 fs-3"></i>
+          </div>
+          <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">Flipped<span class="text-primary">Class</span></span>
         </a>
       </div>
-      <ul class="nav">
-        <li><a class="nav-link" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i
-              class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
-        <li><a class="nav-link" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i
-              class="ti ti-books fs-5"></i><span class="nav-text">Learning Space</span></a></li>
-        <li><a class="nav-link active" href="/student/my-quizzes" data-nav-key="my-quiz" aria-current="page"><i
-              class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
-        <li><a class="nav-link" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span
-              class="nav-text">Reports</span></a></li>
+      <ul class="nav flex-column mt-2">
+        <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
+        <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">My Classes</span></a></li>
+        <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
+        <li id="supporter-nav-item" style="display:none;"><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/supporter/dashboard}" data-nav-key="supporter"><i class="ti ti-heart-handshake fs-5"></i><span class="nav-text">Supporter Portal</span></a></li>
+        <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
+
         <li class="sidebar-user-slot">
           <div class="student-user-menu" data-user-menu>
-            <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false"
-              aria-label="Account menu">
-              <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}"
-                alt="Student avatar">
+            <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+              <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
               <span class="student-menu-info">
-                <span class="student-menu-name" data-user-name>Student</span>
-                <span class="student-menu-role">Student</span>
-              </span>
+            <span class="student-menu-name" data-user-name>Student</span>
+            <span class="student-menu-role">Student</span>
+          </span>
               <i class="ti ti-chevron-up student-menu-chevron"></i>
             </button>
             <div class="student-menu-panel" role="menu">
-              <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i
-                  class="ti ti-help-circle"></i><span>Help</span></a>
-              <button class="student-menu-item" type="button" data-bs-toggle="modal" data-bs-target="#profileDetailModal" role="menuitem"><i class="ti ti-user-edit"></i><span>Edit Profile</span></button>
-              <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i
-                  class="ti ti-logout"></i><span>Logout</span></button>
+              <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+              <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
             </div>
           </div>
         </li>
       </ul>
     </aside>
 
-    <main id="content" class="content">
+    <main id="content" class="content" style="padding-top: 80px;">
       <div class="page-wrap">
         <section class="quiz-hero">
           <div class="hero-stats">
@@ -245,7 +244,9 @@
           </div>
         </section>
 
-        <div class="quiz-shell">
+
+
+        <div class="quiz-shell" id="quiz-shell">
           <aside class="sticky-panel">
             <section class="quiz-card">
               <div class="panel-title"><i class="ti ti-clipboard-text"></i> Attempt Info</div>
@@ -256,7 +257,7 @@
               </div>
 
               <div class="action-buttons">
-                <a class="btn-quiz btn-quiz-outline" href="/student/my-quizzes">
+                <a class="btn-quiz btn-quiz-outline" href="javascript:void(0)" onclick="goBackToQuizzes()">
                   <i class="ti ti-arrow-left"></i> Back
                 </a>
                 <button id="submitQuizButton" class="btn-quiz btn-quiz-primary" type="button">
@@ -412,7 +413,7 @@
           confirmButtonText: 'Back to My Quizzes',
           confirmButtonColor: swalColors.confirmButtonColor
         }).then(() => {
-          window.location.href = '/student/my-quizzes';
+          goBackToQuizzes();
         });
         return false;
       }
@@ -441,7 +442,7 @@
                 confirmButtonText: 'Back to My Quizzes',
                 confirmButtonColor: swalColors.confirmButtonColor
               });
-              window.location.href = '/student/my-quizzes';
+              goBackToQuizzes();
               return;
             }
           }
@@ -461,7 +462,7 @@
 
           timeRemaining = duration * 60;
           renderTimer();
-          startTimer(); // Bắt đầu đếm ngược thời gian
+          startTimer();
 
           // 3. Lấy danh sách câu hỏi của quiz
           const questionsRes = await fetch(`/api/quizzes/${quizId}/questions`, { headers: authHeaders() });
@@ -484,6 +485,8 @@
         `;
         }
       }
+
+
 
       function renderTimer() {
         const minutes = Math.floor(timeRemaining / 60);
@@ -684,7 +687,7 @@
             allowOutsideClick: false
           });
 
-          window.location.href = '/student/my-quizzes';
+          goBackToQuizzes();
         } catch (error) {
           isSubmitting = false;
           Swal.fire({
@@ -721,4 +724,3 @@
   </body>
 
   </html>
-

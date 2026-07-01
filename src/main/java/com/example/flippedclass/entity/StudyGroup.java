@@ -31,7 +31,7 @@ public class StudyGroup {
 
     @NotBlank(message = "Group name cannot be empty")
     @Size(max = 100, message = "Group name max 100 characters")
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(name = "group_name", nullable = false, length = 100)
     private String groupName;
 
     @ManyToOne(fetch = FetchType.LAZY)

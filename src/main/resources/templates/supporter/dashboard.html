@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{supporter/layout}">
 <head>
@@ -7,37 +7,6 @@
     <th:block layout:fragment="head">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
     </th:block>
-  <script>
-(function() {
-    function handleUnauthorized() {
-        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
-        localStorage.removeItem('jwt_token');
-        sessionStorage.removeItem('jwt_token');
-        window.location.href = '/signin';
-    }
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
-        try {
-            const response = await originalFetch.apply(this, args);
-            if (response.status === 401) {
-                handleUnauthorized();
-            }
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    };
-    const originalXhrOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function() {
-        this.addEventListener('load', function() {
-            if (this.status === 401) {
-                handleUnauthorized();
-            }
-        });
-        originalXhrOpen.apply(this, arguments);
-    };
-})();
-</script>
 </head>
 <body>
 <div layout:fragment="content">
@@ -48,6 +17,9 @@
                 <p class="text-muted mb-0">Manage your mentees and track their progress.</p>
             </div>
             <div>
+                <button class="btn btn-success rounded-pill shadow-sm me-2" data-bs-toggle="modal" data-bs-target="#createSpaceModal">
+                    <i class="ti ti-plus"></i> Create Space
+                </button>
                 <button class="btn btn-primary rounded-pill shadow-sm" onclick="notifyMentees()">
                     <i class="ti ti-bell-ringing"></i> Notify Mentees
                 </button>
@@ -187,9 +159,8 @@
                 });
                 if (!res.ok) throw new Error('Failed to load spaces');
                 
-                const currentUserId = localStorage.getItem('user_id');
                 mySpacesList = await res.json();
-                mySpacesList = mySpacesList.filter(s => s.status !== 'DELETE' && s.status !== 'ARCHIVE' && String(s.ownerId) === String(currentUserId));
+                mySpacesList = mySpacesList.filter(s => s.status !== 'DELETE' && s.status !== 'ARCHIVE');
                 
                 if (mySpacesList.length === 0) {
                     grid.innerHTML = '<div class="col-12 text-center text-muted py-4">You have not created any mentoring spaces yet.</div>';
@@ -400,5 +371,3 @@
 </th:block>
 </body>
 </html>
-
-

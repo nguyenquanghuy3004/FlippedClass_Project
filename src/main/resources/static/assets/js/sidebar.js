@@ -30,13 +30,15 @@ const sidebar = document.getElementById('sidebar');
       });
     }
 
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const currentPath = window.location.pathname;
+    const currentPage = currentPath.split('/').pop() || 'index.html';
     const navLinks = document.querySelectorAll('.sidebar .nav-link');
 
     if (navLinks.length > 0) {
       navLinks.forEach(link => {
         link.classList.remove('active');
-        if (link.getAttribute('href') === currentPage) {
+        const href = link.getAttribute('href');
+        if (href === currentPage || href === currentPath) {
           link.classList.add('active');
         }
       });

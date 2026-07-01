@@ -96,4 +96,14 @@ public class LecturerGroupActivityRestController {
             @AuthenticationPrincipal UserDetailsImpl currentUser) {
         return lecturerGroupActivityService.gradeGroup(currentUser.getId(), groupId, request);
     }
+
+    @PatchMapping("/groups/{groupId}/force-leader")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'MENTOR', 'ROLE_MENTOR')")
+    public void forceAssignLeader(
+            @PathVariable Long groupId,
+            @RequestParam("newLeaderId") Long newLeaderId,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        lecturerGroupActivityService.forceAssignLeader(currentUser.getId(), groupId, newLeaderId);
+    }
 }

@@ -15,10 +15,10 @@ public interface LearningNodeRepository extends JpaRepository<LearningNode,Long>
 
     List<LearningNode> findByLearningPathId(Long learningPathId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT n FROM LearningNode n WHERE " +
+    @Query("SELECT n FROM LearningNode n WHERE " +
             "(:keyword IS NULL OR LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
             "(:status IS NULL OR n.status = :status)")
-    org.springframework.data.domain.Page<LearningNode> findAllForAdmin(@org.springframework.data.repository.query.Param("keyword") String keyword,
-                                                                       @org.springframework.data.repository.query.Param("status") String status,
+    org.springframework.data.domain.Page<LearningNode> findAllForAdmin(@Param("keyword") String keyword,
+                                                                       @Param("status") String status,
                                                                        org.springframework.data.domain.Pageable pageable);
 }

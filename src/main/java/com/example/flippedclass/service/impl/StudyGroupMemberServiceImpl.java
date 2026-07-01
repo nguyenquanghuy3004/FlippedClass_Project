@@ -70,10 +70,13 @@ public class StudyGroupMemberServiceImpl implements StudyGroupMemberService {
         group.getMembers().remove(member);
 
         if (group.getMembers().isEmpty()) {
-            groupRepository.delete(group);
+            group.setStatus(com.example.flippedclass.enums.GroupStatus.INACTIVE);
+            groupRepository.save(group);
         } else if (group.getLeader().getId().equals(currentUserId)) {
-            // Auto promote first available member
-            StudyGroupMember nextLeader = group.getMembers().iterator().next();
+            // Auto promote the oldest member
+            StudyGroupMember nextLeader = group.getMembers().stream()
+                    .min(java.util.Comparator.comparing(StudyGroupMember::getJoinedAt))
+                    .orElseThrow(() -> new BusinessException("Cannot find member to promote to leader"));
             nextLeader.setRole(GroupRole.LEADER);
             group.setLeader(nextLeader.getStudent());
             groupRepository.save(group);
