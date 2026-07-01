@@ -20,6 +20,37 @@
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
 
+  <script th:src="@{/assets/js/fetch-interceptor.js}"></script>
+
+  <!-- BỘ KIỂM TRA QUYỀN HẠN & ĐĂNG NHẬP -->
+  <script>
+    (function() {
+      const token = localStorage.getItem('jwt_token');
+      if (!token) {
+        // Chưa đăng nhập, chuyển về trang đăng nhập
+        window.location.href = '/login';
+      } else {
+        try {
+          // Giải mã token JWT
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const now = Math.floor(Date.now() / 1000);
+          if (payload.exp && payload.exp < now) {
+            // Token đã hết hạn, xóa dữ liệu và chuyển về trang đăng nhập
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user_id');
+            window.location.href = '/login';
+          } else if (!payload.roles || (!payload.roles.includes('STUDENT') && !payload.roles.includes('ROLE_STUDENT') && !payload.roles.includes('MENTOR') && !payload.roles.includes('ROLE_MENTOR') && !payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
+            // Không có quyền truy cập trang Supporter, chuyển về trang đăng nhập
+            window.location.href = '/login';
+          }
+        } catch (e) {
+          // Token không hợp lệ, chuyển về trang đăng nhập
+          window.location.href = '/login';
+        }
+      }
+    })();
+  </script>
+
   <th:block layout:fragment="head"></th:block>
 </head>
 

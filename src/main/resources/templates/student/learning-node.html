@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{student/layout}">
 
 
@@ -76,6 +74,20 @@
       const headers = { Authorization: `Bearer ${token}` };
       if (includeJson) headers['Content-Type'] = 'application/json';
       return headers;
+    }
+
+    // MỚI: Realtime Comments
+    if (nodeId) {
+        const nodeSocket = new SockJS('/ws');
+        const nodeStompClient = Stomp.over(nodeSocket);
+        nodeStompClient.debug = null; 
+        nodeStompClient.connect({}, function() {
+            nodeStompClient.subscribe('/topic/nodes/' + nodeId + '/comments', function(res) {
+                if (res.body === "REFRESH") {
+                    loadComments();
+                }
+            });
+        });
     }
 
     function escapeHtml(value) {

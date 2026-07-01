@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class NodeCommentServiceImpl implements NodeCommentService {
     private final UserRepository userRepository;
     private final LearningSpaceMemberRepository learningSpaceMemberRepository;
     private final NotificationService notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional(readOnly = true)
@@ -92,6 +94,8 @@ public class NodeCommentServiceImpl implements NodeCommentService {
             );
         }
 
+        messagingTemplate.convertAndSend("/topic/nodes/" + nodeId + "/comments", "REFRESH");
+
         return mapToResponse(comment);
     }
 
@@ -134,6 +138,8 @@ public class NodeCommentServiceImpl implements NodeCommentService {
             );
         }
 
+        messagingTemplate.convertAndSend("/topic/nodes/" + nodeId + "/comments", "REFRESH");
+
         return mapToResponse(reply);
     }
 
@@ -153,6 +159,8 @@ public class NodeCommentServiceImpl implements NodeCommentService {
         comment.setUpdatedAt(java.time.LocalDateTime.now());
         comment = nodeCommentRepository.save(comment);
 
+        messagingTemplate.convertAndSend("/topic/nodes/" + comment.getLearningNode().getId() + "/comments", "REFRESH");
+
         return mapToResponse(comment);
     }
 
@@ -166,7 +174,10 @@ public class NodeCommentServiceImpl implements NodeCommentService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own comments");
         }
 
+        Long nodeId = comment.getLearningNode().getId();
         nodeCommentRepository.delete(comment);
+        
+        messagingTemplate.convertAndSend("/topic/nodes/" + nodeId + "/comments", "REFRESH");
     }
 
     private void checkClassroomMembership(LearningNode node, User user) {

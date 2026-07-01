@@ -13,28 +13,40 @@
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
+  <!-- SockJS, STOMP & SweetAlert2 for Notifications -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css?v=1.1}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css?v=1.1}">
   <link rel="stylesheet" th:href="@{/assets/css/student-layout.css?v=1.2}">
 
-  <!-- AUTHENTICATION GUARD -->
+  <script th:src="@{/assets/js/fetch-interceptor.js}"></script>
+
+  <!-- BỘ KIỂM TRA QUYỀN HẠN & ĐĂNG NHẬP -->
   <script>
     (function() {
       const token = localStorage.getItem('jwt_token');
       if (!token) {
+        // Chưa đăng nhập, chuyển về trang đăng nhập
         window.location.href = '/login';
       } else {
         try {
+          // Giải mã token JWT
           const payload = JSON.parse(atob(token.split('.')[1]));
           const now = Math.floor(Date.now() / 1000);
           if (payload.exp && payload.exp < now) {
+            // Token đã hết hạn, xóa dữ liệu và chuyển về trang đăng nhập
             localStorage.removeItem('jwt_token');
             localStorage.removeItem('user_id');
             window.location.href = '/login';
           } else if (!payload.roles || (!payload.roles.includes('STUDENT') && !payload.roles.includes('ROLE_STUDENT'))) {
+            // Không đúng vai trò học sinh, chuyển về trang đăng nhập
             window.location.href = '/login';
           }
         } catch (e) {
+          // Token không hợp lệ, chuyển về trang đăng nhập
           window.location.href = '/login';
         }
       }
@@ -616,6 +628,86 @@
       
       pollUnreadCount();
       setInterval(pollUnreadCount, 30000);
+
+      if (userId) {
+          const socket = new SockJS('/ws');
+          const stompClient = Stomp.over(socket);
+          stompClient.debug = null; 
+
+          stompClient.connect({}, function() {
+              stompClient.subscribe('/topic/notifications/' + userId, function(res) {
+                  const notif = JSON.parse(res.body);
+                  
+                  // Update unread count
+                  const badge = document.getElementById('notificationBadge');
+                  if (badge) {
+                      let currentCount = parseInt(badge.textContent) || 0;
+                      badge.textContent = currentCount + 1;
+                      badge.classList.remove('d-none');
+                      
+                      const summary = document.getElementById('notificationSummary');
+                      if (summary) {
+                          summary.textContent = `You have ${currentCount + 1} unread notifications.`;
+                      }
+                  }
+                  
+                  // Generate new notification item HTML
+                  let icon = 'ti-bell';
+                  let bg = 'bg-primary-subtle text-primary';
+                  if (notif.type === 'COMMENT_REPLY') {
+                      icon = 'ti-message-circle';
+                  } else if (notif.type === 'QUIZ_ASSIGNED') {
+                      icon = 'ti-file-pencil';
+                  } else if (notif.type === 'REVIEW_MENTOR') {
+                      icon = 'ti-check';
+                      bg = 'bg-success-subtle text-success';
+                  }
+                  
+                  const notifHtml = `
+                    <a class="notification-item fw-bold bg-light" href="#" onclick="markReadAndGo(event, ${notif.id}, '${notif.targetUrl}')">
+                      <div class="d-flex gap-3 align-items-start">
+                        <span class="stat-icon-bg flex-shrink-0 ${bg}" style="width: 42px; height: 42px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                          <i class="ti ${icon}"></i>
+                        </span>
+                        <div class="min-w-0" style="flex: 1;">
+                          <p class="small text-muted fw-semibold mb-1 text-wrap">${escapeHtml(notif.message)}</p>
+                          <span class="small text-primary fw-bold">New</span>
+                        </div>
+                      </div>
+                    </a>`;
+                  
+                  const list = document.getElementById('notificationList');
+                  if (list) {
+                      // Remove empty state if present
+                      if (list.innerHTML.includes('All caught up!') || list.innerHTML.includes('Loading')) {
+                          list.innerHTML = '';
+                      }
+                      list.insertAdjacentHTML('afterbegin', notifHtml);
+                  }
+                  
+                  if (typeof Swal !== 'undefined') {
+                      Swal.fire({
+                          toast: true,
+                          position: 'top-end',
+                          icon: 'info',
+                          iconColor: '#4f46e5',
+                          title: notif.message,
+                          showConfirmButton: false,
+                          timer: 5000,
+                          timerProgressBar: true,
+                          showCloseButton: true,
+                          customClass: {
+                              popup: 'premium-toast'
+                          },
+                          didOpen: (toast) => {
+                              toast.addEventListener('mouseenter', Swal.stopTimer)
+                              toast.addEventListener('mouseleave', Swal.resumeTimer)
+                          }
+                      });
+                  }
+              });
+          });
+      }
 
       const notificationDropdown = document.getElementById('notificationDropdown');
       if (notificationDropdown) {

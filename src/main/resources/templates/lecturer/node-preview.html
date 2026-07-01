@@ -36,6 +36,10 @@
       window.location.href = '/login';
     }
   </script>
+  
+  <!-- SockJS & STOMP cho Realtime -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
@@ -257,6 +261,19 @@
       if (!resources.length) return emptyLightTemplate('ti-folder-off', 'No resources.');
       return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
     }
+
+      if (nodeId) {
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+        stompClient.connect({}, function() {
+            stompClient.subscribe('/topic/nodes/' + nodeId + '/comments', function(res) {
+                if (res.body === "REFRESH") {
+                    loadDiscussions();
+                }
+            });
+        });
+      }
 
     function commentsTemplate() {
       return `

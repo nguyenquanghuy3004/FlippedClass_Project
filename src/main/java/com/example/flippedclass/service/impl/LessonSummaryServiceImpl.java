@@ -85,6 +85,17 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
         summary.setReviewedAt(LocalDateTime.now());
         
         summary = lessonSummaryRepository.save(summary);
+        
+        // Push notification to student
+        Long studentId = summary.getStudent().getId();
+        String nodeTitle = summary.getLearningNode().getTitle();
+        Long nodeId = summary.getLearningNode().getId();
+        notificationService.pushNotification(
+            studentId,
+            "Giảng viên đã phản hồi bài tóm tắt của bạn: " + nodeTitle,
+            "/student/learning-nodes/" + nodeId
+        );
+        
         return mapToResponse(summary);
     }
 

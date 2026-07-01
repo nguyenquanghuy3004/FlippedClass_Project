@@ -8,7 +8,7 @@
         window.location.href = '/signin';
     }
 
-    // 1. Intercept Fetch API
+    // 1. Chặn và xử lý Fetch API
     const originalFetch = window.fetch;
     window.fetch = async function(...args) {
         try {
@@ -23,7 +23,7 @@
         }
     };
 
-    // 2. Intercept XMLHttpRequest (Bao phủ luôn jQuery $.ajax nếu có dùng)
+    // 2. Chặn và xử lý XMLHttpRequest (Bao phủ luôn jQuery $.ajax nếu có dùng)
     const originalXhrOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function() {
         this.addEventListener('load', function() {

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     private final UserRepository userRepository;
     private final StudyGroupRepository groupRepository;
     private final com.example.flippedclass.repository.NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional(readOnly = true)
@@ -87,6 +89,8 @@ public class DiscussionServiceImpl implements DiscussionService {
             }
         }
 
+        messagingTemplate.convertAndSend("/topic/nodes/" + nodeId + "/comments", "REFRESH");
+
         return mapToResponse(saved);
     }
 
@@ -99,9 +103,12 @@ public class DiscussionServiceImpl implements DiscussionService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         validateLecturerOrAdmin(user);
         
-        discussion.setStatus(
-                discussion.getStatus() == DiscussionStatus.OPEN ? DiscussionStatus.SOLVED : DiscussionStatus.OPEN);
-        return mapToResponse(discussionRepository.save(discussion));
+        discussion.setStatus(discussion.getStatus() == DiscussionStatus.OPEN ? DiscussionStatus.SOLVED : DiscussionStatus.OPEN);
+        discussion = discussionRepository.save(discussion);
+        
+        messagingTemplate.convertAndSend("/topic/nodes/" + discussion.getLearningNode().getId() + "/comments", "REFRESH");
+        
+        return mapToResponse(discussion);
     }
 
     @Override
@@ -114,7 +121,11 @@ public class DiscussionServiceImpl implements DiscussionService {
         validateLecturerOrAdmin(user);
 
         discussion.setPinned(!discussion.isPinned());
-        return mapToResponse(discussionRepository.save(discussion));
+        discussion = discussionRepository.save(discussion);
+        
+        messagingTemplate.convertAndSend("/topic/nodes/" + discussion.getLearningNode().getId() + "/comments", "REFRESH");
+        
+        return mapToResponse(discussion);
     }
 
     @Override
@@ -133,7 +144,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     private void validateDiscussionOwnerOrLecturer(NodeDiscussion discussion, User currentUser) {
         boolean isOwner = discussion.getUser().getId().equals(currentUser.getId());
         boolean isLecturerOrAdmin = currentUser.getRoles().stream()
-                .anyMatch(role -> role.getName().name().equals("LECTURER") || role.getName().name().equals("ADMIN"));
+                .anyMatch(role -> role.getName().name().equals("MENTOR") || role.getName().name().equals("ADMIN"));
         if (!isOwner && !isLecturerOrAdmin) {
             throw new com.example.flippedclass.exception.BusinessException("FORBIDDEN: You do not have permission to modify this discussion.");
         }
@@ -141,7 +152,7 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     private void validateLecturerOrAdmin(User currentUser) {
         boolean isLecturerOrAdmin = currentUser.getRoles().stream()
-                .anyMatch(role -> role.getName().name().equals("LECTURER") || role.getName().name().equals("ADMIN"));
+                .anyMatch(role -> role.getName().name().equals("MENTOR") || role.getName().name().equals("ADMIN"));
         if (!isLecturerOrAdmin) {
             throw new com.example.flippedclass.exception.BusinessException("FORBIDDEN: You do not have permission to perform this action.");
         }
