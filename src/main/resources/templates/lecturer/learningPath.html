@@ -140,6 +140,13 @@
                                         <span th:if="${path.status == 'PUBLISHED'}" class="badge-published">Published</span>
                                         <span th:if="${path.status != 'PUBLISHED'}" class="badge-in-progress">In Progress</span>
 
+                                        <!-- Path Collapse Button -->
+                                        <button class="path-collapse-btn"
+                                                th:data-target="'#pathNodes-' + ${path.id}"
+                                                onclick="togglePathCollapse(this)">
+                                            <i class="ti ti-chevron-down path-collapse-icon"></i>
+                                        </button>
+
                                         <div class="dropdown">
                                             <button class="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center"
                                                     data-bs-toggle="dropdown"
@@ -177,7 +184,9 @@
                                 <!-- Nodes area -->
                                 <div class="card-body px-4 pb-4 pt-2">
                                     <!-- Has lessons -->
-                                    <div th:if="${path.nodes != null and !path.nodes.empty}" class="nodes-container">
+                                    <div th:if="${path.nodes != null and !path.nodes.empty}" 
+                                         class="nodes-container path-collapsible-body"
+                                         th:id="'pathNodes-' + ${path.id}">
                                         <th:block th:each="node : ${path.nodes}">
                                             <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
                                         </th:block>
@@ -1178,6 +1187,27 @@
                         .catch(err => console.error('Failed to load items for node', nodeId, err));
                 });
             });
+        </script>
+
+        <script>
+        // ── Path Collapse / Expand ──
+        function togglePathCollapse(btn) {
+            const targetId = btn.getAttribute('data-target');
+            const body = document.querySelector(targetId);
+            if (!body) return;
+
+            const isCollapsed = body.classList.contains('is-collapsed');
+
+            if (isCollapsed) {
+                body.classList.remove('is-collapsed');
+                btn.classList.remove('collapsed');
+                btn.title = 'Thu gọn';
+            } else {
+                body.classList.add('is-collapsed');
+                btn.classList.add('collapsed');
+                btn.title = 'Mở rộng';
+            }
+        }
         </script>
     </th:block>
 </body>

@@ -3,7 +3,7 @@
 
 <!-- ── Node Card Fragment ── -->
 <div th:fragment="nodeCard(node, path)">
-    <div class="node-card" th:style="${node.nodeType == 'PRACTICE'} ? 'background: linear-gradient(to right, #0f172a, #1e293b); border: 1px solid #334155; border-left: 4px solid #4f46e5; box-shadow: 0 4px 15px rgba(0,0,0,0.2);' : ''">
+    <div class="node-card" th:id="'nodeCard-' + ${node.id}" th:style="${node.nodeType == 'PRACTICE'} ? 'background: linear-gradient(to right, #0f172a, #1e293b); border: 1px solid #334155; border-left: 4px solid #4f46e5; box-shadow: 0 4px 15px rgba(0,0,0,0.2);' : ''">
         <div class="p-3 px-4">
             <div class="d-flex justify-content-between align-items-center">
 
@@ -36,11 +36,7 @@
                         <span th:if="${node.nodeType == 'PRACTICE'}" class="badge rounded-pill" style="font-size: 0.75rem; font-weight: 500; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;">
                                 <i class="ti ti-code me-1"></i>Vào làm Bài tập
                             </span>
-                        <!-- Type tag -->
-                        <span class="ms-2 badge rounded-pill"
-                              th:text="${node.nodeType}"
-                              style="font-size:0.65rem;font-weight:600;letter-spacing:0.5px;
-                                         background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;"></span>
+
                     </div>
                 </a>
 
@@ -97,8 +93,12 @@
                 </div>
             </div>
 
-            <!-- Content area -->
-            <div class="node-items-container" th:if="${node.nodeType != 'PRACTICE'}" th:data-nodeid="${node.id}" th:data-nodetype="${node.nodeType}">
+            <!-- Content area (collapsible) -->
+            <div class="node-items-container node-collapsible-body"
+                 th:if="${node.nodeType != 'PRACTICE'}"
+                 th:id="'nodeContent-' + ${node.id}"
+                 th:data-nodeid="${node.id}"
+                 th:data-nodetype="${node.nodeType}">
                 <!-- Placeholder shown until JS renders items -->
                 <div class="node-placeholder" th:style="${node.nodeType == 'PRACTICE'} ? 'color: #94a3b8; opacity: 0.8;' : ''">
                     <i th:class="'ti '
