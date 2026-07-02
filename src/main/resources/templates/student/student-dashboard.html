@@ -481,13 +481,13 @@
       const clickHandler = doc.nodeId ? ` onclick="openDocumentNode(event, ${doc.nodeId})"` : '';
 
       return `
-          <a class="notification-item rounded-4 border mb-2${disabledClass}" href="javascript:void(0)"${clickHandler}>
-            <div class="d-flex gap-3 align-items-start">
+          <a class="notification-item rounded-4 border mb-2${disabledClass} p-2" style="display: block; text-decoration: none;" href="javascript:void(0)"${clickHandler}>
+            <div class="d-flex gap-2 align-items-center">
               ${documentIconTemplate(doc)}
-              <div class="min-w-0">
-                <h6 class="fw-bold mb-1">${escapeHtml(doc.title || 'Untitled Document')}</h6>
-                <p class="small text-muted fw-semibold mb-1">${escapeHtml(meta || 'Learning space')}</p>
-                <span class="small text-primary fw-bold">${escapeHtml(documentTypeLabel(type))}</span>
+              <div style="min-width: 0; flex: 1; overflow: hidden;">
+                <h6 class="fw-bold mb-1 text-truncate text-dark" style="font-size: 0.9rem;" title="${escapeHtml(doc.title || 'Untitled Document')}">${escapeHtml(doc.title || 'Untitled Document')}</h6>
+                <p class="small text-muted fw-semibold mb-1 text-truncate" style="font-size: 0.75rem;" title="${escapeHtml(meta || 'Learning space')}">${escapeHtml(meta || 'Learning space')}</p>
+                <span class="small text-primary fw-bold" style="font-size: 0.75rem;">${escapeHtml(documentTypeLabel(type))}</span>
               </div>
             </div>
           </a>`;
@@ -611,7 +611,16 @@
     window.currentDashboardData = dashboard;
     const learningSpaces = dashboard.learningSpaces || [];
     const quizzes = flattenQuizzes(learningSpaces);
-    const documents = dashboard.recentDocuments || [];
+    const rawDocuments = dashboard.recentDocuments || [];
+    const documents = rawDocuments.filter(doc => {
+      const type = String(doc?.documentType || 'OTHER').toUpperCase();
+      const url = String(doc?.url || doc?.fullUrl || '').toLowerCase();
+      // Filter out Video and Youtube types
+      if (type === 'VIDEO' || type === 'YOUTUBE') return false;
+      // Filter out video URLs
+      if (/\.(mp4|webm|mov|avi|mkv)(?:$|[?#])/.test(url)) return false;
+      return true;
+    });
 
     renderProfile(dashboard);
     renderStats(learningSpaces, quizzes);
