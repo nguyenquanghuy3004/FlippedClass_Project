@@ -192,4 +192,94 @@
     pointer-events: none;
 }
 
+/* ── Node Card Header (positioning context for centered badge) ── */
+.node-card-header {
+    position: relative;
+}
+
+/* ── Centered CTA Badge ── */
+.action-cta-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    pointer-events: auto;
+}
+
+/* ── Action CTA Badge ── */
+.action-cta-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+/* Hover effect for the link card */
+.node-card:hover .action-cta-badge {
+    transform: scale(1.05);
+}
+
+.node-card:hover .action-cta-badge .cta-arrow {
+    transform: translateX(2px);
+}
+
+/* Colors based on data-type */
+.action-cta-badge[data-type="VIDEO"] {
+    background: #eef2ff;
+    color: #4f46e5;
+    border-color: #c7d2fe;
+}
+.node-card:hover .action-cta-badge[data-type="VIDEO"] {
+    background: #4f46e5;
+    color: #ffffff;
+}
+
+.action-cta-badge[data-type="DOCUMENT"] {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #a7f3d0;
+}
+.node-card:hover .action-cta-badge[data-type="DOCUMENT"] {
+    background: #059669;
+    color: #ffffff;
+}
+
+.action-cta-badge[data-type="PRACTICE"] {
+    background: #fffbeb;
+    color: #d97706;
+    border-color: #fde68a;
+}
+.node-card:hover .action-cta-badge[data-type="PRACTICE"] {
+    background: #d97706;
+    color: #ffffff;
+}
+
+.action-cta-badge[data-type="QUIZ"] {
+    background: #fdf2f8;
+    color: #db2777;
+    border-color: #fbcfe8;
+}
+.node-card:hover .action-cta-badge[data-type="QUIZ"] {
+    background: #db2777;
+    color: #ffffff;
+}
+
+/* Generic or other types */
+.action-cta-badge {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #e2e8f0;
+}
+.node-card:hover .action-cta-badge {
+    background: #475569;
+    color: #ffffff;
+}
+
+
 

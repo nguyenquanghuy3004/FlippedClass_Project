@@ -9,7 +9,8 @@
 
                     <!-- Left: icon + title -->
                     <a class="d-flex align-items-center gap-3 text-decoration-none" 
-                       th:href="${(isSupporter != null and isSupporter) ? '/lecturer/learning-nodes/' + node.id + '/preview?role=supporter' : '/lecturer/learning-nodes/' + node.id + '/preview'}">
+                       th:href="${node.nodeType == 'DOCUMENT' ? 'javascript:void(0)' : ((isSupporter != null and isSupporter) ? '/lecturer/learning-nodes/' + node.id + '/preview?role=supporter' : '/lecturer/learning-nodes/' + node.id + '/preview')}"
+                       th:style="${node.nodeType == 'DOCUMENT' ? 'cursor: default;' : ''}">
                         <!-- Icon: shape depends on type -->
                         <div class="node-icon" th:style="${node.nodeType == 'PRACTICE'} ? 'background: #1e293b; border: 1px solid #334155; box-shadow: 0 0 10px rgba(16,185,129,0.2);' : ''">
                             <i th:class="'ti fs-5 '
@@ -20,16 +21,9 @@
                                 : 'ti-book-2'))))"
                                th:style="${node.nodeType == 'PRACTICE'} ? 'color: #10b981;' : ''"></i>
                         </div>
-                        <div>
-                            <span class="fw-semibold" th:text="${node.title}"
-                                  style="font-size:0.92rem;color:#334155;letter-spacing:0.1px;transition:color 0.2s;"
-                                  onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'">Node Title</span>
-                            <!-- Type tag -->
-                            <span class="ms-2 badge rounded-pill"
-                                  th:text="${node.nodeType}"
-                                  style="font-size:0.65rem;font-weight:600;letter-spacing:0.5px;
-                                         background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;"></span>
-                        </div>
+                        <span class="fw-semibold" th:text="${node.title}"
+                              style="font-size:0.92rem;color:#334155;letter-spacing:0.1px;transition:color 0.2s;"
+                              onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'">Node Title</span>
                     </a>
 
                     <!-- Right: options menu -->
@@ -77,6 +71,19 @@
                             </li>
                         </ul>
                     </div>
+                </div>
+
+                <!-- Action CTA badge row (below header, above content) -->
+                <div class="text-center mt-2 mb-1">
+                    <span class="action-cta-badge action-cta-static" th:data-type="${node.nodeType}">
+                        <i th:class="'ti me-1 '
+                            + (${node.nodeType == 'VIDEO'}    ? 'ti-player-play'
+                            : (${node.nodeType == 'DOCUMENT'} ? 'ti-file-text'
+                            : (${node.nodeType == 'PRACTICE'} ? 'ti-code'
+                            : (${node.nodeType == 'QUIZ'}     ? 'ti-help-circle'
+                            : 'ti-book-2'))))" style="font-size: 0.75rem;"></i>
+                        <span th:text="${node.nodeType == 'VIDEO' ? 'Vào xem video' : (node.nodeType == 'DOCUMENT' ? 'Vào xem document' : (node.nodeType == 'PRACTICE' ? 'Vào làm thực hành' : (node.nodeType == 'QUIZ' ? 'Vào làm quiz' : node.nodeType)))}">Vào xem</span>
+                    </span>
                 </div>
 
                 <!-- Content area (collapsible) -->
@@ -259,13 +266,11 @@
                                     style="color:#312e81;">Lesson Type</label>
                                 <select class="form-select border-0 rounded-3" style="background:#f4f5fb;"
                                     id="editNodeType">
-                                    <option value="LESSON" th:unless="${isSupporter != null and isSupporter}">📖 Theory
-                                        Lesson</option>
+                                    <option value="LESSON" th:unless="${isSupporter != null and isSupporter}">📖 TheoryLesson</option>
                                     <option value="PRACTICE">💻 Practice Module</option>
                                     <option value="VIDEO">▶️ Video Lesson</option>
                                     <option value="DOCUMENT">📄 Document</option>
-                                    <option value="REVIEW" th:unless="${isSupporter != null and isSupporter}">🔁 Review
-                                        Session</option>
+                                    <option value="REVIEW" th:unless="${isSupporter != null and isSupporter}">🔁 ReviewSession</option>
                                 </select>
                             </div>
                             <!-- Video Section -->

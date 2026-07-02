@@ -142,14 +142,25 @@
     }
     function nodeTypeLabel(type) {
       const labels = {
-        LESSON: 'Lesson',
-        VIDEO: 'Video',
-        PRACTICE: 'Practice',
-        QUIZ: 'Quiz',
-        REVIEW: 'Review',
-        DOCUMENT: 'Document'
+        LESSON: 'Vào xem bài học',
+        VIDEO: 'Vào xem video',
+        PRACTICE: 'Vào làm thực hành',
+        QUIZ: 'Vào làm quiz',
+        REVIEW: 'Vào xem review',
+        DOCUMENT: 'Vào xem document'
       };
-      return labels[type] || type || 'Node';
+      return labels[type] || type || 'Vào xem';
+    }
+    function nodeTypeIcon(type) {
+      const icons = {
+        VIDEO: 'ti-player-play',
+        DOCUMENT: 'ti-file-text',
+        QUIZ: 'ti-help-circle',
+        PRACTICE: 'ti-code',
+        LESSON: 'ti-book-2',
+        REVIEW: 'ti-checklist'
+      };
+      return icons[type] || 'ti-book-2';
     }
     function roleLabel(role) {
       const labels = {
@@ -523,7 +534,7 @@
             <p class="node-content">${escapeHtml(node.content || 'Click to open document in new tab.')}</p>
           </div>
           <div class="node-badges">
-            <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+            <span class="soft-chip"><i class="ti ${nodeTypeIcon(node.nodeType)}"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
             <span class="soft-chip ${isLocked ? 'text-danger bg-danger-subtle' : ''}"><i class="ti ${statusIcon}"></i>${escapeHtml(statusLabel(node.status))}</span>
           </div>
           <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
@@ -540,7 +551,7 @@
           <p class="node-content">${escapeHtml(node.content || 'Click to open this node learning page.')}</p>
         </div>
         <div class="node-badges">
-          <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+          <span class="soft-chip"><i class="ti ${nodeTypeIcon(node.nodeType)}"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
           <span class="soft-chip ${isLocked ? 'text-danger bg-danger-subtle border-danger' : ''}"><i class="ti ${statusIcon}"></i>${escapeHtml(statusLabel(node.status))}</span>
         </div>
         <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>

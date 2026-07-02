@@ -799,3 +799,16 @@ body {
     justify-content: flex-start;
   }
 }
+
+/* ── Interactive soft-chip hover effects ── */
+.node-card:not([style*="opacity"]) .soft-chip:first-child {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.node-card:hover:not([style*="opacity"]) .soft-chip:first-child {
+  background: var(--fc-primary-dark);
+  color: #ffffff;
+  border-color: var(--fc-primary-dark);
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 4px 10px rgba(9, 11, 79, 0.12);
+}

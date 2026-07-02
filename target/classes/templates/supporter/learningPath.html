@@ -86,7 +86,7 @@
                                             <i class="ti ti-calendar-week me-1"></i>
                                             Week <span th:text="${iterStat.count}">1</span>
                                             &nbsp;&middot;&nbsp;
-                                            <span th:text="${path.nodes != null ? path.nodes.size() : 0}">0</span> lessons
+                                            <span th:text="${path.nodes != null ? path.nodes.?[nodeType != 'GROUP_ACTIVITY'].size() : 0}">0</span> lessons
                                         </span>
                                         <!-- Title -->
                                         <h5 class="card-title d-flex align-items-center gap-2 mt-1">
@@ -109,14 +109,16 @@
                                 <!-- Nodes area -->
                                 <div class="card-body px-4 pb-4 pt-2">
                                     <!-- Has lessons -->
-                                    <div th:if="${path.nodes != null and !path.nodes.empty}" class="nodes-container">
+                                    <div th:if="${path.nodes != null and !path.nodes.?[nodeType != 'GROUP_ACTIVITY'].empty}" class="nodes-container">
                                         <th:block th:each="node : ${path.nodes}">
-                                            <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
+                                            <th:block th:if="${node.nodeType != 'GROUP_ACTIVITY'}">
+                                                <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
+                                            </th:block>
                                         </th:block>
                                     </div>
 
                                     <!-- No lessons yet -->
-                                    <div th:if="${path.nodes == null or path.nodes.empty}" class="module-empty-box mb-3">
+                                    <div th:if="${path.nodes == null or path.nodes.?[nodeType != 'GROUP_ACTIVITY'].empty}" class="module-empty-box mb-3">
                                         <div class="module-empty-icon">
                                             <i class="ti ti-layer-difference"></i>
                                         </div>
