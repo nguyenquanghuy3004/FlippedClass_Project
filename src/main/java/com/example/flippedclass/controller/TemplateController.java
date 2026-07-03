@@ -89,10 +89,6 @@ public class TemplateController {
         return "supporter/quiz-statistics";
     }
 
-    @GetMapping("/student/dashboard")
-    public String studentDashboard() {
-        return "student/student-dashboard";
-    }
 
     @GetMapping("/student/learning-spaces")
     public String studentLearningSpaces() {

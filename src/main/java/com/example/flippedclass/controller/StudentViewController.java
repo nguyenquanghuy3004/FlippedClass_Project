@@ -1,5 +1,6 @@
 package com.example.flippedclass.controller;
 
+import com.example.flippedclass.dto.response.CourseDocumentResponse;
 import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.service.StudentDashboardService;
 import com.example.flippedclass.service.impl.UserDetailsImpl;
@@ -20,6 +21,22 @@ public class StudentViewController {
         if (user != null) {
             StudentDashboardResponse dashboard = dashboardService.getDashboard(user.getId());
             model.addAttribute("dashboard", dashboard);
+            
+            // Filter recent documents to remove videos and youtube links, matching frontend logic, and limit to 8
+            java.util.List<CourseDocumentResponse> recentDocs = dashboard.getRecentDocuments();
+            if (recentDocs != null) {
+                java.util.List<CourseDocumentResponse> filteredDocs = recentDocs.stream()
+                    .filter(doc -> {
+                        String type = doc.getDocumentType() == null ? "OTHER" : doc.getDocumentType().name();
+                        String url = (doc.getUrl() != null ? doc.getUrl() : "").toLowerCase();
+                        if ("VIDEO".equals(type) || "YOUTUBE".equals(type)) return false;
+                        if (url.matches(".*\\.(mp4|webm|mov|avi|mkv)(?:$|[?#]).*")) return false;
+                        return true;
+                    })
+                    .limit(8)
+                    .collect(java.util.stream.Collectors.toList());
+                model.addAttribute("recentDocuments", filteredDocs);
+            }
         }
         return "student/student-dashboard";
     }
