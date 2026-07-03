@@ -183,34 +183,9 @@
     return getJoinedSpaces(learningSpaces).map((space) => space.id);
   }
 
-  function renderProfile(data) {
-    const user = data.user || {};
-    const profile = data.studentProfile || {};
-    const displayName = user.fullName || user.username || 'Student';
-    const major = profile.major || 'Major not updated';
-    const yearText = profile.enrollmentYear ? `Year ${studyYear(profile.enrollmentYear)}` : 'Academic year not updated';
 
-    setText('#profileName', displayName);
-    setText('[data-greeting-name]', displayName);
-    setText('#profileSummary', `${major} - ${yearText}`);
-    setText('#profileStudentCode', profile.studentCode || '--');
-    setText('#profileClassName', profile.className || '--');
 
-    const avatar = document.querySelector('.massive-avatar');
-    if (avatar) avatar.src = user.avatarUrl || defaultAvatarUrl;
-    window.setStudentMenuUser?.(user);
-  }
 
-  function renderStats(learningSpaces, quizzes) {
-    const joinedSpaces = getJoinedSpaces(learningSpaces);
-    const completedCount = quizzes.filter((quiz) => quiz.isCompleted).length;
-    const pendingCount = quizzes.length - completedCount;
-
-    setText('#learningSpaceCount', joinedSpaces.length);
-    setText('#completedQuizCount', completedCount);
-    setText('#pendingQuizCount', pendingCount);
-    setText('#dashboardSummary', `You are enrolled in ${joinedSpaces.length} classes and have completed ${completedCount}/${quizzes.length} quizzes.`);
-  }
 
   function emptyState(icon, title, message) {
     return `
@@ -622,8 +597,7 @@
       return true;
     });
 
-    renderProfile(dashboard);
-    renderStats(learningSpaces, quizzes);
+
     renderLearningSpaces(learningSpaces);
     renderQuizAccordion(learningSpaces);
 
