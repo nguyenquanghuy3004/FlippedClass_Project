@@ -22,6 +22,14 @@ public class StudentViewController {
             StudentDashboardResponse dashboard = dashboardService.getDashboard(user.getId());
             model.addAttribute("dashboard", dashboard);
             
+            java.util.List<com.example.flippedclass.dto.response.DashboardLearningSpaceResponse> joinedSpaces = new java.util.ArrayList<>();
+            if (dashboard.getLearningSpaces() != null) {
+                joinedSpaces = dashboard.getLearningSpaces().stream()
+                    .filter(space -> !"ARCHIVED".equals(space.getStatus()) && (space.isJoined() || "STUDENT".equals(space.getMemberRole())))
+                    .collect(java.util.stream.Collectors.toList());
+            }
+            model.addAttribute("joinedSpaces", joinedSpaces);
+            
             // Filter recent documents to remove videos and youtube links, matching frontend logic, and limit to 8
             java.util.List<CourseDocumentResponse> recentDocs = dashboard.getRecentDocuments();
             if (recentDocs != null) {
