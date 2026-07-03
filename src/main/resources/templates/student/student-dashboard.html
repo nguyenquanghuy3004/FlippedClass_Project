@@ -27,13 +27,54 @@
           </a>
         </div>
 
-        <div class="row g-3" id="learningSpaceList">
-          <div class="col-12">
+        <div class="row g-3" id="learningSpaceList" th:with="joinedSpaces=${dashboard != null ? dashboard.learningSpaces.?[joined] : {}}">
+          <div class="col-12" th:if="${#lists.isEmpty(joinedSpaces)}">
             <div class="bento-card text-center text-muted py-4">
-              <div class="spinner-border text-primary mb-3" role="status"></div>
-              <p class="fc-body mb-0">Loading learning spaces...</p>
+              <i class="ti ti-school-off text-primary" style="font-size: 2.6rem;"></i>
+              <h5 class="fc-card-title text-dark mt-3 mb-2">No Classes Yet</h5>
+              <p class="fc-body mb-0">Enter a class code on My Classes to join a learning space.</p>
             </div>
           </div>
+          <th:block th:unless="${#lists.isEmpty(joinedSpaces)}">
+            <div class="col-md-6 mb-4 learning-space-item" th:each="space, iterStat : ${joinedSpaces}" 
+                 th:with="banners=${ {'banner-green', 'banner-blue', 'banner-darkblue', 'banner-red', 'banner-gray'} },
+                          avatars=${ {'avatar-blue', 'avatar-orange', 'avatar-green', 'avatar-red'} },
+                          bannerClass=${banners[iterStat.index % 5]},
+                          avatarClass=${avatars[iterStat.index % 4]}">
+              <div class="classroom-card h-100">
+                  <div class="card-banner" th:classappend="${bannerClass}">
+                      <div class="banner-pattern"></div>
+                      <a th:href="@{/student/learning-spaces(spaceId=${space.id}, focus='roadmap')}" class="card-title-link">
+                          <h2 class="course-title" th:text="${space.name ?: 'Untitled Learning Space'}">Space Name</h2>
+                          <div class="course-subtitle" th:text="${space.description ?: 'Sample Space'}">Sample Space</div>
+                      </a>
+                      <div class="card-options-top">
+                          <i class="ti ti-dots-vertical"></i>
+                      </div>
+                  </div>
+
+                  <div class="card-avatar" th:classappend="${avatarClass}" th:text="${#strings.substring(space.name ?: 'S', 0, 1).toUpperCase()}">
+                      S
+                  </div>
+
+                  <div class="card-body-content">
+                  </div>
+
+                  <div class="card-footer">
+                      <div class="d-flex align-items-center gap-1">
+                          <span class="status-indicator" th:classappend="'status-' + ${space.status ?: 'ACTIVE'}" title="Status"></span>
+                          <span class="visibility-text text-muted" style="font-size: 0.75rem; font-weight: 600;" th:text="${space.visibility ?: 'PUBLIC'}">PUBLIC</span>
+                      </div>
+                      <div class="d-flex gap-1">
+                          <div class="footer-icon"><i class="ti ti-share"></i></div>
+                          <div class="footer-icon"><i class="ti ti-id-badge-2"></i></div>
+                          <div class="footer-icon"><i class="ti ti-folder"></i></div>
+                          <div class="footer-icon"><i class="ti ti-dots-vertical"></i></div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </th:block>
         </div>
 
         <!-- PUBLIC SPACES SECTION -->
@@ -199,76 +240,26 @@
   let currentLearningSpacePage = 1;
   const SPACES_PER_PAGE = 4;
 
-  function renderLearningSpaces(learningSpaces) {
-    const list = document.getElementById('learningSpaceList');
-    if (!list) return;
-
-    const joinedSpaces = getJoinedSpaces(learningSpaces);
-    if (!joinedSpaces.length) {
-      list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'No Classes Yet', 'Enter a class code on My Classes to join a learning space.')}</div>`;
-      renderLearningSpacePagination(0);
-      return;
-    }
-
-    const totalPages = Math.ceil(joinedSpaces.length / SPACES_PER_PAGE);
-    if (currentLearningSpacePage > totalPages) currentLearningSpacePage = totalPages;
-    if (currentLearningSpacePage < 1) currentLearningSpacePage = 1;
-
-    const startIndex = (currentLearningSpacePage - 1) * SPACES_PER_PAGE;
-    const paginatedSpaces = joinedSpaces.slice(startIndex, startIndex + SPACES_PER_PAGE);
-
-    const banners = ['banner-green', 'banner-blue', 'banner-darkblue', 'banner-red', 'banner-gray'];
-    const avatars = ['avatar-blue', 'avatar-orange', 'avatar-green', 'avatar-red'];
-
-    list.innerHTML = paginatedSpaces.map((space, index) => {
-      const globalIndex = startIndex + index;
-      const bannerClass = banners[globalIndex % banners.length];
-      const avatarClass = avatars[globalIndex % avatars.length];
-      const firstLetter = space.name ? space.name.charAt(0).toUpperCase() : 'S';
+  function updateLearningSpacePagination() {
+      const items = document.querySelectorAll('.learning-space-item');
+      if (items.length === 0) {
+          renderLearningSpacePagination(0);
+          return;
+      }
       
-      const roadmapUrl = space.id
-              ? `/student/learning-spaces?spaceId=${encodeURIComponent(space.id)}&focus=roadmap`
-              : '/student/learning-spaces';
+      const totalPages = Math.ceil(items.length / SPACES_PER_PAGE);
+      if (currentLearningSpacePage > totalPages) currentLearningSpacePage = totalPages;
+      if (currentLearningSpacePage < 1) currentLearningSpacePage = 1;
 
-      return `
-          <div class="col-md-6 mb-4">
-            <div class="classroom-card h-100">
-                <div class="card-banner ${bannerClass}">
-                    <div class="banner-pattern"></div>
-                    <a href="${roadmapUrl}" class="card-title-link">
-                        <h2 class="course-title">${escapeHtml(space.name || 'Untitled Learning Space')}</h2>
-                        <div class="course-subtitle">${escapeHtml(space.description || 'Sample Space')}</div>
-                    </a>
-                    <div class="card-options-top">
-                        <i class="ti ti-dots-vertical"></i>
-                    </div>
-                </div>
-
-                <div class="card-avatar ${avatarClass}">
-                    ${firstLetter}
-                </div>
-
-                <div class="card-body-content">
-                    <!-- Student specific body content could go here, keeping it clean per design -->
-                </div>
-
-                <div class="card-footer">
-                    <div class="d-flex align-items-center gap-1">
-                        <span class="status-indicator status-${escapeHtml(space.status || 'ACTIVE')}" title="Status"></span>
-                        <span class="visibility-text text-muted" style="font-size: 0.75rem; font-weight: 600;">${escapeHtml(space.visibility || 'PUBLIC')}</span>
-                    </div>
-                    <div class="d-flex gap-1">
-                        <div class="footer-icon"><i class="ti ti-share"></i></div>
-                        <div class="footer-icon"><i class="ti ti-id-badge-2"></i></div>
-                        <div class="footer-icon"><i class="ti ti-folder"></i></div>
-                        <div class="footer-icon"><i class="ti ti-dots-vertical"></i></div>
-                    </div>
-                </div>
-            </div>
-          </div>`;
-    }).join('');
-
-    renderLearningSpacePagination(totalPages);
+      items.forEach((item, index) => {
+          const page = Math.floor(index / SPACES_PER_PAGE) + 1;
+          if (page === currentLearningSpacePage) {
+              item.style.display = '';
+          } else {
+              item.style.display = 'none';
+          }
+      });
+      renderLearningSpacePagination(totalPages);
   }
 
   function renderLearningSpacePagination(totalPages) {
@@ -309,9 +300,7 @@
   window.changeLearningSpacePage = function(event, page) {
       event.preventDefault();
       currentLearningSpacePage = page;
-      if (window.currentDashboardData && window.currentDashboardData.learningSpaces) {
-          renderLearningSpaces(window.currentDashboardData.learningSpaces);
-      }
+      updateLearningSpacePagination();
   };
 
   function quizAction(quiz) {
@@ -598,7 +587,7 @@
     });
 
 
-    renderLearningSpaces(learningSpaces);
+    updateLearningSpacePagination();
     renderQuizAccordion(learningSpaces);
 
     renderRecentDocuments(documents);
