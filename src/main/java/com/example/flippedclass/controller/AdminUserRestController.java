@@ -46,4 +46,14 @@ public class AdminUserRestController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{id}/reset-password")
+    public ResponseEntity<java.util.Map<String, String>> resetPassword(@PathVariable Long id, @RequestBody java.util.Map<String, String> payload) {
+        String newPassword = payload.get("newPassword");
+        if (newPassword == null || newPassword.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        adminUserService.resetUserPassword(id, newPassword);
+        return ResponseEntity.ok(java.util.Map.of("message", "Success"));
+    }
+
 }

@@ -1,7 +1,7 @@
 package com.example.flippedclass.controller;
 
 import com.example.flippedclass.dto.request.HeartbeatRequest;
-import com.example.flippedclass.security.CustomUserDetails;
+import com.example.flippedclass.service.impl.UserDetailsImpl;
 import com.example.flippedclass.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class HeartbeatController {
     @PostMapping("/heartbeat")
     public ResponseEntity<Void> heartbeat(
             @Valid @RequestBody HeartbeatRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         
         if (userDetails != null && userDetails.getId() != null) {
             userService.updateActiveTime(userDetails.getId(), request.getActiveSeconds());

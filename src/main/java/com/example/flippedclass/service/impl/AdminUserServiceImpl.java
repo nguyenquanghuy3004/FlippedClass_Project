@@ -130,4 +130,13 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .createdAt(user.getCreatedAt())
                 .build();
     }
+
+    @Override
+    @Transactional
+    public void resetUserPassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
 }
