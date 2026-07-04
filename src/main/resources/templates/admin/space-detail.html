@@ -65,7 +65,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm bg-success bg-opacity-10 h-100" style="cursor: pointer; transition: transform 0.2s;" onclick="scrollToRoadmap()" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Click to view paths">
+                    <div class="card border-0 shadow-sm bg-success bg-opacity-10 h-100" style="cursor: pointer; transition: transform 0.2s;" onclick="viewPaths()" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Click to view paths">
                         <div class="card-body p-4 text-center">
                             <div class="icon-shape icon-lg bg-success text-white rounded-circle mb-3 mx-auto">
                                 <i class="ti ti-map-2 fs-3"></i>
@@ -76,7 +76,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm bg-info bg-opacity-10 h-100" style="cursor: pointer; transition: transform 0.2s;" onclick="scrollToRoadmap()" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Click to view lessons">
+                    <div class="card border-0 shadow-sm bg-info bg-opacity-10 h-100" style="cursor: pointer; transition: transform 0.2s;" onclick="viewLessons()" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Click to view lessons">
                         <div class="card-body p-4 text-center">
                             <div class="icon-shape icon-lg bg-info text-white rounded-circle mb-3 mx-auto">
                                 <i class="ti ti-book-2 fs-3"></i>
@@ -132,10 +132,44 @@
                 </div>
                 <div class="modal-body p-0">
                     <div id="members-container" class="list-group list-group-flush">
-                        <div class="text-center py-4 text-muted">
-                            <div class="spinner-border text-primary mb-2" role="status"></div>
-                            <p class="mb-0">Loading members...</p>
-                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paths Modal -->
+    <div class="modal fade" id="pathsModal" tabindex="-1" aria-labelledby="pathsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white border-bottom-0">
+                    <h5 class="modal-title" id="pathsModalLabel"><i class="ti ti-map-2 me-2"></i>Learning Paths</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="paths-container" class="list-group list-group-flush">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lessons Modal -->
+    <div class="modal fade" id="lessonsModal" tabindex="-1" aria-labelledby="lessonsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-info text-white border-bottom-0">
+                    <h5 class="modal-title" id="lessonsModalLabel"><i class="ti ti-book-2 me-2"></i>Total Lessons</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="lessons-container" class="list-group list-group-flush">
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-top-0">
@@ -211,11 +245,14 @@
             });
         }
 
+        let cachedRoadmap = null;
+
         function loadSpaceRoadmap() {
             $.ajax({
                 url: `/api/learning-spaces/${spaceId}/learning-paths`,
                 type: 'GET',
                 success: function(paths) {
+                    cachedRoadmap = paths;
                     let html = '';
                     if (!paths || paths.length === 0) {
                         html = '<div class="text-center text-muted py-4"><i class="ti ti-route-off fs-1 mb-2 d-block text-secondary"></i>No learning paths found in this space.</div>';
@@ -288,6 +325,71 @@
 
         function scrollToRoadmap() {
             document.getElementById('roadmap-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function viewPaths() {
+            const pathsModal = new bootstrap.Modal(document.getElementById('pathsModal'));
+            pathsModal.show();
+            
+            let html = '';
+            if (!cachedRoadmap || cachedRoadmap.length === 0) {
+                html = '<div class="text-center py-4 text-muted">No paths found.</div>';
+            } else {
+                cachedRoadmap.forEach((path, index) => {
+                    html += `
+                        <div class="list-group-item py-3">
+                            <h6 class="mb-1 fw-bold text-success"><i class="ti ti-map-2 me-2"></i>${path.title}</h6>
+                            <p class="mb-1 small text-muted">${path.description || 'No description'}</p>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">${path.nodes ? path.nodes.length : 0} lessons</span>
+                        </div>
+                    `;
+                });
+            }
+            $('#paths-container').html(html);
+        }
+
+        function viewLessons() {
+            const lessonsModal = new bootstrap.Modal(document.getElementById('lessonsModal'));
+            lessonsModal.show();
+            
+            let html = '';
+            let allNodes = [];
+            
+            if (cachedRoadmap) {
+                cachedRoadmap.forEach(path => {
+                    if (path.nodes) {
+                        path.nodes.forEach(node => {
+                            allNodes.push({ ...node, pathTitle: path.title });
+                        });
+                    }
+                });
+            }
+            
+            if (allNodes.length === 0) {
+                html = '<div class="text-center py-4 text-muted">No lessons found.</div>';
+            } else {
+                allNodes.forEach((node) => {
+                    let nodeIcon = 'ti-file-description';
+                    let nodeTypeClass = 'bg-secondary';
+                    if(node.nodeType === 'VIDEO') { nodeIcon = 'ti-video'; nodeTypeClass = 'bg-danger'; }
+                    else if(node.nodeType === 'QUIZ') { nodeIcon = 'ti-help'; nodeTypeClass = 'bg-warning'; }
+                    else if(node.nodeType === 'DOCUMENT') { nodeIcon = 'ti-file-text'; nodeTypeClass = 'bg-info'; }
+                    
+                    html += `
+                        <div class="list-group-item py-3 d-flex align-items-start">
+                            <div class="bg-light rounded p-2 me-3 text-info"><i class="ti ${nodeIcon} fs-5"></i></div>
+                            <div>
+                                <h6 class="mb-1 fw-bold text-dark">${node.title}</h6>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <span class="badge ${nodeTypeClass} bg-opacity-10 text-${nodeTypeClass.replace('bg-', '')} fw-normal small">${node.nodeType || 'LESSON'}</span>
+                                    <small class="text-muted"><i class="ti ti-map-2 me-1"></i>${node.pathTitle}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            $('#lessons-container').html(html);
         }
 
         function viewMembers() {

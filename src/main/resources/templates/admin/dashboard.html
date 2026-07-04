@@ -284,7 +284,7 @@
 
                     let matches = true;
                     if (keyword) {
-                        const content = (activity.actionType + ' ' + activity.description).toLowerCase();
+                        const content = (activity.userEmail + ' ' + activity.actionType + ' ' + activity.description).toLowerCase();
                         if (!content.includes(keyword)) matches = false;
                     }
 
@@ -320,7 +320,7 @@
                 <tr id="act-${activity.id}" class="${isNew ? 'highlight-new' : ''}">
                     <td class="text-muted small">${date}</td>
                     <td><span class="badge bg-primary bg-opacity-10 text-primary">${activity.actionType}</span></td>
-                    <td>${activity.description}</td>
+                    <td><strong>${activity.userEmail || 'User'}</strong>: ${activity.description}</td>
                 </tr>
             `;
 

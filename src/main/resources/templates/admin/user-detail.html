@@ -125,6 +125,9 @@
                         <button id="btn-toggle-status" class="btn btn-warning w-100 mb-3" onclick="toggleStatus()">
                             Toggle Lock Status
                         </button>
+                        <button class="btn btn-danger w-100" onclick="resetPassword()">
+                            Reset Password
+                        </button>
                     </div>
                 </div>
             </div>
@@ -176,6 +179,25 @@
                     success: function() {
                         alert('Status updated successfully');
                         loadUserDetail();
+                    }
+                });
+            }
+
+            function resetPassword() {
+                const id = $('#userId').val();
+                const newPassword = prompt("Enter new password for this user:");
+                if (!newPassword || newPassword.trim() === "") return;
+                
+                $.ajax({
+                    url: `/api/admin/users/${id}/reset-password`,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ newPassword: newPassword }),
+                    success: function() {
+                        alert("Password has been reset successfully!");
+                    },
+                    error: function(xhr) {
+                        alert("Failed to reset password. " + (xhr.responseText || ""));
                     }
                 });
             }

@@ -34,18 +34,21 @@ public class AdminUserRestController {
         return ResponseEntity.ok(adminUserService.getUserDetail(id));
     }
 
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "LOCK_USER", description = "'Đã khóa tài khoản user có ID: ' + #id")
     @PostMapping("/{id}/lock")
     public ResponseEntity<Void> lockUser(@PathVariable Long id) {
         adminUserService.lockUser(id);
         return ResponseEntity.ok().build();
     }
 
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "UNLOCK_USER", description = "'Đã mở khóa tài khoản user có ID: ' + #id")
     @PostMapping("/{id}/unlock")
     public ResponseEntity<Void> unlockUser(@PathVariable Long id) {
         adminUserService.unlockUser(id);
         return ResponseEntity.ok().build();
     }
 
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "RESET_PASSWORD", description = "'Đã reset mật khẩu cho user có ID: ' + #id")
     @PostMapping("/{id}/reset-password")
     public ResponseEntity<java.util.Map<String, String>> resetPassword(@PathVariable Long id, @RequestBody java.util.Map<String, String> payload) {
         String newPassword = payload.get("newPassword");
