@@ -58,6 +58,29 @@
   </div>
 </main>
 
+<!-- Modal Share Solution -->
+<div class="modal fade" id="shareSolutionModal" tabindex="-1" aria-labelledby="shareSolutionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+      <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
+        <h5 class="modal-title" id="shareSolutionModalLabel" style="font-weight: 600;"><i class="ti ti-confetti text-warning"></i> Congratulations! 🎉</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p style="color: #475569; font-size: 0.95rem;">You have successfully passed all test cases! Would you like to share your solution with the class to help others learn?</p>
+        <div class="mb-3 mt-4">
+          <label for="shareSolutionTitle" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Title / Description</label>
+          <input type="text" class="form-control" id="shareSolutionTitle" placeholder="E.g., O(n) solution using HashMap" style="border-radius: 6px;">
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="font-weight: 500;">Maybe Later</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmShareSolution" style="font-weight: 500; display: flex; align-items: center; gap: 6px;"><i class="ti ti-share"></i> Share My Solution</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <th:block layout:fragment="scripts">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
@@ -560,96 +583,185 @@
         pageRoot.className = 'lesson-layout practice-layout';
         pageRoot.style.padding = '0';
         pageRoot.style.gap = '0';
-        pageRoot.style.background = '#f8fafc';
-
+        pageRoot.style.background = '#000000';
         setTimeout(() => {
           initMonaco(node.starterCode);
         }, 100);
         pageRoot.innerHTML = `
         <style>
-          .practice-layout { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr) !important; align-items: stretch !important; height: calc(100vh - 65px); }
-          .practice-left-col { display: flex; flex-direction: column; gap: 1rem; max-height: 100%; overflow-y: auto; padding: 16px 24px; }
-          .practice-left-col::-webkit-scrollbar { width: 6px; }
-          .practice-left-col::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-          .practice-right-col { height: 100%; display: flex; flex-direction: column; overflow: hidden; border-left: 1px solid #e2e8f0; }
+          /* Full Dark Theme LeetCode style CSS */
+          .practice-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; align-items: stretch !important; height: calc(100vh - 65px); gap: 8px !important; padding: 8px !important; background: #000000 !important; }
+          
+          /* Common Panes */
+          .lc-pane { background: #282828; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #333; }
+          .lc-tabs-header { display: flex; gap: 16px; padding: 0 16px; background: #333333; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #111; }
+          .lc-tab { padding: 12px 4px; font-size: 0.85rem; font-weight: 500; color: #a1a1aa; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
+          .lc-tab:hover { color: #f4f4f5; background: rgba(255,255,255,0.05); }
+          .lc-tab.active { color: #fff; border-bottom-color: #2cbb5d; background: #282828; }
+          .lc-tab i { margin-right: 6px; font-size: 1rem; vertical-align: middle; }
+          
+          /* Content Areas */
+          .lc-content { flex: 1; overflow-y: auto; padding: 20px; color: #d4d4d8; font-size: 0.95rem; line-height: 1.6; }
+          .lc-content h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; color: #fff; }
+          
+          /* Markdown Preview Styles */
+          .markdown-body { color: #d4d4d8; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+          .markdown-body h1, .markdown-body h2 { border-bottom: 1px solid #3f3f46; padding-bottom: 0.3em; }
+          .markdown-body code { background-color: rgba(255,255,255,0.1); padding: 0.2em 0.4em; border-radius: 6px; font-family: monospace; }
+          .markdown-body pre { background-color: #1e1e1e !important; padding: 16px; border-radius: 6px; overflow: auto; border: 1px solid #3f3f46 !important; }
+          
+          /* Right Pane Wrapper */
+          .lc-right-split { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
+          
+          /* Editor Actions */
+          .lc-editor-card { background: #282828; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 0; border: 1px solid #333; }
+          .lc-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #333333; border-bottom: 1px solid #111; position: relative; }
+          .lc-toolbar-left { display: flex; align-items: center; gap: 12px; }
+          .lc-lang-select { background: #404040; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; color: #fff; cursor: pointer; }
+          
+          /* Top Central Run/Submit buttons */
+          .lc-toolbar-center { display: flex; align-items: center; gap: 8px; position: absolute; left: 50%; transform: translateX(-50%); }
+          .btn-lc-run { background: #3f3f46; color: #fff; border: none; padding: 5px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+          .btn-lc-run:hover { background: #52525b; }
+          .btn-lc-submit { background: #2cbb5d; color: #fff; border: none; padding: 5px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+          .btn-lc-submit:hover { background: #23994c; }
+          
+          /* Terminal Bottom Bar */
+          .lc-terminal-card { background: #282828; border-radius: 8px; display: flex; flex-direction: column; height: 35vh; min-height: 250px; border: 1px solid #333; overflow: hidden; transition: height 0.3s ease, min-height 0.3s ease; }
+          .lc-terminal-card.collapsed { height: 40px !important; min-height: 40px !important; }
+          .lc-term-tabs { display: flex; padding: 0 16px; background: #333333; border-bottom: 1px solid #111; justify-content: space-between; align-items: center; }
+          .lc-term-tab { padding: 8px 12px; font-size: 0.8rem; font-weight: 500; color: #a1a1aa; border: none; background: transparent; cursor: pointer; border-bottom: 2px solid transparent; }
+          .lc-term-tab.active { color: #fff; border-bottom-color: #fff; }
+          .lc-term-toggle { background: transparent; border: none; color: #a1a1aa; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
+          .lc-term-toggle:hover { background: #52525b; color: #fff; }
+          
+          /* Input/Output areas */
+          .lc-io-box { flex: 1; display: flex; flex-direction: column; padding: 12px; }
+          .lc-io-label { font-size: 0.8rem; font-weight: 600; color: #a1a1aa; margin-bottom: 6px; }
+          .lc-io-input { flex: 1; background: #1e1e1e; border: 1px solid #3f3f46; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #d4d4d8; outline: none; resize: none; }
+          .lc-io-output { flex: 1; background: #1e1e1e; border: 1px solid #3f3f46; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #10b981; overflow-y: auto; margin: 0; white-space: pre-wrap; }
         </style>
         
-        <section class="player-column practice-left-col">
-          <section class="node-hero" style="margin-bottom: 0;">
-            <span class="eyebrow" style="color: var(--fc-accent);"><i class="ti ti-code"></i> Coding Practice</span>
-            <h1 class="node-title">${escapeHtml(node.title || 'Practice Problem')}</h1>
-            <div class="meta-row mt-2">
-              <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-              <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
-            </div>
-          </section>
-
-          <section class="content-card" style="margin-top: 0; flex: 1;">
-            <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-              <i class="ti ti-file-description" style="color: var(--fc-primary);"></i> Problem Description
-            </h2>
-            <div style="font-size: 0.95rem; line-height: 1.6; color: #334155;">
-              ${node.content ? node.content : '<p class="text-muted">No specific problem description provided.</p>'}
-            </div>
-          </section>
+        <section class="lc-pane">
+          <div class="lc-tabs-header">
+             <div class="lc-tab active" data-target="lc-desc-pane"><i class="ti ti-file-description" style="color: #007bff;"></i> Description</div>
+             <div class="lc-tab" data-target="lc-solution-pane"><i class="ti ti-flask" style="color: #facc15;"></i> Solution</div>
+             <div class="lc-tab" data-target="lc-community-pane"><i class="ti ti-users" style="color: #a855f7;"></i> Community</div>
+          </div>
+          
+          <div id="lc-desc-pane" class="lc-content lc-pane-content" style="display: block;">
+              <h1>${escapeHtml(node.title || 'Practice Problem')}</h1>
+              <div id="markdownPreviewContainer" class="markdown-body" style="font-size: 0.95rem; line-height: 1.6;">
+                  <div style="text-align: center; padding: 40px;"><i class="ti ti-loader-2 ti-spin"></i> Loading description...</div>
+              </div>
+          </div>
+          
+          <div id="lc-solution-pane" class="lc-content lc-pane-content" style="display: none;">
+             <div id="solutionLockScreen" class="text-center" style="padding-top: 40px; color: #64748b;">
+                <i class="ti ti-lock" style="font-size: 3rem; opacity: 0.5;"></i>
+                <h4 class="mt-3">Solution Locked</h4>
+                <p>You must get an <strong>Accepted</strong> submission to view the instructor's solution.</p>
+             </div>
+             <div id="solutionContent" style="display: none;">
+                <!-- Unlocked content goes here -->
+             </div>
+          </div>
+          
+          <div id="lc-community-pane" class="lc-content lc-pane-content" style="display: none;">
+             <div id="communityLockScreen" class="text-center" style="padding-top: 40px; color: #64748b;">
+                <i class="ti ti-lock" style="font-size: 3rem; opacity: 0.5;"></i>
+                <h4 class="mt-3">Community Locked</h4>
+                <p>You must get an <strong>Accepted</strong> submission to view and share community solutions.</p>
+             </div>
+             <div id="communityContent" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f0f0f0; padding-bottom: 12px;">
+                    <h3 style="margin: 0; color: #334155; font-size: 1.2rem;"><i class="ti ti-world"></i> Community Solutions</h3>
+                    <button class="btn btn-sm" style="background: #a855f7; color: white; border: none; font-weight: 600; border-radius: 6px; padding: 6px 12px;" data-bs-toggle="modal" data-bs-target="#shareSolutionModal"><i class="ti ti-share"></i> Share Solution</button>
+                </div>
+                <div id="sharedSolutionsList">
+                    <div class="text-center text-muted" style="padding: 20px;"><i class="ti ti-loader-2 ti-spin"></i> Loading community solutions...</div>
+                </div>
+             </div>
+          </div>
         </section>
 
-        <aside class="side-column practice-right-col" style="margin: 0; padding: 0;">
-          <section class="content-card" style="margin: 0; background-color: #1e1e1e; border-left: 1px solid #333; height: 100%; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-radius: 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #2d2d2d; border-bottom: 1px solid #444;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <i class="ti ti-brand-java" style="color: #ed8b00; font-size: 1.3rem;"></i>
-                        <span style="color: #fff; font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">Main.java</span>
+        <!-- Cột Phải: Online IDE & Terminal -->
+        <aside class="lc-right-split">
+          
+          <!-- Code Editor Area -->
+          <div class="lc-editor-card">
+            <!-- Toolbar -->
+            <div class="lc-toolbar">
+                <div class="lc-toolbar-left">
+                    <div style="display:flex;align-items:center;gap:6px;color:#2cbb5d;font-size:0.85rem;font-weight:600;">
+                        <i class="ti ti-code"></i> Code
                     </div>
+                    <select class="lc-lang-select">
+                        <option>Java</option>
+                    </select>
+                    <span style="font-size: 0.8rem; color: #8c8c8c; margin-left: 8px;">Auto</span>
                 </div>
+                
+                <div class="lc-toolbar-center">
+                    <button id="btnRunCode" class="btn-lc-run">
+                        <i class="ti ti-player-play-filled"></i> Run
+                    </button>
+                    <button id="btnSubmitCode" class="btn-lc-submit">
+                        <i class="ti ti-cloud-upload"></i> Submit
+                    </button>
+                </div>
+                
+                <div style="display:flex; gap: 8px; color: #8c8c8c; cursor:pointer;">
+                    <i class="ti ti-settings"></i>
+                    <i class="ti ti-maximize"></i>
+                </div>
+            </div>
             
             <div id="editor" style="flex: 1; width: 100%; min-height: 300px;"></div>
-            
-            <div style="border-top: 1px solid #444; background: #000; height: 40vh; min-height: 250px; display: flex; flex-direction: column;">
-                <div style="padding: 0; background: #1a1a1a; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between;">
-                    <ul class="nav nav-tabs border-0" role="tablist" style="margin: 0;">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="console-tab" data-bs-toggle="tab" data-bs-target="#console-pane" type="button" role="tab" style="background: transparent; color: #a3a3a3; border: none; border-bottom: 2px solid transparent; padding: 8px 16px; font-weight: 500; font-size: 0.85rem;"><i class="ti ti-terminal text-primary"></i> Console</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="test-result-tab" data-bs-toggle="tab" data-bs-target="#test-result-pane" type="button" role="tab" style="background: transparent; color: #a3a3a3; border: none; border-bottom: 2px solid transparent; padding: 8px 16px; font-weight: 500; font-size: 0.85rem;"><i class="ti ti-check text-success"></i> Test Results</button>
-                        </li>
-                    </ul>
-                    <div style="display: flex; gap: 8px; padding-right: 12px;">
-                        <button id="btnRunCode" class="btn btn-secondary btn-sm" style="background-color: #475569; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; font-size: 0.8rem;">
-                            <i class="ti ti-player-play-filled" style="font-size: 0.8rem;"></i> Run Code
-                        </button>
-                        <button id="btnSubmitCode" class="btn btn-success btn-sm" style="background-color: #10b981; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                            <i class="ti ti-cloud-upload" style="font-size: 0.8rem;"></i> Submit Code
-                        </button>
+          </div>
+          
+          <!-- Terminal & Test Results -->
+          <div class="lc-terminal-card" id="terminalCard">
+             <div class="lc-term-tabs" role="tablist">
+                <div style="display: flex; gap: 16px;">
+                    <button class="lc-term-tab active" id="console-tab" data-bs-toggle="tab" data-bs-target="#console-pane" type="button" role="tab">
+                        <i class="ti ti-square-check text-success"></i> Testcase
+                    </button>
+                    <button class="lc-term-tab" id="test-result-tab" data-bs-toggle="tab" data-bs-target="#test-result-pane" type="button" role="tab">
+                        <i class="ti ti-terminal text-primary"></i> Test Result
+                    </button>
+                </div>
+                <button class="lc-term-toggle" id="btnToggleTerminal" title="Toggle Terminal">
+                    <i class="ti ti-chevron-down" id="terminalToggleIcon" style="font-size: 1.1rem;"></i>
+                </button>
+             </div>
+             
+             <div class="tab-content" id="terminalContent" style="flex: 1; overflow: hidden; display: flex;">
+                <!-- CONSOLE PANE -->
+                <div class="tab-pane fade show active" id="console-pane" role="tabpanel" style="flex: 1; padding: 0;">
+                    <div style="display: flex; height: 100%;">
+                        <div class="lc-io-box">
+                            <div class="lc-io-label">Custom Input (stdin)</div>
+                            <textarea id="customInput" class="lc-io-input" placeholder="Enter standard input to test..."></textarea>
+                        </div>
+                        <div class="lc-io-box">
+                            <div class="lc-io-label">Output</div>
+                            <pre id="terminalOutput" class="lc-io-output">No commands run yet.</pre>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="tab-content" style="flex: 1; overflow: hidden;">
-                    <div class="tab-pane fade show active" id="console-pane" role="tabpanel" style="height: 100%;">
-                        <div style="display: flex; height: 100%; gap: 8px; padding: 8px;">
-                            <div style="flex: 1; display: flex; flex-direction: column;">
-                                <label style="color: #aaa; font-size: 0.75rem; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;">Custom Input (stdin)</label>
-                                <textarea id="customInput" style="flex: 1; background: #1e1e1e; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 8px; border: 1px solid #333; border-radius: 4px; resize: none; outline: none;" placeholder="Nhập standard input để test..."></textarea>
-                            </div>
-                            <div style="flex: 2; display: flex; flex-direction: column;">
-                                <label style="color: #aaa; font-size: 0.75rem; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;">Output</label>
-                                <pre id="terminalOutput" style="flex: 1; background-color: #000; color: #00ff00; padding: 8px; margin: 0; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border: 1px solid #333; border-radius: 4px;">> Sẵn sàng chạy code...</pre>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tab-pane fade" id="test-result-pane" role="tabpanel" style="height: 100%; overflow-y: auto; padding: 12px; background: #1e1e1e;">
-                        <div id="testResultContainer">
-                            <div class="text-center text-muted" style="padding-top: 40px;">
-                                <i class="ti ti-cloud-upload" style="font-size: 2rem; opacity: 0.5;"></i>
-                                <p class="mt-2">Ấn <b>Submit Code</b> để chấm điểm tự động</p>
-                            </div>
+                <!-- TEST RESULTS PANE -->
+                <div class="tab-pane fade" id="test-result-pane" role="tabpanel" style="flex: 1; overflow-y: auto;">
+                    <div id="testResultContainer" style="padding: 20px;">
+                        <div class="text-center" style="color: #8c8c8c; padding-top: 40px;">
+                            <i class="ti ti-cloud-upload" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                            <p class="mt-2">Run or Submit code to see results</p>
                         </div>
                     </div>
                 </div>
-            </div>
-          </section>
+             </div>
+          </div>
         </aside>
       `;
       } else {
@@ -676,7 +788,6 @@
             <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
           </section>
 
-          <!-- START: LESSON SUMMARY UI -->
           <section class="summary-card" style="margin-top: 1.5rem;">
             <div class="summary-card-header">
               <h2 class="summary-title">
@@ -782,8 +893,33 @@
         const consoleTab = new bootstrap.Tab(document.getElementById('console-tab'));
         const testResultTab = new bootstrap.Tab(document.getElementById('test-result-tab'));
 
+        const terminalCard = document.getElementById('terminalCard');
+        const btnToggleTerminal = document.getElementById('btnToggleTerminal');
+        const terminalToggleIcon = document.getElementById('terminalToggleIcon');
+
+        if (btnToggleTerminal) {
+          btnToggleTerminal.addEventListener('click', function () {
+            terminalCard.classList.toggle('collapsed');
+            if (terminalCard.classList.contains('collapsed')) {
+              terminalToggleIcon.classList.replace('ti-chevron-down', 'ti-chevron-up');
+            } else {
+              terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
+            }
+            setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
+          });
+        }
+
+        function expandTerminal() {
+          if (terminalCard && terminalCard.classList.contains('collapsed')) {
+            terminalCard.classList.remove('collapsed');
+            terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
+            setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
+          }
+        }
+
         if (btnRunCode) {
           btnRunCode.addEventListener('click', function () {
+            expandTerminal();
             consoleTab.show();
             const terminal = document.getElementById('terminalOutput');
             const customInput = document.getElementById('customInput').value;
@@ -818,6 +954,7 @@
 
         if (btnSubmitCode) {
             btnSubmitCode.addEventListener('click', function() {
+                expandTerminal();
                 testResultTab.show();
                 const container = document.getElementById('testResultContainer');
                 container.innerHTML = `
@@ -853,6 +990,38 @@
                                 </div>
                             </div>
                         `;
+
+                        // Unlock logic
+                        if (result.allPassed) {
+                            const lockScreen = document.getElementById('solutionLockScreen');
+                            const solutionDiv = document.getElementById('solutionContent');
+                            if (lockScreen && solutionDiv) {
+                                lockScreen.style.display = 'none';
+                                solutionDiv.style.display = 'block';
+                                
+                                const codeHtml = node.solutionCode ? escapeHtml(node.solutionCode) : 'No solution code provided by instructor.';
+                                solutionDiv.innerHTML = `
+                                    <h3 style="color: #334155;">Instructor's Solution</h3>
+                                    <p style="color: #10b981; font-weight: 500;"><i class="ti ti-check"></i> You have successfully passed all tests and unlocked the solution!</p>
+                                    <pre style="background: #1e1e1e; color: #d4d4d8; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${codeHtml}</code></pre>
+                                `;
+                            }
+                            
+                            const commLockScreen = document.getElementById('communityLockScreen');
+                            const commContent = document.getElementById('communityContent');
+                            if (commLockScreen && commContent) {
+                                commLockScreen.style.display = 'none';
+                                commContent.style.display = 'block';
+                                loadSharedSolutions();
+                            }
+                            
+                            // Show Share Modal
+                            const shareModalEl = document.getElementById('shareSolutionModal');
+                            if (shareModalEl) {
+                               const shareModal = new bootstrap.Modal(shareModalEl);
+                               shareModal.show();
+                            }
+                        }
 
                         if (result.results && result.results.length > 0) {
                             html += `<div style="display: flex; flex-direction: column; gap: 12px;">`;
@@ -915,6 +1084,63 @@
                 }
             });
         }
+        
+        // Tab switching logic for Left Pane
+        const tabs = document.querySelectorAll('.lc-tab');
+        const panes = document.querySelectorAll('.lc-pane-content');
+        if (tabs.length > 0) {
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    const targetId = tab.getAttribute('data-target');
+                    panes.forEach(pane => {
+                      pane.style.display = pane.id === targetId ? 'block' : 'none';
+                    });
+                });
+            });
+
+            // Load marked.js to render the Markdown
+            if (!window.marked) {
+                const script = document.createElement('script');
+                script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+                script.onload = () => {
+                   document.getElementById('markdownPreviewContainer').innerHTML = window.marked.parse(node.content || '*No description provided*');
+                };
+                document.head.appendChild(script);
+            } else {
+                document.getElementById('markdownPreviewContainer').innerHTML = window.marked.parse(node.content || '*No description provided*');
+            }
+            
+            // Check pass status on load to unlock tabs automatically
+            fetch(`/api/shared-solutions/node/${nodeId}/status`, { headers: authHeaders(false) })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.isPassed) {
+                        const lockScreen = document.getElementById('solutionLockScreen');
+                        const solutionDiv = document.getElementById('solutionContent');
+                        if (lockScreen && solutionDiv) {
+                            lockScreen.style.display = 'none';
+                            solutionDiv.style.display = 'block';
+                            const codeHtml = node.solutionCode ? escapeHtml(node.solutionCode) : 'No solution code provided by instructor.';
+                            solutionDiv.innerHTML = `
+                                <h3 style="color: #334155;">Instructor's Solution</h3>
+                                <p style="color: #10b981; font-weight: 500;"><i class="ti ti-check"></i> You have successfully passed all tests and unlocked the solution!</p>
+                                <pre style="background: #1e1e1e; color: #d4d4d8; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${codeHtml}</code></pre>
+                            `;
+                        }
+                        const commLockScreen = document.getElementById('communityLockScreen');
+                        const commContent = document.getElementById('communityContent');
+                        if (commLockScreen && commContent) {
+                            commLockScreen.style.display = 'none';
+                            commContent.style.display = 'block';
+                            loadSharedSolutions();
+                        }
+                    }
+                })
+                .catch(console.error);
+        }
       }
       
       const summaryForm = document.getElementById('summaryForm');
@@ -949,16 +1175,109 @@
             if (!response.ok) {
               throw new Error(await readError(response));
             }
-
-            summaryStatus.classList.add('show');
-            setTimeout(() => summaryStatus.classList.remove('show'), 3500);
+            summaryStatus.innerHTML = '<span class="text-success"><i class="ti ti-check"></i> Ghi nhận thành công.</span>';
           } catch (err) {
-            alert('Failed to save summary: ' + err.message);
+            summaryStatus.innerHTML = `<span class="text-danger"><i class="ti ti-alert-circle"></i> ${err.message}</span>`;
           } finally {
             saveSummaryBtn.disabled = false;
-            saveSummaryBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Summary';
+            saveSummaryBtn.innerHTML = 'Lưu và nộp thu hoạch';
           }
         });
+      }
+      
+      // Community Shared Solutions Logic
+      function loadSharedSolutions() {
+          const listDiv = document.getElementById('sharedSolutionsList');
+          if (!listDiv) return;
+
+          fetch(`/api/shared-solutions/node/${nodeId}`, { headers: authHeaders(false) })
+              .then(res => res.json())
+              .then(data => {
+                  if (!data || data.length === 0) {
+                      listDiv.innerHTML = '<div class="text-center text-muted" style="padding: 20px;">No solutions shared yet. Be the first!</div>';
+                      return;
+                  }
+
+                  let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+                  data.forEach(sol => {
+                      html += `
+                      <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; background: #fff;">
+                          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                              <div>
+                                  <h4 style="margin: 0 0 4px 0; font-size: 1rem; color: #1e293b;">${escapeHtml(sol.title)}</h4>
+                                  <div style="font-size: 0.8rem; color: #64748b;">By <strong style="color: #3b82f6;">${escapeHtml(sol.studentName)}</strong> • ${new Date(sol.createdAt).toLocaleString()}</div>
+                              </div>
+                              <button class="btn btn-sm btn-outline-primary" onclick="upvoteSolution(${sol.id}, this)" style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px;">
+                                  <i class="ti ti-thumb-up"></i> <span>${sol.upvotes || 0}</span>
+                              </button>
+                          </div>
+                          <pre style="background: #1e1e1e; color: #d4d4d8; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; overflow-x: auto; margin: 0;"><code>${escapeHtml(sol.codeContent)}</code></pre>
+                      </div>
+                      `;
+                  });
+                  html += '</div>';
+                  listDiv.innerHTML = html;
+              })
+              .catch(err => {
+                  listDiv.innerHTML = `<div class="text-center text-danger">Error loading community solutions: ${err.message}</div>`;
+              });
+      }
+
+      window.upvoteSolution = function(solId, btnEl) {
+          fetch(`/api/shared-solutions/${solId}/upvote`, {
+              method: 'POST',
+              headers: authHeaders(false)
+          })
+          .then(res => res.json())
+          .then(data => {
+              btnEl.innerHTML = `<i class="ti ti-thumb-up text-primary"></i> <span>${data.upvotes}</span>`;
+              btnEl.classList.add('active');
+          })
+          .catch(console.error);
+      };
+
+      const btnConfirmShareSolution = document.getElementById('btnConfirmShareSolution');
+      if (btnConfirmShareSolution) {
+          btnConfirmShareSolution.addEventListener('click', async () => {
+              const title = document.getElementById('shareSolutionTitle').value.trim();
+              if (!title) {
+                  alert("Please enter a title for your solution.");
+                  return;
+              }
+
+              const codeString = window.myCodeEditor ? window.myCodeEditor.getValue() : '';
+
+              btnConfirmShareSolution.disabled = true;
+              btnConfirmShareSolution.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Sharing...';
+
+              try {
+                  const response = await fetch(`/api/shared-solutions/node/${nodeId}`, {
+                      method: 'POST',
+                      headers: authHeaders(true),
+                      body: JSON.stringify({ title: title, codeContent: codeString })
+                  });
+
+                  if (!response.ok) throw new Error(await readError(response));
+
+                  // Success
+                  const shareModalEl = document.getElementById('shareSolutionModal');
+                  const shareModal = bootstrap.Modal.getInstance(shareModalEl);
+                  if (shareModal) shareModal.hide();
+
+                  document.getElementById('shareSolutionTitle').value = '';
+                  
+                  // Switch to community tab if not there
+                  const commTab = document.querySelector('.lc-tab[data-target="lc-community-pane"]');
+                  if(commTab) commTab.click();
+                  
+                  loadSharedSolutions();
+              } catch (err) {
+                  alert(err.message);
+              } finally {
+                  btnConfirmShareSolution.disabled = false;
+                  btnConfirmShareSolution.innerHTML = '<i class="ti ti-share"></i> Share My Solution';
+              }
+          });
       }
     }
 
