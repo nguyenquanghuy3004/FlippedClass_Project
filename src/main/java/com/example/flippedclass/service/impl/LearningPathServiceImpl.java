@@ -59,6 +59,7 @@ public class LearningPathServiceImpl implements LearningPathService {
     }
 
     @Override
+    @Transactional
     public List<LearningPathResponse> getLearningPath(Long spaceId) {
         return learningPathRepository
                 .findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.ACTIVE)
@@ -69,6 +70,7 @@ public class LearningPathServiceImpl implements LearningPathService {
 
 
     @Override
+    @Transactional
     public LearningPathResponse getLearningPathDetail(Long spaceId, Long pathId) {
         return toResponse(findPathInSpace(spaceId, pathId));
     }
