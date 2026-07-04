@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface UserActivityLogRepository extends JpaRepository<UserActivityLog, Long> {
-    List<UserActivityLog> findTop50ByUserIdOrderByCreatedAtDesc(Long userId);
+    List<UserActivityLog> findTop50ByUser_IdOrderByCreatedAtDesc(Long userId);
     List<UserActivityLog> findTop50ByOrderByCreatedAtDesc();
 
     @Query("SELECT u FROM UserActivityLog u WHERE " +

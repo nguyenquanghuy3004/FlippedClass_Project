@@ -101,7 +101,7 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Override
     public List<UserActivityLogDto> getRecentActivities(Long userId) {
-        return activityLogRepository.findTop50ByUserIdOrderByCreatedAtDesc(userId)
+        return activityLogRepository.findTop50ByUser_IdOrderByCreatedAtDesc(userId)
                 .stream().map(this::mapToDto).collect(Collectors.toList());
     }
 

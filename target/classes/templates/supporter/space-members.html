@@ -5,7 +5,6 @@
 </head>
 <body>
     <div layout:fragment="content">
-<div th:fragment="content">
         <div class="row">
           <div class="col-12">
             <div class="mb-6">
@@ -55,30 +54,20 @@
         </div>
     </div>
 
-    <th:block th:fragment="scripts">
+    <th:block layout:fragment="scripts">
         <script>
 
             // SPACE MEMBERS JS (Logic quản lý thành viên trong Không gian học tập)
 
+            const spaceId = $('#spaceId').val();
+
             // Khởi tạo: Tải danh sách thành viên khi trang được tải xong
             $(document).ready(function() {
-                // Wait for the tab to be shown if it is hidden, but since it could be active from start:
-                if ($('#members-table-body').length && $('#members-table-body').is(':visible')) {
-                    loadMembers();
-                }
-            });
-
-            // Khi click vào tab People thì mới load danh sách (lazy load)
-            $('a[data-bs-toggle="tab"][href="#people"]').on('shown.bs.tab', function (e) {
-                if ($('#members-table-body').children().length === 0) {
-                    loadMembers();
-                }
+                loadMembers();
             });
 
             // Hàm gọi API để lấy danh sách thành viên
             function loadMembers() {
-                const spaceId = $('#spaceId').val();
-                if (!spaceId) return;
                 $.ajax({
                     url: `/api/spaces/${spaceId}/members`,
                     method: 'GET',
@@ -132,7 +121,6 @@
 
             // Hàm thăng cấp thành viên lên Supporter
             function promote(memberId) {
-                const spaceId = $('#spaceId').val();
                 $.ajax({
                     url: `/api/spaces/${spaceId}/members/${memberId}/promote`,
                     method: 'POST',
@@ -147,7 +135,6 @@
 
             // Hàm giáng cấp Supporter xuống Member thường
             function demote(memberId) {
-                const spaceId = $('#spaceId').val();
                 $.ajax({
                     url: `/api/spaces/${spaceId}/members/${memberId}/demote`,
                     method: 'POST',
@@ -162,7 +149,6 @@
 
             // Hàm xóa thành viên khỏi Không gian học tập
             function removeMember(memberId) {
-                const spaceId = $('#spaceId').val();
                 if(!confirm('Are you sure you want to remove this member?')) return;
                 $.ajax({
                     url: `/api/spaces/${spaceId}/members/${memberId}`,
@@ -179,6 +165,3 @@
     </th:block>
 </body>
 </html>
-
-
-

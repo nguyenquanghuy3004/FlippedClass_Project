@@ -15,8 +15,8 @@
 
       <div class="builder-topbar">
         <div class="topbar-left">
-          <a href="/lecturer/quizzes" class="back-link">
-            <i class="ti ti-arrow-left"></i> Back to Quizzes
+          <a href="#" id="backToRoadmapLink" class="back-link">
+            <i class="ti ti-arrow-left"></i> Back to Roadmap
           </a>
           <h1 class="quiz-main-title">
             <i class="ti ti-tools"></i>
@@ -262,18 +262,21 @@
       setTimeout(() => el.remove(), 3500);
     }
 
-    async function loadQuiz() {
-      try {
-        const res = await fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() });
-        if (res.ok) {
-          const quiz = await res.json();
-          document.getElementById('quizTitleText').textContent = quiz.title;
-          document.title = `${quiz.title} - Quiz Builder`;
-        } else {
-          document.getElementById('quizTitleText').textContent = 'Quiz #' + quizId;
-        }
-      } catch (e) { }
-    }
+     async function loadQuiz() {
+       try {
+         const res = await fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() });
+         if (res.ok) {
+           const quiz = await res.json();
+           document.getElementById('quizTitleText').textContent = quiz.title;
+           document.title = `${quiz.title} - Quiz Builder`;
+           if (quiz.learningSpaceId) {
+             document.getElementById('backToRoadmapLink').href = `/supporter/space/${quiz.learningSpaceId}`;
+           }
+         } else {
+           document.getElementById('quizTitleText').textContent = 'Quiz #' + quizId;
+         }
+       } catch (e) { }
+     }
 
     async function loadQuestions() {
       try {

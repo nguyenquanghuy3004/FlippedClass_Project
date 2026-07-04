@@ -20,6 +20,66 @@
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
 
+  <!-- AUTHENTICATION & SUPPORTER GUARD -->
+  <script>
+    (function() {
+      const token = localStorage.getItem('jwt_token');
+      const userId = localStorage.getItem('user_id');
+      if (!token || !userId) {
+        window.location.href = '/signin';
+      } else {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const now = Math.floor(Date.now() / 1000);
+          if (payload.exp && payload.exp < now) {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user_id');
+            localStorage.removeItem('is_supporter');
+            window.location.href = '/signin';
+            return;
+          }
+          
+          const isLecturerOrAdmin = payload.roles && (
+            payload.roles.includes('MENTOR') || payload.roles.includes('ROLE_MENTOR') ||
+            payload.roles.includes('ADMIN') || payload.roles.includes('ROLE_ADMIN')
+          );
+          
+          if (isLecturerOrAdmin) {
+            return; // Allowed
+          }
+          
+          // Otherwise must be student, check if they are a supporter.
+          const isSupporterStored = localStorage.getItem('is_supporter') === 'true';
+          if (!isSupporterStored) {
+            // Hide document element to prevent flashing
+            document.documentElement.style.display = 'none';
+            
+            fetch('/api/users/' + encodeURIComponent(userId), {
+              headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(res => {
+              if (!res.ok) throw new Error();
+              return res.json();
+            })
+            .then(user => {
+              if (user.supporter) {
+                localStorage.setItem('is_supporter', 'true');
+                document.documentElement.style.display = '';
+              } else {
+                window.location.href = '/student/dashboard';
+              }
+            })
+            .catch(() => {
+              window.location.href = '/signin';
+            });
+          }
+        } catch (e) {
+          window.location.href = '/signin';
+        }
+      }
+    })();
+  </script>
+
   <th:block layout:fragment="head"></th:block>
 </head>
 
@@ -61,6 +121,11 @@
       <li>
         <a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" href="/student/dashboard" data-nav-path="/student/dashboard">
           <i class="ti ti-arrow-back-up fs-5"></i><span class="nav-text">Back to Student</span>
+        </a>
+      </li>
+      <li id="lecturerPortalItem" class="d-none">
+        <a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" href="/lecturer/dashboard" data-nav-path="/lecturer/dashboard">
+          <i class="ti ti-arrow-back-up fs-5"></i><span class="nav-text">Back to Lecturer</span>
         </a>
       </li>
 
@@ -108,30 +173,26 @@
     });
 
     function checkAuth() {
+      // Checked in head section by Auth Guard
+    }
+    
+    function checkLecturerAccess() {
       const token = localStorage.getItem('jwt_token');
-      if (!token) {
-        window.location.href = '/signin';
-        return;
-      }
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const path = window.location.pathname;
-        const isSupporterAllowed = path.startsWith('/supporter') || 
-                                   path.startsWith('/lecturer/space') || 
-                                   path.startsWith('/lecturer/quizzes') || 
-                                   path.startsWith('/lecturer/learning-nodes');
-        if (!payload.roles || (!isSupporterAllowed && !payload.roles.includes('MENTOR') && !payload.roles.includes('ROLE_MENTOR') && !payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
-          window.location.href = '/signin';
-        }
-      } catch (e) {
-        window.location.href = '/signin';
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.roles && (payload.roles.includes('MENTOR') || payload.roles.includes('ROLE_MENTOR') || payload.roles.includes('ADMIN') || payload.roles.includes('ROLE_ADMIN'))) {
+            document.getElementById('lecturerPortalItem')?.classList.remove('d-none');
+          }
+        } catch(e) {}
       }
     }
-    checkAuth();
+    checkLecturerAccess();
 
     function logout() {
       localStorage.removeItem('jwt_token');
       localStorage.removeItem('user_id');
+      localStorage.removeItem('is_supporter');
       window.location.href = '/signin';
     }
 

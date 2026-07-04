@@ -83,7 +83,7 @@
         }
 
         function studentLogout() {
-          ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
+          ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl', 'is_supporter'].forEach((key) => {
             localStorage.removeItem(key);
           });
           window.location.href = '/';
@@ -102,7 +102,11 @@
             const user = await response.json();
             setStudentMenuUser(user);
             if (user.supporter) {
+              localStorage.setItem('is_supporter', 'true');
               document.querySelectorAll('#supporter-nav-item').forEach(el => el.style.display = 'block');
+            } else {
+              localStorage.removeItem('is_supporter');
+              document.querySelectorAll('#supporter-nav-item').forEach(el => el.style.display = 'none');
             }
           } catch (error) {
             console.warn('Could not load user menu profile.', error);
@@ -120,6 +124,9 @@
 
         function initStudentUserMenus() {
           setStudentMenuUser();
+          if (localStorage.getItem('is_supporter') === 'true') {
+            document.querySelectorAll('#supporter-nav-item').forEach(el => el.style.display = 'block');
+          }
           refreshStudentMenuUser();
 
           document.querySelectorAll('[data-user-menu]').forEach((menu) => {

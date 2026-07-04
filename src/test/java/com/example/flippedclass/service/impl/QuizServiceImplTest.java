@@ -72,6 +72,7 @@ public class QuizServiceImplTest {
         learningNode = new LearningNode();
         learningNode.setId(1L);
         learningNode.setTitle("Spring Boot Basics");
+        learningNode.setNodeType("VIDEO");
 
         quiz = new Quiz();
         quiz.setId(1L);

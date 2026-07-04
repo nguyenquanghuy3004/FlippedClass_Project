@@ -10,4 +10,6 @@ import java.util.List;
 public interface NodeCommentRepository extends JpaRepository<NodeComment, Long> {
     List<NodeComment> findByLearningNodeIdAndParentCommentIsNullOrderByCreatedAtDesc(Long nodeId);
     List<NodeComment> findByLearningNodeIdOrderByCreatedAtAsc(Long nodeId);
+
+    void deleteByLearningNodeId(Long learningNodeId);
 }

@@ -57,22 +57,34 @@
                                 </a>
                             </li>
 
-                            <li th:if="${node.nodeType == 'VIDEO'}">
+                            <li th:if="${node.nodeType != 'QUIZ'}">
                                 <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-video-btn"
                                    href="#" th:data-nodeid="${node.id}">
                                     <i class="ti ti-upload" style="color:#4f46e5;"></i> Upload Video (MP4)
                                 </a>
                             </li>
-                            <li th:if="${node.nodeType == 'VIDEO'}">
+                            <li th:if="${node.nodeType != 'QUIZ'}">
                                 <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 add-youtube-btn"
                                    href="#" th:data-nodeid="${node.id}" style="color:#ef4444;">
                                     <i class="ti ti-brand-youtube"></i> Add Youtube Link
+                                </a>
+                            </li>
+                            <li th:if="${node.nodeType != 'QUIZ'}">
+                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 text-danger delete-video-item-btn"
+                                   href="#" th:data-nodeid="${node.id}">
+                                    <i class="ti ti-video-off"></i> Delete Video
                                 </a>
                             </li>
                             <li th:if="${node.nodeType == 'DOCUMENT'}">
                                 <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-document-btn"
                                    href="#" th:data-nodeid="${node.id}" style="color:#059669;">
                                     <i class="ti ti-file-upload"></i> Upload Document (PDF)
+                                </a>
+                            </li>
+                            <li th:if="${node.nodeType == 'VIDEO'}">
+                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 create-quiz-btn"
+                                   href="#" th:data-nodeid="${node.id}" style="color:#8b5cf6;">
+                                    <i class="ti ti-brain"></i> Create Quiz
                                 </a>
                             </li>
                         </ul>

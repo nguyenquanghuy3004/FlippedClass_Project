@@ -73,7 +73,7 @@
       }
 
       function studentLogout() {
-        ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
+        ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl', 'is_supporter'].forEach((key) => {
           localStorage.removeItem(key);
         });
         window.location.href = '/';

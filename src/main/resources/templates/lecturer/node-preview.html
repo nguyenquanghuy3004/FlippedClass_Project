@@ -824,6 +824,16 @@
 
       const resources = items.filter((item) => normalizeItemType(item.itemType) !== 'VIDEO');
       const videoCount = items.some((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item)) ? 1 : 0;
+      
+      const videoItem = items.find((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item));
+      let deleteVideoBtn = '';
+      if (videoItem && !isSupporter) {
+        deleteVideoBtn = `
+          <button class="server-pill text-danger" type="button" style="background: #fee2e2; border: 1px solid #fecaca; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="deleteVideoItem(${videoItem.id})">
+            <i class="ti ti-trash"></i> Delete Video
+          </button>
+        `;
+      }
 
       pageRoot.className = 'lesson-layout';
       
@@ -878,6 +888,7 @@
           <div class="player-controls">
             <button class="server-pill active" type="button">Lesson Video</button>
             <button class="server-pill" type="button" onclick="document.getElementById('hiddenResourceInput').click()"><i class="ti ti-upload"></i> Upload Resource</button>
+            ${deleteVideoBtn}
           </div>
         </section>
 
@@ -1041,6 +1052,22 @@
         alert('Failed to delete quiz: ' + err.message);
       }
     }
+
+    async function deleteVideoItem(itemId) {
+      if (!confirm('Bạn có chắc chắn muốn xóa video của bài học này?')) return;
+      try {
+        const res = await fetch(`/api/learning-nodes/${nodeId}/items/item/${itemId}`, {
+          method: 'DELETE',
+          headers: authHeaders(false)
+        });
+        if (!res.ok) throw new Error(await readError(res));
+        alert('Đã xóa video thành công!');
+        window.location.reload();
+      } catch(err) {
+        alert('Lỗi khi xóa video: ' + err.message);
+      }
+    }
+    window.deleteVideoItem = deleteVideoItem;
 
     let globalSummaries = [];
 

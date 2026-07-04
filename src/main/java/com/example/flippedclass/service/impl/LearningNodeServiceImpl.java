@@ -30,7 +30,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
     @Override
     public LearningNodeResponse createLearningNode(Long pathId, CreateLearningNodeRequest request) {
         LearningPath learningPath = learningPathRepository.findById(pathId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Learning Path"));
+                .orElseThrow(() -> new RuntimeException("Khng tm thy Learning Path"));
 
         LearningNode node = LearningNode.builder()
                 .title(request.getTitle())
@@ -61,16 +61,86 @@ public class LearningNodeServiceImpl implements LearningNodeService {
     @Autowired
     private com.example.flippedclass.repository.QuizRepository quizRepository;
 
+    @Autowired
+    private com.example.flippedclass.repository.QuizAttemptRepository quizAttemptRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.QuizQuestionRepository quizQuestionRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.TestCaseRepository testCaseRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.SharedSolutionRepository sharedSolutionRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.NodeProgressRepository nodeProgressRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.NodeDiscussionRepository nodeDiscussionRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.NodeCommentRepository nodeCommentRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.LessonSummaryRepository lessonSummaryRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.GroupActivityRepository groupActivityRepository;
+
     @Override
     @Transactional
     public void deleteNode(Long nodeId) {
         LearningNode node = learningNodeRepository.findById(nodeId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài học"));
+                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay bai hoc"));
         
-        // Explicitly delete children to avoid JPA orphanRemoval bidirectional quirks
+        // 1. Delete quiz attempts and quiz questions for all quizzes of this node
+        if (node.getQuizzes() != null) {
+            for (Quiz quiz : node.getQuizzes()) {
+                quizAttemptRepository.deleteByQuizId(quiz.getId());
+                quizQuestionRepository.deleteByQuizId(quiz.getId());
+            }
+        }
+
+        // 2. Delete test cases
+        testCaseRepository.deleteByLearningNodeId(nodeId);
+
+        // 3. Delete shared solutions
+        sharedSolutionRepository.deleteByLearningNodeId(nodeId);
+
+        // 4. Delete group activities (and their cascaded groups)
+        groupActivityRepository.deleteByLearningNodeId(nodeId);
+
+        // 5. Delete node progress
+        nodeProgressRepository.deleteByLearningNodeId(nodeId);
+
+        // 6. Delete node discussions (derived delete loads and deletes with cascade replies)
+        nodeDiscussionRepository.deleteByLearningNodeId(nodeId);
+
+        // 7. Delete node comments safely (replies first, then parents)
+        List<com.example.flippedclass.entity.NodeComment> comments = nodeCommentRepository.findByLearningNodeIdOrderByCreatedAtAsc(nodeId);
+        if (comments != null && !comments.isEmpty()) {
+            for (com.example.flippedclass.entity.NodeComment c : comments) {
+                if (c.getParentComment() != null) {
+                    nodeCommentRepository.delete(c);
+                }
+            }
+            for (com.example.flippedclass.entity.NodeComment c : comments) {
+                if (c.getParentComment() == null) {
+                    nodeCommentRepository.delete(c);
+                }
+            }
+        }
+
+        // 8. Delete lesson summaries
+        lessonSummaryRepository.deleteByLearningNodeId(nodeId);
+
+        // 9. Explicitly delete items
         if (node.getItems() != null && !node.getItems().isEmpty()) {
             learningNodeItemRepository.deleteAllInBatch(node.getItems());
         }
+
+        // 10. Explicitly delete quizzes
         if (node.getQuizzes() != null && !node.getQuizzes().isEmpty()) {
             quizRepository.deleteAllInBatch(node.getQuizzes());
         }
@@ -82,7 +152,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
     @Transactional
     public LearningNodeResponse updateLearningNode(Long nodeId, CreateLearningNodeRequest request) {
         LearningNode node = learningNodeRepository.findById(nodeId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài học"));
+                .orElseThrow(() -> new RuntimeException("Khng tm thy bi hc"));
 
         node.setTitle(request.getTitle());
         node.setDescription(request.getDescription());

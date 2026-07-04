@@ -8,4 +8,6 @@ import java.util.List;
 public interface SharedSolutionRepository extends JpaRepository<SharedSolution, Long> {
     // Tìm các solution chia sẻ theo nodeId, sắp xếp theo upvote giảm dần và ngày tạo
     List<SharedSolution> findByLearningNodeIdOrderByUpvotesDescCreatedAtDesc(Long nodeId);
+
+    void deleteByLearningNodeId(Long learningNodeId);
 }

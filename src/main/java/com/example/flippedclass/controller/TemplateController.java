@@ -179,7 +179,7 @@ public class TemplateController {
     public String supporterSpaceMembers(@RequestParam("spaceId") Long spaceId, Model model) {
         loadSpaceCommonData(spaceId, "people", model);
         model.addAttribute("isSupporter", true);
-        return "supporter/learningPath";
+        return "supporter/space-members";
     }
 
 

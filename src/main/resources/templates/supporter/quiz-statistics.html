@@ -22,8 +22,8 @@
           <h1 class="fw-bold mb-1 text-dark" id="pageTitle">Quiz Statistics</h1>
           <p class="text-muted mb-0"><i class="ti ti-chart-bar me-1"></i> Real-time performance insights</p>
         </div>
-        <a href="/lecturer/quizzes" class="back-btn">
-          <i class="ti ti-arrow-left me-1"></i> Back to Quizzes
+        <a href="#" id="backToRoadmapLink" class="back-btn">
+          <i class="ti ti-arrow-left me-1"></i> Back to Roadmap
         </a>
       </div>
 
@@ -125,6 +125,14 @@
 
       async function loadStatistics() {
         try {
+          fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() })
+            .then(res => res.json())
+            .then(quiz => {
+              if (quiz && quiz.learningSpaceId) {
+                document.getElementById('backToRoadmapLink').href = `/supporter/space/${quiz.learningSpaceId}`;
+              }
+            }).catch(e => {});
+
           const res = await fetch(`/api/quizzes/${quizId}/statistics`, { headers: authHeaders() });
           if (!res.ok) throw new Error();
           const data = await res.json();

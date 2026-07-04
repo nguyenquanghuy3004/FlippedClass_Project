@@ -1,42 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{supporter/layout}">
+
 <head>
   <meta charset="UTF-8" />
   <title>Quiz Builder - FlippedClass</title>
   <th:block layout:fragment="head">
     <link rel="stylesheet" th:href="@{/assets/css/quiz-builder.css}">
   </th:block>
-  <script>
-(function() {
-    function handleUnauthorized() {
-        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
-        localStorage.removeItem('jwt_token');
-        sessionStorage.removeItem('jwt_token');
-        window.location.href = '/signin';
-    }
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
-        try {
-            const response = await originalFetch.apply(this, args);
-            if (response.status === 401) {
-                handleUnauthorized();
-            }
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    };
-    const originalXhrOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function() {
-        this.addEventListener('load', function() {
-            if (this.status === 401) {
-                handleUnauthorized();
-            }
-        });
-        originalXhrOpen.apply(this, arguments);
-    };
-})();
-</script>
 </head>
 
 <body>
@@ -45,8 +15,8 @@
 
       <div class="builder-topbar">
         <div class="topbar-left">
-          <a href="/lecturer/quizzes" class="back-link">
-            <i class="ti ti-arrow-left"></i> Back to Quizzes
+          <a href="#" id="backToRoadmapLink" class="back-link">
+            <i class="ti ti-arrow-left"></i> Back to Roadmap
           </a>
           <h1 class="quiz-main-title">
             <i class="ti ti-tools"></i>
@@ -292,18 +262,21 @@
       setTimeout(() => el.remove(), 3500);
     }
 
-    async function loadQuiz() {
-      try {
-        const res = await fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() });
-        if (res.ok) {
-          const quiz = await res.json();
-          document.getElementById('quizTitleText').textContent = quiz.title;
-          document.title = `${quiz.title} - Quiz Builder`;
-        } else {
-          document.getElementById('quizTitleText').textContent = 'Quiz #' + quizId;
-        }
-      } catch (e) { }
-    }
+     async function loadQuiz() {
+       try {
+         const res = await fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() });
+         if (res.ok) {
+           const quiz = await res.json();
+           document.getElementById('quizTitleText').textContent = quiz.title;
+           document.title = `${quiz.title} - Quiz Builder`;
+           if (quiz.learningSpaceId) {
+             document.getElementById('backToRoadmapLink').href = `/supporter/space/${quiz.learningSpaceId}`;
+           }
+         } else {
+           document.getElementById('quizTitleText').textContent = 'Quiz #' + quizId;
+         }
+       } catch (e) { }
+     }
 
     async function loadQuestions() {
       try {
@@ -749,7 +722,5 @@
 </body>
 
 </html>
-
-
 
 

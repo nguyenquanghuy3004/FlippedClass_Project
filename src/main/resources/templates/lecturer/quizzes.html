@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
 
 <head>
@@ -597,18 +597,19 @@
       document.getElementById('quizModal').classList.remove('show');
     }
 
-    // Render danh sách dropdown Learning Node để chọn
+    // Render danh sách dropdown Learning Node để chọn (chỉ hiện node VIDEO)
     function renderNodePicker() {
       const picker = document.getElementById('nodePicker');
       picker.innerHTML = '';
-      if (!availableNodes.length) {
-        picker.innerHTML = '<option value="">No learning nodes found. Create a learning space first.</option>';
+      const videoNodes = availableNodes.filter(node => node.nodeType === 'VIDEO');
+      if (!videoNodes.length) {
+        picker.innerHTML = '<option value="">No video lessons found. Create a video lesson first.</option>';
         picker.disabled = true;
         return;
       }
       picker.disabled = false;
-      picker.innerHTML = '<option value="">-- Select a Learning Node --</option>';
-      availableNodes.forEach(node => {
+      picker.innerHTML = '<option value="">-- Select a Video Lesson --</option>';
+      videoNodes.forEach(node => {
         const opt = document.createElement('option');
         opt.value = node.id;
         const spacePart = node.spaceName && node.spaceName !== 'Uncategorized' ? `[${node.spaceName}] - ` : '';
