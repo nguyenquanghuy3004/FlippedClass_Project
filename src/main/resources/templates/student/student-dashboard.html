@@ -28,12 +28,53 @@
         </div>
 
         <div class="row g-3" id="learningSpaceList">
-          <div class="col-12">
+          <div class="col-12" th:if="${#lists.isEmpty(joinedSpaces)}">
             <div class="bento-card text-center text-muted py-4">
-              <div class="spinner-border text-primary mb-3" role="status"></div>
-              <p class="fc-body mb-0">Loading learning spaces...</p>
+              <i class="ti ti-school-off text-primary" style="font-size: 2.6rem;"></i>
+              <h5 class="fc-card-title text-dark mt-3 mb-2">No Classes Yet</h5>
+              <p class="fc-body mb-0">Enter a class code on My Classes to join a learning space.</p>
             </div>
           </div>
+          <th:block th:unless="${#lists.isEmpty(joinedSpaces)}">
+            <div class="col-md-6 mb-4 learning-space-item" th:each="space, iterStat : ${joinedSpaces}" 
+                 th:with="banners=${ {'banner-green', 'banner-blue', 'banner-darkblue', 'banner-red', 'banner-gray'} },
+                          avatars=${ {'avatar-blue', 'avatar-orange', 'avatar-green', 'avatar-red'} },
+                          bannerClass=${banners[iterStat.index % 5]},
+                          avatarClass=${avatars[iterStat.index % 4]}">
+              <div class="classroom-card h-100">
+                  <div class="card-banner" th:classappend="${bannerClass}">
+                      <div class="banner-pattern"></div>
+                      <a th:href="@{/student/learning-spaces(spaceId=${space.id}, focus='roadmap')}" class="card-title-link">
+                          <h2 class="course-title" th:text="${space.name ?: 'Untitled Learning Space'}">Space Name</h2>
+                          <div class="course-subtitle" th:text="${space.description ?: 'Sample Space'}">Sample Space</div>
+                      </a>
+                      <div class="card-options-top">
+                          <i class="ti ti-dots-vertical"></i>
+                      </div>
+                  </div>
+
+                  <div class="card-avatar" th:classappend="${avatarClass}" th:text="${#strings.substring(space.name ?: 'S', 0, 1).toUpperCase()}">
+                      S
+                  </div>
+
+                  <div class="card-body-content">
+                  </div>
+
+                  <div class="card-footer">
+                      <div class="d-flex align-items-center gap-1">
+                          <span class="status-indicator" th:classappend="'status-' + ${space.status ?: 'ACTIVE'}" title="Status"></span>
+                          <span class="visibility-text text-muted" style="font-size: 0.75rem; font-weight: 600;" th:text="${space.visibility ?: 'PUBLIC'}">PUBLIC</span>
+                      </div>
+                      <div class="d-flex gap-1">
+                          <div class="footer-icon"><i class="ti ti-share"></i></div>
+                          <div class="footer-icon"><i class="ti ti-id-badge-2"></i></div>
+                          <div class="footer-icon"><i class="ti ti-folder"></i></div>
+                          <div class="footer-icon"><i class="ti ti-dots-vertical"></i></div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </th:block>
         </div>
 
         <!-- PUBLIC SPACES SECTION -->
@@ -75,11 +116,34 @@
       <div class="col-xl-3">
         <h2 class="fc-section-title text-dark mb-3">New Documents</h2>
         <div class="bento-card p-3" id="recentDocuments">
-          <div class="text-center text-muted py-4">
+          <div class="text-center text-muted py-4" th:if="${#lists.isEmpty(recentDocuments)}">
             <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
-            <h5 class="fc-card-title text-dark mt-3 mb-2">Loading documents</h5>
-            <p class="fc-meta mb-0">Documents from your learning spaces will appear here.</p>
+            <h5 class="fw-bold text-dark mt-3 mb-2">No Documents Yet</h5>
+            <p class="small fw-semibold mb-0">Your instructor has not added documents for your learning spaces yet.</p>
           </div>
+          
+          <th:block th:unless="${#lists.isEmpty(recentDocuments)}">
+             <a th:each="doc : ${recentDocuments}" class="notification-item rounded-4 border mb-2 p-2" 
+                th:classappend="${doc.url == null ? 'opacity-75 pe-none' : ''}" 
+                style="display: block; text-decoration: none;" href="javascript:void(0)" 
+                th:onclick="${doc.nodeId != null ? 'openDocumentNode(event, ' + doc.nodeId + ')' : ''}"
+                th:with="type=${doc.documentType ?: 'OTHER'}, 
+                         logo=${type == 'GOOGLE_DRIVE' ? '/uploads/anh/Google-Drive-Logo-2020-present.jpg' : (type == 'PDF' ? '/uploads/anh/pdf-file-download-symbols-format-for-texts-vector.jpg' : '/uploads/anh/1200x630wa.jpg')},
+                         meta=${(doc.learningSpaceName != null ? doc.learningSpaceName : '') + (doc.learningSpaceName != null and doc.learningPathTitle != null ? ' · ' : '') + (doc.learningPathTitle != null ? doc.learningPathTitle : '')},
+                         typeLabel=${type == 'PDF' ? 'PDF' : (type == 'GOOGLE_DRIVE' ? 'Google Drive' : (type == 'GITHUB' ? 'GitHub' : (type == 'WEBSITE' ? 'Website' : 'Document')))}">
+                
+                <div class="d-flex gap-2 align-items-center">
+                  <span class="document-logo-box flex-shrink-0">
+                    <img class="document-logo-img" th:src="${logo}" th:alt="${typeLabel} + ' logo'" loading="lazy">
+                  </span>
+                  <div style="min-width: 0; flex: 1; overflow: hidden;">
+                    <h6 class="fw-bold mb-1 text-truncate text-dark" style="font-size: 0.9rem;" th:title="${doc.title ?: 'Untitled Document'}" th:text="${doc.title ?: 'Untitled Document'}">Untitled Document</h6>
+                    <p class="small text-muted fw-semibold mb-1 text-truncate" style="font-size: 0.75rem;" th:title="${meta ?: 'Learning space'}" th:text="${meta ?: 'Learning space'}">Learning space</p>
+                    <span class="small text-primary fw-bold" style="font-size: 0.75rem;" th:text="${typeLabel}">Document</span>
+                  </div>
+                </div>
+             </a>
+          </th:block>
         </div>
       </div>
     </div>
@@ -183,34 +247,9 @@
     return getJoinedSpaces(learningSpaces).map((space) => space.id);
   }
 
-  function renderProfile(data) {
-    const user = data.user || {};
-    const profile = data.studentProfile || {};
-    const displayName = user.fullName || user.username || 'Student';
-    const major = profile.major || 'Major not updated';
-    const yearText = profile.enrollmentYear ? `Year ${studyYear(profile.enrollmentYear)}` : 'Academic year not updated';
 
-    setText('#profileName', displayName);
-    setText('[data-greeting-name]', displayName);
-    setText('#profileSummary', `${major} - ${yearText}`);
-    setText('#profileStudentCode', profile.studentCode || '--');
-    setText('#profileClassName', profile.className || '--');
 
-    const avatar = document.querySelector('.massive-avatar');
-    if (avatar) avatar.src = user.avatarUrl || defaultAvatarUrl;
-    window.setStudentMenuUser?.(user);
-  }
 
-  function renderStats(learningSpaces, quizzes) {
-    const joinedSpaces = getJoinedSpaces(learningSpaces);
-    const completedCount = quizzes.filter((quiz) => quiz.isCompleted).length;
-    const pendingCount = quizzes.length - completedCount;
-
-    setText('#learningSpaceCount', joinedSpaces.length);
-    setText('#completedQuizCount', completedCount);
-    setText('#pendingQuizCount', pendingCount);
-    setText('#dashboardSummary', `You are enrolled in ${joinedSpaces.length} classes and have completed ${completedCount}/${quizzes.length} quizzes.`);
-  }
 
   function emptyState(icon, title, message) {
     return `
@@ -224,76 +263,26 @@
   let currentLearningSpacePage = 1;
   const SPACES_PER_PAGE = 4;
 
-  function renderLearningSpaces(learningSpaces) {
-    const list = document.getElementById('learningSpaceList');
-    if (!list) return;
-
-    const joinedSpaces = getJoinedSpaces(learningSpaces);
-    if (!joinedSpaces.length) {
-      list.innerHTML = `<div class="col-12">${emptyState('ti-school-off', 'No Classes Yet', 'Enter a class code on My Classes to join a learning space.')}</div>`;
-      renderLearningSpacePagination(0);
-      return;
-    }
-
-    const totalPages = Math.ceil(joinedSpaces.length / SPACES_PER_PAGE);
-    if (currentLearningSpacePage > totalPages) currentLearningSpacePage = totalPages;
-    if (currentLearningSpacePage < 1) currentLearningSpacePage = 1;
-
-    const startIndex = (currentLearningSpacePage - 1) * SPACES_PER_PAGE;
-    const paginatedSpaces = joinedSpaces.slice(startIndex, startIndex + SPACES_PER_PAGE);
-
-    const banners = ['banner-green', 'banner-blue', 'banner-darkblue', 'banner-red', 'banner-gray'];
-    const avatars = ['avatar-blue', 'avatar-orange', 'avatar-green', 'avatar-red'];
-
-    list.innerHTML = paginatedSpaces.map((space, index) => {
-      const globalIndex = startIndex + index;
-      const bannerClass = banners[globalIndex % banners.length];
-      const avatarClass = avatars[globalIndex % avatars.length];
-      const firstLetter = space.name ? space.name.charAt(0).toUpperCase() : 'S';
+  function updateLearningSpacePagination() {
+      const items = document.querySelectorAll('.learning-space-item');
+      if (items.length === 0) {
+          renderLearningSpacePagination(0);
+          return;
+      }
       
-      const roadmapUrl = space.id
-              ? `/student/learning-spaces?spaceId=${encodeURIComponent(space.id)}&focus=roadmap`
-              : '/student/learning-spaces';
+      const totalPages = Math.ceil(items.length / SPACES_PER_PAGE);
+      if (currentLearningSpacePage > totalPages) currentLearningSpacePage = totalPages;
+      if (currentLearningSpacePage < 1) currentLearningSpacePage = 1;
 
-      return `
-          <div class="col-md-6 mb-4">
-            <div class="classroom-card h-100">
-                <div class="card-banner ${bannerClass}">
-                    <div class="banner-pattern"></div>
-                    <a href="${roadmapUrl}" class="card-title-link">
-                        <h2 class="course-title">${escapeHtml(space.name || 'Untitled Learning Space')}</h2>
-                        <div class="course-subtitle">${escapeHtml(space.description || 'Sample Space')}</div>
-                    </a>
-                    <div class="card-options-top">
-                        <i class="ti ti-dots-vertical"></i>
-                    </div>
-                </div>
-
-                <div class="card-avatar ${avatarClass}">
-                    ${firstLetter}
-                </div>
-
-                <div class="card-body-content">
-                    <!-- Student specific body content could go here, keeping it clean per design -->
-                </div>
-
-                <div class="card-footer">
-                    <div class="d-flex align-items-center gap-1">
-                        <span class="status-indicator status-${escapeHtml(space.status || 'ACTIVE')}" title="Status"></span>
-                        <span class="visibility-text text-muted" style="font-size: 0.75rem; font-weight: 600;">${escapeHtml(space.visibility || 'PUBLIC')}</span>
-                    </div>
-                    <div class="d-flex gap-1">
-                        <div class="footer-icon"><i class="ti ti-share"></i></div>
-                        <div class="footer-icon"><i class="ti ti-id-badge-2"></i></div>
-                        <div class="footer-icon"><i class="ti ti-folder"></i></div>
-                        <div class="footer-icon"><i class="ti ti-dots-vertical"></i></div>
-                    </div>
-                </div>
-            </div>
-          </div>`;
-    }).join('');
-
-    renderLearningSpacePagination(totalPages);
+      items.forEach((item, index) => {
+          const page = Math.floor(index / SPACES_PER_PAGE) + 1;
+          if (page === currentLearningSpacePage) {
+              item.style.display = '';
+          } else {
+              item.style.display = 'none';
+          }
+      });
+      renderLearningSpacePagination(totalPages);
   }
 
   function renderLearningSpacePagination(totalPages) {
@@ -334,9 +323,7 @@
   window.changeLearningSpacePage = function(event, page) {
       event.preventDefault();
       currentLearningSpacePage = page;
-      if (window.currentDashboardData && window.currentDashboardData.learningSpaces) {
-          renderLearningSpaces(window.currentDashboardData.learningSpaces);
-      }
+      updateLearningSpacePagination();
   };
 
   function quizAction(quiz) {
@@ -392,107 +379,7 @@
   }
 
 
-  function documentTypeLabel(type) {
-    const labels = {
-      VIDEO: 'Video',
-      YOUTUBE: 'YouTube',
-      PDF: 'PDF',
-      GOOGLE_DRIVE: 'Google Drive',
-      GITHUB: 'GitHub',
-      WEBSITE: 'Website',
-      OTHER: 'Document'
-    };
-    return labels[type] || 'Document';
-  }
 
-  function documentIcon(type) {
-    const icons = {
-      VIDEO: 'ti-video',
-      YOUTUBE: 'ti-brand-youtube',
-      PDF: 'ti-file-type-pdf',
-      GOOGLE_DRIVE: 'ti-brand-google-drive',
-      GITHUB: 'ti-brand-github',
-      WEBSITE: 'ti-world',
-      OTHER: 'ti-file-description'
-    };
-    return icons[type] || 'ti-file-description';
-  }
-
-  function documentLogo(doc) {
-    const type = String(doc?.documentType || 'OTHER').toUpperCase();
-    const url = String(doc?.url || doc?.fullUrl || '').toLowerCase();
-    const title = String(doc?.title || '').toLowerCase();
-    const sourceText = `${url} ${title}`;
-
-    if (type === 'YOUTUBE' || sourceText.includes('youtube') || sourceText.includes('youtu.be')) {
-      return documentLogoSources.YOUTUBE;
-    }
-    if (type === 'GOOGLE_DRIVE' || sourceText.includes('drive.google')) {
-      return documentLogoSources.GOOGLE_DRIVE;
-    }
-    if (type === 'PDF' || sourceText.includes('.pdf')) {
-      return documentLogoSources.PDF;
-    }
-    if (type === 'VIDEO' || /\.(mp4|webm|mov|avi|mkv)(?:$|[?#])/.test(url) || sourceText.includes('video')) {
-      return documentLogoSources.VIDEO;
-    }
-    if (type === 'OTHER' || sourceText.includes('.doc') || sourceText.includes('docx') || sourceText.includes('document')) {
-      return documentLogoSources.DOC;
-    }
-    return '';
-  }
-
-  function documentIconTemplate(doc) {
-    const type = doc?.documentType || 'OTHER';
-    const logo = documentLogo(doc);
-    if (logo) {
-      return `
-              <span class="document-logo-box flex-shrink-0">
-                <img class="document-logo-img" src="${escapeHtml(logo)}" alt="${escapeHtml(documentTypeLabel(type))} logo" loading="lazy">
-              </span>`;
-    }
-    return `
-              <span class="document-logo-box document-logo-box-fallback flex-shrink-0">
-                <i class="ti ${documentIcon(type)}"></i>
-              </span>`;
-  }
-
-  function renderRecentDocuments(documents) {
-    const container = document.getElementById('recentDocuments');
-    if (!container) return;
-
-    if (!documents.length) {
-      container.innerHTML = `
-          <div class="text-center text-muted py-4">
-            <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
-            <h5 class="fw-bold text-dark mt-3 mb-2">No Documents Yet</h5>
-            <p class="small fw-semibold mb-0">Your instructor has not added documents for your learning spaces yet.</p>
-          </div>`;
-      return;
-    }
-
-    container.innerHTML = documents.slice(0, 8).map((doc) => {
-      const type = doc.documentType || 'OTHER';
-      const meta = [doc.learningSpaceName, doc.learningPathTitle]
-              .filter(Boolean)
-              .join(' · ');
-      const href = doc.url || '#';
-      const disabledClass = doc.url ? '' : ' opacity-75 pe-none';
-      const clickHandler = doc.nodeId ? ` onclick="openDocumentNode(event, ${doc.nodeId})"` : '';
-
-      return `
-          <a class="notification-item rounded-4 border mb-2${disabledClass}" href="javascript:void(0)"${clickHandler}>
-            <div class="d-flex gap-3 align-items-start">
-              ${documentIconTemplate(doc)}
-              <div class="min-w-0">
-                <h6 class="fw-bold mb-1">${escapeHtml(doc.title || 'Untitled Document')}</h6>
-                <p class="small text-muted fw-semibold mb-1">${escapeHtml(meta || 'Learning space')}</p>
-                <span class="small text-primary fw-bold">${escapeHtml(documentTypeLabel(type))}</span>
-              </div>
-            </div>
-          </a>`;
-    }).join('');
-  }
 
   async function openDocumentNode(event, nodeId) {
     event.preventDefault();
@@ -611,14 +498,12 @@
     window.currentDashboardData = dashboard;
     const learningSpaces = dashboard.learningSpaces || [];
     const quizzes = flattenQuizzes(learningSpaces);
-    const documents = dashboard.recentDocuments || [];
 
-    renderProfile(dashboard);
-    renderStats(learningSpaces, quizzes);
-    renderLearningSpaces(learningSpaces);
+
+
+    updateLearningSpacePagination();
     renderQuizAccordion(learningSpaces);
 
-    renderRecentDocuments(documents);
     
     loadPublicSpaces();
   }
