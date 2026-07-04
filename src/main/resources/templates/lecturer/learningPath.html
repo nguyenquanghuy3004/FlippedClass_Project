@@ -754,6 +754,31 @@
                     });
                 });
 
+                // Xóa video khỏi bài học
+                $('.delete-video-btn').click(function (e) {
+                    e.preventDefault();
+                    const nodeId = $(this).data('nodeid');
+                    Swal.fire({
+                        title: 'Delete Video?',
+                        text: "Are you sure you want to delete the video from this lesson?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, delete video!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/api/learning-nodes/${nodeId}/items/video`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': 'Bearer ' + token }
+                            }).then(res => {
+                                if (res.ok) window.location.reload();
+                                else Swal.fire('Error!', 'Failed to delete video', 'error');
+                            });
+                        }
+                    });
+                });
+
                 // Lưu bài học mới (Create)
                 $('#btnSaveNode').click(function () {
                     $('#createNodeError').hide();

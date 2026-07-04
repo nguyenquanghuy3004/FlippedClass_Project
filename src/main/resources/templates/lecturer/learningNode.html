@@ -69,6 +69,12 @@
                                 </a>
                             </li>
                             <li th:if="${node.nodeType == 'VIDEO'}">
+                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 delete-video-btn"
+                                   href="#" th:data-nodeid="${node.id}">
+                                    <i class="ti ti-trash" style="color:#ef4444;"></i> Delete Video
+                                </a>
+                            </li>
+                            <li th:if="${node.nodeType == 'VIDEO'}">
                                 <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 add-youtube-btn"
                                    href="#" th:data-nodeid="${node.id}" style="color:#ef4444;">
                                     <i class="ti ti-brand-youtube"></i> Add Youtube Link

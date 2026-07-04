@@ -4,9 +4,12 @@ import com.example.flippedclass.dto.request.CreateLearningNodeRequest;
 import com.example.flippedclass.dto.response.LearningNodeResponse;
 import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.LearningPath;
+import com.example.flippedclass.repository.LearningNodeItemRepository;
 import com.example.flippedclass.repository.LearningNodeRepository;
 import com.example.flippedclass.repository.LearningPathRepository;
+import com.example.flippedclass.repository.QuizRepository;
 import com.example.flippedclass.service.LearningNodeService;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,10 +59,13 @@ public class LearningNodeServiceImpl implements LearningNodeService {
     }
 
     @Autowired
-    private com.example.flippedclass.repository.LearningNodeItemRepository learningNodeItemRepository;
+    private LearningNodeItemRepository learningNodeItemRepository;
 
     @Autowired
-    private com.example.flippedclass.repository.QuizRepository quizRepository;
+    private QuizRepository quizRepository;
+
+    @jakarta.persistence.PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     @Transactional
@@ -67,13 +73,23 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         LearningNode node = learningNodeRepository.findById(nodeId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài học"));
         
-        // Explicitly delete children to avoid JPA orphanRemoval bidirectional quirks
-        if (node.getItems() != null && !node.getItems().isEmpty()) {
-            learningNodeItemRepository.deleteAllInBatch(node.getItems());
-        }
-        if (node.getQuizzes() != null && !node.getQuizzes().isEmpty()) {
-            quizRepository.deleteAllInBatch(node.getQuizzes());
-        }
+        // Break self-referencing relationships first
+        entityManager.createQuery("UPDATE NodeDiscussion d SET d.parentDiscussion = null WHERE d.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("UPDATE NodeComment c SET c.parentComment = null WHERE c.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        
+        // Delete all dependent records via bulk JPQL to avoid FK constraints
+        entityManager.createQuery("DELETE FROM NodeConnection c WHERE c.sourceNode.id = :nodeId OR c.targetNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM NodeProgress p WHERE p.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM NodeDiscussion d WHERE d.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM NodeComment c WHERE c.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM LessonSummary s WHERE s.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM SharedSolution s WHERE s.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM TestCase t WHERE t.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM GroupActivity g WHERE g.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+
+        // Items and quizzes are mapped with CascadeType.ALL in LearningNode, 
+        // so Hibernate will automatically delete them when we delete the node.
+        // Do NOT use deleteAllInBatch here as it causes StaleStateException.
         
         learningNodeRepository.delete(node);
     }

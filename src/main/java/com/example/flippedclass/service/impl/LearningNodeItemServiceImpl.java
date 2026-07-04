@@ -80,6 +80,14 @@ public class LearningNodeItemServiceImpl implements LearningNodeItemService {
 
     @Override
     @Transactional
+    public void deleteVideoByNodeId(Long nodeId) {
+        List<LearningNodeItem> items = learningNodeItemRepository.findByLearningNodeIdOrderByPosition(nodeId);
+        List<LearningNodeItem> videos = items.stream().filter(i -> i.getItemType() == ItemType.VIDEO).toList();
+        learningNodeItemRepository.deleteAll(videos);
+    }
+
+    @Override
+    @Transactional
     public void reorderItem(List<Long> itemIdsInNewOrder) {
         for (int i = 0; i < itemIdsInNewOrder.size(); i++) {
             Long itemId = itemIdsInNewOrder.get(i);
