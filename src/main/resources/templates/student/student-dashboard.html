@@ -611,7 +611,8 @@
     window.currentDashboardData = dashboard;
     const learningSpaces = dashboard.learningSpaces || [];
     const quizzes = flattenQuizzes(learningSpaces);
-    const documents = dashboard.recentDocuments || [];
+    const allDocuments = dashboard.recentDocuments || [];
+    const documents = allDocuments.filter(doc => doc.documentType === 'PDF');
 
     renderProfile(dashboard);
     renderStats(learningSpaces, quizzes);

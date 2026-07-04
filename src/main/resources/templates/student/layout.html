@@ -255,15 +255,22 @@
     }
 
     async function fetchNotifications() {
-      if (!token) return;
+      const list = document.getElementById('notificationList');
+      if (!token) {
+        if (list) list.innerHTML = '<div class="text-center p-3 text-danger">No token found</div>';
+        return;
+      }
       try {
         const res = await fetch('/api/notifications', { headers: { Authorization: `Bearer ${token}` } });
         if (res.ok) {
           const notifications = await res.json();
           renderNotificationsAPI(notifications);
+        } else {
+          if (list) list.innerHTML = `<div class="text-center p-3 text-danger">Error: ${res.status}</div>`;
         }
       } catch (e) {
         console.error('Failed to fetch notifications', e);
+        if (list) list.innerHTML = `<div class="text-center p-3 text-danger">Failed to fetch notifications</div>`;
       }
     }
 

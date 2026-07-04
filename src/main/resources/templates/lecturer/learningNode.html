@@ -57,24 +57,7 @@
                                 </a>
                             </li>
 
-                            <li th:if="${node.nodeType != 'QUIZ'}">
-                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-video-btn"
-                                   href="#" th:data-nodeid="${node.id}">
-                                    <i class="ti ti-upload" style="color:#4f46e5;"></i> Upload Video (MP4)
-                                </a>
-                            </li>
-                            <li th:if="${node.nodeType != 'QUIZ'}">
-                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 add-youtube-btn"
-                                   href="#" th:data-nodeid="${node.id}" style="color:#ef4444;">
-                                    <i class="ti ti-brand-youtube"></i> Add Youtube Link
-                                </a>
-                            </li>
-                            <li th:if="${node.nodeType != 'QUIZ'}">
-                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 text-danger delete-video-item-btn"
-                                   href="#" th:data-nodeid="${node.id}">
-                                    <i class="ti ti-video-off"></i> Delete Video
-                                </a>
-                            </li>
+
                             <li th:if="${node.nodeType == 'DOCUMENT'}">
                                 <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-document-btn"
                                    href="#" th:data-nodeid="${node.id}" style="color:#059669;">
@@ -186,7 +169,7 @@
                                 <select class="form-select border-0 rounded-3" style="background:#f4f5fb;" id="nodeType">
                                     <option value="LESSON" th:unless="${isSupporter != null and isSupporter}">📖 Theory Lesson</option>
                                     <option value="PRACTICE">💻 Practice Module</option>
-                                    <option value="VIDEO">▶️ Video Lesson</option>
+
                                     <option value="DOCUMENT">📄 Document</option>
                                     <option value="REVIEW" th:unless="${isSupporter != null and isSupporter}">🔁 Review Session</option>
                                 </select>
@@ -252,7 +235,7 @@
                                 <select class="form-select border-0 rounded-3" style="background:#f4f5fb;" id="editNodeType">
                                     <option value="LESSON" th:unless="${isSupporter != null and isSupporter}">📖 Theory Lesson</option>
                                     <option value="PRACTICE">💻 Practice Module</option>
-                                    <option value="VIDEO">▶️ Video Lesson</option>
+
                                     <option value="DOCUMENT">📄 Document</option>
                                     <option value="REVIEW" th:unless="${isSupporter != null and isSupporter}">🔁 Review Session</option>
                                 </select>
