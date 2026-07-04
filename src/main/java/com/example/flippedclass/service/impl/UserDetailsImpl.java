@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.example.flippedclass.enums.UserStatus;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +26,8 @@ public class UserDetailsImpl implements UserDetails {
     @JsonIgnore
     private String password;
 
+    private UserStatus status;
+
     private Collection<? extends GrantedAuthority> authorities;
 
     public static UserDetailsImpl build(User user) {
@@ -38,6 +41,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getStatus(),
                 authorities);
     }
 
@@ -48,7 +52,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return this.status == UserStatus.ACTIVE;
     }
 
     @Override
@@ -58,7 +62,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.status == UserStatus.ACTIVE;
     }
 
     @Override

@@ -36,11 +36,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken( userDetails,   null,   userDetails.getAuthorities());
-
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (userDetails != null && userDetails.isAccountNonLocked() && userDetails.isEnabled()) {
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken( userDetails,   null,   userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    logger.warn("Locked or disabled user attempted to access endpoint: {}", username);
+                }
             }
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e);

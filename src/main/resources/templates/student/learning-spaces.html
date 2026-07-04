@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
 
+  <script th:src="@{/assets/js/auth-interceptor.js}"></script>
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
 
@@ -427,10 +428,10 @@
         : 'Confirm Join';
     }
 
-    // Hiển thị modal thủ công (không cần window.bootstrap vì main.js là ES module)
+    // Hiá»ƒn thá»‹ modal thá»§ cÃ´ng (khÃ´ng cáº§n window.bootstrap vÃ¬ main.js lÃ  ES module)
     function showJoinConfirmModal() {
       if (!joinConfirmModalElement) return;
-      // Tạo backdrop
+      // Táº¡o backdrop
       const backdrop = document.createElement('div');
       backdrop.className = 'modal-backdrop fade show';
       backdrop.id = 'joinModalBackdrop';
@@ -572,9 +573,9 @@
       });
     }
 
-    // Hàm chính: Tải danh sách các lớp học (learning spaces) từ backend
+    // HÃ m chÃ­nh: Táº£i danh sÃ¡ch cÃ¡c lá»›p há»c (learning spaces) tá»« backend
     async function loadSpaces(preferredSpaceId = null) {
-      // Kiểm tra quyền đăng nhập
+      // Kiá»ƒm tra quyá»n Ä‘Äƒng nháº­p
       if (!token || !userId) {
         window.location.href = '/login';
         return;
@@ -612,10 +613,10 @@
       }
     }
 
-    // Hàm hiển thị danh sách các lớp học (cột bên trái)
+    // HÃ m hiá»ƒn thá»‹ danh sÃ¡ch cÃ¡c lá»›p há»c (cá»™t bÃªn trÃ¡i)
     function renderSpaces() {
       const keyword = state.searchTerm.trim().toLowerCase();
-      // Lọc danh sách lớp học theo từ khóa tìm kiếm
+      // Lá»c danh sÃ¡ch lá»›p há»c theo tá»« khÃ³a tÃ¬m kiáº¿m
       const filtered = state.spaces.filter((space) => {
         const haystack = `${space.name || ''} ${space.description || ''} ${space.inviteCode || ''}`.toLowerCase();
         return haystack.includes(keyword);
@@ -672,17 +673,17 @@
       </div>`;
     }
 
-    // Hàm xử lý khi người dùng chọn/nhấp vào một lớp học cụ thể
+    // HÃ m xá»­ lÃ½ khi ngÆ°á»i dÃ¹ng chá»n/nháº¥p vÃ o má»™t lá»›p há»c cá»¥ thá»ƒ
     async function selectSpace(spaceId) {
       const selected = state.spaces.find((space) => space.id === Number(spaceId));
       if (!selected) return;
 
       state.selectedSpaceId = selected.id;
-      renderSpaces(); // Cập nhật lại giao diện (đánh dấu active)
-      renderDetailLoading(selected); // Hiển thị trạng thái đang tải dữ liệu roadmap
+      renderSpaces(); // Cáº­p nháº­t láº¡i giao diá»‡n (Ä‘Ã¡nh dáº¥u active)
+      renderDetailLoading(selected); // Hiá»ƒn thá»‹ tráº¡ng thÃ¡i Ä‘ang táº£i dá»¯ liá»‡u roadmap
 
       try {
-        // Gọi API để lấy lộ trình học (roadmap/paths) của lớp được chọn
+        // Gá»i API Ä‘á»ƒ láº¥y lá»™ trÃ¬nh há»c (roadmap/paths) cá»§a lá»›p Ä‘Æ°á»£c chá»n
         const response = await fetch(`/api/learning-spaces/${selected.id}/learning-paths`, {
           headers: authHeaders(false)
         });
@@ -721,9 +722,9 @@
       </section>`;
     }
 
-    // Hàm hiển thị chi tiết lộ trình học (roadmap) của lớp học bên cột phải
+    // HÃ m hiá»ƒn thá»‹ chi tiáº¿t lá»™ trÃ¬nh há»c (roadmap) cá»§a lá»›p há»c bÃªn cá»™t pháº£i
     function renderDetail(space, paths, errorMessage = '') {
-      // Nếu có lỗi, hiển thị thông báo lỗi
+      // Náº¿u cÃ³ lá»—i, hiá»ƒn thá»‹ thÃ´ng bÃ¡o lá»—i
       if (errorMessage) {
         spaceDetail.innerHTML = `
         ${detailHeaderTemplate(space)}
@@ -905,7 +906,7 @@
       }
     });
 
-    // Đóng modal khi bấm nút Cancel (data-bs-dismiss="modal")
+    // ÄÃ³ng modal khi báº¥m nÃºt Cancel (data-bs-dismiss="modal")
     joinConfirmModalElement?.querySelector('[data-bs-dismiss="modal"]')?.addEventListener('click', hideJoinConfirmModal);
 
     spaceDetail.addEventListener('click', (event) => {
@@ -979,3 +980,5 @@
 </body>
 
 </html>
+
+

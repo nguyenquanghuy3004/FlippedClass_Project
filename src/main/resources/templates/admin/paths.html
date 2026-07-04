@@ -71,7 +71,7 @@
                     $('#pageInfo').text(`Showing ${response.numberOfElements} of ${response.totalElements} results`);
                 },
                 error: function(err) {
-                    alert('Error loading paths');
+                    Swal.fire('Error!', 'Error loading paths', 'error');
                 }
             });
         }
@@ -143,15 +143,27 @@
         }
 
         function updateStatus(id, newStatus) {
-            if(!confirm(`Are you sure you want to change status to ${newStatus}?`)) return;
-            $.ajax({
-                url: `/api/admin/curriculum/paths/${id}/status?status=${newStatus}`,
-                type: 'PUT',
-                success: function() {
-                    loadPaths(currentPage, currentKeyword);
-                },
-                error: function() {
-                    alert('Error updating status');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Are you sure you want to change status to ${newStatus}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: newStatus === 'DELETED' ? '#d33' : '#3085d6',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, update it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/api/admin/curriculum/paths/${id}/status?status=${newStatus}`,
+                        type: 'PUT',
+                        success: function() {
+                            Swal.fire('Updated!', 'Status updated successfully.', 'success');
+                            loadPaths(currentPage, currentKeyword);
+                        },
+                        error: function() {
+                            Swal.fire('Error!', 'Error updating status', 'error');
+                        }
+                    });
                 }
             });
         }

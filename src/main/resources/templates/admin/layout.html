@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <head>
@@ -10,8 +10,10 @@
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
   <link rel="manifest" th:href="@{/assets/site.webmanifest}">
 
+  <script th:src="@{/assets/js/auth-interceptor.js}"></script>
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- FontAwesome for fallback -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" th:href="@{/assets/css/admin-layout.css}">
@@ -120,6 +122,17 @@
       </li>
     </ul>
   </aside>
+  <script>
+    (function() {
+        const currentUrl = window.location.pathname;
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+            const href = link.getAttribute('href');
+            if (currentUrl.startsWith(href) || (currentUrl === '/admin' && href === '/admin/dashboard')) {
+                link.classList.add('active');
+            }
+        });
+    })();
+  </script>
 
   <!-- MAIN CONTENT -->
   <main id="content" class="content py-10">
@@ -149,24 +162,21 @@
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             if (!payload.roles || (!payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
-                alert('Access Denied. Admin privileges required.');
-                window.location.href = '/signin';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: 'Admin privileges required.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = '/signin';
+                });
             }
         } catch (e) {
             window.location.href = '/signin';
         }
     }
 
-    // Sidebar Active State
-    document.addEventListener("DOMContentLoaded", function() {
-        const currentUrl = window.location.pathname;
-        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
-            const href = link.getAttribute('href');
-            if (currentUrl.startsWith(href) || (currentUrl === '/admin' && href === '/admin/dashboard')) {
-                link.classList.add('active');
-            }
-        });
-    });
+
 
     // Setup AJAX to include JWT token
     $.ajaxSetup({
@@ -188,6 +198,8 @@
 </body>
 
 </html>
+
+
 
 
 

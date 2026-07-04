@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
 
+  <script th:src="@{/assets/js/auth-interceptor.js}"></script>
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
 
@@ -28,7 +29,7 @@
             localStorage.removeItem('user_id');
             window.location.href = '/login';
           } else if (!payload.roles || (!payload.roles.includes('STUDENT') && !payload.roles.includes('ROLE_STUDENT'))) {
-            // Token không phải của Student (có thể do login bằng tab khác) -> force login
+            // Token khÃ´ng pháº£i cá»§a Student (cÃ³ thá»ƒ do login báº±ng tab khÃ¡c) -> force login
             window.location.href = '/login';
           }
         } catch (e) {
@@ -961,7 +962,7 @@
       const type = doc.documentType || 'OTHER';
       const meta = [doc.learningSpaceName, doc.learningPathTitle]
               .filter(Boolean)
-              .join(' · ');
+              .join(' Â· ');
       const href = doc.url || '#';
       const disabledClass = doc.url ? '' : ' opacity-75 pe-none';
       const targetAttrs = doc.url ? ' target="_blank" rel="noopener noreferrer"' : '';
@@ -1213,3 +1214,5 @@
 <script src="/js/active-time-tracker.js"></script>
 </body>
 </html>
+
+

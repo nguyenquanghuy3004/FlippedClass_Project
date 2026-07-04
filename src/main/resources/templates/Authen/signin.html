@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
@@ -10,6 +10,7 @@
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
   <link rel="manifest" th:href="@{/assets/site.webmanifest}">
+  <script th:src="@{/assets/js/auth-interceptor.js}"></script>
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" th:href="@{/assets/css/auth.css}">
@@ -107,9 +108,10 @@
         password: password
       })
     })
-            .then(response => {
+            .then(async response => {
               if (!response.ok) {
-                throw new Error('Sign in failed. Incorrect username or password.');
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.message || 'Sign in failed. Incorrect username or password.');
               }
               return response.json();
             })
@@ -154,9 +156,10 @@
         idToken: response.credential
       })
     })
-            .then(res => {
+            .then(async res => {
               if (!res.ok) {
-                throw new Error('Google sign in failed.');
+                 const err = await res.json().catch(() => ({}));
+                 throw new Error(err.message || 'Google sign in failed.');
               }
               return res.json();
             })
@@ -203,5 +206,7 @@
 
 </body>
 </html>
+
+
 
 

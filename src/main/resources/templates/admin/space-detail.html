@@ -225,22 +225,33 @@
                     $('#s-actions').html(actions);
                 },
                 error: function() {
-                    alert('Failed to load space details');
+                    Swal.fire('Error!', 'Failed to load space details', 'error');
                 }
             });
         }
 
         function updateStatus(newStatus) {
-            if (!confirm(`Are you sure you want to mark this space as ${newStatus}?`)) return;
-            
-            $.ajax({
-                url: `/api/admin/spaces/${spaceId}/status?status=${newStatus}`,
-                type: 'PUT',
-                success: function() {
-                    loadSpaceDetail();
-                },
-                error: function(err) {
-                    alert('Error updating status');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Are you sure you want to mark this space as ${newStatus}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: newStatus === 'DELETE' ? '#d33' : '#3085d6',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, update it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/api/admin/spaces/${spaceId}/status?status=${newStatus}`,
+                        type: 'PUT',
+                        success: function() {
+                            Swal.fire('Updated!', 'Status updated successfully.', 'success');
+                            loadSpaceDetail();
+                        },
+                        error: function(err) {
+                            Swal.fire('Error!', 'Error updating status.', 'error');
+                        }
+                    });
                 }
             });
         }
