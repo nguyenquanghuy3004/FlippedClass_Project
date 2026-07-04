@@ -1132,16 +1132,19 @@
                                     } else if (item.itemType === 'PDF') {
                                         html += `
                                     <div class="mb-3">
-                                        <div class="border rounded-3 p-3 d-flex align-items-center gap-3 shadow-sm bg-white">
-                                            <div class="bg-danger-subtle text-danger p-2 rounded-2">
-                                                <i class="ti ti-file-pdf fs-3"></i>
-                                            </div>
-                                            <div class="flex-grow-1 overflow-hidden">
-                                                <a href="${item.fullUrl}" target="_blank" class="text-decoration-none text-dark">
+                                        <div class="border rounded-3 p-3 d-flex align-items-center justify-content-between shadow-sm bg-white">
+                                            <div class="d-flex align-items-center gap-3 overflow-hidden flex-grow-1">
+                                                <div class="bg-danger-subtle text-danger p-2 rounded-2">
+                                                    <i class="ti ti-file-pdf fs-3"></i>
+                                                </div>
+                                                <a href="${item.fullUrl}" target="_blank" class="text-decoration-none text-dark d-flex align-items-center gap-2">
                                                     <h6 class="mb-0 text-truncate fw-bold hover-text-primary" style="transition: color 0.2s;">${item.title}</h6>
+                                                    <span class="action-cta-badge" style="padding: 0.25rem 0.7rem; display: inline-flex; align-items: center; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                                                        Vào xem document <i class="ti ti-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                                                    </span>
                                                 </a>
                                             </div>
-                                            <button class="btn btn-sm btn-outline-danger border-0 delete-item-btn" data-itemid="${item.id}" title="Remove Document">
+                                            <button class="btn btn-sm btn-outline-danger border-0 delete-item-btn ms-2" data-itemid="${item.id}" title="Remove Document">
                                                 <i class="ti ti-trash"></i>
                                             </button>
                                         </div>

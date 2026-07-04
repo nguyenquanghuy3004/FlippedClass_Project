@@ -21,9 +21,20 @@
                                 : 'ti-book-2'))))"
                                th:style="${node.nodeType == 'PRACTICE'} ? 'color: #10b981;' : ''"></i>
                         </div>
-                        <span class="fw-semibold" th:text="${node.title}"
-                              style="font-size:0.92rem;color:#334155;letter-spacing:0.1px;transition:color 0.2s;"
-                              onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'">Node Title</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-semibold" th:text="${node.title}"
+                                  style="font-size:0.92rem;color:#334155;letter-spacing:0.1px;transition:color 0.2s;"
+                                  onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'">Node Title</span>
+                            <span class="action-cta-badge" th:data-type="${node.nodeType}" style="padding: 0.25rem 0.7rem;" th:if="${node.nodeType != 'DOCUMENT'}">
+                                <i th:class="'ti me-1 '
+                                    + (${node.nodeType == 'VIDEO'}    ? 'ti-player-play'
+                                    : (${node.nodeType == 'DOCUMENT'} ? 'ti-file-text'
+                                    : (${node.nodeType == 'PRACTICE'} ? 'ti-code'
+                                    : (${node.nodeType == 'QUIZ'}     ? 'ti-help-circle'
+                                    : 'ti-book-2'))))" style="font-size: 0.8rem;"></i>
+                                <span th:text="${node.nodeType == 'VIDEO' ? 'Vào xem video' : (node.nodeType == 'DOCUMENT' ? 'Vào xem document' : (node.nodeType == 'PRACTICE' ? 'Vào làm thực hành' : (node.nodeType == 'QUIZ' ? 'Vào làm quiz' : node.nodeType)))}">Vào xem</span>
+                            </span>
+                        </div>
                     </a>
 
                     <!-- Right: options menu -->
@@ -73,18 +84,6 @@
                     </div>
                 </div>
 
-                <!-- Action CTA badge row (below header, above content) -->
-                <div class="text-center mt-2 mb-1">
-                    <span class="action-cta-badge action-cta-static" th:data-type="${node.nodeType}">
-                        <i th:class="'ti me-1 '
-                            + (${node.nodeType == 'VIDEO'}    ? 'ti-player-play'
-                            : (${node.nodeType == 'DOCUMENT'} ? 'ti-file-text'
-                            : (${node.nodeType == 'PRACTICE'} ? 'ti-code'
-                            : (${node.nodeType == 'QUIZ'}     ? 'ti-help-circle'
-                            : 'ti-book-2'))))" style="font-size: 0.75rem;"></i>
-                        <span th:text="${node.nodeType == 'VIDEO' ? 'Vào xem video' : (node.nodeType == 'DOCUMENT' ? 'Vào xem document' : (node.nodeType == 'PRACTICE' ? 'Vào làm thực hành' : (node.nodeType == 'QUIZ' ? 'Vào làm quiz' : node.nodeType)))}">Vào xem</span>
-                    </span>
-                </div>
 
                 <!-- Content area (collapsible) -->
                 <div class="node-items-container node-collapsible-body" th:if="${node.nodeType != 'PRACTICE'}"
