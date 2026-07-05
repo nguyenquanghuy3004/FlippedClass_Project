@@ -58,30 +58,31 @@
       <p class="mt-3 mb-0">Loading node content...</p>
     </div>
   </div>
-</main>
 
-<!-- Modal Share Solution -->
-<div class="modal fade" id="shareSolutionModal" tabindex="-1" aria-labelledby="shareSolutionModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-      <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
-        <h5 class="modal-title" id="shareSolutionModalLabel" style="font-weight: 600;"><i class="ti ti-confetti text-warning"></i> Congratulations! 🎉</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p style="color: #475569; font-size: 0.95rem;">You have successfully passed all test cases! Would you like to share your solution with the class to help others learn?</p>
-        <div class="mb-3 mt-4">
-          <label for="shareSolutionTitle" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Title / Description</label>
-          <input type="text" class="form-control" id="shareSolutionTitle" placeholder="E.g., O(n) solution using HashMap" style="border-radius: 6px;">
+  <!-- Modal Share Solution -->
+  <div class="modal fade" id="shareSolutionModal" tabindex="-1" aria-labelledby="shareSolutionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+        <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
+          <h5 class="modal-title" id="shareSolutionModalLabel" style="font-weight: 600;"><i class="ti ti-confetti text-warning"></i> Congratulations! 🎉</h5>
+          <button type="button" class="btn-close" onclick="closeModalSafe('shareSolutionModal')" aria-label="Close"></button>
         </div>
-      </div>
-      <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="font-weight: 500;">Maybe Later</button>
-        <button type="button" class="btn btn-primary" id="btnConfirmShareSolution" style="font-weight: 500; display: flex; align-items: center; gap: 6px;"><i class="ti ti-share"></i> Share My Solution</button>
+        <div class="modal-body">
+          <p style="color: #475569; font-size: 0.95rem;">You have successfully passed all test cases! Would you like to share your solution with the class to help others learn?</p>
+          <div class="mb-3 mt-4">
+            <label for="shareSolutionTitle" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Title / Description</label>
+            <input type="text" class="form-control" id="shareSolutionTitle" placeholder="E.g., O(n) solution using HashMap" style="border-radius: 6px;">
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
+          <button type="button" class="btn btn-light" onclick="closeModalSafe('shareSolutionModal')" style="font-weight: 500;">Maybe Later</button>
+          <button type="button" class="btn btn-primary" id="btnConfirmShareSolution" style="font-weight: 500; display: flex; align-items: center; gap: 6px;"><i class="ti ti-share"></i> Share My Solution</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+</main>
+
 
 <th:block layout:fragment="scripts">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -100,6 +101,48 @@
       if (includeJson) headers['Content-Type'] = 'application/json';
       return headers;
     }
+
+    // Safe modal handling bypassing Bootstrap 5 AMD class bugs
+    window.openModalSafe = function(modalId) {
+        console.log('openModalSafe called for', modalId);
+        const modalEl = document.getElementById(modalId);
+        if (!modalEl) {
+            console.error('Modal not found:', modalId);
+            return;
+        }
+        modalEl.style.display = 'block';
+        setTimeout(() => modalEl.classList.add('show'), 10);
+        modalEl.removeAttribute('aria-hidden');
+        modalEl.setAttribute('aria-modal', 'true');
+        modalEl.setAttribute('role', 'dialog');
+        let backdrop = document.querySelector('.modal-backdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade';
+            document.body.appendChild(backdrop);
+            setTimeout(() => backdrop.classList.add('show'), 10);
+        }
+        document.body.classList.add('modal-open');
+    };
+
+    window.closeModalSafe = function(modalId) {
+        console.log('closeModalSafe called for', modalId);
+        const modalEl = document.getElementById(modalId);
+        if (!modalEl) return;
+        modalEl.classList.remove('show');
+        setTimeout(() => {
+            modalEl.style.display = 'none';
+        }, 150);
+        modalEl.setAttribute('aria-hidden', 'true');
+        modalEl.removeAttribute('aria-modal');
+        modalEl.removeAttribute('role');
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.classList.remove('show');
+            setTimeout(() => backdrop.remove(), 150);
+        }
+        document.body.classList.remove('modal-open');
+    };
 
     // MỚI: Realtime Comments
     if (nodeId) {
@@ -678,7 +721,7 @@
              <div id="communityContent" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f0f0f0; padding-bottom: 12px;">
                     <h3 style="margin: 0; color: #334155; font-size: 1.2rem;"><i class="ti ti-world"></i> Community Solutions</h3>
-                    <button class="btn btn-sm" style="background: #a855f7; color: white; border: none; font-weight: 600; border-radius: 6px; padding: 6px 12px;" data-bs-toggle="modal" data-bs-target="#shareSolutionModal"><i class="ti ti-share"></i> Share Solution</button>
+                    <button class="btn btn-sm" style="background: #a855f7; color: white; border: none; font-weight: 600; border-radius: 6px; padding: 6px 12px;" onclick="openModalSafe('shareSolutionModal')"><i class="ti ti-share"></i> Share Solution</button>
                 </div>
                 <div id="sharedSolutionsList">
                     <div class="text-center text-muted" style="padding: 20px;"><i class="ti ti-loader-2 ti-spin"></i> Loading community solutions...</div>
@@ -870,7 +913,7 @@
         require(['vs/editor/editor.main'], function () {
           const editorDiv = document.getElementById('editor');
           if (editorDiv) {
-            const storageKey = 'saved_code_node_' + nodeId;
+            const storageKey = 'saved_code_node_' + nodeId + '_user_' + userId;
             const savedCode = localStorage.getItem(storageKey);
             const fallbackCode = "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n}";
             const defaultCode = lecturerStarterCode || fallbackCode;
@@ -916,6 +959,7 @@
             setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
           });
         }
+
 
         function expandTerminal() {
           if (terminalCard && terminalCard.classList.contains('collapsed')) {
@@ -1026,8 +1070,7 @@
                             // Show Share Modal
                             const shareModalEl = document.getElementById('shareSolutionModal');
                             if (shareModalEl) {
-                               const shareModal = new bootstrap.Modal(shareModalEl);
-                               shareModal.show();
+                               openModalSafe('shareSolutionModal');
                             }
                         }
 
@@ -1242,7 +1285,7 @@
                   return;
               }
 
-              const codeString = window.myCodeEditor ? window.myCodeEditor.getValue() : '';
+              const codeString = typeof myCodeEditor !== 'undefined' && myCodeEditor ? myCodeEditor.getValue() : '';
 
               btnConfirmShareSolution.disabled = true;
               btnConfirmShareSolution.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Sharing...';
@@ -1257,9 +1300,7 @@
                   if (!response.ok) throw new Error(await readError(response));
 
                   // Success
-                  const shareModalEl = document.getElementById('shareSolutionModal');
-                  const shareModal = bootstrap.Modal.getInstance(shareModalEl);
-                  if (shareModal) shareModal.hide();
+                  closeModalSafe('shareSolutionModal');
 
                   document.getElementById('shareSolutionTitle').value = '';
                   
