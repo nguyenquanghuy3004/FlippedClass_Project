@@ -103,7 +103,15 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         node.setTitle(request.getTitle());
         node.setDescription(request.getDescription());
 
-
+        if (request.getContent() != null) {
+            node.setContent(request.getContent());
+        }
+        if (request.getStarterCode() != null) {
+            node.setStarterCode(request.getStarterCode());
+        }
+        if (request.getSolutionCode() != null) {
+            node.setSolutionCode(request.getSolutionCode());
+        }
         if (request.getNodeType() != null) {
             node.setNodeType(request.getNodeType());
         }

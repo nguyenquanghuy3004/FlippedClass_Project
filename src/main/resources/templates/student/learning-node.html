@@ -10,6 +10,8 @@
     <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
     <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
     <link rel="stylesheet" th:href="@{/assets/css/student-layout.css}">
+    <!-- Load marked.js globally before require.js to prevent AMD conflicts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
       body {
         padding-left: 0 !important;
@@ -856,6 +858,12 @@
         </aside>`;
       }
 
+      // Use globally loaded marked.js
+      if (window.marked) {
+          const mdContainer = document.getElementById('markdownPreviewContainer');
+          if (mdContainer) mdContainer.innerHTML = window.marked.parse(node.content || '*No description provided*');
+      }
+
       require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
       function initMonaco(lecturerStarterCode) {
@@ -1101,18 +1109,7 @@
                 });
             });
 
-            // Load marked.js to render the Markdown
-            if (!window.marked) {
-                const script = document.createElement('script');
-                script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
-                script.onload = () => {
-                   document.getElementById('markdownPreviewContainer').innerHTML = window.marked.parse(node.content || '*No description provided*');
-                };
-                document.head.appendChild(script);
-            } else {
-                document.getElementById('markdownPreviewContainer').innerHTML = window.marked.parse(node.content || '*No description provided*');
-            }
-            
+
             // Check pass status on load to unlock tabs automatically
             fetch(`/api/shared-solutions/node/${nodeId}/status`, { headers: authHeaders(false) })
                 .then(res => res.json())

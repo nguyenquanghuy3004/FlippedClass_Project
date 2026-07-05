@@ -22,6 +22,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
   <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-layout.css}">
+  <!-- Load marked.js globally before require.js to prevent AMD conflicts -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     /* --- Inlined from student-user-menu.js --- */
     (function () {
@@ -912,6 +916,13 @@
           </div>
         </aside>
       `;
+
+      // Use globally loaded marked.js
+      if (window.marked) {
+          const container = document.getElementById('markdownPreviewContainer');
+          if (container) container.innerHTML = window.marked.parse(node.content || '*No description provided*');
+      }
+
       // --- START: INIT MONACO EDITOR ---
       require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
@@ -935,17 +946,7 @@
               minimap: { enabled: false }
             });
 
-            // Load marked.js for Markdown
-            if (!window.marked) {
-                const script = document.createElement('script');
-                script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
-                script.onload = () => {
-                   document.getElementById('markdownPreviewContainer').innerHTML = window.marked.parse(node.content || '*No description provided*');
-                };
-                document.head.appendChild(script);
-            } else {
-                document.getElementById('markdownPreviewContainer').innerHTML = window.marked.parse(node.content || '*No description provided*');
-            }
+            // Markdown rendering has been moved outside of initMonaco to prevent blockages
 
             // Check if already passed previously to unlock
             fetch(`/api/shared-solutions/node/${nodeId}/status`, { headers: authHeaders(false) })
