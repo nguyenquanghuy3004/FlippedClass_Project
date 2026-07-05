@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <head>
@@ -122,17 +122,6 @@
       </li>
     </ul>
   </aside>
-  <script>
-    (function() {
-        const currentUrl = window.location.pathname;
-        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
-            const href = link.getAttribute('href');
-            if (currentUrl.startsWith(href) || (currentUrl === '/admin' && href === '/admin/dashboard')) {
-                link.classList.add('active');
-            }
-        });
-    })();
-  </script>
 
   <!-- MAIN CONTENT -->
   <main id="content" class="content py-10">
@@ -192,6 +181,29 @@
       localStorage.removeItem('jwt_token');
       window.location.href = '/signin';
     }
+
+    // Auto-highlight active sidebar menu item
+    $(document).ready(function() {
+      setTimeout(function() {
+        const path = window.location.pathname;
+        $('.sidebar .nav-link').removeClass('active');
+        
+        let matched = false;
+        $('.sidebar .nav-link').each(function() {
+          const href = $(this).attr('href');
+          // Only match specific sub-paths, not just "/admin" or "/"
+          if (href && href !== '/admin' && href !== '/' && path.startsWith(href)) {
+            $(this).addClass('active');
+            matched = true;
+          }
+        });
+        
+        // Fallback to Dashboard
+        if (!matched || path === '/admin') {
+          $('.sidebar .nav-link[href="/admin/dashboard"]').addClass('active');
+        }
+      }, 50);
+    });
   </script>
   <th:block layout:fragment="scripts"></th:block>
   <script src="/js/active-time-tracker.js"></script>
