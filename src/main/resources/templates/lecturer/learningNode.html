@@ -25,6 +25,7 @@
                             <span class="fw-semibold" th:text="${node.title}"
                                   style="font-size:0.92rem;color:#334155;letter-spacing:0.1px;transition:color 0.2s;"
                                   onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#334155'">Node Title</span>
+                            <i th:if="${node.prerequisiteNodeId != null}" class="ti ti-lock" style="color: #f59e0b; font-size: 1.1rem; filter: drop-shadow(0 2px 4px rgba(245,158,11,0.2));" title="Has Prerequisite"></i>
                             <span class="action-cta-badge" th:data-type="${node.nodeType}" style="padding: 0.25rem 0.7rem;" th:if="${node.nodeType != 'DOCUMENT'}">
                                 <i th:class="'ti me-1 '
                                     + (${node.nodeType == 'VIDEO'}    ? 'ti-player-play'
@@ -51,7 +52,8 @@
                                    th:data-nodeid="${node.id}"
                                    th:data-title="${node.title}"
                                    th:data-description="${node.description}"
-                                   th:data-type="${node.nodeType}">
+                                   th:data-type="${node.nodeType}"
+                                   th:data-prereq="${node.prerequisiteNodeId}">
                                     <i class="ti ti-pencil" style="color:#4f46e5;"></i> Edit Lesson
                                 </a>
                             </li>

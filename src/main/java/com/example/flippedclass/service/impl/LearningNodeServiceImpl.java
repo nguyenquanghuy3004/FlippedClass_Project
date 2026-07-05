@@ -4,9 +4,11 @@ import com.example.flippedclass.dto.request.CreateLearningNodeRequest;
 import com.example.flippedclass.dto.response.LearningNodeResponse;
 import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.LearningPath;
+import com.example.flippedclass.entity.NodeConnection;
 import com.example.flippedclass.repository.LearningNodeItemRepository;
 import com.example.flippedclass.repository.LearningNodeRepository;
 import com.example.flippedclass.repository.LearningPathRepository;
+import com.example.flippedclass.repository.NodeConnectionRepository;
 import com.example.flippedclass.repository.QuizRepository;
 import com.example.flippedclass.service.LearningNodeService;
 import jakarta.persistence.EntityManager;
@@ -30,6 +32,9 @@ public class LearningNodeServiceImpl implements LearningNodeService {
     @Autowired
     private LearningPathRepository learningPathRepository;
 
+    @Autowired
+    private NodeConnectionRepository nodeConnectionRepository;
+
     @Override
     public LearningNodeResponse createLearningNode(Long pathId, CreateLearningNodeRequest request) {
         LearningPath learningPath = learningPathRepository.findById(pathId)
@@ -44,6 +49,18 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .build();
 
         LearningNode savedNode = learningNodeRepository.save(node);
+
+        if (request.getPrerequisiteNodeId() != null && request.getPrerequisiteNodeId() > 0) {
+            LearningNode sourceNode = learningNodeRepository.findById(request.getPrerequisiteNodeId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy Prerequisite node"));
+            NodeConnection connection = NodeConnection.builder()
+                    .learningPath(learningPath)
+                    .sourceNode(sourceNode)
+                    .targetNode(savedNode)
+                    .conditionType("COMPLETION")
+                    .build();
+            nodeConnectionRepository.save(connection);
+        }
 
         return LearningNodeResponse.builder()
                 .id(savedNode.getId())
@@ -117,6 +134,19 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         }
 
         LearningNode savedNode = learningNodeRepository.save(node);
+
+        nodeConnectionRepository.deleteByTargetNodeId(savedNode.getId());
+        if (request.getPrerequisiteNodeId() != null && request.getPrerequisiteNodeId() > 0) {
+            LearningNode sourceNode = learningNodeRepository.findById(request.getPrerequisiteNodeId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy Prerequisite node"));
+            NodeConnection connection = NodeConnection.builder()
+                    .learningPath(savedNode.getLearningPath())
+                    .sourceNode(sourceNode)
+                    .targetNode(savedNode)
+                    .conditionType("COMPLETION")
+                    .build();
+            nodeConnectionRepository.save(connection);
+        }
 
         return LearningNodeResponse.builder()
                 .id(savedNode.getId())
