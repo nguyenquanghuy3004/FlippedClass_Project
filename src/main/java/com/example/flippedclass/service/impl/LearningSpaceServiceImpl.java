@@ -45,7 +45,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
     private User getCurrentUser() {
         return userRepository.findByUsername(getCurrentUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User không tìm thấy"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
     private String getCurrentUsername() {
@@ -56,7 +56,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         return principal.toString();
     }
 
-    // Kiểm tra user hiện tại có phải ADMIN không — ADMIN bypass mọi kiểm tra owner
+    // Check if current user is ADMIN - ADMIN bypasses all owner checks
     private boolean isCurrentUserAdmin() {
         return SecurityContextHolder.getContext().getAuthentication()
                 .getAuthorities().stream()
@@ -69,7 +69,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     public LearningSpaceResponse createLearningSpace(CreateLearningSpaceRequest request) {
 
         if (request.getName() == null || request.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Tên Learning Space không được để trống");
+            throw new IllegalArgumentException("Learning Space name cannot be empty");
         }
 
         User owner = getCurrentUser();
@@ -77,7 +77,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         // Security check for STUDENTs: Must be a SUPPORTER in at least one space
         if (owner.getRoles().stream().noneMatch(r -> r.getName() == com.example.flippedclass.enums.RoleName.MENTOR || r.getName() == com.example.flippedclass.enums.RoleName.ADMIN)) {
             if (!memberRepository.existsByUser_IdAndRole(owner.getId(), MemberRole.SUPPORTER)) {
-                throw new IllegalArgumentException("Chỉ những sinh viên được thăng cấp (Supporter) mới có quyền tạo Learning Space.");
+                throw new IllegalArgumentException("Only promoted students (Supporter) have the right to create a Learning Space.");
             }
         }
 
@@ -85,7 +85,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         List<LearningSpace> existingSpaces = learningSpaceRepository.findByOwnerIdAndStatus(owner.getId(), LearningSpaceStatus.ACTIVE);
         boolean nameExists = existingSpaces.stream().anyMatch(s -> s.getName().equalsIgnoreCase(request.getName().trim()));
         if (nameExists) {
-            throw new IllegalArgumentException("Bạn đã có một Mentoring Space với tên này rồi. Vui lòng chọn tên khác!");
+            throw new IllegalArgumentException("You already have a Mentoring Space with this name. Please choose another name!");
         }
 
         // Create Entity and save
@@ -100,7 +100,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
                 .build();
         LearningSpace savedSpace = learningSpaceRepository.save(learningSpace);
 
-        // tạo luôn OWNER trong bảng member
+        // Create OWNER in member table
         LearningSpaceMember ownerMember = new LearningSpaceMember();
         ownerMember.setLearningSpace(savedSpace);
         ownerMember.setUser(owner);
@@ -186,7 +186,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     public LearningSpaceResponse getSpaceByInviteCode(String inviteCode) {
         String normalizedInviteCode = inviteCode == null ? "" : inviteCode.trim();
         LearningSpace learningSpace = learningSpaceRepository.findByInviteCodeIgnoreCaseAndStatus(normalizedInviteCode, LearningSpaceStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("Mã mời không hợp lệ hoặc lớp đã bị xóa"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid invite code or the space has been deleted"));
 
         return LearningSpaceResponse.builder()
                 .id(learningSpace.getId())
@@ -204,13 +204,13 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Transactional
     @Override
     public LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail) {
-        LearningSpace space = learningSpaceRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy Learning Space hoặc đã bị xóa"));
+        LearningSpace space = learningSpaceRepository.findById(id).orElseThrow(() -> new RuntimeException("Learning Space not found or has been deleted"));
 
-        // ADMIN bypass kiểm tra owner
+        // ADMIN bypasses owner check
         if (!isCurrentUserAdmin()) {
             String username = getCurrentUsername();
             if (!space.getOwner().getUsername().equals(username)) {
-                throw new IllegalArgumentException("Bạn không có quyền cập nhật Learning Space này");
+                throw new IllegalArgumentException("You don't have permission to update this Learning Space");
             }
         }
 
@@ -231,22 +231,22 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
         if (!inviteCode.isEmpty()) {
             learningSpace = learningSpaceRepository.findByInviteCodeIgnoreCaseAndStatus(inviteCode, LearningSpaceStatus.ACTIVE)
-                    .orElseThrow(() -> new IllegalArgumentException("Mã mời không hợp lệ hoặc lớp đã bị xóa"));
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid invite code or the space has been deleted"));
         } else if (request.getSpaceId() != null) {
             learningSpace = learningSpaceRepository.findByIdAndStatus(request.getSpaceId(), LearningSpaceStatus.ACTIVE)
-                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lớp học"));
+                    .orElseThrow(() -> new IllegalArgumentException("Learning Space not found"));
 
             if (learningSpace.getVisibility() == VisibilityType.PRIVATE) {
-                throw new IllegalArgumentException("Lớp học này là riêng tư, bạn phải có mã mời để tham gia");
+                throw new IllegalArgumentException("This space is private, you need an invite code to join");
             }
         } else {
-            throw new IllegalArgumentException("Vui lòng cung cấp mã mời hoặc ID lớp học");
+            throw new IllegalArgumentException("Please provide an invite code or space ID");
         }
 
         User currentUser = getCurrentUser();
 
         if (memberRepository.existsByLearningSpaceAndUser(learningSpace, currentUser)) {
-            throw new IllegalArgumentException("Bạn đã tham gia lớp học này rồi");
+            throw new IllegalArgumentException("You have already joined this space");
         }
 
         LearningSpaceMember member = new LearningSpaceMember();
@@ -258,7 +258,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
         // Return Response
         JoinLearningSpaceResponse response = new JoinLearningSpaceResponse();
-        response.setMessage("Tham gia lớp học thành công!");
+        response.setMessage("Successfully joined the space!");
         response.setLearningSpaceId(learningSpace.getId());
         response.setLearningSpaceName(learningSpace.getName());
         response.setRole(MemberRole.MEMBER);
@@ -270,21 +270,23 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Transactional
     public void deleteLearningSpace(Long id) {
         LearningSpace learningSpace = learningSpaceRepository
-                .findByIdAndStatus(id, LearningSpaceStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning Space hoặc đã bị xóa"));
+                .findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Learning Space not found"));
 
-        // ADMIN bypass kiểm tra owner
+        if (learningSpace.getStatus() == LearningSpaceStatus.DELETE) {
+            throw new IllegalArgumentException("Learning Space has already been deleted");
+        }
+
+        if (learningSpace.getStatus() == LearningSpaceStatus.ARCHIVE) {
+            throw new IllegalArgumentException("This space is archived and cannot be deleted. Please unarchive it first to delete.");
+        }
+
+        // ADMIN bypasses owner check
         if (!isCurrentUserAdmin()) {
             String username = getCurrentUsername();
             if (!learningSpace.getOwner().getUsername().equals(username)) {
-                throw new IllegalArgumentException("Bạn không có quyền xóa");
+                throw new IllegalArgumentException("You don't have permission to delete");
             }
-        }
-
-        // Không cho phép xóa nếu đã có học viên (MEMBER) tham gia
-        long memberCount = memberRepository.countByLearningSpaceIdAndRole(id, MemberRole.MEMBER);
-        if (memberCount > 0) {
-            throw new IllegalArgumentException("Không thể xóa Learning Space này vì đã có học viên (Mentee) tham gia.");
         }
 
         learningSpace.setStatus(LearningSpaceStatus.DELETE);
@@ -296,18 +298,18 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Transactional
     public void restoreLearningSpace(Long id) {
         LearningSpace learningSpace = learningSpaceRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy learning space"));
+                .orElseThrow(() -> new IllegalArgumentException("Learning Space not found"));
 
-        // ADMIN bypass kiểm tra owner
+        // ADMIN bypasses owner check
         if (!isCurrentUserAdmin()) {
             String username = getCurrentUsername();
             if (!learningSpace.getOwner().getUsername().equals(username)) {
-                throw new IllegalArgumentException("Bạn không có quyền khôi phục learning space");
+                throw new IllegalArgumentException("You don't have permission to restore this Learning Space");
             }
         }
 
         if (learningSpace.getStatus() == LearningSpaceStatus.ACTIVE) {
-            throw new IllegalArgumentException("Lớp đang hoạt động, không cần khôi phục");
+            throw new IllegalArgumentException("The space is currently active, no need to restore");
         }
 
         learningSpace.setStatus(LearningSpaceStatus.ACTIVE);
@@ -319,18 +321,18 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Transactional
     public void archiveLearningSpace(Long id) {
         LearningSpace learningSpace = learningSpaceRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy learning space"));
+                .orElseThrow(() -> new IllegalArgumentException("Learning Space not found"));
 
-        // ADMIN bypass kiểm tra owner
+        // ADMIN bypasses owner check
         if (!isCurrentUserAdmin()) {
             String username = getCurrentUsername();
             if (!learningSpace.getOwner().getUsername().equals(username)) {
-                throw new IllegalArgumentException("Bạn không có quyền lưu trữ learning space");
+                throw new IllegalArgumentException("You don't have permission to archive this Learning Space");
             }
         }
 
         if (learningSpace.getStatus() == LearningSpaceStatus.ARCHIVE) {
-            throw new IllegalArgumentException("Lớp đã được lưu trữ");
+            throw new IllegalArgumentException("The space is already archived");
         }
 
         learningSpace.setStatus(LearningSpaceStatus.ARCHIVE);
@@ -355,7 +357,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
         LearningSpace saveSpace = learningSpaceRepository.save(newSpace);
 
-        // Tạo OWNER trong bảng member
+        // Create OWNER in member table
         LearningSpaceMember ownerMember = new LearningSpaceMember();
         ownerMember.setLearningSpace(saveSpace);
         ownerMember.setUser(getCurrentUser());
@@ -431,7 +433,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
                     newQuiz.setLearningNode(saveNode);
 
                     Quiz savedQuiz = quizRepository.save(newQuiz);
-                    // Copy câu hỏi của Quiz (Phải viết query riêng vì Quiz không map trực tiếp Questions trong Entity)
+                    // Copy Quiz questions (Need a separate query because Quiz doesn't map Questions directly in Entity)
                     List<QuizQuestion> sourceQuestions = quizQuestionRepository.findByQuizId(quiz.getId());
 
                     for (QuizQuestion question : sourceQuestions) {

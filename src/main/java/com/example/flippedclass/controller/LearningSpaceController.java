@@ -43,7 +43,7 @@ public class LearningSpaceController {
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteLearningSpace (@PathVariable Long id){
         learningSpaceService.deleteLearningSpace(id);
-        return ResponseEntity.ok(new MessageResponse("Xóa thành công"));
+        return ResponseEntity.ok(new MessageResponse("Successfully deleted"));
     }
 
 
@@ -51,14 +51,14 @@ public class LearningSpaceController {
     @PutMapping("/{id}/restore")
     public ResponseEntity<?> restoreLearningSpace(@PathVariable Long id){
         learningSpaceService.restoreLearningSpace(id);
-        return ResponseEntity.ok(new MessageResponse("Khôi phục thành công "));
+        return ResponseEntity.ok(new MessageResponse("Successfully restored"));
     }
 
     @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")
     @PutMapping("/{id}/archive")
     public ResponseEntity<?> archiveLearningSpace(@PathVariable Long id){
         learningSpaceService.archiveLearningSpace(id);
-        return ResponseEntity.ok(new MessageResponse("Lưu trữ thành công "));
+        return ResponseEntity.ok(new MessageResponse("Successfully archived"));
     }
 
     @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")
