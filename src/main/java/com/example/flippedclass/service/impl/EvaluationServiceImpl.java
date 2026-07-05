@@ -74,10 +74,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         return toSessionResponse(sessionRepository.save(session));
     }
 
-    @Override
-    public EvaluationSessionResponse getSession(Long id) {
-        return toSessionResponse(findSession(id));
-    }
+
 
     @Override
     public List<EvaluationSessionResponse> getSessionsByLecturer(Long lecturerId) {
@@ -191,22 +188,7 @@ public class EvaluationServiceImpl implements EvaluationService {
                 .toList();
     }
 
-    @Override
-    public InteractionLogResponse addInteractionLog(CreateInteractionLogRequest request) {
-        User student = UserServiceImpl.findUser(userRepository, request.getStudentId());
-        LearningPath path = learningPathRepository.findById(request.getLearningPathId())
-                .orElseThrow(() -> new NotFoundException("Learning path not found: " + request.getLearningPathId()));
 
-        InteractionLog log = InteractionLog.builder()
-                .student(student)
-                .learningPath(path)
-                .interactionType(request.getInteractionType())
-                .summary(request.getSummary() != null ? request.getSummary().trim() : null)
-                .occurredAt(request.getOccurredAt() != null ? request.getOccurredAt() : LocalDateTime.now())
-                .build();
-
-        return toInteractionResponse(interactionLogRepository.save(log));
-    }
 
     @Override
     public List<InteractionLogResponse> getInteractionHistory(Long studentId, Long learningPathId) {
@@ -217,21 +199,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         return logs.stream().map(this::toInteractionResponse).toList();
     }
 
-    @Override
-    public StudentProfileResponse getStudentProfile(Long userId) {
-        User user = UserServiceImpl.findUser(userRepository, userId);
-        StudentProfile profile = studentProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("Student profile not found for user: " + userId));
 
-        return StudentProfileResponse.builder()
-                .id(profile.getId())
-                .user(UserServiceImpl.toResponse(user))
-                .studentCode(profile.getStudentCode())
-                .className(profile.getClassName())
-                .major(profile.getMajor())
-                .enrollmentYear(profile.getEnrollmentYear())
-                .build();
-    }
 
     private EvaluationSession findSession(Long id) {
         return sessionRepository.findById(id)

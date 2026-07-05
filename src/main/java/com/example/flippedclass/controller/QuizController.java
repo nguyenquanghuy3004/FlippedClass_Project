@@ -110,18 +110,9 @@ public class QuizController {
         return quizService.getById(id);
     }
 
-    @GetMapping
-    @Operation(summary = "Get all quizzes")
-    public List<QuizResponse> getAll() {
-        return quizService.getAll();
-    }
 
-    @GetMapping("/lecturer/{lecturerId}")
-    @Operation(summary = "Get quizzes by lecturer ID")
-    public List<QuizResponse> getByLecturer(
-            @PathVariable("lecturerId") @Positive(message = "lecturerId must be a positive number") Long lecturerId) {
-        return quizService.getByLecturer(lecturerId);
-    }
+
+
 
     @GetMapping("/{quizId}/questions")
     @Operation(summary = "Get questions for a quiz")
@@ -183,10 +174,5 @@ public class QuizController {
         return quizService.getAttemptsByStudent(studentId);
     }
 
-    @GetMapping("/attempts/{id}")
-    @Operation(summary = "Get a specific attempt by ID")
-    public QuizAttemptResponse getAttemptById(
-            @PathVariable("id") @Positive(message = "id must be a positive number") Long id) {
-        return quizService.getAttemptById(id);
-    }
+
 }

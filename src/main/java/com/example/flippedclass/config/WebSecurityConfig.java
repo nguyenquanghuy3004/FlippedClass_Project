@@ -65,7 +65,7 @@ public class WebSecurityConfig {
             // Public UI Pages (Authentication, Landing, etc.)
             "/", "/index", "/login", "/register", "/signin", "/signup", 
             // Feature UI Routes (Bypass JWT for HTML load)
-            "/inventory", "/create-product", "/reports", "/lecturer/**", "/student/**", "/admin/**", "/mentor/**", "/supporter/**"
+            "/lecturer/**", "/student/**", "/admin/**", "/mentor/**", "/supporter/**"
     };
 
     @Bean

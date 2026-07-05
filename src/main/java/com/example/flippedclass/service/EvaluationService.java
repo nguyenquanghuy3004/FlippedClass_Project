@@ -11,7 +11,7 @@ public interface EvaluationService {
 
     EvaluationSessionResponse createSession(CreateEvaluationSessionRequest request);
 
-    EvaluationSessionResponse getSession(Long id);
+
 
     List<EvaluationSessionResponse> getSessionsByLecturer(Long lecturerId);
 
@@ -25,9 +25,9 @@ public interface EvaluationService {
 
     List<UserResponse> getStudentsForSession(Long sessionId);
 
-    InteractionLogResponse addInteractionLog(CreateInteractionLogRequest request);
+
 
     List<InteractionLogResponse> getInteractionHistory(Long studentId, Long learningPathId);
 
-    StudentProfileResponse getStudentProfile(Long userId);
+
 }

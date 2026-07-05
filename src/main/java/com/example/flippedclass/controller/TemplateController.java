@@ -19,20 +19,7 @@ public class TemplateController {
         return "homePage";
     }
 
-    @GetMapping("/inventory")
-    public String inventory() {
-        return "inventory";
-    }
 
-    @GetMapping("/create-product")
-    public String createProduct() {
-        return "create-product";
-    }
-
-    @GetMapping("/reports")
-    public String reports() {
-        return "reports";
-    }
 
     @GetMapping("/signin")
     public String signin() {

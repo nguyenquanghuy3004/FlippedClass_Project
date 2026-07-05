@@ -163,10 +163,7 @@ public class QuizServiceImpl implements QuizService {
         return toResponse(findQuiz(id));
     }
 
-    @Override
-    public List<QuizResponse> getAll() {
-        return quizRepository.findAll().stream().map(this::toResponse).toList();
-    }
+
 
     @Override
     public List<QuizResponse> getByLecturer(Long lecturerId) {
@@ -252,12 +249,7 @@ public class QuizServiceImpl implements QuizService {
                 .toList();
     }
 
-    @Override
-    public QuizAttemptResponse getAttemptById(Long attemptId) {
-        QuizAttempt attempt = attemptRepository.findById(attemptId)
-                .orElseThrow(() -> new NotFoundException("Attempt not found: " + attemptId));
-        return toAttemptResponse(attempt);
-    }
+
 
     @Override
     public QuizStatisticsResponse getStatistics(Long quizId) {
