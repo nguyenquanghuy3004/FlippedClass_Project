@@ -11,5 +11,6 @@ public interface LessonSummaryService {
     LessonSummaryResponse provideFeedback(Long id, FeedbackSummaryRequest request);
     LessonSummaryResponse getSummaryById(Long id);
     List<LessonSummaryResponse> getSummariesByLearningNode(Long learningNodeId);
+    LessonSummaryResponse getMySummaryByNode(Long learningNodeId, Long studentId);
     List<LessonSummaryResponse> getSummariesByStudent(Long studentId);
 }

@@ -1183,9 +1183,46 @@
         }
       }
       
+      // --- START: HANDLE SUMMARY SUBMIT AND LOAD ---
       const summaryForm = document.getElementById('summaryForm');
       const saveSummaryBtn = document.getElementById('saveSummaryBtn');
       const summaryStatus = document.getElementById('summaryStatus');
+
+      // Load existing summary
+      fetch(`/api/lesson-summaries/learning-node/${nodeId}/my-summary`, { headers: authHeaders(false) })
+        .then(res => {
+          if (res.status === 204 || res.status === 404) return null;
+          return res.json();
+        })
+        .then(data => {
+          if (data && summaryForm) {
+            try {
+              const contentObj = JSON.parse(data.summaryContent);
+              document.getElementById('keyTakeaways').value = contentObj.keyTakeaways || '';
+              document.getElementById('questions').value = contentObj.questions || '';
+            } catch (e) {
+              document.getElementById('keyTakeaways').value = data.summaryContent;
+            }
+            if (saveSummaryBtn) {
+              saveSummaryBtn.innerHTML = '<i class="ti ti-check"></i> Đã cập nhật bài';
+            }
+            if (summaryStatus) {
+              summaryStatus.innerHTML = '<span class="text-success"><i class="ti ti-check"></i> Đã nộp vào ' + new Date(data.submittedAt).toLocaleString() + '</span>';
+              summaryStatus.classList.add('show');
+            }
+            if (data.lecturerFeedback) {
+              const feedbackHtml = `
+                <div class="lecturer-feedback mt-4 p-3 rounded" style="background-color: #f0fdf4; border-left: 4px solid #16a34a;">
+                    <h5 style="color: #166534; font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;"><i class="ti ti-message-circle-2"></i> Nhận xét của giảng viên</h5>
+                    <p style="margin-bottom: 0.5rem; color: #15803d;">${data.lecturerFeedback.replace(/\\n/g, '<br>')}</p>
+                    <small class="text-muted" style="color: #166534 !important; opacity: 0.8;">Đánh giá lúc: ${new Date(data.reviewedAt).toLocaleString()}</small>
+                </div>
+              `;
+              summaryForm.insertAdjacentHTML('afterend', feedbackHtml);
+            }
+          }
+        })
+        .catch(err => console.error("Error loading summary:", err));
 
       if (summaryForm && saveSummaryBtn && summaryStatus) {
         summaryForm.addEventListener('submit', async (e) => {

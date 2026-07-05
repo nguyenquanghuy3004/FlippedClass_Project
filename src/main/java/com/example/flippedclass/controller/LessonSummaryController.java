@@ -35,6 +35,17 @@ public class LessonSummaryController {
         return ResponseEntity.ok(lessonSummaryService.getSummariesByLearningNode(nodeId));
     }
 
+    @GetMapping("/learning-node/{nodeId}/my-summary")
+    public ResponseEntity<LessonSummaryResponse> getMySummary(
+            @PathVariable Long nodeId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        LessonSummaryResponse response = lessonSummaryService.getMySummaryByNode(nodeId, userDetails.getId());
+        if (response == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<LessonSummaryResponse> getSummaryById(@PathVariable Long id) {
         return ResponseEntity.ok(lessonSummaryService.getSummaryById(id));

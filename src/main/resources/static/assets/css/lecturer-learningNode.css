@@ -210,54 +210,72 @@
 .action-cta-badge {
     display: inline-flex;
     align-items: center;
-    padding: 3px 8px;
-    border-radius: 20px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     border: 1px solid transparent;
+    text-decoration: none;
 }
 
-
+.action-cta-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
 
 /* Colors based on data-type */
 .action-cta-badge[data-type="VIDEO"] {
-    background: #eef2ff;
-    color: #4f46e5;
-    border-color: #c7d2fe;
+    background: #eff6ff;
+    color: #3b82f6;
+    border-color: #bfdbfe;
 }
-
+.action-cta-badge[data-type="VIDEO"]:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+}
 
 .action-cta-badge[data-type="DOCUMENT"] {
-    background: #ecfdf5;
-    color: #059669;
-    border-color: #a7f3d0;
+    background: #f0fdf4;
+    color: #10b981;
+    border-color: #bbf7d0;
 }
-
+.action-cta-badge[data-type="DOCUMENT"]:hover {
+    background: #dcfce7;
+    border-color: #86efac;
+}
 
 .action-cta-badge[data-type="PRACTICE"] {
-    background: #fffbeb;
-    color: #d97706;
-    border-color: #fde68a;
+    background: #f5f3ff;
+    color: #8b5cf6;
+    border-color: #ddd6fe;
 }
-
+.action-cta-badge[data-type="PRACTICE"]:hover {
+    background: #ede9fe;
+    border-color: #c4b5fd;
+}
 
 .action-cta-badge[data-type="QUIZ"] {
     background: #fdf2f8;
-    color: #db2777;
+    color: #ec4899;
     border-color: #fbcfe8;
 }
-
+.action-cta-badge[data-type="QUIZ"]:hover {
+    background: #fce7f3;
+    border-color: #f9a8d4;
+}
 
 /* Generic or other types */
 .action-cta-badge {
     background: #f1f5f9;
-    color: #475569;
+    color: #64748b;
     border-color: #e2e8f0;
 }
-
+.action-cta-badge:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+}
 
 
 

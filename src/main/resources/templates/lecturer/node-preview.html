@@ -579,8 +579,6 @@
         <section class="lc-pane">
             <div class="lc-tabs-header">
               <div class="lc-tab active" onclick="switchLeftTab('problem')" id="tab-problem"><i class="ti ti-edit" style="color: #60a5fa;"></i> Edit Description</div>
-              <div class="lc-tab" onclick="switchLeftTab('preview')" id="tab-preview"><i class="ti ti-eye" style="color: #34d399;"></i> Preview</div>
-              <div class="lc-tab" onclick="switchLeftTab('qa')" id="tab-qa"><i class="ti ti-messages" style="color: #fbbf24;"></i> Q&A</div>
               <div class="lc-tab" onclick="switchLeftTab('submissions')" id="tab-submissions"><i class="ti ti-checklist" style="color: #a78bfa;"></i> Submissions</div>
             </div>
           
@@ -589,17 +587,6 @@
             <textarea id="problemDescriptionInput" class="lc-textarea" placeholder="Write problem description in Markdown..."></textarea>
           </div>
 
-          <!-- TAB: PREVIEW -->
-          <div id="pane-preview" class="lc-content markdown-body" style="display: none;">
-            <div id="markdownPreviewContainer">Preview will appear here...</div>
-          </div>
-
-          <!-- TAB: Q&A -->
-          <div id="pane-qa" class="lc-content" style="display: none;">
-            <div id="nodeCommentsContainer">
-              <div style="text-align: center; color: #71717a; padding: 40px 0;"><i class="ti ti-loader-2 ti-spin fs-2"></i><br>Loading Q&A...</div>
-            </div>
-          </div>
 
           <!-- TAB: SUBMISSIONS -->
           <div id="pane-submissions" class="lc-content" style="display: none;">
@@ -689,34 +676,21 @@
             window.myCodeEditor.setValue(window.codeStore[tab]);
         };
 
-        // Hàm chuyển tab trái (Problem, Q&A, Submissions)
+        // Hàm chuyển tab trái (Problem, Submissions)
         window.switchLeftTab = function(tabId) {
             const leftPaneTabs = document.getElementById('tab-problem').parentElement;
             leftPaneTabs.querySelectorAll('.lc-tab').forEach(t => t.classList.remove('active'));
             const activeTab = document.getElementById('tab-' + tabId);
             if (activeTab) activeTab.classList.add('active');
             
-            document.getElementById('pane-problem').style.display = 'none';
-            document.getElementById('pane-preview').style.display = 'none';
-            document.getElementById('pane-qa').style.display = 'none';
-            document.getElementById('pane-submissions').style.display = 'none';
+            const problemPane = document.getElementById('pane-problem');
+            const subPane = document.getElementById('pane-submissions');
+            if (problemPane) problemPane.style.display = 'none';
+            if (subPane) subPane.style.display = 'none';
             
-            document.getElementById('pane-' + tabId).style.display = 'flex';
-
-            // Auto render markdown when switching to preview
-            if (tabId === 'preview') {
-                const mdContent = document.getElementById('problemDescriptionInput').value;
-                const container = document.getElementById('markdownPreviewContainer');
-                if (window.marked) {
-                    container.innerHTML = window.marked.parse(mdContent || '*No description provided*');
-                } else {
-                    container.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Loading markdown parser...';
-                    setTimeout(() => { 
-                        if (document.getElementById('tab-preview').classList.contains('active')) {
-                            window.switchLeftTab('preview'); 
-                        }
-                    }, 500); // retry only if still on preview
-                }
+            const targetPane = document.getElementById('pane-' + tabId);
+            if (targetPane) {
+                targetPane.style.display = 'flex';
             }
         };
 

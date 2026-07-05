@@ -117,6 +117,14 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
 
     @Override
     @Transactional(readOnly = true)
+    public LessonSummaryResponse getMySummaryByNode(Long learningNodeId, Long studentId) {
+        return lessonSummaryRepository.findByLearningNodeIdAndStudentId(learningNodeId, studentId)
+                .map(this::mapToResponse)
+                .orElse(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<LessonSummaryResponse> getSummariesByStudent(Long studentId) {
         return lessonSummaryRepository.findByStudentId(studentId).stream()
                 .map(this::mapToResponse)
