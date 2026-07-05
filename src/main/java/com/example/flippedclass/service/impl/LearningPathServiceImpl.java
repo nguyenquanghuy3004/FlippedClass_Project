@@ -151,10 +151,23 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy Learning Path trong Learning Space này"));
     }
 
+    private int getNodeTypePriority(String nodeType) {
+        if (nodeType == null) return 99;
+        switch (nodeType.toUpperCase()) {
+            case "VIDEO": return 1;
+            case "DOCUMENT": return 2;
+            case "PRACTICE": return 3;
+            case "QUIZ": return 4;
+            default: return 99;
+        }
+    }
+
     private LearningPathResponse toResponse(LearningPath path, Long studentId) {
         List<LearningNodeResponse> nodeResponses = new java.util.ArrayList<>();
         if (path.getNodes() != null) {
-            nodeResponses = path.getNodes().stream().map(node -> {
+            nodeResponses = path.getNodes().stream()
+                .sorted(java.util.Comparator.comparingInt(node -> getNodeTypePriority(node.getNodeType())))
+                .map(node -> {
                 Long prereqId = null;
                 var connections = nodeConnectionRepository.findByTargetNodeId(node.getId());
                 if (!connections.isEmpty()) {

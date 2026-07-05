@@ -41,7 +41,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
-                user.getStatus(),
+                user.getStatus() != null ? user.getStatus() : UserStatus.ACTIVE,
                 authorities);
     }
 

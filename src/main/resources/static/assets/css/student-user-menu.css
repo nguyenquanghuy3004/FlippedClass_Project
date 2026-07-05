@@ -10,7 +10,9 @@
 
 .student-menu-trigger {
   width: 100%;
+  max-width: 100%;
   min-width: 0;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 0.7rem;
