@@ -37,6 +37,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
     private final QuizQuestionRepository quizQuestionRepository;
     private final CourseDocumentRepository courseDocumentRepository;
+    private final com.example.flippedclass.repository.LearningNodeItemRepository learningNodeItemRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -48,7 +49,9 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 .map(this::toStudentProfileResponse)
                 .orElse(null);
 
-        List<LearningSpaceMember> memberships = learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId);
+        List<LearningSpaceMember> memberships = learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId).stream()
+                .filter(m -> m.getLearningSpace().getStatus() == com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE)
+                .toList();
         List<Long> joinedSpaceIds = memberships.stream()
                 .map(member -> member.getLearningSpace().getId())
                 .distinct()
@@ -92,8 +95,15 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
         List<CourseDocumentResponse> recentDocuments = allSpaceIds.isEmpty()
                 ? List.of()
-                : courseDocumentRepository
-                        .findTop8ByLearningPath_LearningSpace_IdInOrderByCreatedAtDesc(allSpaceIds)
+                : learningNodeItemRepository
+                        .findRecentDocumentsBySpaceIds(
+                                allSpaceIds,
+                                List.of(
+                                        com.example.flippedclass.enums.ItemType.PDF,
+                                        com.example.flippedclass.enums.ItemType.VIDEO
+                                ),
+                                org.springframework.data.domain.PageRequest.of(0, 8)
+                        )
                         .stream()
                         .map(CourseDocumentResponse::from)
                         .toList();

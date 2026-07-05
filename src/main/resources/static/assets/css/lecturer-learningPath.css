@@ -112,7 +112,7 @@
 ══════════════════════════════════════════ */
 .page-tabs {
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -130,7 +130,6 @@
 .page-tabs .nav-link.active {
   color: var(--indigo);
   border-bottom-color: var(--indigo);
-  font-weight: 600;
 }
 
 .action-bar {
@@ -255,27 +254,52 @@
 
 /* Status badges */
 .badge-published {
-  background: #f1f5f9;
+  background: rgba(71, 85, 105, 0.08);
   color: #475569;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 0.25rem 0.6rem;
+  border: none;
+  border-radius: 50px;
+  padding: 0.35rem 0.8rem;
   font-size: 0.65rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
 .badge-in-progress {
-  background: #eff6ff;
+  background: rgba(37, 99, 235, 0.1);
   color: #2563eb;
-  border: 1px solid #bfdbfe;
-  border-radius: 6px;
-  padding: 0.25rem 0.6rem;
+  border: none;
+  border-radius: 50px;
+  padding: 0.35rem 0.8rem;
   font-size: 0.65rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+/* Action buttons in Module Header */
+.module-action-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.04);
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.module-action-btn i {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.module-action-btn:hover {
+  background: rgba(0,0,0,0.08);
+  color: #0f172a;
 }
 
 /* ══════════════════════════════════════════
@@ -335,3 +359,37 @@
 
 .cursor-pointer { cursor: pointer; }
 .drag-handle    { cursor: grab; }
+
+/* ------------------------------------------
+   NODE COLLAPSE BUTTON
+------------------------------------------ */
+.node-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(79,70,229,0.15);
+}
+
+.node-collapse-btn:hover {
+  transform: scale(1.12);
+  box-shadow: 0 4px 16px rgba(79,70,229,0.3);
+  filter: brightness(1.08);
+}
+
+.node-collapse-btn i {
+  transition: transform 0.25s ease;
+  font-size: 1.05rem;
+}
+
+/* Animate the content area */
+.collapse {
+  transition: height 0.3s ease;
+}

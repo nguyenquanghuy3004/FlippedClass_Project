@@ -6,11 +6,13 @@ import com.example.flippedclass.dto.request.UpdateLearningPathRequest;
 import com.example.flippedclass.dto.response.LearningPathResponse;
 import com.example.flippedclass.dto.response.MessageResponse;
 import com.example.flippedclass.service.LearningPathService;
+import com.example.flippedclass.service.impl.UserDetailsImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 import com.example.flippedclass.service.LearningNodeService;
 import com.example.flippedclass.dto.request.CreateLearningNodeRequest;
 import com.example.flippedclass.dto.response.LearningNodeResponse;
@@ -42,19 +44,27 @@ public class LearningPathController {
         return ResponseEntity.ok(learningNodeService.createLearningNode(pathId, request));
     }
 
+    @PreAuthorize("@spaceSecurity.isMemberInSpace(#spaceId)")
     @GetMapping
-    public ResponseEntity<List<LearningPathResponse>> getLearningPath(@PathVariable Long spaceId) {
+    public ResponseEntity<List<LearningPathResponse>> getLearningPath(@PathVariable Long spaceId, Authentication authentication) {
+        Long userId = null;
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
+            userId = userDetails.getId();
+        }
         return ResponseEntity
-                .ok(learningPathService.getLearningPath(spaceId));
+                .ok(learningPathService.getLearningPath(spaceId, userId));
     }
 
-
+    @PreAuthorize("@spaceSecurity.isMemberInSpace(#spaceId)")
     @GetMapping("/{pathId}")
-    public ResponseEntity<LearningPathResponse> getDetail(@PathVariable Long spaceId, @PathVariable Long pathId) {
+    public ResponseEntity<LearningPathResponse> getDetail(@PathVariable Long spaceId, @PathVariable Long pathId, Authentication authentication) {
+        Long userId = null;
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
+            userId = userDetails.getId();
+        }
         return ResponseEntity
-                .ok(learningPathService.getLearningPathDetail(spaceId, pathId));
+                .ok(learningPathService.getLearningPathDetail(spaceId, pathId, userId));
     }
-
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PutMapping("/{pathId}")
@@ -63,7 +73,6 @@ public class LearningPathController {
         return ResponseEntity
                 .ok(learningPathService.updateLearningPath(spaceId, pathId, request));
     }
-
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PutMapping("/{pathId}/archive")
@@ -79,7 +88,6 @@ public class LearningPathController {
         learningPathService.restoreLearningPath(spaceId, pathId);
         return ResponseEntity.ok(new MessageResponse("Khôi phục module thành công"));
     }
-
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER')")
     @DeleteMapping("/{pathId}")

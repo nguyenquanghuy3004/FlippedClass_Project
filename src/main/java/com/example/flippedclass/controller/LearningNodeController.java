@@ -62,6 +62,12 @@ public class LearningNodeController {
     public ResponseEntity<Map<String,String>> deleteItem(@PathVariable Long itemId){
         learningNodeItemService.delete(itemId);
         return  ResponseEntity.ok(Map.of("message", "gỡ tài liệu thành công"));
-        }
+    }
+
+    @DeleteMapping("/video")
+    public ResponseEntity<Map<String,String>> deleteVideoItem(@PathVariable Long nodeId){
+        learningNodeItemService.deleteVideoByNodeId(nodeId);
+        return ResponseEntity.ok(Map.of("message", "Xóa video thành công"));
+    }
 
 }

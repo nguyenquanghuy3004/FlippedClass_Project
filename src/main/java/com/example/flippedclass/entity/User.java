@@ -65,7 +65,7 @@ public class User {
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @Column(name = "total_active_time")
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     @Builder.Default
-    private Long totalActiveTime = 0L;
+    private Integer contributionPoints = 0;
 }

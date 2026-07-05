@@ -1,102 +1,154 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <head>
   <meta charset="UTF-8" />
-  <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">FCMS Mentor</title>
+  <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">FCMS Lecturer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
   <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
   <link rel="manifest" th:href="@{/assets/site.webmanifest}">
 
-  <script th:src="@{/assets/js/auth-interceptor.js}"></script>
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <!-- FontAwesome for fallback -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- SockJS & STOMP for Notifications -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  
   <link rel="stylesheet" th:href="@{/assets/css/lecturer-layout.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+
+  <script th:src="@{/assets/js/fetch-interceptor.js}"></script>
+
+  <!-- BỘ KIỂM TRA QUYỀN HẠN & ĐĂNG NHẬP -->
+  <script>
+    (function() {
+      const token = localStorage.getItem('jwt_token');
+      if (!token) {
+        // Chưa đăng nhập, chuyển về trang đăng nhập
+        window.location.href = '/login';
+      } else {
+        try {
+          // Giải mã token JWT
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const now = Math.floor(Date.now() / 1000);
+          if (payload.exp && payload.exp < now) {
+            // Token đã hết hạn, xóa dữ liệu và chuyển về trang đăng nhập
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user_id');
+            window.location.href = '/login';
+          } else if (!payload.roles || (!payload.roles.includes('MENTOR') && !payload.roles.includes('ROLE_MENTOR') && !payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
+            // Không đúng vai trò giảng viên (MENTOR) hoặc admin, chuyển về trang đăng nhập
+            window.location.href = '/login';
+          }
+        } catch (e) {
+          // Token không hợp lệ, chuyển về trang đăng nhập
+          window.location.href = '/login';
+        }
+      }
+    })();
+  </script>
+
   <th:block layout:fragment="head"></th:block>
 </head>
 
 <body>
   <div id="overlay" class="overlay"></div>
+
   <!-- TOPBAR -->
-  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
-    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3 shadow-sm">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm">
       <i class="ti ti-layout-sidebar-left-expand"></i>
     </button>
-
-    <!-- MOBILE -->
     <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
       <i class="ti ti-layout-sidebar-left-expand"></i>
     </button>
-    <div>
-      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
-        <!-- Dropdown -->
-        <li class="ms-3 dropdown">
-          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="avatar avatar-sm rounded-circle" />
+
+    <div class="topbar-main">
+      <div class="topbar-title-wrap d-none d-md-block">
+        <h5 class="topbar-title fw-bold text-dark ms-1">Lecturer <span class="badge bg-primary-subtle text-primary rounded-pill">Workspace</span></h5>
+      </div>
+    </div>
+    
+    <div class="ms-auto d-flex align-items-center gap-3">
+      <!-- Notification Bell -->
+      <div class="position-relative dropdown">
+          <a href="#" id="bellIcon" class="nav-link text-dark position-relative" data-bs-toggle="dropdown" aria-expanded="false" onclick="markAsReadOnOpen()">
+              <i class="ti ti-bell fs-4"></i>
+              <span id="notifBadge" class="badge bg-danger position-absolute top-0 start-100 translate-middle" style="display:none; font-size: 0.6rem;">!</span>
           </a>
-          FCMS Mentor
-          <div class="dropdown-menu dropdown-menu-end p-0" style="min-width: 200px;">
-            <div>
-              <div class="d-flex gap-3 align-items-center border-dashed border-bottom px-3 py-3">
-                <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="avatar avatar-md rounded-circle" />
-                <div>
-                  <h4 class="mb-0 small">Mentor User</h4>
-                  <p class="mb-0 small">@mentor</p>
-                </div>
+          <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0" style="width: 350px; border-radius: 12px; overflow: hidden; z-index: 9999;">
+              <div class="p-3 border-bottom d-flex justify-content-between align-items-center text-white" style="background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);">
+                  <h6 class="mb-0 fw-bold"><i class="ti ti-bell-ringing me-2"></i>Thông báo mới</h6>
               </div>
-              <div class="p-3 d-flex flex-column gap-1 small lh-lg">
-                <a href="#!" class="text-danger" onclick="logout()">
-                  <span><i class="ti ti-logout me-2"></i>Log out</span>
-                </a>
+              <div id="notifList" class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
+                  <div class="text-center p-4 text-muted small">
+                      <i class="ti ti-inbox fs-1 mb-2 d-block text-light"></i>
+                      Không có thông báo nào
+                  </div>
               </div>
-            </div>
           </div>
-        </li>
-      </ul>
+      </div>
+      
+      <div class="student-user-menu topbar-user-menu" data-user-menu style="position: relative;">
+        <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
+          <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Lecturer avatar">
+          <span class="student-menu-info">
+            <span class="student-menu-name" data-user-name>Lecturer View</span>
+          </span>
+          <i class="ti ti-chevron-down student-menu-chevron ms-1"></i>
+        </button>
+        <div class="student-menu-panel" role="menu">
+          <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
+          <button class="student-menu-item student-menu-item-danger" type="button" onclick="logout()" role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
+        </div>
+      </div>
     </div>
   </nav>
 
   <!-- SIDEBAR -->
-  <aside id="sidebar" class="sidebar d-flex flex-column">
-    <div class="logo-area py-3 px-4 mb-3 border-bottom" style="border-color: rgba(0,0,0,0.05) !important;">
-      <a href="#" class="d-flex align-items-center text-decoration-none">
-        <div class="d-flex align-items-center justify-content-center rounded-3 me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);">
-          <i class="fa-solid fa-chalkboard-user text-white fs-5"></i>
+  <aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm d-flex flex-column">
+    <div class="logo-area border-bottom border-light">
+      <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
+        <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2">
+          <i class="fa-solid fa-chalkboard-user fs-5" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;"></i>
         </div>
-        <span class="logo-text fw-bolder fs-5 text-nowrap" style="white-space: nowrap; background: linear-gradient(135deg, #0f172a 0%, #334155 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; font-family: 'Inter', sans-serif;">
-          FCMS <span style="font-weight: 500; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Lecture</span>
-        </span>
+        <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">FCMS<span class="text-primary">Lecture</span></span>
       </a>
     </div>
-    <ul class="nav flex-column mb-auto">
-      <li class="px-4 py-2"><small class="nav-text">Workspace</small></li>
+    
+    <ul class="nav flex-column mt-4 mb-auto">
       <li>
-        <a class="nav-link" href="/lecturer/dashboard" data-nav-path="/lecturer/dashboard">
-          <i class="ti ti-box-seam"></i><span class="nav-text">My Spaces</span>
+        <a class="nav-link rounded-pill mx-3 mb-2 px-4 active fw-bold" href="/lecturer/dashboard" data-nav-path="/lecturer/dashboard">
+          <i class="ti ti-box-seam fs-5"></i><span class="nav-text">My Spaces</span>
         </a>
       </li>
       <li>
-        <a class="nav-link" href="/lecturer/quizzes" data-nav-path="/lecturer/quizzes">
-          <i class="ti ti-checklist"></i><span class="nav-text">My Quizzes</span>
+        <a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" href="/lecturer/quizzes" data-nav-path="/lecturer/quizzes">
+          <i class="ti ti-checklist fs-5"></i><span class="nav-text">My Quizzes</span>
         </a>
       </li>
       <li>
-        <a class="nav-link" href="/lecturer/evaluation-sessions" data-nav-path="/lecturer/evaluation-sessions">
-          <i class="ti ti-clipboard-list"></i><span class="nav-text">Eval Sessions</span>
+        <a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" href="/lecturer/evaluation-sessions" data-nav-path="/lecturer/evaluation-sessions">
+          <i class="ti ti-clipboard-list fs-5"></i><span class="nav-text">Eval Sessions</span>
         </a>
+      </li>
+      <li>
+        <a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="${spaceId != null ? '/lecturer/mentoring?spaceId=' + spaceId : '/lecturer/mentoring?spaceId=900'}" data-nav-path="/lecturer/mentoring">
+          <i class="ti ti-users fs-5"></i><span class="nav-text">Peer Mentoring</span>
+        </a>
+      </li>
+
+      <li layout:fragment="sidebar-bottom" class="p-3 mt-4">
+          <!-- Button placeholder if a specific page wants to add something below menu -->
       </li>
     </ul>
-    
-    <div class="p-3 mt-auto w-100">
-      <button class="btn btn-primary w-100 rounded d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createSpaceModal" style="background-color: #6366f1; border-color: #6366f1; padding: 0.6rem;">
-        <i class="ti ti-plus fs-5"></i> New Space
-      </button>
-    </div>
   </aside>
 
   <!-- MAIN CONTENT -->
@@ -110,7 +162,7 @@
       <div class="row">
         <div class="col-12">
           <footer class="text-center py-2 mt-6 text-secondary ">
-            <p class="mb-0">FCMS Mentor Workspace. Powered by InApp Theme</p>
+            <p class="mb-0">FCMS Lecturer Workspace. Powered by InApp Theme</p>
           </footer>
         </div>
       </div>
@@ -138,7 +190,12 @@
       }
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        if (!payload.roles || (!payload.roles.includes('MENTOR') && !payload.roles.includes('ROLE_MENTOR') && !payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
+        const path = window.location.pathname;
+        const isSupporterAllowed = path.startsWith('/supporter') || 
+                                   path.startsWith('/lecturer/space') || 
+                                   path.startsWith('/lecturer/quizzes') || 
+                                   path.startsWith('/lecturer/learning-nodes');
+        if (!payload.roles || (!isSupporterAllowed && !payload.roles.includes('MENTOR') && !payload.roles.includes('ROLE_MENTOR') && !payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
           window.location.href = '/signin';
         }
       } catch (e) {
@@ -155,36 +212,162 @@
 
     // Auto-highlight active sidebar menu item
     $(document).ready(function() {
+      // User Menu Toggle Logic (CSS-driven)
+      document.querySelectorAll('[data-user-menu]').forEach((menu) => {
+        const toggle = menu.querySelector('[data-user-menu-toggle]');
+        if (toggle) {
+          toggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const shouldOpen = !menu.classList.contains('is-open');
+            document.querySelectorAll('[data-user-menu].is-open').forEach(m => {
+              m.classList.remove('is-open');
+              const t = m.querySelector('[data-user-menu-toggle]');
+              if (t) t.setAttribute('aria-expanded', 'false');
+            });
+            menu.classList.toggle('is-open', shouldOpen);
+            toggle.setAttribute('aria-expanded', String(shouldOpen));
+          });
+        }
+      });
+      document.addEventListener('click', () => {
+        document.querySelectorAll('[data-user-menu].is-open').forEach(m => {
+          m.classList.remove('is-open');
+          const t = m.querySelector('[data-user-menu-toggle]');
+          if (t) t.setAttribute('aria-expanded', 'false');
+        });
+      });
+
       const path = window.location.pathname;
-      $('.sidebar .nav-link').removeClass('active');
+      $('.sidebar .nav-link').removeClass('active fw-bold').addClass('text-secondary fw-semibold');
       
       let matched = false;
       $('.sidebar .nav-link').each(function() {
         const navPath = $(this).attr('data-nav-path');
         if (navPath && path.startsWith(navPath)) {
-          $(this).addClass('active');
+          $(this).removeClass('text-secondary fw-semibold').addClass('active fw-bold');
           matched = true;
         }
       });
       // Special case for Evaluate Student
       if (path.startsWith('/lecturer/grading') || path.startsWith('/lecturer/evaluation-sessions')) {
-         $('.sidebar .nav-link').removeClass('active');
-         $('.sidebar .nav-link[data-nav-path="/lecturer/evaluation-sessions"]').addClass('active');
+         $('.sidebar .nav-link').removeClass('active fw-bold').addClass('text-secondary fw-semibold');
+         $('.sidebar .nav-link[data-nav-path="/lecturer/evaluation-sessions"]').removeClass('text-secondary fw-semibold').addClass('active fw-bold');
          matched = true;
       }
       // Fallback
       if (!matched) {
-        $('.sidebar .nav-link[data-nav-path="/lecturer/dashboard"]').addClass('active');
+        $('.sidebar .nav-link[data-nav-path="/lecturer/dashboard"]').removeClass('text-secondary fw-semibold').addClass('active fw-bold');
       }
     });
   </script>
+  <script>
+    const notifUserId = localStorage.getItem('user_id');
+
+    // Cập nhật giao diện list thông báo
+    function renderNotifItem(notif) {
+        const timeStr = new Date(notif.createdAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+        return `
+            <a href="${notif.link || notif.targetUrl || '#'}" class="list-group-item list-group-item-action p-3 border-bottom-0 border-bottom">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.65rem;">Mới</span>
+                    <small class="text-muted" style="font-size: 0.75rem;"><i class="ti ti-clock me-1"></i>${timeStr}</small>
+                </div>
+                <p class="mb-0 text-dark small" style="font-weight: 500; line-height: 1.4;">${notif.message}</p>
+            </a>
+        `;
+    }
+
+    function markAsReadOnOpen() {
+        const badge = document.getElementById('notifBadge');
+        if (badge) badge.style.display = 'none';
+        
+        // Gửi API đánh dấu đã đọc
+        fetch('/api/notifications/read-all', {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+            }
+        }).catch(err => console.error(err));
+    }
+
+    if (notifUserId) {
+        // Fetch notifications on load
+        fetch('/api/notifications', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const listEl = document.getElementById('notifList');
+            if (data && data.length > 0) {
+                listEl.innerHTML = data.map(n => renderNotifItem(n)).join('');
+            }
+            
+            const unreadCount = data.filter(n => !n.isRead).length;
+            if (unreadCount > 0) {
+                const badge = document.getElementById('notifBadge');
+                if (badge) {
+                    badge.innerText = unreadCount;
+                    badge.style.display = 'inline-block';
+                }
+            }
+        })
+        .catch(err => console.error("Error fetching notifications", err));
+
+        // Setup WebSocket for real-time notifications
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+        stompClient.debug = null; 
+
+        stompClient.connect({}, function() {
+            stompClient.subscribe('/topic/notifications/' + notifUserId, function(res) {
+                const notif = JSON.parse(res.body);
+                
+                // Cập nhật danh sách
+                const listEl = document.getElementById('notifList');
+                // Xóa dòng "Không có thông báo" nếu đang hiển thị
+                if (listEl.innerHTML.includes('Không có thông báo')) {
+                    listEl.innerHTML = '';
+                }
+                listEl.insertAdjacentHTML('afterbegin', renderNotifItem(notif));
+
+                // Cập nhật số đếm
+                const badge = document.getElementById('notifBadge');
+                if (badge) {
+                    let currentCount = parseInt(badge.innerText) || 0;
+                    badge.innerText = currentCount + 1;
+                    badge.style.display = 'inline-block';
+                }
+                
+                // Hiện popup đẹp hơn
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'info',
+                        iconColor: '#4f46e5',
+                        title: notif.message,
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        showCloseButton: true,
+                        customClass: {
+                            popup: 'premium-toast'
+                        },
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                }
+            });
+        });
+    }
+  </script>
+
   <th:block layout:fragment="scripts"></th:block>
-  <script src="/js/active-time-tracker.js"></script>
 </body>
 
 </html>
-
-
-
-
-

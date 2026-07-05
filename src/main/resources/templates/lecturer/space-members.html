@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
-<head>
-    <title>Space Members</title>
-</head>
-<body>
-    <div layout:fragment="content">
+<div th:fragment="content">
         <div class="row">
           <div class="col-12">
             <div class="mb-6">
@@ -15,22 +9,6 @@
         </div>
         
         <input type="hidden" id="spaceId" th:value="${spaceId}">
-        
-        <!-- Classroom Style Tabs -->
-        <ul class="nav nav-tabs mb-4 border-bottom-0 gap-3 fw-bold" style="font-size: 0.95rem;">
-            <li class="nav-item">
-                <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/dashboard" style="transition: color 0.2s;"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/space/' + ${spaceId}}">Classwork / Roadmap</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active text-primary border-0 border-bottom border-primary border-3 pb-3 px-3" href="#" style="color: #1a73e8 !important; border-color: #1a73e8 !important;">People</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-muted border-0 pb-3 px-3" th:href="@{'/lecturer/spaces/' + ${spaceId} + '/analytics'}">Analytics</a>
-            </li>
-        </ul>
         
         <div class="card">
             <div class="card-header bg-white px-4 py-3 border-bottom d-flex justify-content-between align-items-center">
@@ -57,20 +35,30 @@
         </div>
     </div>
 
-    <th:block layout:fragment="scripts">
+    <th:block th:fragment="scripts">
         <script>
 
             // SPACE MEMBERS JS (Logic quản lý thành viên trong Không gian học tập)
 
-            const spaceId = $('#spaceId').val();
-
             // Khởi tạo: Tải danh sách thành viên khi trang được tải xong
             $(document).ready(function() {
-                loadMembers();
+                // Wait for the tab to be shown if it is hidden, but since it could be active from start:
+                if ($('#members-table-body').length && $('#members-table-body').is(':visible')) {
+                    loadMembers();
+                }
+            });
+
+            // Khi click vào tab People thì mới load danh sách (lazy load)
+            $('a[data-bs-toggle="tab"][href="#people"]').on('shown.bs.tab', function (e) {
+                if ($('#members-table-body').children().length === 0) {
+                    loadMembers();
+                }
             });
 
             // Hàm gọi API để lấy danh sách thành viên
             function loadMembers() {
+                const spaceId = $('#spaceId').val();
+                if (!spaceId) return;
                 $.ajax({
                     url: `/api/spaces/${spaceId}/members`,
                     method: 'GET',
@@ -124,6 +112,7 @@
 
             // Hàm thăng cấp thành viên lên Supporter
             function promote(memberId) {
+                const spaceId = $('#spaceId').val();
                 $.ajax({
                     url: `/api/spaces/${spaceId}/members/${memberId}/promote`,
                     method: 'POST',
@@ -138,6 +127,7 @@
 
             // Hàm giáng cấp Supporter xuống Member thường
             function demote(memberId) {
+                const spaceId = $('#spaceId').val();
                 $.ajax({
                     url: `/api/spaces/${spaceId}/members/${memberId}/demote`,
                     method: 'POST',
@@ -152,6 +142,7 @@
 
             // Hàm xóa thành viên khỏi Không gian học tập
             function removeMember(memberId) {
+                const spaceId = $('#spaceId').val();
                 if(!confirm('Are you sure you want to remove this member?')) return;
                 $.ajax({
                     url: `/api/spaces/${spaceId}/members/${memberId}`,
@@ -166,8 +157,6 @@
             }
         </script>
     </th:block>
-</body>
-</html>
 
 
 

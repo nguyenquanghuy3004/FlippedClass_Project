@@ -18,16 +18,19 @@ public class DiscussionController {
     private final DiscussionService discussionService;
 
     @GetMapping
-    public ResponseEntity<List<DiscussionResponse>> getDiscussions(@PathVariable Long nodeId) {
-        return ResponseEntity.ok(discussionService.getDiscussionsByNodeId(nodeId));
+    public ResponseEntity<List<DiscussionResponse>> getDiscussions(
+            @PathVariable Long nodeId,
+            @RequestParam(required = false) Long groupId) {
+        return ResponseEntity.ok(discussionService.getDiscussionsByNodeId(nodeId, groupId));
     }
 
     @PostMapping
     public ResponseEntity<DiscussionResponse> addDiscussion(
             @PathVariable Long nodeId,
+            @RequestParam(required = false) Long groupId,
             @RequestBody DiscussionRequest request,
             Authentication authentication) {
-        return ResponseEntity.ok(discussionService.addDiscussion(nodeId, authentication.getName(), request));
+        return ResponseEntity.ok(discussionService.addDiscussion(nodeId, groupId, authentication.getName(), request));
     }
 
     @PutMapping("/{discussionId}/solved")

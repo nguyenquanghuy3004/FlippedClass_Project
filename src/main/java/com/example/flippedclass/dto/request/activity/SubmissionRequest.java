@@ -1,17 +1,12 @@
 package com.example.flippedclass.dto.request.activity;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class SubmissionRequest {
-
-    @NotBlank(message = "Github URL is required")
-    @Pattern(regexp = "^https://github\\.com/.+$", message = "Invalid Github URL format")
-    private String githubUrl;
-
+    @Pattern(regexp = "^https?://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$", message = "Invalid Github URL format")
+    private String githubRepoUrl;
+    
     private String note;
 }

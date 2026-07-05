@@ -5,6 +5,15 @@
     <th:block layout:fragment="head">
         <link rel="stylesheet" th:href="@{/assets/css/lecturer-learningPath.css}">
         <link rel="stylesheet" th:href="@{/assets/css/lecturer-learningNode.css}">
+        <link rel="stylesheet" th:href="@{/assets/css/lecturer-analytics.css}">
+        <style>
+            .activity-card { border-radius: 12px; transition: transform 0.2s ease, box-shadow 0.2s ease; border: 1px solid rgba(0,0,0,0.05); }
+            .activity-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important; }
+            .status-badge { padding: 6px 12px; border-radius: 50rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+            .stat-box { background: #f8f9fa; border-radius: 8px; padding: 10px 15px; text-align: center; }
+            .stat-value { font-size: 1.25rem; font-weight: 700; color: #2b3440; margin-bottom: 0; }
+            .stat-label { font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+        </style>
     </th:block>
 </head>
 <body>
@@ -12,21 +21,31 @@
         <input type="hidden" id="spaceId" th:value="${spaceId}" />
         
         <div class="container-fluid py-4">
-            <!-- Tabs -->
-            <ul class="nav page-tabs mb-4">
+            <!-- Classroom Style Tabs -->
+            <ul class="nav nav-tabs mb-4 border-bottom-0 gap-3 fw-bold" style="font-size: 0.95rem;" role="tablist" th:with="currentTab=${activeTab != null ? activeTab : 'roadmap'}">
                 <li class="nav-item">
-                    <a class="nav-link" href="/lecturer/dashboard"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
+                    <a class="nav-link text-muted border-0 pb-3 px-3" href="/lecturer/dashboard" style="transition: color 0.2s;"><i class="ti ti-arrow-left me-1"></i> Spaces</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">Classwork / Roadmap</a>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'roadmap' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'roadmap' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#roadmap" role="tab" th:attr="data-url-path='/lecturer/space/' + ${spaceId}">Classwork / Roadmap</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/lecturer/space-members(spaceId=${spaceId})}">People</a>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'people' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'people' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#people" role="tab" th:attr="data-url-path='/lecturer/space-members?spaceId=' + ${spaceId}">People</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{'/lecturer/spaces/' + ${spaceId} + '/analytics'}">Analytics</a>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'analytics' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'analytics' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#analytics" role="tab" th:attr="data-url-path='/lecturer/spaces/' + ${spaceId} + '/analytics'">Analytics</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'activities' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'activities' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#activities" role="tab" th:attr="data-url-path='/lecturer/spaces/' + ${spaceId} + '/group-activities'">Group Activities</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link space-tab-link border-0 pb-3 px-3" th:classappend="${currentTab == 'mentoring' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}" th:style="${currentTab == 'mentoring' ? 'color: #1a73e8 !important; border-color: #1a73e8 !important;' : ''}" data-bs-toggle="tab" href="#mentoring" role="tab" th:attr="data-url-path='/lecturer/mentoring?spaceId=' + ${spaceId}"><i class="ti ti-users me-1"></i> Peer Mentoring</a>
                 </li>
             </ul>
+
+            <div class="tab-content" th:with="currentTab=${activeTab != null ? activeTab : 'roadmap'}">
+                <!-- ROADMAP TAB -->
+                <div class="tab-pane fade" th:classappend="${currentTab == 'roadmap' ? 'show active' : ''}" id="roadmap" role="tabpanel">
 
             <!-- Hero Banner -->
             <div class="classroom-banner mb-5">
@@ -105,7 +124,7 @@
                                             <i class="ti ti-calendar-week me-1"></i>
                                             Week <span th:text="${iterStat.count}">1</span>
                                             &nbsp;&middot;&nbsp;
-                                            <span th:text="${path.nodes != null ? path.nodes.size() : 0}">0</span> lessons
+                                            <span th:text="${path.nodes != null ? path.nodes.?[nodeType != 'GROUP_ACTIVITY'].size() : 0}">0</span> lessons
                                         </span>
                                         <!-- Title -->
                                         <h5 class="card-title d-flex align-items-center gap-2 mt-1">
@@ -118,8 +137,15 @@
 
                                     <!-- Right: badge + menu -->
                                     <div class="d-flex align-items-center gap-2 ms-3 flex-shrink-0">
-                                        <span th:if="${path.status == 'PUBLISHED'}" class="badge-published">Published</span>
-                                        <span th:if="${path.status != 'PUBLISHED'}" class="badge-in-progress">In Progress</span>
+<!--                                        <span th:if="${path.status == 'PUBLISHED'}" class="badge-published">Published</span>-->
+<!--                                        <span th:if="${path.status != 'PUBLISHED'}" class="badge-in-progress">In Progress</span>-->
+
+                                        <!-- Path Collapse Button -->
+                                        <button class="path-collapse-btn"
+                                                th:data-target="'#pathNodes-' + ${path.id}"
+                                                onclick="togglePathCollapse(this)">
+                                            <i class="ti ti-chevron-down path-collapse-icon"></i>
+                                        </button>
 
                                         <div class="dropdown">
                                             <button class="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center"
@@ -158,14 +184,18 @@
                                 <!-- Nodes area -->
                                 <div class="card-body px-4 pb-4 pt-2">
                                     <!-- Has lessons -->
-                                    <div th:if="${path.nodes != null and !path.nodes.empty}" class="nodes-container">
+                                    <div th:if="${path.nodes != null and !path.nodes.?[nodeType != 'GROUP_ACTIVITY'].empty}" 
+                                         class="nodes-container path-collapsible-body"
+                                         th:id="'pathNodes-' + ${path.id}">
                                         <th:block th:each="node : ${path.nodes}">
-                                            <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
+                                            <th:block th:if="${node.nodeType != 'GROUP_ACTIVITY'}">
+                                                <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
+                                            </th:block>
                                         </th:block>
                                     </div>
 
                                     <!-- No lessons yet -->
-                                    <div th:if="${path.nodes == null or path.nodes.empty}" class="module-empty-box mb-3">
+                                    <div th:if="${path.nodes == null or path.nodes.?[nodeType != 'GROUP_ACTIVITY'].empty}" class="module-empty-box mb-3">
                                         <div class="module-empty-icon">
                                             <i class="ti ti-layer-difference"></i>
                                         </div>
@@ -186,6 +216,29 @@
                 </div>
 
             </div>
+                </div> <!-- End Roadmap Tab Pane -->
+
+                <!-- PEOPLE TAB -->
+                <div class="tab-pane fade" th:classappend="${currentTab == 'people' ? 'show active' : ''}" id="people" role="tabpanel">
+                    <div th:replace="~{lecturer/space-members :: content}"></div>
+                </div> <!-- End People Tab Pane -->
+
+                <!-- ANALYTICS TAB -->
+                <div class="tab-pane fade" th:classappend="${currentTab == 'analytics' ? 'show active' : ''}" id="analytics" role="tabpanel">
+                    <div th:replace="~{lecturer/learning-analytics :: content}"></div>
+                </div> <!-- End Analytics Tab Pane -->
+
+                <!-- ACTIVITIES TAB -->
+                <div class="tab-pane fade" th:classappend="${currentTab == 'activities' ? 'show active' : ''}" id="activities" role="tabpanel">
+                    <div th:replace="~{lecturer/group-activities :: content}"></div>
+                </div> <!-- End Activities Tab Pane -->
+
+                <!-- MENTORING TAB -->
+                <div class="tab-pane fade" th:classappend="${currentTab == 'mentoring' ? 'show active' : ''}" id="mentoring" role="tabpanel">
+                    <div th:replace="~{lecturer/mentoring :: content}"></div>
+                </div> <!-- End Mentoring Tab Pane -->
+                
+            </div> <!-- End Tab Content -->
         </div>
 
 
@@ -279,10 +332,71 @@
 
     </div>
 
+    <!-- Scripts block for the entire layout -->
     <th:block layout:fragment="scripts">
+        <!-- Chart.js needed by analytics -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        
+        <!-- Tab Navigation Logic -->
+        <script>
+            $(document).ready(function() {
+                // Handle tab clicks to update URL
+                $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                    // Update active visual styles
+                    $('.space-tab-link').removeClass('active text-primary border-bottom border-primary border-3').addClass('text-muted');
+                    $('.space-tab-link').attr('style', '');
+                    $(e.target).removeClass('text-muted').addClass('active text-primary border-bottom border-primary border-3');
+                    $(e.target).attr('style', 'color: #1a73e8 !important; border-color: #1a73e8 !important;');
+                    
+                    // Update URL without reloading
+                    const newUrl = $(e.target).attr('data-url-path');
+                    if (newUrl) {
+                        window.history.pushState({path: newUrl}, '', newUrl);
+                    }
+                });
+                
+                // Handle browser back/forward buttons
+                window.addEventListener('popstate', function(event) {
+                    location.reload(); // Simple reload to handle back properly, or we can parse URL and switch tab
+                });
+            });
+        </script>
+
+        <!-- Included Fragments Scripts -->
+        <th:block th:replace="~{lecturer/space-members :: scripts}"></th:block>
+        <th:block th:replace="~{lecturer/learning-analytics :: scripts}"></th:block>
+        <th:block th:replace="~{lecturer/group-activities :: scripts}"></th:block>
+        <th:block th:replace="~{lecturer/mentoring :: scripts}"></th:block>
+
+        <!-- Existing Roadmap Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- Sortable.js for drag and drop -->
         <script>
 
             // LEARNING PATH JS (Logic quản lý đường dẫn học tập - Module)
+
+            window.deleteQuiz = function(quizId) {
+                Swal.fire({
+                    title: 'Delete Quiz?',
+                    text: "Bạn có chắc muốn xóa bài trắc nghiệm này?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Có, xóa nó!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const token = localStorage.getItem('jwt_token');
+                        fetch(`/api/quizzes/${quizId}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        }).then(res => {
+                            if (res.ok) window.location.reload();
+                            else Swal.fire('Error!', 'Lỗi xóa quiz', 'error');
+                        });
+                    }
+                });
+            };
 
             // Hàm kiểm tra input trống (Global utility)
             const checkValid = (selectors) => {
@@ -292,6 +406,17 @@
                 });
                 return valid;
             };
+
+            function launchQuiz(quizId) {
+                const launcher = document.getElementById('quiz-launcher-' + quizId);
+                const container = document.getElementById('quiz-iframe-container-' + quizId);
+                const iframe = document.getElementById('quiz-iframe-' + quizId);
+                if (launcher && container && iframe) {
+                    launcher.style.display = 'none';
+                    container.style.display = 'block';
+                    iframe.src = iframe.getAttribute('data-src');
+                }
+            }
 
             // --- Khởi tạo và xử lý sự kiện quản lý Module (Learning Path) ---
             $(document).ready(function() {
@@ -539,23 +664,68 @@
                     $(this).removeClass('is-invalid');
                 });
 
-                // Mở popup Sửa bài học
+                // Mở Modal Cập nhật bài học
                 $('.edit-node-btn').click(function (e) {
                     e.preventDefault();
-                    const pathId = $(this).data('pathid');
-                    const nodeId = $(this).data('nodeid');
-                    const title = $(this).data('title');
-                    const description = $(this).data('description');
-                    const type = $(this).data('type');
+                    $('#editNodeError').hide();
 
-                    $('#editNodePathId').val(pathId);
+                    const nodeId = $(this).data('nodeid');
+                    const pathId = $(this).data('pathid');
+                    const title = $(this).data('title');
+                    const desc = $(this).data('description');
+                    const type = $(this).data('type');
+                    const prereq = $(this).data('prereq');
+
                     $('#editNodeId').val(nodeId);
+                    $('#editNodePathId').val(pathId);
                     $('#editNodeTitle').val(title);
-                    $('#editNodeDescription').val(description !== 'null' ? description : '');
-                    $('#editNodeType').val(type || 'VIDEO');
+                    $('#editNodeDescription').val(desc !== 'null' ? desc : '');
+                    $('#editNodeType').val(type).trigger('change');
+                    if (prereq) {
+                        $('#editNodePrerequisite').val(prereq);
+                    } else {
+                        $('#editNodePrerequisite').val('');
+                    }
+
+                    $('#editYoutubeUrl').val('').removeData('original').removeData('itemid');
+                    $('#editDocumentFile').val('').removeData('itemid');
+                    $('#currentDocumentInfo').text('');
                     $('#editNodeTitle, #editNodeDescription').removeClass('is-invalid');
                     $('#editNodeError').hide();
+
+                    // Fetch existing items to pre-fill
+                    fetch(`/api/learning-nodes/${nodeId}/items`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    })
+                    .then(res => res.json())
+                    .then(items => {
+                        if (items && items.length > 0) {
+                            const item = items[0]; // assume 1 main item
+                            if (type === 'VIDEO' && item.itemType === 'VIDEO') {
+                                $('#editYoutubeUrl').val(item.url).data('original', item.url).data('itemid', item.id);
+                            } else if (type === 'DOCUMENT' && item.itemType === 'PDF') {
+                                $('#currentDocumentInfo').html(`<i class="ti ti-file-pdf"></i> Current file: ${item.title}`);
+                                $('#editDocumentFile').data('itemid', item.id);
+                            }
+                        }
+                    });
+
                     $('#editNodeModal').modal('show');
+                });
+
+                // Toggle logic for edit node type
+                $('#editNodeType').change(function() {
+                    const type = $(this).val();
+                    if (type === 'VIDEO') {
+                        $('#editVideoSection').show();
+                        $('#editDocumentSection').hide();
+                    } else if (type === 'DOCUMENT') {
+                        $('#editVideoSection').hide();
+                        $('#editDocumentSection').show();
+                    } else {
+                        $('#editVideoSection').hide();
+                        $('#editDocumentSection').hide();
+                    }
                 });
 
                 // Xóa bài học
@@ -584,18 +754,49 @@
                     });
                 });
 
+                // Xóa video khỏi bài học
+                $('.delete-video-btn').click(function (e) {
+                    e.preventDefault();
+                    const nodeId = $(this).data('nodeid');
+                    Swal.fire({
+                        title: 'Delete Video?',
+                        text: "Are you sure you want to delete the video from this lesson?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, delete video!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/api/learning-nodes/${nodeId}/items/video`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': 'Bearer ' + token }
+                            }).then(res => {
+                                if (res.ok) window.location.reload();
+                                else Swal.fire('Error!', 'Failed to delete video', 'error');
+                            });
+                        }
+                    });
+                });
+
                 // Lưu bài học mới (Create)
                 $('#btnSaveNode').click(function () {
                     $('#createNodeError').hide();
-                    if (!checkValid(['#nodeTitle', '#nodeDescription'])) return;
+                    if (!checkValid(['#nodeTitle'])) return;
 
                     const btn = $(this);
                     const pathId = $('#nodePathId').val();
                     const title = $('#nodeTitle').val().trim();
                     const desc = $('#nodeDescription').val().trim();
                     const type = $('#nodeType').val();
+                    const prereq = $('#nodePrerequisite').val();
 
                     btn.prop('disabled', true).text('Adding...');
+
+                    const payload = { title: title, description: desc, nodeType: type, learningPathId: pathId };
+                    if (prereq && prereq !== "") {
+                        payload.prerequisiteNodeId = prereq;
+                    }
 
                     fetch(`/api/learning-spaces/${spaceId}/learning-paths/${pathId}/learning-nodes`, {
                         method: 'POST',
@@ -603,7 +804,7 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
+                        body: JSON.stringify(payload)
                     })
                         .then(res => {
                             if (!res.ok) throw new Error("Failed to add lesson");
@@ -621,7 +822,7 @@
                 // Cập nhật bài học (Edit)
                 $('#btnUpdateNode').click(function () {
                     $('#editNodeError').hide();
-                    if (!checkValid(['#editNodeTitle', '#editNodeDescription'])) return;
+                    if (!checkValid(['#editNodeTitle'])) return;
 
                     const btn = $(this);
                     const pathId = $('#editNodePathId').val();
@@ -629,8 +830,17 @@
                     const title = $('#editNodeTitle').val().trim();
                     const desc = $('#editNodeDescription').val().trim();
                     const type = $('#editNodeType').val();
+                    const prereq = $('#editNodePrerequisite').val();
+
+                    const youtubeUrl = $('#editYoutubeUrl').val().trim();
+                    const docFile = $('#editDocumentFile')[0].files[0];
 
                     btn.prop('disabled', true).text('Saving...');
+
+                    const payload = { title: title, description: desc, nodeType: type, learningPathId: pathId };
+                    if (prereq && prereq !== "") {
+                        payload.prerequisiteNodeId = prereq;
+                    }
 
                     fetch(`/api/learning-spaces/${spaceId}/learning-paths/${pathId}/learning-nodes/${nodeId}`, {
                         method: 'PUT',
@@ -638,19 +848,60 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
+                        body: JSON.stringify(payload)
                     })
-                        .then(res => {
-                            if (!res.ok) throw new Error("Failed to update lesson");
-                            return res.json();
-                        })
-                        .then(data => {
-                            window.location.reload();
-                        })
-                        .catch(err => {
-                            $('#editNodeError').text(err.message).show();
-                            btn.prop('disabled', false).text('Save Changes');
-                        });
+                    .then(res => {
+                        if (!res.ok) throw new Error("Failed to update lesson");
+                        return res.json();
+                    })
+                    .then(data => {
+                        let promises = [];
+                        const oldVideoItemId = $('#editYoutubeUrl').data('itemid');
+                        const originalYoutubeUrl = $('#editYoutubeUrl').data('original');
+                        const oldDocItemId = $('#editDocumentFile').data('itemid');
+
+                        if (type === 'VIDEO' && youtubeUrl && youtubeUrl !== originalYoutubeUrl) {
+                            if (oldVideoItemId) {
+                                promises.push(fetch(`/api/learning-nodes/items/${oldVideoItemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
+                            }
+                            promises.push(
+                                fetch(`/api/learning-nodes/${nodeId}/items`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                    body: JSON.stringify({ title: 'Youtube Video', itemType: 'VIDEO', url: youtubeUrl, learningNodeId: nodeId })
+                                })
+                            );
+                        } else if (type === 'DOCUMENT' && docFile) {
+                            if (oldDocItemId) {
+                                promises.push(fetch(`/api/learning-nodes/items/${oldDocItemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
+                            }
+                            let formData = new FormData();
+                            formData.append('file', docFile);
+                            let uploadPromise = fetch(`/api/learning-nodes/${nodeId}/items/upload-document`, {
+                                method: 'POST',
+                                headers: { 'Authorization': 'Bearer ' + token },
+                                body: formData
+                            })
+                            .then(r => r.json())
+                            .then(uploadData => {
+                                return fetch(`/api/learning-nodes/${nodeId}/items`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                    body: JSON.stringify({ title: docFile.name, itemType: 'PDF', url: uploadData.url, learningNodeId: nodeId })
+                                });
+                            });
+                            promises.push(uploadPromise);
+                        }
+                        
+                        return Promise.all(promises);
+                    })
+                    .then(() => {
+                        window.location.reload();
+                    })
+                    .catch(err => {
+                        $('#editNodeError').text(err.message).show();
+                        btn.prop('disabled', false).text('Save Changes');
+                    });
                 });
 
 
@@ -732,6 +983,59 @@
                             $('#addYoutubeError').text(err.message).show();
                             btn.prop('disabled', false).text('Add Video');
                         });
+                });
+
+                // Click nút tạo Quiz
+                $(document).on('click', '.create-quiz-btn', function (e) {
+                    e.preventDefault();
+                    const nodeId = $(this).data('nodeid');
+                    $('#quizNodeId').val(nodeId);
+                    $('#quizTitle').val('Practice Quiz');
+                    $('#quizDuration').val(30);
+                    $('#quizPassScore').val(50);
+                    $('#createQuizModal').modal('show');
+                });
+
+                // Xử lý tạo Quiz
+                $('#btnSaveQuiz').click(function () {
+                    const btn = $(this);
+                    const nodeId = $('#quizNodeId').val();
+                    const title = $('#quizTitle').val().trim();
+                    const duration = $('#quizDuration').val();
+                    const passScore = $('#quizPassScore').val();
+
+                    if (!title) {
+                        alert("Vui lòng nhập tên Quiz");
+                        return;
+                    }
+
+                    btn.prop('disabled', true).text('Đang tạo...');
+
+                    fetch(`/api/quizzes`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({
+                            learningNodeId: nodeId,
+                            title: title,
+                            durationMinutes: duration,
+                            passScore: passScore,
+                            active: true
+                        })
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error("Lỗi tạo quiz");
+                        return res.json();
+                    })
+                    .then(data => {
+                        window.location.href = `/lecturer/quizzes/${data.id}/builder`;
+                    })
+                    .catch(err => {
+                        alert(err.message);
+                        btn.prop('disabled', false).text('Continue to Builder');
+                    });
                 });
 
                 // Hàm thực hiện upload file lên server
@@ -826,13 +1130,13 @@
                     const nodeId = container.data('nodeid');
                     const nodeType = container.data('nodetype');
 
-                    fetch(`/api/learning-nodes/${nodeId}/items`, {
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    })
-                        .then(res => res.json())
-                        .then(items => {
+                    Promise.all([
+                        fetch(`/api/learning-nodes/${nodeId}/items`, { headers: { 'Authorization': 'Bearer ' + token } }).then(res => res.ok ? res.json() : []),
+                        fetch(`/api/quizzes/learning-node/${nodeId}/active`, { headers: { 'Authorization': 'Bearer ' + token } }).then(res => res.ok ? res.json() : [])
+                    ])
+                        .then(([items, quizzes]) => {
+                            let html = '';
                             if (items && items.length > 0) {
-                                let html = '';
                                 items.forEach(item => {
                                     if (item.itemType === 'VIDEO') {
                                         let videoHtml = '';
@@ -853,28 +1157,87 @@
                                     } else if (item.itemType === 'PDF') {
                                         html += `
                                     <div class="mb-3">
-                                        <div class="border rounded-3 p-3 d-flex align-items-center gap-3 shadow-sm bg-white">
-                                            <div class="bg-danger-subtle text-danger p-2 rounded-2">
-                                                <i class="ti ti-file-pdf fs-3"></i>
-                                            </div>
-                                            <div class="flex-grow-1 overflow-hidden">
-                                                <a href="${item.fullUrl}" target="_blank" class="text-decoration-none text-dark">
+                                        <div class="border rounded-3 p-3 d-flex align-items-center justify-content-between shadow-sm bg-white">
+                                            <div class="d-flex align-items-center gap-3 overflow-hidden flex-grow-1">
+                                                <div class="bg-danger-subtle text-danger p-2 rounded-2">
+                                                    <i class="ti ti-file-pdf fs-3"></i>
+                                                </div>
+                                                <a href="${item.fullUrl}" target="_blank" class="text-decoration-none text-dark d-flex align-items-center gap-2">
                                                     <h6 class="mb-0 text-truncate fw-bold hover-text-primary" style="transition: color 0.2s;">${item.title}</h6>
+                                                    <span class="action-cta-badge" style="padding: 0.25rem 0.7rem; display: inline-flex; align-items: center; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                                                        Vào xem document <i class="ti ti-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                                                    </span>
                                                 </a>
                                             </div>
-                                            <button class="btn btn-sm btn-outline-danger border-0 delete-item-btn" data-itemid="${item.id}" title="Remove Document">
+                                            <button class="btn btn-sm btn-outline-danger border-0 delete-item-btn ms-2" data-itemid="${item.id}" title="Remove Document">
                                                 <i class="ti ti-trash"></i>
                                             </button>
                                         </div>
                                     </div>`;
                                     }
                                 });
+                            }
+
+                            if (quizzes && quizzes.length > 0) {
+                                quizzes.forEach(quiz => {
+                                    html += `
+                                    <div class="mb-3 mt-4">
+                                        <div class="d-flex align-items-center justify-content-between p-3 bg-white border rounded-4 shadow-sm">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="bg-primary-subtle text-primary p-2 rounded-3">
+                                                    <i class="ti ti-brain fs-3"></i>
+                                                </div>
+                                                <div>
+                                                    <h5 class="mb-0 fw-bold text-dark">${quiz.title || 'Practice Quiz'}</h5>
+                                                    <small class="text-muted">Attached Quiz</small>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <a href="/lecturer/quizzes/${quiz.id}/statistics" class="btn btn-outline-info px-3 py-1 rounded-pill"><i class="ti ti-chart-bar"></i> Thống kê</a>
+                                                <a href="/lecturer/quizzes/${quiz.id}/builder" class="btn btn-outline-primary px-3 py-1 rounded-pill"><i class="ti ti-edit"></i> Edit Quiz</a>
+                                                <button class="btn btn-outline-danger px-3 py-1 rounded-pill" onclick="deleteQuiz(${quiz.id})"><i class="ti ti-trash"></i> Delete Quiz</button>
+                                            </div>
+                                        </div>
+                                        <div id="quiz-launcher-${quiz.id}" class="mt-3 text-center p-4 bg-light border rounded-4">
+                                            <button class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm" onclick="launchQuiz('${quiz.id}')">
+                                                <i class="ti ti-player-play me-2"></i> Take Quiz
+                                            </button>
+                                        </div>
+                                        <div id="quiz-iframe-container-${quiz.id}" class="quiz-iframe-container mt-2" style="display: none;">
+                                            <iframe id="quiz-iframe-${quiz.id}" src="" data-src="/student/take-quiz?quizId=${quiz.id}&embed=true" style="width: 100%; height: 600px; border: 1px solid #dee2e6; border-radius: 8px;"></iframe>
+                                        </div>
+                                    </div>`;
+                                });
+                            }
+
+                            if (html !== '') {
                                 container.html(html);
                             }
                         })
                         .catch(err => console.error('Failed to load items for node', nodeId, err));
                 });
             });
+        </script>
+
+        <script>
+        // ── Path Collapse / Expand ──
+        function togglePathCollapse(btn) {
+            const targetId = btn.getAttribute('data-target');
+            const body = document.querySelector(targetId);
+            if (!body) return;
+
+            const isCollapsed = body.classList.contains('is-collapsed');
+
+            if (isCollapsed) {
+                body.classList.remove('is-collapsed');
+                btn.classList.remove('collapsed');
+                btn.title = 'Thu gọn';
+            } else {
+                body.classList.add('is-collapsed');
+                btn.classList.add('collapsed');
+                btn.title = 'Mở rộng';
+            }
+        }
         </script>
     </th:block>
 </body>

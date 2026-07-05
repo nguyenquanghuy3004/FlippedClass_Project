@@ -123,3 +123,141 @@
 .cursor-pointer { cursor: pointer; }
 .drag-handle    { cursor: grab; }
 .drag-handle:active { cursor: grabbing; }
+
+/* ── Node Collapse Button (giữ lại để tương thích nếu dùng ở nơi khác) ── */
+.node-collapse-btn {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    margin-right: 0.5rem;
+}
+
+/* ── Path Collapse Button (cạnh badge IN PROGRESS trên path card lớn) ── */
+.path-collapse-btn {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    background: rgba(99, 102, 241, 0.06);
+    color: #6366f1;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.path-collapse-btn:hover {
+    background: rgba(99, 102, 241, 0.14);
+    color: #4f46e5;
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+.path-collapse-btn .path-collapse-icon {
+    font-size: 0.9rem;
+    transition: transform 0.25s ease;
+}
+
+.path-collapse-btn.collapsed .path-collapse-icon {
+    transform: rotate(-90deg);
+}
+
+/* ── Collapsible Body (dùng cho cả node và path) ── */
+.node-collapsible-body,
+.path-collapsible-body {
+    overflow: hidden;
+    max-height: 5000px;
+    transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.3s ease;
+    opacity: 1;
+}
+
+.node-collapsible-body.is-collapsed,
+.path-collapsible-body.is-collapsed {
+    max-height: 0 !important;
+    opacity: 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    pointer-events: none;
+}
+
+/* ── Node Card Header (positioning context for centered badge) ── */
+.node-card-header {
+    position: relative;
+}
+
+/* ── Centered CTA Badge ── */
+.action-cta-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    pointer-events: auto;
+}
+
+/* ── Action CTA Badge ── */
+.action-cta-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+
+
+/* Colors based on data-type */
+.action-cta-badge[data-type="VIDEO"] {
+    background: #eef2ff;
+    color: #4f46e5;
+    border-color: #c7d2fe;
+}
+
+
+.action-cta-badge[data-type="DOCUMENT"] {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #a7f3d0;
+}
+
+
+.action-cta-badge[data-type="PRACTICE"] {
+    background: #fffbeb;
+    color: #d97706;
+    border-color: #fde68a;
+}
+
+
+.action-cta-badge[data-type="QUIZ"] {
+    background: #fdf2f8;
+    color: #db2777;
+    border-color: #fbcfe8;
+}
+
+
+/* Generic or other types */
+.action-cta-badge {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #e2e8f0;
+}
+
+
+
+

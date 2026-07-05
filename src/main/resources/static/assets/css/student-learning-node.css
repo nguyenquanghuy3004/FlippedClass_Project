@@ -31,7 +31,7 @@ body {
     radial-gradient(circle at top left, rgba(91, 92, 226, 0.18), transparent 30rem),
     radial-gradient(circle at bottom right, rgba(9, 11, 79, 0.12), transparent 28rem),
     linear-gradient(180deg, #ffffff 0%, var(--fc-background) 48%, #ffffff 100%);
-  font-family: "Lexend", "Trebuchet MS", sans-serif;
+  font-family: "Inter", "Trebuchet MS", sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -40,89 +40,7 @@ a {
   color: inherit;
 }
 
-.lesson-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.9rem clamp(1rem, 3vw, 2rem);
-  border-bottom: 1px solid rgba(229, 231, 235, 0.9);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: var(--fc-shadow-sm);
-  backdrop-filter: blur(18px);
-}
 
-.brand-link,
-.back-link,
-.student-chip {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-}
-
-.brand-link {
-  gap: 0.65rem;
-  min-width: max-content;
-  font-size: 1.15rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-}
-
-.brand-mark {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary) 58%, var(--fc-accent));
-  box-shadow: 0 12px 24px rgba(9, 11, 79, 0.18);
-}
-
-.brand-link span span {
-  color: var(--fc-primary-dark);
-}
-
-.topbar-spacer {
-  flex: 1;
-}
-
-.back-link {
-  gap: 0.45rem;
-  padding: 0.62rem 1rem;
-  border: 1px solid rgba(229, 231, 235, 0.95);
-  border-radius: 999px;
-  color: var(--fc-primary-dark);
-  background: #ffffff;
-  font-size: 0.86rem;
-  font-weight: 900;
-  box-shadow: 0 8px 18px rgba(31, 41, 55, 0.06);
-}
-
-.back-link:hover {
-  color: #ffffff;
-  background: var(--fc-primary-dark);
-}
-
-.student-chip {
-  gap: 0.6rem;
-  padding: 0.35rem 0.8rem 0.35rem 0.4rem;
-  border: 1px solid rgba(229, 231, 235, 0.95);
-  border-radius: 999px;
-  background: #ffffff;
-  font-size: 0.86rem;
-  font-weight: 850;
-  box-shadow: 0 8px 18px rgba(31, 41, 55, 0.06);
-}
-
-.student-chip img {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  object-fit: cover;
-}
 
 .lesson-shell {
   width: min(1500px, calc(100% - 2rem));

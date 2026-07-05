@@ -32,7 +32,7 @@ public class LearningSpace {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @Column(name = "invite_code", nullable = false, unique = true, length = 255)
+    @Column(name = "invite_code", length = 255, nullable = false, unique = true)
     private String inviteCode;
 
     @Enumerated(EnumType.STRING)

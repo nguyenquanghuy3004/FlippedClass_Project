@@ -15,6 +15,7 @@ import com.example.flippedclass.repository.LearningNodeRepository;
 import com.example.flippedclass.repository.LessonSummaryRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.LessonSummaryService;
+import com.example.flippedclass.service.NotificationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +31,7 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
     private final LearningNodeRepository learningNodeRepository;
     private final UserRepository userRepository;
     private final ProgressEvaluationService progressEvaluationService;
+    private final NotificationService notificationService;
 
 
     @Override
@@ -61,6 +63,15 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
         summary = lessonSummaryRepository.save(summary);
         // MỚI: Gọi đánh giá tiến độ sau khi lưu
         progressEvaluationService.evaluateNodeCompletion(student.getId(), learningNode.getId());
+        
+        // Push notification
+        Long lecturerId = learningNode.getLearningPath().getLecturer().getId();
+        notificationService.pushNotification(
+            lecturerId,
+            student.getFullName() + " vừa nộp bài tóm tắt: " + learningNode.getTitle(),
+            "/lecturer/summaries/" + summary.getId() + "/review"
+        );
+
         return mapToResponse(summary);
     }
 
@@ -74,6 +85,17 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
         summary.setReviewedAt(LocalDateTime.now());
         
         summary = lessonSummaryRepository.save(summary);
+        
+        // Push notification to student
+        Long studentId = summary.getStudent().getId();
+        String nodeTitle = summary.getLearningNode().getTitle();
+        Long nodeId = summary.getLearningNode().getId();
+        notificationService.pushNotification(
+            studentId,
+            "Giảng viên đã phản hồi bài tóm tắt của bạn: " + nodeTitle,
+            "/student/learning-nodes/" + nodeId
+        );
+        
         return mapToResponse(summary);
     }
 

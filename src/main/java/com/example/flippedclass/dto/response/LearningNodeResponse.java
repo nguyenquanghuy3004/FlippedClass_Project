@@ -18,6 +18,10 @@ public class LearningNodeResponse {
     private String status;
     private String nodeType;
     private String content;
+    private String starterCode;
+    private String solutionCode;
+    private Long prerequisiteNodeId;
+    private java.util.List<java.util.Map<String, Object>> quizzes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

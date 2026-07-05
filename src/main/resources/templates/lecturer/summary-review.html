@@ -12,6 +12,41 @@
     if (!localStorage.getItem('jwt_token')) window.location.href = '/login';
   </script>
   <link rel="stylesheet" th:href="@{/assets/css/summary-review.css}">
+  <!-- SockJS & STOMP for Notifications -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    (function () {
+      function handleUnauthorized() {
+        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
+        localStorage.removeItem('jwt_token');
+        sessionStorage.removeItem('jwt_token');
+        window.location.href = '/signin';
+      }
+      const originalFetch = window.fetch;
+      window.fetch = async function (...args) {
+        try {
+          const response = await originalFetch.apply(this, args);
+          if (response.status === 401) {
+            handleUnauthorized();
+          }
+          return response;
+        } catch (error) {
+          throw error;
+        }
+      };
+      const originalXhrOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function () {
+        this.addEventListener('load', function () {
+          if (this.status === 401) {
+            handleUnauthorized();
+          }
+        });
+        originalXhrOpen.apply(this, arguments);
+      };
+    })();
+  </script>
 </head>
 
 <body>
@@ -25,22 +60,44 @@
       <i class="ti ti-arrow-left"></i>
       Back
     </a>
-    
+
     <div class="topbar-spacer"></div>
 
-      <div class="student-user-menu topbar-user-menu" data-user-menu>
-        <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
-          <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Lecturer avatar">
-          <span class="student-menu-info">
-            <span class="student-menu-name" data-user-name>Lecturer View</span>
-          </span>
-          <i class="ti ti-chevron-down student-menu-chevron ms-1"></i>
-        </button>
-        <div class="student-menu-panel" role="menu">
-          <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
-          <button class="student-menu-item student-menu-item-danger" type="button" onclick="logout()" role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
+    <!-- Notification Bell -->
+    <div class="position-relative dropdown me-3" style="list-style:none;">
+        <a href="#" id="bellIcon" class="nav-link text-dark position-relative" data-bs-toggle="dropdown" aria-expanded="false" onclick="markAsReadOnOpen()">
+            <i class="ti ti-bell fs-4"></i>
+            <span id="notifBadge" class="badge bg-danger position-absolute top-0 start-100 translate-middle" style="display:none; font-size: 0.6rem;">!</span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0" style="width: 350px; border-radius: 12px; overflow: hidden; z-index: 9999;">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center text-white" style="background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);">
+                <h6 class="mb-0 fw-bold"><i class="ti ti-bell-ringing me-2"></i>Thông báo mới</h6>
+            </div>
+            <div id="notifList" class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
+                <div class="text-center p-4 text-muted small">
+                    <i class="ti ti-inbox fs-1 mb-2 d-block text-light"></i>
+                    Không có thông báo nào
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div class="student-user-menu topbar-user-menu" data-user-menu>
+      <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false"
+        aria-label="Account menu">
+        <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Lecturer avatar">
+        <span class="student-menu-info">
+          <span class="student-menu-name" data-user-name>Lecturer View</span>
+        </span>
+        <i class="ti ti-chevron-down student-menu-chevron ms-1"></i>
+      </button>
+      <div class="student-menu-panel" role="menu">
+        <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i
+            class="ti ti-help-circle"></i><span>Help</span></a>
+        <button class="student-menu-item student-menu-item-danger" type="button" onclick="logout()" role="menuitem"><i
+            class="ti ti-logout"></i><span>Logout</span></button>
       </div>
+    </div>
   </header>
 
   <div id="mainContent">
@@ -267,6 +324,73 @@
       localStorage.removeItem('role');
       localStorage.removeItem('username');
       window.location.href = '/signin';
+    }
+  </script>
+
+  <script>
+    const notifUserId = localStorage.getItem('user_id');
+
+    function renderNotifItem(notif) {
+        const timeStr = new Date(notif.createdAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+        return `
+            <a href="${notif.link || notif.targetUrl || '#'}" class="list-group-item list-group-item-action p-3 border-bottom">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.65rem;">Mới</span>
+                    <small class="text-muted" style="font-size: 0.75rem;"><i class="ti ti-clock me-1"></i>${timeStr}</small>
+                </div>
+                <p class="mb-0 text-dark small" style="font-weight: 500; line-height: 1.4;">${notif.message}</p>
+            </a>
+        `;
+    }
+
+    function markAsReadOnOpen() {
+        const badge = document.getElementById('notifBadge');
+        if (badge) badge.style.display = 'none';
+        fetch('/api/notifications/read-all', {
+            method: 'PUT',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+        }).catch(err => console.error(err));
+    }
+
+    if (notifUserId) {
+        fetch('/api/notifications', {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const listEl = document.getElementById('notifList');
+            if (data && data.length > 0) {
+                listEl.innerHTML = data.map(n => renderNotifItem(n)).join('');
+            }
+            const unreadCount = data.filter(n => !n.isRead).length;
+            if (unreadCount > 0) {
+                const badge = document.getElementById('notifBadge');
+                if (badge) { badge.innerText = unreadCount; badge.style.display = 'inline-block'; }
+            }
+        })
+        .catch(err => console.error('Error fetching notifications', err));
+
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+        stompClient.connect({}, function() {
+            stompClient.subscribe('/topic/notifications/' + notifUserId, function(res) {
+                const notif = JSON.parse(res.body);
+                const listEl = document.getElementById('notifList');
+                if (listEl.innerHTML.includes('Không có thông báo')) listEl.innerHTML = '';
+                listEl.insertAdjacentHTML('afterbegin', renderNotifItem(notif));
+                const badge = document.getElementById('notifBadge');
+                if (badge) {
+                    badge.innerText = (parseInt(badge.innerText) || 0) + 1;
+                    badge.style.display = 'inline-block';
+                }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'info', iconColor: '#4f46e5',
+                        title: notif.message, showConfirmButton: false, timer: 5000, timerProgressBar: true });
+                }
+            });
+        });
     }
   </script>
 </body>

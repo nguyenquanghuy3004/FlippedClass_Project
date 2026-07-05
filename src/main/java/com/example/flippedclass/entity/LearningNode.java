@@ -24,7 +24,7 @@ public class LearningNode {
     @JoinColumn(name = "learning_path_id", nullable = false)
     private LearningPath learningPath;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String title;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
@@ -32,6 +32,12 @@ public class LearningNode {
 
     @Column(name = "content", columnDefinition = "NVARCHAR(MAX)")
     private String content;
+
+    @Column(name = "starter_code", columnDefinition = "NVARCHAR(MAX)")
+    private String starterCode;
+
+    @Column(name = "solution_code", columnDefinition = "NVARCHAR(MAX)")
+    private String solutionCode;
 
     @Column(name = "node_type", length = 50)
     private String nodeType;

@@ -11,7 +11,7 @@ textarea,
 .logo-link,
 .nav-link,
 .nav-text {
-  font-family: 'Lexend', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
 /* 1. FONT WEIGHT CONFIGURATION */
@@ -99,20 +99,20 @@ textarea,
 .hero h1,
 .page-title,
 .quiz-hero h1 {
-  font-size: clamp(1.6rem, 2.5vw, 2.0rem) !important;
+  font-size: 1.5rem !important;
   line-height: 1.25 !important;
   letter-spacing: -0.03em !important;
 }
 
 .dashboard-hero-grid .welcome-card h1 {
-  font-size: 1.5rem !important;
+  font-size: 1.25rem !important;
 }
 
 /* Stat values */
 .stat-value,
 .stat-card strong,
 .timer-value {
-  font-size: 1.6rem !important;
+  font-size: 1.25rem !important;
   letter-spacing: -0.02em !important;
   font-weight: 700 !important;
 }
@@ -123,7 +123,7 @@ textarea,
 .detail-title,
 .path-title,
 .quiz-card h2 {
-  font-size: 1.15rem !important;
+  font-size: 1.05rem !important;
 }
 
 .topbar-title strong,
@@ -132,7 +132,7 @@ textarea,
 .space-card-title,
 .node-title,
 .q-number {
-  font-size: 0.95rem !important;
+  font-size: 0.85rem !important;
 }
 
 /* Standard body text & buttons */
@@ -142,12 +142,13 @@ p,
 .btn,
 .btn-quiz,
 .form-control {
-  font-size: 0.92rem !important;
+  font-size: 0.85rem !important; /* Reduced to ~13.6px */
+  line-height: 1.5;
 }
 
 /* Sidebar navigation */
 .sidebar .nav-link {
-  font-size: 0.85rem !important;
+  font-size: 0.8rem !important;
 }
 
 /* Small metadata, chips, labels */
@@ -160,4 +161,68 @@ p,
 .status-pill,
 .q-type {
   font-size: 0.72rem !important;
+}
+
+/* =========================================
+   NEW DESIGN SYSTEM TYPOGRAPHY TOKENS
+   Phase 1 Refactor - Matching Lecture UI
+   ========================================= */
+:root {
+  --fc-text-h1: 1.5rem; /* 24px */
+  --fc-text-section: 1.25rem; /* 20px */
+  --fc-text-card: 1rem; /* 16px */
+  --fc-text-body: 0.85rem; /* 13.6px */
+  --fc-text-meta: 0.75rem; /* 12px */
+  --fc-text-label: 0.6875rem; /* 11px */
+  --fc-text-stat: 1.25rem; /* 20px */
+
+  --fc-weight-bold: 700;
+  --fc-weight-semibold: 600;
+  --fc-weight-medium: 500;
+  --fc-weight-regular: 400;
+}
+
+/* Semantic Classes */
+.fc-h1 {
+  font-size: var(--fc-text-h1) !important;
+  font-weight: var(--fc-weight-bold) !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.fc-section-title {
+  font-size: var(--fc-text-section) !important;
+  font-weight: var(--fc-weight-bold) !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.fc-card-title {
+  font-size: var(--fc-text-card) !important;
+  font-weight: var(--fc-weight-semibold) !important;
+  line-height: 1.4 !important;
+}
+
+.fc-body {
+  font-size: var(--fc-text-body) !important;
+  font-weight: var(--fc-weight-regular) !important;
+  line-height: 1.6 !important;
+}
+
+.fc-stat-number {
+  font-size: var(--fc-text-stat) !important;
+  font-weight: var(--fc-weight-bold) !important;
+  letter-spacing: -0.02em !important;
+}
+
+.fc-badge, .fc-label {
+  font-size: var(--fc-text-label) !important;
+  font-weight: var(--fc-weight-bold) !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+.fc-meta {
+  font-size: var(--fc-text-meta) !important;
+  font-weight: var(--fc-weight-medium) !important;
 }

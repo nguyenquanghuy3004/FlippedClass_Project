@@ -9,6 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface ActivitySubmissionRepository extends JpaRepository<ActivitySubmission, Long> {
-    Optional<ActivitySubmission> findByGroup_Id(Long groupId);
-    List<ActivitySubmission> findByGroup_Activity_Id(Long activityId);
+    Optional<ActivitySubmission> findByGroupId(Long groupId);
 }

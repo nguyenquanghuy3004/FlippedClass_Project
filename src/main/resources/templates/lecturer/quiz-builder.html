@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
 
 <head>
@@ -7,6 +7,37 @@
   <th:block layout:fragment="head">
     <link rel="stylesheet" th:href="@{/assets/css/quiz-builder.css}">
   </th:block>
+  <script>
+(function() {
+    function handleUnauthorized() {
+        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
+        localStorage.removeItem('jwt_token');
+        sessionStorage.removeItem('jwt_token');
+        window.location.href = '/signin';
+    }
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        try {
+            const response = await originalFetch.apply(this, args);
+            if (response.status === 401) {
+                handleUnauthorized();
+            }
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+    const originalXhrOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function() {
+        this.addEventListener('load', function() {
+            if (this.status === 401) {
+                handleUnauthorized();
+            }
+        });
+        originalXhrOpen.apply(this, arguments);
+    };
+})();
+</script>
 </head>
 
 <body>
@@ -650,12 +681,45 @@
           const qData = bankQuestions.find(x => x.id === qId);
           if (!qData) continue;
           
+          let optsStr = qData.options || '';
+          let finalOptions = optsStr;
+          let finalCorrectAnswer = qData.correctAnswer || '';
+
+          if (qData.questionType === 'SINGLE_CHOICE' || qData.questionType === 'MULTIPLE_CHOICE') {
+             try {
+                let parsed = JSON.parse(optsStr);
+                if (Array.isArray(parsed)) {
+                   let obj = {};
+                   let correctKey = finalCorrectAnswer;
+                   parsed.forEach((val, idx) => {
+                      let key = String.fromCharCode(65 + idx);
+                      obj[key] = val;
+                      if (String(val).trim().toUpperCase() === String(qData.correctAnswer).trim().toUpperCase()) {
+                         correctKey = key;
+                      }
+                   });
+                   finalOptions = JSON.stringify(obj);
+                   finalCorrectAnswer = correctKey;
+                } else if (typeof parsed === 'object' && parsed !== null) {
+                   let foundKey = Object.keys(parsed).find(k => String(parsed[k]).trim().toUpperCase() === String(qData.correctAnswer).trim().toUpperCase());
+                   if (foundKey && !parsed[finalCorrectAnswer]) {
+                       finalCorrectAnswer = foundKey;
+                   }
+                }
+             } catch(e) {}
+          } else if (qData.questionType === 'TRUE_FALSE') {
+             let up = String(finalCorrectAnswer).toUpperCase();
+             if (up === 'TRUE' || up === '1') finalCorrectAnswer = 'TRUE';
+             else if (up === 'FALSE' || up === '0') finalCorrectAnswer = 'FALSE';
+             finalOptions = JSON.stringify({ "TRUE": "True", "FALSE": "False" });
+          }
+
           const payload = {
             content: qData.content,
-            options: qData.options || '',
-            correctAnswer: qData.correctAnswer,
+            options: finalOptions,
+            correctAnswer: finalCorrectAnswer,
             points: qData.points,
-            questionType: qData.questionType,
+            questionType: qData.questionType === 'MULTIPLE_CHOICE' ? 'SINGLE_CHOICE' : qData.questionType,
             sortOrder: questions.length + successCount // append to end
           };
           
@@ -686,5 +750,7 @@
 </body>
 
 </html>
+
+
 
 

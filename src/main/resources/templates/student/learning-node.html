@@ -1,177 +1,55 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{student/layout}">
+
+
 <head>
-  <meta charset="UTF-8">
   <title>Learning Node - FlippedClass</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/apple-touch-icon.png}">
-  <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon-32x32.png}">
-  <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
-  <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
-  <script type="text/javascript">
-    if (!localStorage.getItem('jwt_token')) {
-      window.location.href = '/login';
-    }
-  </script>
-  <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
-  <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
-  <script>
-/* --- Inlined from student-user-menu.js --- */
-(function () {
-  const defaultAvatarUrl = '/assets/images/avatar-1.jpg';
-
-  function storedUser() {
-    return {
-      fullName: localStorage.getItem('full_name') || localStorage.getItem('fullName') || '',
-      username: localStorage.getItem('username') || '',
-      avatarUrl: localStorage.getItem('avatar_url') || localStorage.getItem('avatarUrl') || ''
-    };
-  }
-
-  function normalizeUser(user = {}) {
-    const stored = storedUser();
-    return {
-      name: user.fullName || user.name || user.username || stored.fullName || stored.username || 'Student',
-      username: user.username || stored.username || '',
-      avatarUrl: user.avatarUrl || user.avatar_url || stored.avatarUrl || defaultAvatarUrl
-    };
-  }
-
-  function setStudentMenuUser(user = {}) {
-    const normalized = normalizeUser(user);
-
-    if (normalized.name && normalized.name !== 'Student') {
-      localStorage.setItem('full_name', normalized.name);
-    }
-    if (normalized.username) {
-      localStorage.setItem('username', normalized.username);
-    }
-    if (normalized.avatarUrl && normalized.avatarUrl !== defaultAvatarUrl) {
-      localStorage.setItem('avatar_url', normalized.avatarUrl);
-    }
-
-    document.querySelectorAll('[data-user-name]').forEach((element) => {
-      element.textContent = normalized.name;
-    });
-    document.querySelectorAll('[data-user-avatar]').forEach((image) => {
-      image.src = normalized.avatarUrl;
-      image.onerror = () => {
-        image.onerror = null;
-        image.src = defaultAvatarUrl;
-      };
-    });
-
-    const topbarName = document.getElementById('studentName');
-    if (topbarName) topbarName.textContent = normalized.name;
-  }
-
-  function studentLogout() {
-    ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
-      localStorage.removeItem(key);
-    });
-    window.location.href = '/';
-  }
-
-  async function refreshStudentMenuUser() {
-    const token = localStorage.getItem('jwt_token');
-    const userId = localStorage.getItem('user_id');
-    if (!token || !userId) return;
-
-    try {
-      const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!response.ok) return;
-      const user = await response.json();
-      setStudentMenuUser(user);
-    } catch (error) {
-      console.warn('Could not load user menu profile.', error);
-    }
-  }
-
-  function closeAllMenus(exceptMenu = null) {
-    document.querySelectorAll('[data-user-menu].is-open').forEach((menu) => {
-      if (menu !== exceptMenu) {
-        menu.classList.remove('is-open');
-        menu.querySelector('[data-user-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+  <th:block layout:fragment="head">
+    <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/student-layout.css}">
+    <style>
+      body {
+        padding-left: 0 !important;
       }
-    });
-  }
-
-  function initStudentUserMenus() {
-    setStudentMenuUser();
-    refreshStudentMenuUser();
-
-    document.querySelectorAll('[data-user-menu]').forEach((menu) => {
-      const toggle = menu.querySelector('[data-user-menu-toggle]');
-      const logoutButton = menu.querySelector('[data-user-logout]');
-
-      toggle?.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const shouldOpen = !menu.classList.contains('is-open');
-        closeAllMenus(menu);
-        menu.classList.toggle('is-open', shouldOpen);
-        toggle.setAttribute('aria-expanded', String(shouldOpen));
-      });
-
-      logoutButton?.addEventListener('click', studentLogout);
-    });
-
-    document.addEventListener('click', () => closeAllMenus());
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closeAllMenus();
-    });
-  }
-
-  window.setStudentMenuUser = setStudentMenuUser;
-  window.studentLogout = studentLogout;
-  if (!window.logout) window.logout = studentLogout;
-
-  document.addEventListener('DOMContentLoaded', initStudentUserMenus);
-})();
-
-</script>
-  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
-  <!-- Monaco Editor & JetBrains Mono -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+      #sidebar {
+        display: none !important;
+      }
+      #topbar {
+        left: 0 !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+      }
+      #toggleBtn, #mobileBtn {
+        display: none !important;
+      }
+      .lesson-shell {
+        margin-top: 65px;
+      }
+    </style>
+  </th:block>
 </head>
 
 <body>
-<header class="lesson-topbar">
-  <a class="brand-link" th:href="@{/}">
-    <span class="brand-mark"><i class="ti ti-school"></i></span>
-    <span>Flipped<span>Class</span></span>
-  </a>
-  <a id="backLink" class="back-link" th:href="@{/student/learning-spaces}">
-    <i class="ti ti-arrow-left"></i>
-    Back to roadmap
-  </a>
-  <div class="topbar-spacer"></div>
-  <a class="back-link" th:href="@{/student/my-quizzes}">
-    <i class="ti ti-brain"></i>
-    My Quizzes
-  </a>
-  <div class="student-user-menu topbar-user-menu" data-user-menu>
-  <button class="student-menu-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-label="Account menu">
-    <img class="student-menu-avatar" data-user-avatar th:src="@{/assets/images/avatar-1.jpg}" alt="Student avatar">
-    <span class="student-menu-info">
-      <span id="studentName" class="student-menu-name" data-user-name>Student</span>
-      <span class="student-menu-role">Student</span>
-    </span>
-    <i class="ti ti-chevron-down student-menu-chevron"></i>
-  </button>
-  <div class="student-menu-panel" role="menu">
-    <a class="student-menu-item" th:href="@{/docs}" role="menuitem"><i class="ti ti-help-circle"></i><span>Help</span></a>
-    <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
-  </div>
-</div>
-</header>
 
-<main class="lesson-shell">
+<span layout:fragment="topbar-title">
+  <a id="backLink" class="back-link" th:href="@{/student/learning-spaces}" style="font-size: 0.9rem; font-weight: 500; color: #475569; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+    <i class="ti ti-arrow-left"></i> Back to roadmap
+  </a>
+</span>
+
+<ul class="topbar-actions list-unstyled" layout:fragment="topbar-actions">
+  <li class="d-flex align-items-center">
+    <a class="back-link" th:href="@{/student/my-quizzes}" style="font-size: 0.9rem; font-weight: 500; color: #475569; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+      <i class="ti ti-brain"></i> My Quizzes
+    </a>
+  </li>
+</ul>
+
+<!-- MAIN CONTENT -->
+<main class="lesson-shell" layout:fragment="content">
   <div id="pageRoot" class="loading-state">
     <div>
       <i class="ti ti-loader-2"></i>
@@ -180,186 +58,224 @@
   </div>
 </main>
 
+<!-- Modal Share Solution -->
+<div class="modal fade" id="shareSolutionModal" tabindex="-1" aria-labelledby="shareSolutionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+      <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
+        <h5 class="modal-title" id="shareSolutionModalLabel" style="font-weight: 600;"><i class="ti ti-confetti text-warning"></i> Congratulations! 🎉</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p style="color: #475569; font-size: 0.95rem;">You have successfully passed all test cases! Would you like to share your solution with the class to help others learn?</p>
+        <div class="mb-3 mt-4">
+          <label for="shareSolutionTitle" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Title / Description</label>
+          <input type="text" class="form-control" id="shareSolutionTitle" placeholder="E.g., O(n) solution using HashMap" style="border-radius: 6px;">
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="font-weight: 500;">Maybe Later</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmShareSolution" style="font-weight: 500; display: flex; align-items: center; gap: 6px;"><i class="ti ti-share"></i> Share My Solution</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="scripts">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
 <script>
-/* --- Inlined from student-learning-node.js --- */
-const token = localStorage.getItem('jwt_token');
-  const urlParams = new URLSearchParams(window.location.search);
-  const pathNodeMatch = window.location.pathname.match(/\/student\/learning-nodes\/(\d+)/);
-  const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
-  const pageRoot = document.getElementById('pageRoot');
-  const studentName = document.getElementById('studentName');
+    let myCodeEditor; // Biến toàn cục để lưu instance của editor
+    const token = localStorage.getItem('jwt_token');
+    const userId = localStorage.getItem('user_id');
+    const urlParams = new URLSearchParams(window.location.search);
+    const pathNodeMatch = window.location.pathname.match(/\/student\/learning-nodes\/(\d+)/);
+    const nodeId = urlParams.get('nodeId') || pathNodeMatch?.[1] || '';
+    const pageRoot = document.getElementById('pageRoot');
 
-  studentName.textContent = localStorage.getItem('full_name') || localStorage.getItem('username') || 'Student';
-
-  function authHeaders(includeJson = true) {
-    const headers = { Authorization: `Bearer ${token}` };
-    if (includeJson) headers['Content-Type'] = 'application/json';
-    return headers;
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
-  }
-
-  async function readError(response) {
-    const text = await response.text();
-    if (!text) return 'Something went wrong. Please try again.';
-    try {
-      const json = JSON.parse(text);
-      return json.message || json.error || text;
-    } catch {
-      return text;
+    function authHeaders(includeJson = true) {
+      const headers = { Authorization: `Bearer ${token}` };
+      if (includeJson) headers['Content-Type'] = 'application/json';
+      return headers;
     }
-  }
 
-  function normalizeItemType(type) {
-    return String(type || '').toUpperCase();
-  }
+    // MỚI: Realtime Comments
+    if (nodeId) {
+        const nodeSocket = new SockJS('/ws');
+        const nodeStompClient = Stomp.over(nodeSocket);
+        nodeStompClient.debug = null; 
+        nodeStompClient.connect({}, function() {
+            nodeStompClient.subscribe('/topic/nodes/' + nodeId + '/comments', function(res) {
+                if (res.body === "REFRESH") {
+                    loadComments();
+                }
+            });
+        });
+    }
 
-  function itemUrl(item) {
-    return item.fullUrl || item.url || '';
-  }
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
 
-  const resourceLogoSources = {
-    DOC: '/uploads/anh/1200x630wa.jpg',
-    VIDEO: '/uploads/anh/R.jpg',
-    YOUTUBE: '/uploads/anh/OIP.jpg',
-    PDF: '/uploads/anh/pdf-file-download-symbols-format-for-texts-vector.jpg',
-    GOOGLE_DRIVE: '/uploads/anh/Google-Drive-Logo-2020-present.jpg'
-  };
+    async function readError(response) {
+      const text = await response.text();
+      if (!text) return 'Something went wrong. Please try again.';
+      try {
+        const json = JSON.parse(text);
+        return json.message || json.error || text;
+      } catch {
+        return text;
+      }
+    }
 
-  // Hàm hỗ trợ: Chuyển đổi link video YouTube thường thành dạng link nhúng (embed) để có thể xem trực tiếp trên web
-  function youtubeEmbedUrl(url) {
-    const value = String(url || '');
-    const watchMatch = value.match(/[?&]v=([^&]+)/);
-    const shortMatch = value.match(/youtu\.be\/([^?&]+)/);
-    const embedMatch = value.match(/youtube\.com\/embed\/([^?&]+)/);
-    const id = watchMatch?.[1] || shortMatch?.[1] || embedMatch?.[1];
-    return id ? `https://www.youtube.com/embed/${id}` : '';
-  }
+    function normalizeItemType(type) {
+      return String(type || '').toUpperCase();
+    }
 
-  function statusLabel(status) {
-    const labels = {
-      ACTIVE: 'Active',
-      DRAFT: 'Draft',
-      LOCKED: 'Locked',
-      UNLOCKED: 'Unlocked',
-      ARCHIVED: 'Archived',
-      DELETED: 'Deleted'
+    function itemUrl(item) {
+      return item.fullUrl || item.url || '';
+    }
+
+    const resourceLogoSources = {
+      DOC: '/uploads/anh/1200x630wa.jpg',
+      VIDEO: '/uploads/anh/R.jpg',
+      YOUTUBE: '/uploads/anh/OIP.jpg',
+      PDF: '/uploads/anh/pdf-file-download-symbols-format-for-texts-vector.jpg',
+      GOOGLE_DRIVE: '/uploads/anh/Google-Drive-Logo-2020-present.jpg'
     };
-    return labels[status] || status || 'Unknown';
-  }
 
-  function nodeTypeLabel(type) {
-    const labels = {
-      LESSON: 'Lesson',
-      VIDEO: 'Video',
-      PRACTICE: 'Practice',
-      QUIZ: 'Quiz',
-      REVIEW: 'Review'
-    };
-    return labels[type] || type || 'Node';
-  }
-
-  function resourceTypeLabel(type) {
-    const labels = {
-      PDF: 'Document PDF',
-      CODE: 'Source Code',
-      QUIZ: 'Quiz',
-      DISCUSSION: 'Discussion',
-      VIDEO: 'Video'
-    };
-    return labels[normalizeItemType(type)] || 'Resource';
-  }
-
-  function resourceIcon(type) {
-    const icons = {
-      PDF: 'ti-file-type-pdf',
-      CODE: 'ti-code',
-      QUIZ: 'ti-brain',
-      DISCUSSION: 'ti-message-circle',
-      VIDEO: 'ti-video'
-    };
-    return icons[normalizeItemType(type)] || 'ti-file';
-  }
-
-  function resourceLogo(item) {
-    const type = normalizeItemType(item?.itemType);
-    const url = itemUrl(item).toLowerCase();
-    const title = String(item?.title || '').toLowerCase();
-    const sourceText = `${url} ${title}`;
-
-    if (sourceText.includes('youtube') || sourceText.includes('youtu.be')) {
-      return resourceLogoSources.YOUTUBE;
+    function youtubeEmbedUrl(url) {
+      const value = String(url || '');
+      const watchMatch = value.match(/[?&]v=([^&]+)/);
+      const shortMatch = value.match(/youtu\.be\/([^?&]+)/);
+      const embedMatch = value.match(/youtube\.com\/embed\/([^?&]+)/);
+      const id = watchMatch?.[1] || shortMatch?.[1] || embedMatch?.[1];
+      return id ? `https://www.youtube.com/embed/${id}` : '';
     }
-    if (sourceText.includes('drive.google')) {
-      return resourceLogoSources.GOOGLE_DRIVE;
-    }
-    if (type === 'PDF' || sourceText.includes('.pdf')) {
-      return resourceLogoSources.PDF;
-    }
-    if (type === 'VIDEO' || /\.(mp4|webm|mov|avi|mkv)(?:$|[?#])/.test(url) || sourceText.includes('video')) {
-      return resourceLogoSources.VIDEO;
-    }
-    if (sourceText.includes('.doc') || sourceText.includes('docx') || sourceText.includes('document')) {
-      return resourceLogoSources.DOC;
-    }
-    return '';
-  }
 
-  function resourceIconTemplate(item) {
-    const logo = resourceLogo(item);
-    if (logo) {
-      return `
+    function statusLabel(status) {
+      const labels = {
+        ACTIVE: 'Active',
+        DRAFT: 'Draft',
+        LOCKED: 'Locked',
+        UNLOCKED: 'Unlocked',
+        ARCHIVED: 'Archived',
+        DELETED: 'Deleted'
+      };
+      return labels[status] || status || 'Unknown';
+    }
+
+    function nodeTypeLabel(type) {
+      const labels = {
+        LESSON: 'Lesson',
+        VIDEO: 'Video',
+        PRACTICE: 'Practice',
+        QUIZ: 'Quiz',
+        REVIEW: 'Review'
+      };
+      return labels[type] || type || 'Node';
+    }
+
+    function resourceTypeLabel(type) {
+      const labels = {
+        PDF: 'Document PDF',
+        CODE: 'Source Code',
+        QUIZ: 'Quiz',
+        DISCUSSION: 'Discussion',
+        VIDEO: 'Video'
+      };
+      return labels[normalizeItemType(type)] || 'Resource';
+    }
+
+    // Tabler Icons mapping
+    function resourceIcon(type) {
+      const icons = {
+        PDF: 'ti-file-type-pdf',
+        CODE: 'ti-code',
+        QUIZ: 'ti-brain',
+        DISCUSSION: 'ti-message-circle',
+        VIDEO: 'ti-video'
+      };
+      return icons[normalizeItemType(type)] || 'ti-file';
+    }
+
+    function resourceLogo(item) {
+      const type = normalizeItemType(item?.itemType);
+      const url = itemUrl(item).toLowerCase();
+      const title = String(item?.title || '').toLowerCase();
+      const sourceText = `${url} ${title}`;
+
+      if (sourceText.includes('youtube') || sourceText.includes('youtu.be')) {
+        return resourceLogoSources.YOUTUBE;
+      }
+      if (sourceText.includes('drive.google')) {
+        return resourceLogoSources.GOOGLE_DRIVE;
+      }
+      if (type === 'PDF' || sourceText.includes('.pdf')) {
+        return resourceLogoSources.PDF;
+      }
+      if (type === 'VIDEO' || /\.(mp4|webm|mov|avi|mkv)(?:$|[?#])/.test(url) || sourceText.includes('video')) {
+        return resourceLogoSources.VIDEO;
+      }
+      if (sourceText.includes('.doc') || sourceText.includes('docx') || sourceText.includes('document')) {
+        return resourceLogoSources.DOC;
+      }
+      return '';
+    }
+
+    function resourceIconTemplate(item) {
+      const logo = resourceLogo(item);
+      if (logo) {
+        return `
       <span class="resource-icon resource-icon-image">
         <img class="resource-logo-img" src="${escapeHtml(logo)}" alt="${escapeHtml(resourceTypeLabel(item?.itemType))} logo" loading="lazy">
       </span>`;
+      }
+      return `<span class="resource-icon"><i class="ti ${resourceIcon(item?.itemType)}"></i></span>`;
     }
-    return `<span class="resource-icon"><i class="ti ${resourceIcon(item?.itemType)}"></i></span>`;
-  }
 
-  function emptyLightTemplate(icon, message) {
-    return `
+    function emptyLightTemplate(icon, message) {
+      return `
       <div class="empty-light">
         <div>
           <i class="ti ${icon}"></i>
           ${escapeHtml(message)}
         </div>
       </div>`;
-  }
+    }
 
-  function videoTemplate(node, items) {
-    const video = items.find((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item));
-    if (!video) {
-      return `
+    function videoTemplate(node, items) {
+      const video = items.find((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item));
+      if (!video) {
+        return `
         <div class="empty-video">
           <div>
             <i class="ti ti-video-off"></i>
             Your instructor has not added a video for this node yet.
           </div>
         </div>`;
+      }
+
+      const url = itemUrl(video);
+      const embedUrl = youtubeEmbedUrl(url);
+      const player = embedUrl
+        ? `<iframe src="${escapeHtml(embedUrl)}" title="${escapeHtml(video.title || node.title || 'Lesson Video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+        : `<video controls preload="metadata" src="${escapeHtml(url)}"></video>`;
+
+      return `<div class="video-frame">${player}</div>`;
     }
 
-    const url = itemUrl(video);
-    const embedUrl = youtubeEmbedUrl(url);
-    const player = embedUrl
-      ? `<iframe src="${escapeHtml(embedUrl)}" title="${escapeHtml(video.title || node.title || 'Lesson Video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
-      : `<video controls preload="metadata" src="${escapeHtml(url)}"></video>`;
-
-    return `<div class="video-frame">${player}</div>`;
-  }
-
-  function resourceItemTemplate(item) {
-    const type = normalizeItemType(item.itemType);
-    const url = type === 'QUIZ' && item.quizId
-      ? `/student/take-quiz?quizId=${encodeURIComponent(item.quizId)}`
-      : itemUrl(item);
-    const body = `
+    function resourceItemTemplate(item) {
+      const type = normalizeItemType(item.itemType);
+      const url = type === 'QUIZ' && item.quizId
+        ? `/student/take-quiz?quizId=${encodeURIComponent(item.quizId)}`
+        : itemUrl(item);
+      const body = `
       ${resourceIconTemplate(item)}
       <span>
         <span class="resource-title">${escapeHtml(item.title || resourceTypeLabel(item.itemType))}</span>
@@ -367,230 +283,1053 @@ const token = localStorage.getItem('jwt_token');
       </span>
       <i class="ti ti-arrow-up-right text-primary"></i>`;
 
-    return url
-      ? `<a class="resource-item" href="${escapeHtml(url)}" ${type === 'QUIZ' ? '' : 'target="_blank" rel="noopener"'}>${body}</a>`
-      : `<div class="resource-item">${body}</div>`;
-  }
+      return url
+        ? `<a class="resource-item" href="${escapeHtml(url)}" ${type === 'QUIZ' ? '' : 'target="_blank" rel="noopener"'}>${body}</a>`
+        : `<div class="resource-item">${body}</div>`;
+    }
 
-  function resourcesTemplate(items) {
-    const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
-    if (!resources.length) return emptyLightTemplate('ti-folder-off', 'No resources have been added for this node yet.');
-    return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
-  }
+    function resourcesTemplate(items) {
+      const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
+      if (!resources.length) return emptyLightTemplate('ti-folder-off', 'No resources have been added for this node yet.');
+      return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
+    }
 
-  function commentsTemplate(items) {
-    const discussions = items.filter((item) => normalizeItemType(item.itemType) === 'DISCUSSION');
-    const body = discussions.length
-      ? `<div class="comment-list">${discussions.map((item) => `
-          <div class="comment-item">
-            <span class="comment-author">${escapeHtml(item.title || 'Discussion')}</span>
-            <span class="comment-text">${escapeHtml(item.content || 'Your instructor opened a discussion topic for this node.')}</span>
+    let currentComments = [];
+
+    async function loadComments() {
+      const container = document.getElementById('nodeCommentsContainer');
+      const badge = document.getElementById('commentsCountBadge');
+      if (!container) return;
+
+      try {
+        const groupParam = window.currentGroupId ? `?groupId=${window.currentGroupId}` : '';
+        const response = await fetch(`/api/nodes/${nodeId}/discussions${groupParam}`, { headers: authHeaders(false) });
+        if (response.status === 403) {
+          container.innerHTML = emptyLightTemplate('ti-lock', 'You do not have permission to comment in this class.');
+          if (badge) badge.textContent = '0';
+          return;
+        }
+        if (!response.ok) throw new Error(await readError(response));
+
+        currentComments = await response.json();
+        renderCommentsUI();
+      } catch (err) {
+        container.innerHTML = emptyLightTemplate('ti-alert-circle', err.message || 'Could not load comments.');
+      }
+    }
+
+    function formatTime(dateString) {
+      if (!dateString) return '';
+      const d = new Date(dateString);
+      return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderCommentItem(comment, isReply = false, rootId = null) {
+      const isOwner = String(comment.authorId) === String(userId);
+      const defaultAvt = '/assets/images/avatar-1.jpg';
+      const avatar = comment.authorAvatar || defaultAvt;
+      const author = comment.authorName || 'Student';
+      const time = formatTime(comment.createdAt);
+      const currentRootId = rootId || comment.id;
+      const safeAuthor = author.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+      let html = `
+      <div class="comment-item ${isReply ? 'comment-reply' : ''}" style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <img src="${escapeHtml(avatar)}" alt="avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='${defaultAvt}'">
+        <div style="flex: 1; background: #f8f9fa; border-radius: 8px; padding: 10px 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+            <strong style="font-size: 0.9rem; color: #1e293b;">${escapeHtml(author)}</strong>
+            <span style="font-size: 0.75rem; color: #64748b;">${escapeHtml(time)}</span>
           </div>
-        `).join('')}</div>`
-      : emptyLightTemplate('ti-message-off', 'No comments or discussion topics yet.');
+          <div style="font-size: 0.875rem; color: #334155; margin-bottom: 8px; white-space: pre-wrap;" id="comment-content-${comment.id}">${escapeHtml(comment.content)}</div>
 
-    return `
-      ${body}
-      <div class="comment-compose">
-        <textarea placeholder="Write a comment or question..."></textarea>
-        <button type="button" disabled>Send Comment</button>
+          <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #64748b;">
+            <button type="button" onclick="openReplyBox(${currentRootId}, '${safeAuthor}')" style="border:none; background:none; color:#64748b; cursor:pointer; padding:0;">Reply</button>
+            ${isOwner ? `<button type="button" onclick="deleteComment(${comment.id})" style="border:none; background:none; color:#ef4444; cursor:pointer; padding:0;">Delete</button>` : ''}
+          </div>
+
+          <div id="edit-form-${comment.id}" style="display: none; margin-top: 8px;">
+          </div>
+
+          <!-- Reply Form -->
+          ${!isReply ? `
+          <div id="reply-form-${comment.id}" style="display: none; margin-top: 12px;">
+            <textarea id="reply-input-${comment.id}" placeholder="Write a reply..." class="form-control" style="width: 100%; border-radius: 6px; padding: 8px; border: 1px solid #e2e8f0; font-size: 0.875rem; margin-bottom: 8px;" rows="2"></textarea>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" onclick="submitReply(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #3b82f6; color: white; border: none; cursor: pointer;">Reply</button>
+              <button type="button" onclick="toggleReplyForm(${comment.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+      if (!isReply && comment.replies && comment.replies.length > 0) {
+        html += `<div style="padding-left: 32px; border-left: 2px solid #e2e8f0; margin-left: 16px; margin-bottom: 16px;">`;
+        comment.replies.forEach(reply => {
+          html += renderCommentItem(reply, true, comment.id);
+        });
+        html += `</div>`;
+      }
+
+      return html;
+    }
+
+    function renderCommentsUI() {
+      const container = document.getElementById('nodeCommentsContainer');
+      const badge = document.getElementById('commentsCountBadge');
+      const heroBadge = document.getElementById('heroCommentsCount');
+      if (!container) return;
+
+      let totalCount = currentComments.length;
+      currentComments.forEach(c => totalCount += (c.replies ? c.replies.length : 0));
+      if (badge) badge.textContent = totalCount;
+      if (heroBadge) heroBadge.textContent = totalCount;
+
+      let body = '';
+      if (currentComments.length === 0) {
+        body = emptyLightTemplate('ti-message-off', 'No comments yet. Be the first to start a discussion!');
+      } else {
+        body = `<div class="comment-list" style="max-height: 400px; overflow-y: auto; padding-right: 8px;">
+        ${currentComments.map(c => renderCommentItem(c, false)).join('')}
       </div>`;
-  }
+      }
 
-  function renderError(title, message) {
-    pageRoot.className = 'error-state';
-    pageRoot.innerHTML = `
+      container.innerHTML = `
+      ${body}
+      <div class="comment-compose" style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+        <textarea id="rootCommentInput" placeholder="Write a comment or question..." style="width: 100%; border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1; font-size: 0.875rem; resize: vertical; margin-bottom: 8px;" rows="3"></textarea>
+        <button type="button" onclick="submitRootComment()" id="rootCommentBtn" style="width: 100%; padding: 8px; border-radius: 6px; background: #2563eb; color: white; border: none; font-weight: 500; cursor: pointer; transition: background 0.2s;">Send Comment</button>
+      </div>
+    `;
+
+      const input = document.getElementById('rootCommentInput');
+      const btn = document.getElementById('rootCommentBtn');
+      if (input && btn) {
+        input.addEventListener('input', () => {
+          btn.disabled = input.value.trim().length === 0;
+          btn.style.opacity = btn.disabled ? '0.6' : '1';
+        });
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+      }
+
+      const targetCommentId = urlParams.get('commentId');
+      if (targetCommentId && !window.hasScrolledToComment) {
+        window.hasScrolledToComment = true;
+        setTimeout(() => {
+          const commentEl = document.getElementById(`comment-content-${targetCommentId}`);
+          if (commentEl) {
+            commentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const parentBox = commentEl.parentElement;
+            if (parentBox) {
+              parentBox.style.transition = 'background-color 1.5s ease-in-out';
+              parentBox.style.backgroundColor = '#e0f2fe';
+              setTimeout(() => {
+                parentBox.style.backgroundColor = '#f8f9fa';
+              }, 3000);
+            }
+          }
+        }, 500);
+      }
+    }
+
+    window.toggleReplyForm = function (id) {
+      const form = document.getElementById(`reply-form-${id}`);
+      if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    };
+
+    window.openReplyBox = function (rootId, mentionName) {
+      const form = document.getElementById(`reply-form-${rootId}`);
+      const input = document.getElementById(`reply-input-${rootId}`);
+      if (form && input) {
+        form.style.display = 'block';
+        if (mentionName && !input.value.includes(`@${mentionName}`)) {
+          input.value = `@${mentionName} ${input.value}`;
+        }
+        input.focus();
+        const val = input.value;
+        input.value = '';
+        input.value = val;
+      }
+    };
+
+    window.toggleEditForm = function (id) {
+      const form = document.getElementById(`edit-form-${id}`);
+      const contentDiv = document.getElementById(`comment-content-${id}`);
+      const input = document.getElementById(`edit-input-${id}`);
+
+      if (form && contentDiv && input) {
+        if (form.style.display === 'none') {
+          form.style.display = 'block';
+          contentDiv.style.display = 'none';
+          input.value = contentDiv.textContent;
+        } else {
+          form.style.display = 'none';
+          contentDiv.style.display = 'block';
+        }
+      }
+    };
+
+    window.submitRootComment = async function () {
+      const input = document.getElementById('rootCommentInput');
+      const content = input.value.trim();
+      if (!content) return;
+
+      const btn = document.getElementById('rootCommentBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      try {
+        const groupParam = window.currentGroupId ? `?groupId=${window.currentGroupId}` : '';
+        const res = await fetch(`/api/nodes/${nodeId}/discussions${groupParam}`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ content })
+        });
+        if (!res.ok) throw new Error(await readError(res));
+        await loadComments();
+      } catch (err) {
+        alert(err.message || 'Could not post comment');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Send Comment';
+        }
+      }
+    };
+
+    window.submitReply = async function (parentId) {
+      const input = document.getElementById(`reply-input-${parentId}`);
+      const content = input?.value.trim();
+      if (!content) return;
+
+      try {
+        const groupParam = window.currentGroupId ? `?groupId=${window.currentGroupId}` : '';
+        const res = await fetch(`/api/nodes/${nodeId}/discussions${groupParam}`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ content, parentId })
+        });
+        if (!res.ok) throw new Error(await readError(res));
+        await loadComments();
+      } catch (err) {
+        alert(err.message || 'Could not post reply');
+      }
+    };
+
+    window.submitEdit = async function (commentId) {
+      const input = document.getElementById(`edit-input-${commentId}`);
+      const content = input?.value.trim();
+      if (!content) return;
+
+      try {
+        const res = await fetch(`/api/comments/${commentId}?userId=${userId}`, {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify({ content })
+        });
+        if (!res.ok) throw new Error(await readError(res));
+        await loadComments();
+      } catch (err) {
+        alert(err.message || 'Could not update comment');
+      }
+    };
+
+    window.deleteComment = async function (commentId) {
+      if (!confirm('Are you sure you want to delete this comment?')) return;
+      try {
+        const groupParam = window.currentGroupId ? `?groupId=${window.currentGroupId}` : '';
+        const res = await fetch(`/api/nodes/${nodeId}/discussions/${commentId}${groupParam}`, {
+          method: 'DELETE',
+          headers: authHeaders(false)
+        });
+        if (!res.ok) throw new Error(await readError(res));
+        await loadComments();
+      } catch (err) {
+        alert(err.message || 'Could not delete comment');
+      }
+    };
+
+    function renderError(title, message) {
+      pageRoot.className = 'error-state';
+      pageRoot.innerHTML = `
       <div>
         <i class="ti ti-alert-circle"></i>
         <h1>${escapeHtml(title)}</h1>
         <p class="mb-4">${escapeHtml(message)}</p>
         <a class="back-link" href="/student/learning-spaces"><i class="ti ti-arrow-left"></i> Back to Roadmap</a>
       </div>`;
-  }
-
-  // Hàm hiển thị giao diện toàn bộ nội dung của bài học (node)
-  function renderNodePage(node, items) {
-    // Phân loại các tài liệu đính kèm (items) thành: tài nguyên (tài liệu/code), bình luận, và video
-    const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
-    const discussions = items.filter((item) => normalizeItemType(item.itemType) === 'DISCUSSION');
-    const videoCount = items.some((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item)) ? 1 : 0;
-
-    pageRoot.className = 'lesson-layout';
-    pageRoot.innerHTML = `
-      <section class="player-column">
-        <section class="node-hero">
-          <span class="eyebrow"><i class="ti ti-player-play"></i> Learning Spaces node</span>
-          <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
-          <p class="node-description">${escapeHtml(node.content || 'Your instructor has not added a description for this node yet.')}</p>
-          <div class="meta-row">
-            <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-            <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
-            <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Video available' : 'No video'}</span>
-            <span class="soft-chip"><i class="ti ti-folder-open"></i>${resources.length} resource</span>
-            <span class="soft-chip"><i class="ti ti-messages"></i>${discussions.length} comments</span>
-          </div>
-        </section>
-
-        <section class="video-shell">
-          ${videoTemplate(node, items)}
-          <div class="player-controls">
-            <button class="server-pill active" type="button">Lesson Video</button>
-            <button class="server-pill" type="button">${resources.length} resource</button>
-            <button class="server-pill" type="button">${discussions.length} comments</button>
-          </div>
-        </section>
-
-        <section class="content-card">
-          <h2>Node Content</h2>
-          <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
-        </section>
-
-        <!-- Code Editor Section (IDE) -->
-        <section class="ide-card dark-mode" style="margin-top: 2rem; background-color: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2 style="color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; margin: 0;"><i class="ti ti-code"></i> Code Editor</h2>
-            <button id="btnRunCode" class="btn btn-success" style="background-color: #2ea043; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: background-color 0.2s;"><i class="ti ti-player-play"></i> Run Code</button>
-          </div>
-          
-          <div id="editor" style="height: 400px; border: 1px solid #444; border-radius: 4px; overflow: hidden;"></div>
-          
-          <div class="mt-3" style="margin-top: 20px;">
-            <h5 style="color: #aaa; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; font-size: 0.9rem;">Terminal Output:</h5>
-            <pre id="terminalOutput" style="background-color: #000; color: #00ff00; padding: 15px; border-radius: 4px; height: 150px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; border: 1px solid #333; margin: 0; white-space: pre-wrap; word-wrap: break-word;">> Chờ chạy lệnh...</pre>
-          </div>
-        </section>
-      </section>
-
-      <aside class="side-column">
-        <section class="side-card">
-          <div class="side-card-header">
-            <div>
-              <h2>Resources</h2>
-              <p>Documents, source code, or quizzes for this node.</p>
-            </div>
-            <span class="soft-chip">${resources.length}</span>
-          </div>
-          ${resourcesTemplate(items)}
-        </section>
-
-        <section class="side-card">
-          <div class="side-card-header">
-            <div>
-              <h2>Comments</h2>
-              <p>Discussions and questions related to this node.</p>
-            </div>
-            <span class="soft-chip">${discussions.length}</span>
-          </div>
-          ${commentsTemplate(items)}
-        </section>
-      </aside>`;
-  }
-
-  // Hàm chính: Tải thông tin của bài học (node) và các tài liệu/item liên quan từ backend
-  async function loadNodePage() {
-    if (!nodeId) {
-      renderError('Missing nodeId', 'Could not find the node to open. Please return to the roadmap and select a node again.');
-      return;
     }
 
-    try {
-      // Gọi đồng thời 2 API: lấy chi tiết node và lấy các item (tài liệu/video) thuộc node đó
-      const [nodeResponse, itemsResponse] = await Promise.all([
-        fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}`, { headers: authHeaders(false) }),
-        fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}/items`, { headers: authHeaders(false) })
-      ]);
+    function renderNodePage(node, items) {
+      window.currentGroupId = null; // Reset groupId khi render một node mới
 
-      if (!nodeResponse.ok) {
-        throw new Error(await readError(nodeResponse));
+      const resources = items.filter((item) => !['VIDEO', 'DISCUSSION'].includes(normalizeItemType(item.itemType)));
+      const discussions = items.filter((item) => normalizeItemType(item.itemType) === 'DISCUSSION');
+      const videoCount = items.some((item) => normalizeItemType(item.itemType) === 'VIDEO' && itemUrl(item)) ? 1 : 0;
+
+      if (node.nodeType === 'PRACTICE') {
+        const shell = document.querySelector('.lesson-shell');
+        if (shell) {
+            shell.style.maxWidth = 'none';
+            shell.style.width = '100%';
+            shell.style.padding = '0';
+            shell.style.margin = '0';
+        }
+        document.body.style.overflow = 'hidden';
+
+        pageRoot.className = 'lesson-layout practice-layout';
+        pageRoot.style.padding = '0';
+        pageRoot.style.gap = '0';
+        pageRoot.style.background = '#000000';
+        setTimeout(() => {
+          initMonaco(node.starterCode);
+        }, 100);
+        pageRoot.innerHTML = `
+        <style>
+          /* Full Dark Theme LeetCode style CSS */
+          .practice-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; align-items: stretch !important; height: calc(100vh - 65px); gap: 8px !important; padding: 8px !important; background: #000000 !important; }
+          
+          /* Common Panes */
+          .lc-pane { background: #282828; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #333; }
+          .lc-tabs-header { display: flex; gap: 16px; padding: 0 16px; background: #333333; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #111; }
+          .lc-tab { padding: 12px 4px; font-size: 0.85rem; font-weight: 500; color: #a1a1aa; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
+          .lc-tab:hover { color: #f4f4f5; background: rgba(255,255,255,0.05); }
+          .lc-tab.active { color: #fff; border-bottom-color: #2cbb5d; background: #282828; }
+          .lc-tab i { margin-right: 6px; font-size: 1rem; vertical-align: middle; }
+          
+          /* Content Areas */
+          .lc-content { flex: 1; overflow-y: auto; padding: 20px; color: #d4d4d8; font-size: 0.95rem; line-height: 1.6; }
+          .lc-content h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; color: #fff; }
+          
+          /* Markdown Preview Styles */
+          .markdown-body { color: #d4d4d8; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+          .markdown-body h1, .markdown-body h2 { border-bottom: 1px solid #3f3f46; padding-bottom: 0.3em; }
+          .markdown-body code { background-color: rgba(255,255,255,0.1); padding: 0.2em 0.4em; border-radius: 6px; font-family: monospace; }
+          .markdown-body pre { background-color: #1e1e1e !important; padding: 16px; border-radius: 6px; overflow: auto; border: 1px solid #3f3f46 !important; }
+          
+          /* Right Pane Wrapper */
+          .lc-right-split { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
+          
+          /* Editor Actions */
+          .lc-editor-card { background: #282828; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 0; border: 1px solid #333; }
+          .lc-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #333333; border-bottom: 1px solid #111; position: relative; }
+          .lc-toolbar-left { display: flex; align-items: center; gap: 12px; }
+          .lc-lang-select { background: #404040; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; color: #fff; cursor: pointer; }
+          
+          /* Top Central Run/Submit buttons */
+          .lc-toolbar-center { display: flex; align-items: center; gap: 8px; position: absolute; left: 50%; transform: translateX(-50%); }
+          .btn-lc-run { background: #3f3f46; color: #fff; border: none; padding: 5px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+          .btn-lc-run:hover { background: #52525b; }
+          .btn-lc-submit { background: #2cbb5d; color: #fff; border: none; padding: 5px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+          .btn-lc-submit:hover { background: #23994c; }
+          
+          /* Terminal Bottom Bar */
+          .lc-terminal-card { background: #282828; border-radius: 8px; display: flex; flex-direction: column; height: 35vh; min-height: 250px; border: 1px solid #333; overflow: hidden; transition: height 0.3s ease, min-height 0.3s ease; }
+          .lc-terminal-card.collapsed { height: 40px !important; min-height: 40px !important; }
+          .lc-term-tabs { display: flex; padding: 0 16px; background: #333333; border-bottom: 1px solid #111; justify-content: space-between; align-items: center; }
+          .lc-term-tab { padding: 8px 12px; font-size: 0.8rem; font-weight: 500; color: #a1a1aa; border: none; background: transparent; cursor: pointer; border-bottom: 2px solid transparent; }
+          .lc-term-tab.active { color: #fff; border-bottom-color: #fff; }
+          .lc-term-toggle { background: transparent; border: none; color: #a1a1aa; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
+          .lc-term-toggle:hover { background: #52525b; color: #fff; }
+          
+          /* Input/Output areas */
+          .lc-io-box { flex: 1; display: flex; flex-direction: column; padding: 12px; }
+          .lc-io-label { font-size: 0.8rem; font-weight: 600; color: #a1a1aa; margin-bottom: 6px; }
+          .lc-io-input { flex: 1; background: #1e1e1e; border: 1px solid #3f3f46; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #d4d4d8; outline: none; resize: none; }
+          .lc-io-output { flex: 1; background: #1e1e1e; border: 1px solid #3f3f46; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #10b981; overflow-y: auto; margin: 0; white-space: pre-wrap; }
+        </style>
+        
+        <section class="lc-pane">
+          <div class="lc-tabs-header">
+             <div class="lc-tab active" data-target="lc-desc-pane"><i class="ti ti-file-description" style="color: #007bff;"></i> Description</div>
+             <div class="lc-tab" data-target="lc-solution-pane"><i class="ti ti-flask" style="color: #facc15;"></i> Solution</div>
+             <div class="lc-tab" data-target="lc-community-pane"><i class="ti ti-users" style="color: #a855f7;"></i> Community</div>
+          </div>
+          
+          <div id="lc-desc-pane" class="lc-content lc-pane-content" style="display: block;">
+              <h1>${escapeHtml(node.title || 'Practice Problem')}</h1>
+              <div id="markdownPreviewContainer" class="markdown-body" style="font-size: 0.95rem; line-height: 1.6;">
+                  <div style="text-align: center; padding: 40px;"><i class="ti ti-loader-2 ti-spin"></i> Loading description...</div>
+              </div>
+          </div>
+          
+          <div id="lc-solution-pane" class="lc-content lc-pane-content" style="display: none;">
+             <div id="solutionLockScreen" class="text-center" style="padding-top: 40px; color: #64748b;">
+                <i class="ti ti-lock" style="font-size: 3rem; opacity: 0.5;"></i>
+                <h4 class="mt-3">Solution Locked</h4>
+                <p>You must get an <strong>Accepted</strong> submission to view the instructor's solution.</p>
+             </div>
+             <div id="solutionContent" style="display: none;">
+                <!-- Unlocked content goes here -->
+             </div>
+          </div>
+          
+          <div id="lc-community-pane" class="lc-content lc-pane-content" style="display: none;">
+             <div id="communityLockScreen" class="text-center" style="padding-top: 40px; color: #64748b;">
+                <i class="ti ti-lock" style="font-size: 3rem; opacity: 0.5;"></i>
+                <h4 class="mt-3">Community Locked</h4>
+                <p>You must get an <strong>Accepted</strong> submission to view and share community solutions.</p>
+             </div>
+             <div id="communityContent" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f0f0f0; padding-bottom: 12px;">
+                    <h3 style="margin: 0; color: #334155; font-size: 1.2rem;"><i class="ti ti-world"></i> Community Solutions</h3>
+                    <button class="btn btn-sm" style="background: #a855f7; color: white; border: none; font-weight: 600; border-radius: 6px; padding: 6px 12px;" data-bs-toggle="modal" data-bs-target="#shareSolutionModal"><i class="ti ti-share"></i> Share Solution</button>
+                </div>
+                <div id="sharedSolutionsList">
+                    <div class="text-center text-muted" style="padding: 20px;"><i class="ti ti-loader-2 ti-spin"></i> Loading community solutions...</div>
+                </div>
+             </div>
+          </div>
+        </section>
+
+        <!-- Cột Phải: Online IDE & Terminal -->
+        <aside class="lc-right-split">
+          
+          <!-- Code Editor Area -->
+          <div class="lc-editor-card">
+            <!-- Toolbar -->
+            <div class="lc-toolbar">
+                <div class="lc-toolbar-left">
+                    <div style="display:flex;align-items:center;gap:6px;color:#2cbb5d;font-size:0.85rem;font-weight:600;">
+                        <i class="ti ti-code"></i> Code
+                    </div>
+                    <select class="lc-lang-select">
+                        <option>Java</option>
+                    </select>
+                    <span style="font-size: 0.8rem; color: #8c8c8c; margin-left: 8px;">Auto</span>
+                </div>
+                
+                <div class="lc-toolbar-center">
+                    <button id="btnRunCode" class="btn-lc-run">
+                        <i class="ti ti-player-play-filled"></i> Run
+                    </button>
+                    <button id="btnSubmitCode" class="btn-lc-submit">
+                        <i class="ti ti-cloud-upload"></i> Submit
+                    </button>
+                </div>
+                
+                <div style="display:flex; gap: 8px; color: #8c8c8c; cursor:pointer;">
+                    <i class="ti ti-settings"></i>
+                    <i class="ti ti-maximize"></i>
+                </div>
+            </div>
+            
+            <div id="editor" style="flex: 1; width: 100%; min-height: 300px;"></div>
+          </div>
+          
+          <!-- Terminal & Test Results -->
+          <div class="lc-terminal-card" id="terminalCard">
+             <div class="lc-term-tabs" role="tablist">
+                <div style="display: flex; gap: 16px;">
+                    <button class="lc-term-tab active" id="console-tab" data-bs-toggle="tab" data-bs-target="#console-pane" type="button" role="tab">
+                        <i class="ti ti-square-check text-success"></i> Testcase
+                    </button>
+                    <button class="lc-term-tab" id="test-result-tab" data-bs-toggle="tab" data-bs-target="#test-result-pane" type="button" role="tab">
+                        <i class="ti ti-terminal text-primary"></i> Test Result
+                    </button>
+                </div>
+                <button class="lc-term-toggle" id="btnToggleTerminal" title="Toggle Terminal">
+                    <i class="ti ti-chevron-down" id="terminalToggleIcon" style="font-size: 1.1rem;"></i>
+                </button>
+             </div>
+             
+             <div class="tab-content" id="terminalContent" style="flex: 1; overflow: hidden; display: flex;">
+                <!-- CONSOLE PANE -->
+                <div class="tab-pane fade show active" id="console-pane" role="tabpanel" style="flex: 1; padding: 0;">
+                    <div style="display: flex; height: 100%;">
+                        <div class="lc-io-box">
+                            <div class="lc-io-label">Custom Input (stdin)</div>
+                            <textarea id="customInput" class="lc-io-input" placeholder="Enter standard input to test..."></textarea>
+                        </div>
+                        <div class="lc-io-box">
+                            <div class="lc-io-label">Output</div>
+                            <pre id="terminalOutput" class="lc-io-output">No commands run yet.</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TEST RESULTS PANE -->
+                <div class="tab-pane fade" id="test-result-pane" role="tabpanel" style="flex: 1; overflow-y: auto;">
+                    <div id="testResultContainer" style="padding: 20px;">
+                        <div class="text-center" style="color: #8c8c8c; padding-top: 40px;">
+                            <i class="ti ti-cloud-upload" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                            <p class="mt-2">Run or Submit code to see results</p>
+                        </div>
+                    </div>
+                </div>
+             </div>
+          </div>
+        </aside>
+      `;
+      } else {
+        pageRoot.className = 'lesson-layout';
+        pageRoot.innerHTML = `
+        <section class="player-column">
+          <section class="node-hero">
+            <span class="eyebrow"><i class="ti ti-player-play"></i> Learning Spaces node</span>
+            <h1 class="node-title">${escapeHtml(node.title || 'Learning Node')}</h1>
+            <div class="meta-row">
+              <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+              <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
+              <span class="soft-chip"><i class="ti ti-video"></i>${videoCount ? 'Video available' : 'No video'}</span>
+              <span class="soft-chip"><i class="ti ti-messages"></i><span id="heroCommentsCount">0</span> comments</span>
+            </div>
+          </section>
+
+          <section class="video-shell">
+            ${videoTemplate(node, items)}
+          </section>
+
+          <section class="content-card">
+            <h2>Node Content</h2>
+            <p>${escapeHtml(node.content || 'Detailed content will be updated by your instructor later.')}</p>
+          </section>
+
+          <section class="summary-card" style="margin-top: 1.5rem;">
+            <div class="summary-card-header">
+              <h2 class="summary-title">
+                <i class="ti ti-notebook"></i> Lesson Summary
+              </h2>
+              <span id="summaryStatus" class="summary-status">
+                <i class="ti ti-check"></i> Saved successfully
+              </span>
+            </div>
+
+            <form id="summaryForm" class="summary-form">
+              <div>
+                <label for="keyTakeaways" class="summary-label">📚 Key takeaways from the lesson</label>
+                <textarea id="keyTakeaways" class="summary-textarea" placeholder="Record the important knowledge you learned from the lesson..." required></textarea>
+              </div>
+
+              <div>
+                <label for="questions" class="summary-label">❓ Concepts you didn't understand</label>
+                <textarea id="questions" class="summary-textarea" placeholder="Record any content you are still wondering about or didn't understand..."></textarea>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                <button type="submit" id="saveSummaryBtn" class="btn-primary">
+                  <i class="ti ti-device-floppy"></i> Save Summary
+                </button>
+              </div>
+            </form>
+          </section>
+          <!-- END: LESSON SUMMARY UI -->
+          
+          ${node.quizzes && node.quizzes.length > 0 ? `
+          <!-- START: TAKE QUIZ UI -->
+          <section class="content-card mt-3" style="text-align: center; background: #f8fafc; border: 1px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.25rem; border-radius: 12px;">
+            <i class="ti ti-brain" style="font-size: 2rem; color: #6366f1; margin-bottom: 0.5rem;"></i>
+            <h3 style="font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 0.25rem;">Knowledge Check</h3>
+            <p style="color: #64748b; margin-bottom: 1rem; font-size: 0.85rem;">${node.quizzes.length > 1 ? 'There are multiple quizzes available.' : 'There is a quiz available to test your understanding of this lesson.'}</p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+              ${node.quizzes.map((quiz, index) => `
+                <a href="/student/take-quiz?quizId=${quiz.id}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: 6px;">
+                  <i class="ti ti-player-play-filled"></i> ${node.quizzes.length > 1 ? escapeHtml(quiz.title || ('Quiz ' + (index + 1))) : 'Take Quiz Now'}
+                </a>
+              `).join('')}
+            </div>
+          </section>
+          <!-- END: TAKE QUIZ UI -->
+          ` : ''}
+        </section>
+
+        <aside class="side-column">
+
+
+          <section class="side-card">
+            <div class="side-card-header">
+              <div>
+                <h2>Comments</h2>
+                <p>Discussions and questions related to this node.</p>
+              </div>
+              <span class="soft-chip" id="commentsCountBadge">0</span>
+            </div>
+            <div id="nodeCommentsContainer">
+              <div class="empty-light">
+                <div><i class="ti ti-loader-2"></i> Loading comments...</div>
+              </div>
+            </div>
+          </section>
+        </aside>`;
       }
 
-      const node = await nodeResponse.json();
-      const items = itemsResponse.ok ? await itemsResponse.json() : [];
-      // Sắp xếp các tài liệu theo thứ tự (position)
-      const sortedItems = Array.isArray(items)
-        ? [...items].sort((a, b) => (a.position || 0) - (b.position || 0))
-        : [];
+      require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
-      // Hiển thị nội dung ra giao diện
-      renderNodePage(node, sortedItems);
-      
-      // Khởi tạo Monaco Editor
-      initMonacoEditor();
-    } catch (error) {
-      renderError('Could not load node', error.message || 'Please try again later.');
-    }
-  }
+      function initMonaco(lecturerStarterCode) {
+        require(['vs/editor/editor.main'], function () {
+          const editorDiv = document.getElementById('editor');
+          if (editorDiv) {
+            const storageKey = 'saved_code_node_' + nodeId;
+            const savedCode = localStorage.getItem(storageKey);
+            const fallbackCode = "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n}";
+            const defaultCode = lecturerStarterCode || fallbackCode;
 
-  let myCodeEditor; // Biến toàn cục để lưu instance của editor
-
-  function initMonacoEditor() {
-    const editorDiv = document.getElementById('editor');
-    if (!editorDiv) return;
-
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
-
-    require(['vs/editor/editor.main'], function() {
-        myCodeEditor = monaco.editor.create(editorDiv, {
-            value: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello World!\");\n    }\n}",
-            language: "java",
-            theme: "vs-dark",     // Giao diện nền đen chuẩn Dev
-            automaticLayout: true,
-            fontSize: 14,
-            minimap: { enabled: false } // Tắt cái bản đồ nhỏ bên phải cho gọn
-        });
-    });
-
-    document.getElementById('btnRunCode').addEventListener('click', async function() {
-        const terminal = document.getElementById('terminalOutput');
-        const btn = document.getElementById('btnRunCode');
-        
-        terminal.innerText = "> Đang biên dịch code. Vui lòng đợi...";
-        terminal.style.color = "#aaa";
-        btn.disabled = true;
-        btn.style.opacity = "0.7";
-        btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Running...';
-        
-        // Lấy nội dung code đang gõ
-        const codeString = myCodeEditor.getValue();
-
-        try {
-            const response = await fetch('/api/compiler/execute', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ script: codeString })
+            myCodeEditor = monaco.editor.create(editorDiv, {
+              value: savedCode !== null ? savedCode : defaultCode,
+              language: "java",
+              theme: "vs-dark",
+              automaticLayout: true,
+              fontSize: 14,
+              minimap: { enabled: false }
             });
-            
-            const result = await response.json();
-            
-            // Phục hồi UI
-            btn.disabled = false;
-            btn.style.opacity = "1";
-            btn.innerHTML = '<i class="ti ti-player-play"></i> Run Code';
 
-            // JDoodle trả về Output ở trường "output"
-            if (result.output) {
-                terminal.style.color = response.ok ? "#00ff00" : "#ff4444";
-                terminal.innerText = "> " + result.output;
+            myCodeEditor.onDidChangeModelContent(function () {
+              localStorage.setItem(storageKey, myCodeEditor.getValue());
+            });
+
+            window.addEventListener('beforeunload', function () {
+              if (typeof myCodeEditor !== 'undefined') {
+                localStorage.setItem(storageKey, myCodeEditor.getValue());
+              }
+            });
+          }
+        });
+
+        const btnRunCode = document.getElementById('btnRunCode');
+        const btnSubmitCode = document.getElementById('btnSubmitCode');
+        const consoleTab = new bootstrap.Tab(document.getElementById('console-tab'));
+        const testResultTab = new bootstrap.Tab(document.getElementById('test-result-tab'));
+
+        const terminalCard = document.getElementById('terminalCard');
+        const btnToggleTerminal = document.getElementById('btnToggleTerminal');
+        const terminalToggleIcon = document.getElementById('terminalToggleIcon');
+
+        if (btnToggleTerminal) {
+          btnToggleTerminal.addEventListener('click', function () {
+            terminalCard.classList.toggle('collapsed');
+            if (terminalCard.classList.contains('collapsed')) {
+              terminalToggleIcon.classList.replace('ti-chevron-down', 'ti-chevron-up');
             } else {
-                terminal.style.color = "#ff4444";
-                terminal.innerText = "> Lỗi Server Compiler: " + JSON.stringify(result);
+              terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
             }
-        } catch (error) {
-            btn.disabled = false;
-            btn.style.opacity = "1";
-            btn.innerHTML = '<i class="ti ti-player-play"></i> Run Code';
-            
-            terminal.style.color = "#ff4444";
-            terminal.innerText = "> Lỗi kết nối đến Backend: " + error.message;
+            setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
+          });
         }
-    });
-  }
 
-  loadNodePage();
+        function expandTerminal() {
+          if (terminalCard && terminalCard.classList.contains('collapsed')) {
+            terminalCard.classList.remove('collapsed');
+            terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
+            setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
+          }
+        }
 
+        if (btnRunCode) {
+          btnRunCode.addEventListener('click', function () {
+            expandTerminal();
+            consoleTab.show();
+            const terminal = document.getElementById('terminalOutput');
+            const customInput = document.getElementById('customInput').value;
+            terminal.innerText = "> Đang biên dịch code. Vui lòng đợi Backend API...";
+            btnRunCode.disabled = true;
+
+            if (typeof myCodeEditor !== 'undefined') {
+              const codeString = myCodeEditor.getValue();
+
+              fetch('/api/compiler/execute', {
+                method: 'POST',
+                headers: authHeaders(),
+                body: JSON.stringify({ script: codeString, stdin: customInput })
+              })
+                .then(res => res.json())
+                .then(result => {
+                  if (result.output) {
+                    terminal.innerText = "> " + result.output;
+                  } else if (result.error) {
+                    terminal.innerText = "> Lỗi Server Compiler: " + result.error;
+                  } else {
+                    terminal.innerText = "> " + JSON.stringify(result);
+                  }
+                })
+                .catch(err => {
+                  terminal.innerText = "> Lỗi mạng hoặc mất kết nối Backend: " + err.message;
+                })
+                .finally(() => btnRunCode.disabled = false);
+            }
+          });
+        }
+
+        if (btnSubmitCode) {
+            btnSubmitCode.addEventListener('click', function() {
+                expandTerminal();
+                testResultTab.show();
+                const container = document.getElementById('testResultContainer');
+                container.innerHTML = `
+                    <div class="text-center text-muted" style="padding-top: 40px;">
+                        <i class="ti ti-loader-2 ti-spin" style="font-size: 2rem; color: #3b82f6;"></i>
+                        <p class="mt-2 text-white">Đang gửi code lên Server chấm điểm...</p>
+                    </div>
+                `;
+                btnSubmitCode.disabled = true;
+
+                if (typeof myCodeEditor !== 'undefined') {
+                    const codeString = myCodeEditor.getValue();
+
+                    fetch(`/api/learning-nodes/${nodeId}/submit-code`, {
+                        method: 'POST',
+                        headers: authHeaders(),
+                        body: JSON.stringify({ code: codeString })
+                    })
+                    .then(async res => {
+                        if (!res.ok) throw new Error(await readError(res));
+                        return res.json();
+                    })
+                    .then(result => {
+                        const scoreColor = result.allPassed ? '#10b981' : (result.passedCount > 0 ? '#f59e0b' : '#ef4444');
+                        const statusText = result.allPassed ? 'Accepted' : 'Wrong Answer';
+                        
+                        let html = `
+                            <div style="margin-bottom: 16px;">
+                                <h3 style="color: ${scoreColor}; font-weight: bold; margin: 0;">${statusText}</h3>
+                                <div style="color: #aaa; font-size: 0.9rem; margin-top: 4px;">
+                                    Điểm: <span style="color: white; font-weight: bold;">${result.totalScore}/${result.maxScore}</span> | 
+                                    Vượt qua: <span style="color: white; font-weight: bold;">${result.passedCount}/${result.totalCases} Test Cases</span>
+                                </div>
+                            </div>
+                        `;
+
+                        // Unlock logic
+                        if (result.allPassed) {
+                            const lockScreen = document.getElementById('solutionLockScreen');
+                            const solutionDiv = document.getElementById('solutionContent');
+                            if (lockScreen && solutionDiv) {
+                                lockScreen.style.display = 'none';
+                                solutionDiv.style.display = 'block';
+                                
+                                const codeHtml = node.solutionCode ? escapeHtml(node.solutionCode) : 'No solution code provided by instructor.';
+                                solutionDiv.innerHTML = `
+                                    <h3 style="color: #334155;">Instructor's Solution</h3>
+                                    <p style="color: #10b981; font-weight: 500;"><i class="ti ti-check"></i> You have successfully passed all tests and unlocked the solution!</p>
+                                    <pre style="background: #1e1e1e; color: #d4d4d8; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${codeHtml}</code></pre>
+                                `;
+                            }
+                            
+                            const commLockScreen = document.getElementById('communityLockScreen');
+                            const commContent = document.getElementById('communityContent');
+                            if (commLockScreen && commContent) {
+                                commLockScreen.style.display = 'none';
+                                commContent.style.display = 'block';
+                                loadSharedSolutions();
+                            }
+                            
+                            // Show Share Modal
+                            const shareModalEl = document.getElementById('shareSolutionModal');
+                            if (shareModalEl) {
+                               const shareModal = new bootstrap.Modal(shareModalEl);
+                               shareModal.show();
+                            }
+                        }
+
+                        if (result.results && result.results.length > 0) {
+                            html += `<div style="display: flex; flex-direction: column; gap: 12px;">`;
+                            result.results.forEach((tc, index) => {
+                                const passColor = tc.passed ? '#10b981' : '#ef4444';
+                                const passIcon = tc.passed ? 'ti-check' : 'ti-x';
+                                
+                                html += `
+                                <div style="background: #2d2d2d; border-radius: 8px; border: 1px solid #444; overflow: hidden;">
+                                    <div style="padding: 8px 16px; background: #333; display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="font-weight: 600; color: #fff; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                                            <i class="ti ${passIcon}" style="color: ${passColor};"></i> Test Case #${index + 1}
+                                        </div>
+                                        <span class="badge" style="background: #444;">${tc.points} pts</span>
+                                    </div>
+                                    <div style="padding: 12px;">
+                                `;
+
+                                if (tc.hidden) {
+                                    html += `
+                                        <div style="color: #94a3b8; font-size: 0.85rem; font-style: italic; display: flex; align-items: center; gap: 6px;">
+                                            <i class="ti ti-lock"></i> Hidden Test Case. ${tc.passed ? 'Bạn đã vượt qua.' : 'Bạn chưa vượt qua test này.'}
+                                        </div>
+                                    `;
+                                } else {
+                                    html += `
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                                            <div>
+                                                <label style="color: #aaa; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 2px;">Input</label>
+                                                <div style="background: #1a1a1a; padding: 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #e2e8f0; white-space: pre-wrap; word-break: break-all;">${escapeHtml(tc.inputData)}</div>
+                                            </div>
+                                            <div>
+                                                <label style="color: #aaa; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 2px;">Expected</label>
+                                                <div style="background: #1a1a1a; padding: 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #e2e8f0; white-space: pre-wrap; word-break: break-all;">${escapeHtml(tc.expectedOutput)}</div>
+                                            </div>
+                                            <div>
+                                                <label style="color: #aaa; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 2px;">Actual</label>
+                                                <div style="background: #1a1a1a; padding: 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: ${passColor}; white-space: pre-wrap; word-break: break-all;">${escapeHtml(tc.actualOutput)}</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+
+                                html += `</div></div>`;
+                            });
+                            html += `</div>`;
+                        }
+
+                        container.innerHTML = html;
+                    })
+                    .catch(err => {
+                        container.innerHTML = `
+                            <div class="text-center text-danger" style="padding-top: 40px;">
+                                <i class="ti ti-alert-circle" style="font-size: 2rem;"></i>
+                                <p class="mt-2">${err.message}</p>
+                            </div>
+                        `;
+                    })
+                    .finally(() => btnSubmitCode.disabled = false);
+                }
+            });
+        }
+        
+        // Tab switching logic for Left Pane
+        const tabs = document.querySelectorAll('.lc-tab');
+        const panes = document.querySelectorAll('.lc-pane-content');
+        if (tabs.length > 0) {
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    const targetId = tab.getAttribute('data-target');
+                    panes.forEach(pane => {
+                      pane.style.display = pane.id === targetId ? 'block' : 'none';
+                    });
+                });
+            });
+
+            // Load marked.js to render the Markdown
+            if (!window.marked) {
+                const script = document.createElement('script');
+                script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+                script.onload = () => {
+                   document.getElementById('markdownPreviewContainer').innerHTML = window.marked.parse(node.content || '*No description provided*');
+                };
+                document.head.appendChild(script);
+            } else {
+                document.getElementById('markdownPreviewContainer').innerHTML = window.marked.parse(node.content || '*No description provided*');
+            }
+            
+            // Check pass status on load to unlock tabs automatically
+            fetch(`/api/shared-solutions/node/${nodeId}/status`, { headers: authHeaders(false) })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.isPassed) {
+                        const lockScreen = document.getElementById('solutionLockScreen');
+                        const solutionDiv = document.getElementById('solutionContent');
+                        if (lockScreen && solutionDiv) {
+                            lockScreen.style.display = 'none';
+                            solutionDiv.style.display = 'block';
+                            const codeHtml = node.solutionCode ? escapeHtml(node.solutionCode) : 'No solution code provided by instructor.';
+                            solutionDiv.innerHTML = `
+                                <h3 style="color: #334155;">Instructor's Solution</h3>
+                                <p style="color: #10b981; font-weight: 500;"><i class="ti ti-check"></i> You have successfully passed all tests and unlocked the solution!</p>
+                                <pre style="background: #1e1e1e; color: #d4d4d8; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${codeHtml}</code></pre>
+                            `;
+                        }
+                        const commLockScreen = document.getElementById('communityLockScreen');
+                        const commContent = document.getElementById('communityContent');
+                        if (commLockScreen && commContent) {
+                            commLockScreen.style.display = 'none';
+                            commContent.style.display = 'block';
+                            loadSharedSolutions();
+                        }
+                    }
+                })
+                .catch(console.error);
+        }
+      }
+      
+      const summaryForm = document.getElementById('summaryForm');
+      const saveSummaryBtn = document.getElementById('saveSummaryBtn');
+      const summaryStatus = document.getElementById('summaryStatus');
+
+      if (summaryForm && saveSummaryBtn && summaryStatus) {
+        summaryForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const keyTakeaways = document.getElementById('keyTakeaways').value;
+          const questions = document.getElementById('questions').value;
+
+          const summaryJson = JSON.stringify({
+            keyTakeaways: keyTakeaways,
+            confusingPoints: questions
+          });
+
+          saveSummaryBtn.disabled = true;
+          saveSummaryBtn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Saving...';
+
+          try {
+            const response = await fetch('/api/lesson-summaries', {
+              method: 'POST',
+              headers: authHeaders(true),
+              body: JSON.stringify({
+                learningNodeId: nodeId,
+                summaryContent: summaryJson
+              })
+            });
+
+            if (!response.ok) {
+              throw new Error(await readError(response));
+            }
+            summaryStatus.innerHTML = '<span class="text-success"><i class="ti ti-check"></i> Ghi nhận thành công.</span>';
+          } catch (err) {
+            summaryStatus.innerHTML = `<span class="text-danger"><i class="ti ti-alert-circle"></i> ${err.message}</span>`;
+          } finally {
+            saveSummaryBtn.disabled = false;
+            saveSummaryBtn.innerHTML = 'Lưu và nộp thu hoạch';
+          }
+        });
+      }
+      
+      // Community Shared Solutions Logic
+      function loadSharedSolutions() {
+          const listDiv = document.getElementById('sharedSolutionsList');
+          if (!listDiv) return;
+
+          fetch(`/api/shared-solutions/node/${nodeId}`, { headers: authHeaders(false) })
+              .then(res => res.json())
+              .then(data => {
+                  if (!data || data.length === 0) {
+                      listDiv.innerHTML = '<div class="text-center text-muted" style="padding: 20px;">No solutions shared yet. Be the first!</div>';
+                      return;
+                  }
+
+                  let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+                  data.forEach(sol => {
+                      html += `
+                      <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; background: #fff;">
+                          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                              <div>
+                                  <h4 style="margin: 0 0 4px 0; font-size: 1rem; color: #1e293b;">${escapeHtml(sol.title)}</h4>
+                                  <div style="font-size: 0.8rem; color: #64748b;">By <strong style="color: #3b82f6;">${escapeHtml(sol.studentName)}</strong> • ${new Date(sol.createdAt).toLocaleString()}</div>
+                              </div>
+                              <button class="btn btn-sm btn-outline-primary" onclick="upvoteSolution(${sol.id}, this)" style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px;">
+                                  <i class="ti ti-thumb-up"></i> <span>${sol.upvotes || 0}</span>
+                              </button>
+                          </div>
+                          <pre style="background: #1e1e1e; color: #d4d4d8; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; overflow-x: auto; margin: 0;"><code>${escapeHtml(sol.codeContent)}</code></pre>
+                      </div>
+                      `;
+                  });
+                  html += '</div>';
+                  listDiv.innerHTML = html;
+              })
+              .catch(err => {
+                  listDiv.innerHTML = `<div class="text-center text-danger">Error loading community solutions: ${err.message}</div>`;
+              });
+      }
+
+      window.upvoteSolution = function(solId, btnEl) {
+          fetch(`/api/shared-solutions/${solId}/upvote`, {
+              method: 'POST',
+              headers: authHeaders(false)
+          })
+          .then(res => res.json())
+          .then(data => {
+              btnEl.innerHTML = `<i class="ti ti-thumb-up text-primary"></i> <span>${data.upvotes}</span>`;
+              btnEl.classList.add('active');
+          })
+          .catch(console.error);
+      };
+
+      const btnConfirmShareSolution = document.getElementById('btnConfirmShareSolution');
+      if (btnConfirmShareSolution) {
+          btnConfirmShareSolution.addEventListener('click', async () => {
+              const title = document.getElementById('shareSolutionTitle').value.trim();
+              if (!title) {
+                  alert("Please enter a title for your solution.");
+                  return;
+              }
+
+              const codeString = window.myCodeEditor ? window.myCodeEditor.getValue() : '';
+
+              btnConfirmShareSolution.disabled = true;
+              btnConfirmShareSolution.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Sharing...';
+
+              try {
+                  const response = await fetch(`/api/shared-solutions/node/${nodeId}`, {
+                      method: 'POST',
+                      headers: authHeaders(true),
+                      body: JSON.stringify({ title: title, codeContent: codeString })
+                  });
+
+                  if (!response.ok) throw new Error(await readError(response));
+
+                  // Success
+                  const shareModalEl = document.getElementById('shareSolutionModal');
+                  const shareModal = bootstrap.Modal.getInstance(shareModalEl);
+                  if (shareModal) shareModal.hide();
+
+                  document.getElementById('shareSolutionTitle').value = '';
+                  
+                  // Switch to community tab if not there
+                  const commTab = document.querySelector('.lc-tab[data-target="lc-community-pane"]');
+                  if(commTab) commTab.click();
+                  
+                  loadSharedSolutions();
+              } catch (err) {
+                  alert(err.message);
+              } finally {
+                  btnConfirmShareSolution.disabled = false;
+                  btnConfirmShareSolution.innerHTML = '<i class="ti ti-share"></i> Share My Solution';
+              }
+          });
+      }
+    }
+
+    async function loadNodePage() {
+      if (!nodeId) {
+        renderError('Missing nodeId', 'Could not find the node to open. Please return to the roadmap and select a node again.');
+        return;
+      }
+
+      try {
+        const [nodeResponse, itemsResponse] = await Promise.all([
+          fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}`, { headers: authHeaders(false) }),
+          fetch(`/api/learning-nodes/${encodeURIComponent(nodeId)}/items`, { headers: authHeaders(false) })
+        ]);
+
+        if (!nodeResponse.ok) {
+          throw new Error(await readError(nodeResponse));
+        }
+
+        const node = await nodeResponse.json();
+        const items = itemsResponse.ok ? await itemsResponse.json() : [];
+        const sortedItems = Array.isArray(items)
+          ? [...items].sort((a, b) => (a.position || 0) - (b.position || 0))
+          : [];
+
+        const quizItem = sortedItems.find(i => String(i.itemType || '').toUpperCase() === 'QUIZ');
+        if (quizItem && quizItem.quizId && node.nodeType !== 'GROUP_ACTIVITY') {
+          window.location.replace(`/student/take-quiz?quizId=${encodeURIComponent(quizItem.quizId)}`);
+          return;
+        }
+
+        const hasVideo = sortedItems.some(i => String(i.itemType || '').toUpperCase() === 'VIDEO');
+        // Redirection for PDF/DOC has been removed so that documents open inside the portal via iframe.
+
+        if (node.nodeType === 'GROUP_ACTIVITY') {
+            if (typeof window.renderGroupActivityPage === 'function') {
+                window.renderGroupActivityPage(node, nodeId);
+            } else {
+                renderError('Lỗi', 'Module Group Activity chưa được tải.');
+            }
+        } else {
+            renderNodePage(node, sortedItems);
+            loadComments();
+        }
+      } catch (error) {
+        renderError('Could not load node', error.message || 'Please try again later.');
+      }
+    }
+
+    loadNodePage();
 </script>
-<script src="/js/active-time-tracker.js"></script>
+<script th:src="@{/assets/js/group-activity.js}"></script>
+</th:block>
 </body>
 </html>
-
-

@@ -11,6 +11,7 @@ import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.NodeCommentRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.NodeCommentService;
+import com.example.flippedclass.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,8 @@ public class NodeCommentServiceImpl implements NodeCommentService {
     private final LearningNodeRepository learningNodeRepository;
     private final UserRepository userRepository;
     private final LearningSpaceMemberRepository learningSpaceMemberRepository;
+    private final NotificationService notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional(readOnly = true)
@@ -80,6 +84,18 @@ public class NodeCommentServiceImpl implements NodeCommentService {
 
         comment = nodeCommentRepository.save(comment);
 
+        // Đẩy thông báo cho giảng viên nếu người comment không phải là giảng viên
+        Long lecturerId = node.getLearningPath().getLecturer().getId();
+        if (!user.getId().equals(lecturerId)) {
+            notificationService.pushNotification(
+                lecturerId,
+                user.getFullName() + " vừa bình luận trong bài học: " + node.getTitle(),
+                "/lecturer/learning-nodes/" + node.getId() + "/preview"
+            );
+        }
+
+        messagingTemplate.convertAndSend("/topic/nodes/" + nodeId + "/comments", "REFRESH");
+
         return mapToResponse(comment);
     }
 
@@ -112,6 +128,18 @@ public class NodeCommentServiceImpl implements NodeCommentService {
 
         reply = nodeCommentRepository.save(reply);
 
+        // Đẩy thông báo
+        Long lecturerId = node.getLearningPath().getLecturer().getId();
+        if (!user.getId().equals(lecturerId)) {
+            notificationService.pushNotification(
+                lecturerId,
+                user.getFullName() + " vừa trả lời bình luận trong bài: " + node.getTitle(),
+                "/lecturer/learning-nodes/" + node.getId() + "/preview"
+            );
+        }
+
+        messagingTemplate.convertAndSend("/topic/nodes/" + nodeId + "/comments", "REFRESH");
+
         return mapToResponse(reply);
     }
 
@@ -131,6 +159,8 @@ public class NodeCommentServiceImpl implements NodeCommentService {
         comment.setUpdatedAt(java.time.LocalDateTime.now());
         comment = nodeCommentRepository.save(comment);
 
+        messagingTemplate.convertAndSend("/topic/nodes/" + comment.getLearningNode().getId() + "/comments", "REFRESH");
+
         return mapToResponse(comment);
     }
 
@@ -144,7 +174,10 @@ public class NodeCommentServiceImpl implements NodeCommentService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own comments");
         }
 
+        Long nodeId = comment.getLearningNode().getId();
         nodeCommentRepository.delete(comment);
+        
+        messagingTemplate.convertAndSend("/topic/nodes/" + nodeId + "/comments", "REFRESH");
     }
 
     private void checkClassroomMembership(LearningNode node, User user) {

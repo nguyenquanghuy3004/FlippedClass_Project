@@ -32,6 +32,20 @@ build/
 ### VS Code ###
 .vscode/
 
+<<<<<<< HEAD
+### Mac OS ###
+.DS_Store
+
+### Others ###
+*.log
+uploads/
+.tomcat/
+*.class
+.idea/
+.vscode/
+target/
+target-mvn/
+=======
 ### Java ###
 *.class
 *.log
@@ -49,3 +63,5 @@ build/
 ### Others ###
 temp_exec/
 uploads/
+>>>>>>> origin/Quanh1
+

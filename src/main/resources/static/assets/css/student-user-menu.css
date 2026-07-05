@@ -152,7 +152,12 @@
 
 .topbar-user-menu .student-menu-trigger {
   width: auto;
-  padding-right: 0.82rem;
+  padding: 0.28rem 0.72rem 0.28rem 0.28rem;
+}
+
+.topbar-user-menu .student-menu-avatar {
+  width: 34px;
+  height: 34px;
 }
 
 .topbar-user-menu .student-menu-panel {

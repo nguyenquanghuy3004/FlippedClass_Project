@@ -21,6 +21,7 @@ public class DashboardLearningSpaceResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<QuizResponse> quizzes;
+    private boolean joined;
 
     public static DashboardLearningSpaceResponse from(LearningSpaceMember member, List<QuizResponse> quizzes) {
         LearningSpace space = member.getLearningSpace();
@@ -38,6 +39,7 @@ public class DashboardLearningSpaceResponse {
         response.createdAt = space.getCreatedAt();
         response.updatedAt = space.getUpdatedAt();
         response.quizzes = quizzes;
+        response.joined = true;
         return response;
     }
 
@@ -56,6 +58,7 @@ public class DashboardLearningSpaceResponse {
         response.createdAt = space.getCreatedAt();
         response.updatedAt = space.getUpdatedAt();
         response.quizzes = quizzes;
+        response.joined = false;
         return response;
     }
 }

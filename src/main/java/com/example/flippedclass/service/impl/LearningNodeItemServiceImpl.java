@@ -37,6 +37,17 @@ public class LearningNodeItemServiceImpl implements LearningNodeItemService {
         String normalizedUrl = normalizeItemUrl(request.getItemType(), request.getUrl());
 
         List<LearningNodeItem> existingItems = learningNodeItemRepository.findByLearningNodeIdOrderByPosition(nodeId);
+
+        if (request.getItemType() == ItemType.VIDEO || request.getItemType() == ItemType.PDF) {
+            List<LearningNodeItem> itemsToRemove = existingItems.stream()
+                    .filter(i -> i.getItemType() == request.getItemType())
+                    .toList();
+            if (!itemsToRemove.isEmpty()) {
+                learningNodeItemRepository.deleteAll(itemsToRemove);
+                existingItems.removeAll(itemsToRemove);
+            }
+        }
+
         int nextPosition = existingItems.isEmpty() ? 1 : existingItems.get(existingItems.size() - 1).getPosition() + 1;
 
         LearningNodeItem item = LearningNodeItem.builder()
@@ -65,6 +76,14 @@ public class LearningNodeItemServiceImpl implements LearningNodeItemService {
     @Transactional
     public void delete(Long id) {
         learningNodeItemRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteVideoByNodeId(Long nodeId) {
+        List<LearningNodeItem> items = learningNodeItemRepository.findByLearningNodeIdOrderByPosition(nodeId);
+        List<LearningNodeItem> videos = items.stream().filter(i -> i.getItemType() == ItemType.VIDEO).toList();
+        learningNodeItemRepository.deleteAll(videos);
     }
 
     @Override

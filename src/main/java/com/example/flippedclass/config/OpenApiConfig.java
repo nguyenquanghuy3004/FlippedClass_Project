@@ -23,7 +23,7 @@ public class OpenApiConfig {
                 // Kích hoạt yêu cầu xác thực Bearer Token (JWT) cho toàn bộ hệ thống API
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
                 
-                        //       Khai báo nút "Authorize" (Chiếc khóa JWT) trên giao diện Swagger
+                        //   Khai báo nút "Authorize" (Chiếc khóa JWT) trên giao diện Swagger
                 .components(new Components()
                         .addSecuritySchemes("BearerAuth", new SecurityScheme()
                                 .name("BearerAuth")
