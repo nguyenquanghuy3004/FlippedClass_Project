@@ -81,6 +81,10 @@ public class QuizServiceImpl implements QuizService {
         
         LearningNode node = learningNodeRepository.findById(request.getLearningNodeId())
                 .orElseThrow(() -> new NotFoundException("Learning node not found: " + request.getLearningNodeId()));
+        
+        if (!"VIDEO".equals(node.getNodeType())) {
+            throw new BusinessException("Chỉ cho phép tạo quiz ở những node có kiểu VIDEO.");
+        }
 
         Quiz quiz = Quiz.builder()
                 .learningNode(node)

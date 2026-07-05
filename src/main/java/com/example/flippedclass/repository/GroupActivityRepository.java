@@ -12,4 +12,6 @@ public interface GroupActivityRepository extends JpaRepository<GroupActivity, Lo
 
     @org.springframework.data.jpa.repository.Query("SELECT ga FROM GroupActivity ga WHERE ga.learningNode.learningPath.learningSpace.id = :spaceId ORDER BY ga.createdAt DESC")
     List<GroupActivity> findBySpaceId(@org.springframework.data.repository.query.Param("spaceId") Long spaceId);
+
+    void deleteByLearningNodeId(Long learningNodeId);
 }

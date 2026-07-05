@@ -23,4 +23,6 @@ public interface NodeDiscussionRepository extends JpaRepository<NodeDiscussion, 
 
     @Query("SELECT nd FROM NodeDiscussion nd WHERE nd.parentDiscussion.user.id = :userId AND nd.user.id != :userId ORDER BY nd.createdAt DESC")
     List<NodeDiscussion> findRepliesToUser(@Param("userId") Long userId);
+
+    void deleteByLearningNodeId(Long learningNodeId);
 }

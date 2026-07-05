@@ -149,7 +149,6 @@
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Learning Space</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
     <li id="supporterPortalItem" class="d-none"><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/supporter/dashboard}" data-nav-key="supporter-portal"><i class="ti ti-heart-handshake fs-5"></i><span class="nav-text">Supporter Portal</span></a></li>
-    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/}" data-nav-key="reports"><i class="ti ti-chart-pie fs-5"></i><span class="nav-text">Reports</span></a></li>
 
     <li class="sidebar-user-slot">
       <div class="student-user-menu" data-user-menu>
@@ -279,15 +278,22 @@
     }
 
     async function fetchNotifications() {
-      if (!token) return;
+      const list = document.getElementById('notificationList');
+      if (!token) {
+        if (list) list.innerHTML = '<div class="text-center p-3 text-danger">No token found</div>';
+        return;
+      }
       try {
         const res = await fetch('/api/notifications', { headers: { Authorization: `Bearer ${token}` } });
         if (res.ok) {
           const notifications = await res.json();
           renderNotificationsAPI(notifications);
+        } else {
+          if (list) list.innerHTML = `<div class="text-center p-3 text-danger">Error: ${res.status}</div>`;
         }
       } catch (e) {
         console.error('Failed to fetch notifications', e);
+        if (list) list.innerHTML = `<div class="text-center p-3 text-danger">Failed to fetch notifications</div>`;
       }
     }
 
@@ -418,7 +424,7 @@
     }
 
     function studentLogout() {
-      ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl'].forEach((key) => {
+      ['jwt_token', 'user_id', 'full_name', 'fullName', 'username', 'avatar_url', 'avatarUrl', 'is_supporter'].forEach((key) => {
         localStorage.removeItem(key);
       });
       window.location.href = '/';
@@ -433,6 +439,13 @@
         if (!response.ok) return;
         const user = await response.json();
         setStudentMenuUser(user);
+        if (user.supporter) {
+          localStorage.setItem('is_supporter', 'true');
+          document.getElementById('supporterPortalItem')?.classList.remove('d-none');
+        } else {
+          localStorage.removeItem('is_supporter');
+          document.getElementById('supporterPortalItem')?.classList.add('d-none');
+        }
       } catch (error) {
         console.warn('Could not load user menu profile.', error);
       }
@@ -804,7 +817,8 @@
       if (token) {
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
-          if (payload.roles && (payload.roles.includes('SUPPORTER') || payload.roles.includes('ROLE_SUPPORTER'))) {
+          const isSupporterStored = localStorage.getItem('is_supporter') === 'true';
+          if (isSupporterStored || (payload.roles && (payload.roles.includes('SUPPORTER') || payload.roles.includes('ROLE_SUPPORTER')))) {
             document.getElementById('supporterPortalItem')?.classList.remove('d-none');
           }
         } catch(e) {}

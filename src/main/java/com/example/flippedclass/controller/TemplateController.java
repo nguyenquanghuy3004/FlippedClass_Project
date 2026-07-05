@@ -89,10 +89,6 @@ public class TemplateController {
         return "supporter/quiz-statistics";
     }
 
-    @GetMapping("/student/dashboard")
-    public String studentDashboard() {
-        return "student/student-dashboard";
-    }
 
     @GetMapping("/student/learning-spaces")
     public String studentLearningSpaces() {
@@ -187,7 +183,7 @@ public class TemplateController {
     public String supporterSpaceMembers(@RequestParam("spaceId") Long spaceId, Model model) {
         loadSpaceCommonData(spaceId, "people", model);
         model.addAttribute("isSupporter", true);
-        return "supporter/learningPath";
+        return "supporter/space-members";
     }
 
 

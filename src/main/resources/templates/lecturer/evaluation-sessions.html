@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{lecturer/layout}">
 
@@ -231,7 +231,10 @@
             'Authorization': `Bearer ${token}`
           }
         });
-        if (!response.ok) throw new Error('Failed to fetch learning paths');
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || `HTTP ${response.status}`);
+        }
 
         const data = await response.json();
         const select = document.getElementById('learningPathId');
@@ -281,13 +284,16 @@
             'Authorization': `Bearer ${token}`
           }
         });
-        if (!response.ok) throw new Error('Failed to fetch');
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || `HTTP ${response.status}`);
+        }
         allSessions = await response.json();
         currentPage = 1;
         renderPaginatedSessions();
       } catch (error) {
         console.error(error);
-        showAlert('Error loading sessions. Make sure backend is running and data is seeded.', 'danger');
+        showAlert(`Error loading sessions (${error.message}). Make sure backend is running and data is seeded.`, 'danger');
       } finally {
         loader.classList.add('d-none');
       }

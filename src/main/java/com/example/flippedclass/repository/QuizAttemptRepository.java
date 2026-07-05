@@ -14,6 +14,8 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
 
     long countByQuizId(Long quizId);
 
+    void deleteByQuizId(Long quizId);
+
     @Query("SELECT AVG(a.score) FROM QuizAttempt a WHERE a.quiz.id = :quizId")
     Double averageScoreByQuizId(@Param("quizId") Long quizId);
 

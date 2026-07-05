@@ -144,6 +144,11 @@
           <i class="ti ti-users fs-5"></i><span class="nav-text">Peer Mentoring</span>
         </a>
       </li>
+      <li id="supporterPortalItem" class="d-none">
+        <a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" href="/supporter/dashboard" data-nav-path="/supporter/dashboard">
+          <i class="ti ti-heart-handshake fs-5"></i><span class="nav-text">Supporter Portal</span>
+        </a>
+      </li>
 
       <li layout:fragment="sidebar-bottom" class="p-3 mt-4">
           <!-- Button placeholder if a specific page wants to add something below menu -->
@@ -190,6 +195,13 @@
       }
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
+        const now = Math.floor(Date.now() / 1000);
+        if (payload.exp && payload.exp < now) {
+          localStorage.removeItem('jwt_token');
+          localStorage.removeItem('user_id');
+          window.location.href = '/signin';
+          return;
+        }
         const path = window.location.pathname;
         const isSupporterAllowed = path.startsWith('/supporter') || 
                                    path.startsWith('/lecturer/space') || 
@@ -203,6 +215,19 @@
       }
     }
     checkAuth();
+    
+    function checkSupporterAccess() {
+      const token = localStorage.getItem('jwt_token');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.roles && (payload.roles.includes('SUPPORTER') || payload.roles.includes('ROLE_SUPPORTER') || payload.roles.includes('ADMIN') || payload.roles.includes('ROLE_ADMIN'))) {
+            document.getElementById('supporterPortalItem')?.classList.remove('d-none');
+          }
+        } catch(e) {}
+      }
+    }
+    checkSupporterAccess();
 
     function logout() {
       localStorage.removeItem('jwt_token');

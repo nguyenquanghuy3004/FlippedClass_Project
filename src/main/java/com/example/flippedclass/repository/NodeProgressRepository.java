@@ -21,4 +21,6 @@ public interface NodeProgressRepository extends JpaRepository<NodeProgress, Long
     List<NodeProgress> findCompletedNodesByStudentAndSpace(@Param("studentId") Long studentId, @Param("spaceId") Long spaceId);
 
     Optional<NodeProgress> findByStudentIdAndLearningNodeId(Long studentId, Long learningNodeId);
+
+    void deleteByLearningNodeId(Long learningNodeId);
 }
