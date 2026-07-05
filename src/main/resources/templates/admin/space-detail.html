@@ -85,7 +85,7 @@
             
             <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm bg-primary bg-opacity-10 h-100">
+                    <div class="card border-0 shadow-sm bg-primary bg-opacity-10 h-100" style="cursor: pointer; transition: transform 0.2s;" onclick="viewMembers()" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Click to view members">
                         <div class="card-body p-4 text-center">
                             <div class="icon-shape icon-lg bg-primary text-white rounded-circle mb-3 mx-auto">
                                 <i class="ti ti-users fs-3"></i>
@@ -96,7 +96,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm bg-success bg-opacity-10 h-100">
+                    <div class="card border-0 shadow-sm bg-success bg-opacity-10 h-100" style="cursor: pointer; transition: transform 0.2s;" onclick="viewPaths()" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Click to view paths">
                         <div class="card-body p-4 text-center">
                             <div class="icon-shape icon-lg bg-success text-white rounded-circle mb-3 mx-auto">
                                 <i class="ti ti-map-2 fs-3"></i>
@@ -107,7 +107,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm bg-info bg-opacity-10 h-100">
+                    <div class="card border-0 shadow-sm bg-info bg-opacity-10 h-100" style="cursor: pointer; transition: transform 0.2s;" onclick="viewLessons()" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Click to view lessons">
                         <div class="card-body p-4 text-center">
                             <div class="icon-shape icon-lg bg-info text-white rounded-circle mb-3 mx-auto">
                                 <i class="ti ti-book-2 fs-3"></i>
@@ -131,9 +131,84 @@
                     </ul>
                 </div>
             </div>
+    </div>
+
+    <!-- Roadmap Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white p-4 border-bottom-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="ti ti-route me-2 text-primary"></i>Learning Roadmap</h5>
+                </div>
+                <div class="card-body p-4 pt-0" id="roadmap-container">
+                    <div class="text-center text-muted py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>Loading roadmap...</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+    <!-- Members Modal -->
+    <div class="modal fade" id="membersModal" tabindex="-1" aria-labelledby="membersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white border-bottom-0">
+                    <h5 class="modal-title" id="membersModalLabel"><i class="ti ti-users me-2"></i>Space Members</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="members-container" class="list-group list-group-flush">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paths Modal -->
+    <div class="modal fade" id="pathsModal" tabindex="-1" aria-labelledby="pathsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white border-bottom-0">
+                    <h5 class="modal-title" id="pathsModalLabel"><i class="ti ti-map-2 me-2"></i>Learning Paths</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="paths-container" class="list-group list-group-flush">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lessons Modal -->
+    <div class="modal fade" id="lessonsModal" tabindex="-1" aria-labelledby="lessonsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-info text-white border-bottom-0">
+                    <h5 class="modal-title" id="lessonsModalLabel"><i class="ti ti-book-2 me-2"></i>Total Lessons</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="lessons-container" class="list-group list-group-flush">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <th:block layout:fragment="scripts">
     <script>
@@ -181,29 +256,230 @@
                     $('#s-actions').html(actions);
                 },
                 error: function() {
-                    alert('Failed to load space details');
+                    Swal.fire('Error!', 'Failed to load space details', 'error');
                 }
             });
         }
 
         function updateStatus(newStatus) {
-            if (!confirm(`Are you sure you want to mark this space as ${newStatus}?`)) return;
-            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Are you sure you want to mark this space as ${newStatus}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: newStatus === 'DELETE' ? '#d33' : '#3085d6',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, update it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/api/admin/spaces/${spaceId}/status?status=${newStatus}`,
+                        type: 'PUT',
+                        success: function() {
+                            Swal.fire('Updated!', 'Status updated successfully.', 'success');
+                            loadSpaceDetail();
+                        },
+                        error: function(err) {
+                            Swal.fire('Error!', 'Error updating status.', 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        let cachedRoadmap = null;
+
+        function loadSpaceRoadmap() {
             $.ajax({
-                url: `/api/admin/spaces/${spaceId}/status?status=${newStatus}`,
-                type: 'PUT',
-                success: function() {
-                    loadSpaceDetail();
+                url: `/api/learning-spaces/${spaceId}/learning-paths`,
+                type: 'GET',
+                success: function(paths) {
+                    cachedRoadmap = paths;
+                    let html = '';
+                    if (!paths || paths.length === 0) {
+                        html = '<div class="text-center text-muted py-4"><i class="ti ti-route-off fs-1 mb-2 d-block text-secondary"></i>No learning paths found in this space.</div>';
+                    } else {
+                        html = '<div class="accordion" id="roadmapAccordion">';
+                        paths.forEach((path, index) => {
+                            let nodesHtml = '';
+                            if (!path.nodes || path.nodes.length === 0) {
+                                nodesHtml = '<div class="text-muted small py-3 px-3">No nodes in this path.</div>';
+                            } else {
+                                nodesHtml = '<ul class="list-group list-group-flush">';
+                                path.nodes.forEach(node => {
+                                    let nodeIcon = 'ti-file-description';
+                                    let nodeTypeClass = 'bg-secondary';
+                                    
+                                    if(node.nodeType === 'VIDEO') {
+                                        nodeIcon = 'ti-video';
+                                        nodeTypeClass = 'bg-danger';
+                                    } else if(node.nodeType === 'QUIZ') {
+                                        nodeIcon = 'ti-help';
+                                        nodeTypeClass = 'bg-warning';
+                                    } else if(node.nodeType === 'DOCUMENT') {
+                                        nodeIcon = 'ti-file-text';
+                                        nodeTypeClass = 'bg-info';
+                                    }
+                                    
+                                    nodesHtml += `
+                                        <li class="list-group-item px-3 py-3 d-flex align-items-start border-bottom-dashed">
+                                            <div class="bg-light rounded p-2 me-3 text-primary"><i class="ti ${nodeIcon} fs-5"></i></div>
+                                            <div>
+                                                <h6 class="mb-1 fw-bold">${node.title}</h6>
+                                                <span class="badge ${nodeTypeClass} bg-opacity-10 text-${nodeTypeClass.replace('bg-', '')} fw-normal small border border-${nodeTypeClass.replace('bg-', '')} border-opacity-25">${node.nodeType || 'LESSON'}</span>
+                                            </div>
+                                        </li>
+                                    `;
+                                });
+                                nodesHtml += '</ul>';
+                            }
+
+                            html += `
+                                <div class="accordion-item border-0 mb-3 bg-light rounded shadow-sm overflow-hidden">
+                                    <h2 class="accordion-header" id="heading${path.id}">
+                                        <button class="accordion-button ${index !== 0 ? 'collapsed' : ''} fw-bold bg-white shadow-none border-bottom" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${path.id}" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="collapse${path.id}">
+                                            <span class="badge bg-primary me-2 px-2 py-1">Path ${index + 1}</span> ${path.title}
+                                        </button>
+                                    </h2>
+                                    <div id="collapse${path.id}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" aria-labelledby="heading${path.id}" data-bs-parent="#roadmapAccordion">
+                                        <div class="accordion-body bg-white p-0">
+                                            ${nodesHtml}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                    }
+                    $('#roadmap-container').html(html);
                 },
                 error: function(err) {
-                    alert('Error updating status');
+                    console.error("Failed to load roadmap", err);
+                    $('#roadmap-container').html('<div class="alert alert-danger">Failed to load learning roadmap.</div>');
                 }
             });
         }
 
         document.addEventListener("DOMContentLoaded", function() {
             loadSpaceDetail();
+            loadSpaceRoadmap();
         });
+
+        function scrollToRoadmap() {
+            document.getElementById('roadmap-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function viewPaths() {
+            const pathsModal = new bootstrap.Modal(document.getElementById('pathsModal'));
+            pathsModal.show();
+            
+            let html = '';
+            if (!cachedRoadmap || cachedRoadmap.length === 0) {
+                html = '<div class="text-center py-4 text-muted">No paths found.</div>';
+            } else {
+                cachedRoadmap.forEach((path, index) => {
+                    html += `
+                        <div class="list-group-item py-3">
+                            <h6 class="mb-1 fw-bold text-success"><i class="ti ti-map-2 me-2"></i>${path.title}</h6>
+                            <p class="mb-1 small text-muted">${path.description || 'No description'}</p>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">${path.nodes ? path.nodes.length : 0} lessons</span>
+                        </div>
+                    `;
+                });
+            }
+            $('#paths-container').html(html);
+        }
+
+        function viewLessons() {
+            const lessonsModal = new bootstrap.Modal(document.getElementById('lessonsModal'));
+            lessonsModal.show();
+            
+            let html = '';
+            let allNodes = [];
+            
+            if (cachedRoadmap) {
+                cachedRoadmap.forEach(path => {
+                    if (path.nodes) {
+                        path.nodes.forEach(node => {
+                            allNodes.push({ ...node, pathTitle: path.title });
+                        });
+                    }
+                });
+            }
+            
+            if (allNodes.length === 0) {
+                html = '<div class="text-center py-4 text-muted">No lessons found.</div>';
+            } else {
+                allNodes.forEach((node) => {
+                    let nodeIcon = 'ti-file-description';
+                    let nodeTypeClass = 'bg-secondary';
+                    if(node.nodeType === 'VIDEO') { nodeIcon = 'ti-video'; nodeTypeClass = 'bg-danger'; }
+                    else if(node.nodeType === 'QUIZ') { nodeIcon = 'ti-help'; nodeTypeClass = 'bg-warning'; }
+                    else if(node.nodeType === 'DOCUMENT') { nodeIcon = 'ti-file-text'; nodeTypeClass = 'bg-info'; }
+                    
+                    html += `
+                        <div class="list-group-item py-3 d-flex align-items-start">
+                            <div class="bg-light rounded p-2 me-3 text-info"><i class="ti ${nodeIcon} fs-5"></i></div>
+                            <div>
+                                <h6 class="mb-1 fw-bold text-dark">${node.title}</h6>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <span class="badge ${nodeTypeClass} bg-opacity-10 text-${nodeTypeClass.replace('bg-', '')} fw-normal small">${node.nodeType || 'LESSON'}</span>
+                                    <small class="text-muted"><i class="ti ti-map-2 me-1"></i>${node.pathTitle}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            $('#lessons-container').html(html);
+        }
+
+        function viewMembers() {
+            const membersModal = new bootstrap.Modal(document.getElementById('membersModal'));
+            membersModal.show();
+            
+            $('#members-container').html(`
+                <div class="text-center py-4 text-muted">
+                    <div class="spinner-border text-primary mb-2" role="status"></div>
+                    <p class="mb-0">Loading members...</p>
+                </div>
+            `);
+
+            $.ajax({
+                url: `/api/spaces/${spaceId}/members?size=100`,
+                type: 'GET',
+                success: function(response) {
+                    let html = '';
+                    if (!response.content || response.content.length === 0) {
+                        html = '<div class="text-center py-4 text-muted">No members found.</div>';
+                    } else {
+                        response.content.forEach(member => {
+                            let roleBadge = '';
+                            if (member.role === 'OWNER') roleBadge = '<span class="badge bg-danger ms-auto">Owner</span>';
+                            else if (member.role === 'SUPPORTER') roleBadge = '<span class="badge bg-warning ms-auto">Supporter</span>';
+                            else roleBadge = '<span class="badge bg-secondary ms-auto">Member</span>';
+                            
+                            html += `
+                                <div class="list-group-item d-flex align-items-center py-3">
+                                    <div class="avatar avatar-sm bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
+                                        <i class="ti ti-user"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">${member.fullName || member.email}</h6>
+                                        <small class="text-muted">${member.email}</small>
+                                    </div>
+                                    ${roleBadge}
+                                </div>
+                            `;
+                        });
+                    }
+                    $('#members-container').html(html);
+                },
+                error: function() {
+                    $('#members-container').html('<div class="text-center py-4 text-danger">Failed to load members.</div>');
+                }
+            });
+        }
     </script>
 </th:block>
 </body>

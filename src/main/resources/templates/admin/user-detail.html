@@ -76,13 +76,17 @@
                         
                         <h6 class="fw-bold mb-3">Learning Stats</h6>
                         <div class="row text-center">
-                            <div class="col-6 border-end">
+                            <div class="col-4 border-end">
                                 <h3 class="fw-bold text-primary mb-1" id="u-joined">0</h3>
                                 <div class="small text-muted">Spaces Joined</div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4 border-end">
                                 <h3 class="fw-bold text-success mb-1" id="u-owned">0</h3>
                                 <div class="small text-muted">Spaces Owned</div>
+                            </div>
+                            <div class="col-4">
+                                <h3 class="fw-bold text-info mb-1" id="u-time">0m</h3>
+                                <div class="small text-muted">Active Time</div>
                             </div>
                         </div>
                     </div>
@@ -121,6 +125,9 @@
                         <button id="btn-toggle-status" class="btn btn-warning w-100 mb-3" onclick="toggleStatus()">
                             Toggle Lock Status
                         </button>
+                        <button class="btn btn-danger w-100" onclick="resetPassword()">
+                            Reset Password
+                        </button>
                     </div>
                 </div>
             </div>
@@ -158,6 +165,7 @@
                         $('#u-roles').text(data.user.roles.join(', '));
                         $('#u-joined').text(data.spacesJoined);
                         $('#u-owned').text(data.spacesOwned);
+                        $('#u-time').text(data.totalActiveTimeFormatted || '0m');
                     }
                 });
             }
@@ -165,12 +173,63 @@
             function toggleStatus() {
                 const id = $('#userId').val();
                 const action = currentStatus === 'ACTIVE' ? 'lock' : 'unlock';
-                $.ajax({
-                    url: `/api/admin/users/${id}/${action}`,
-                    method: 'POST',
-                    success: function() {
-                        alert('Status updated successfully');
-                        loadUserDetail();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `Do you want to ${action} this user account?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: currentStatus === 'ACTIVE' ? '#d33' : '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: `Yes, ${action} it!`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/api/admin/users/${id}/${action}`,
+                            method: 'POST',
+                            success: function() {
+                                Swal.fire('Updated!', 'Status updated successfully.', 'success');
+                                loadUserDetail();
+                            },
+                            error: function() {
+                                Swal.fire('Error!', 'Failed to update status.', 'error');
+                            }
+                        });
+                    }
+                });
+            }
+
+            function resetPassword() {
+                const id = $('#userId').val();
+                Swal.fire({
+                    title: 'Reset Password',
+                    text: "Enter new password for this user:",
+                    input: 'password',
+                    inputPlaceholder: 'New password',
+                    inputAttributes: {
+                        autocapitalize: 'off',
+                        autocorrect: 'off'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Reset Password',
+                    showLoaderOnConfirm: true,
+                    preConfirm: (newPassword) => {
+                        if (!newPassword || newPassword.trim() === "") {
+                            Swal.showValidationMessage('Password cannot be empty!');
+                            return false;
+                        }
+                        return $.ajax({
+                            url: `/api/admin/users/${id}/reset-password`,
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({ newPassword: newPassword })
+                        }).catch(error => {
+                            Swal.showValidationMessage(`Request failed: ${error.responseText || error.statusText}`);
+                        });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire('Reset!', 'Password has been reset successfully.', 'success');
                     }
                 });
             }

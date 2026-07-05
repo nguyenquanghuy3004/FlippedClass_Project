@@ -98,6 +98,17 @@ public class UserServiceImpl implements UserService {
         return findUser(userRepository, id);
     }
 
+    @Override
+    public void updateActiveTime(Long userId, int activeSeconds) {
+        User user = findUser(userId);
+        if (user.getTotalActiveTime() == null) {
+            user.setTotalActiveTime((long) activeSeconds);
+        } else {
+            user.setTotalActiveTime(user.getTotalActiveTime() + activeSeconds);
+        }
+        userRepository.save(user);
+    }
+
     static UserResponse toResponse(User user) {
         Set<String> roleNames = user.getRoles().stream()
                 .map(role -> role.getName().name())

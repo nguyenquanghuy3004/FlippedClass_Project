@@ -76,6 +76,7 @@ public class GlobalLearningNodeController {
         return ResponseEntity.ok(response);
     }
 
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "VIEW_NODE", description = "'Học bài học: ' + #result.body.title")
     @GetMapping("/{nodeId}")
     @Transactional(readOnly = true)
     public ResponseEntity<LearningNodeResponse> getNodeDetail(@PathVariable Long nodeId, Authentication authentication) {

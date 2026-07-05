@@ -131,12 +131,12 @@
                     contentType: 'application/json',
                     data: JSON.stringify(dto),
                     success: function() {
-                        alert('Configuration saved successfully');
+                        Swal.fire('Saved!', 'Configuration saved successfully.', 'success');
                         $('#config-form')[0].reset();
                         loadConfigs();
                     },
                     error: function() {
-                        alert('Failed to save configuration');
+                        Swal.fire('Error!', 'Failed to save configuration.', 'error');
                     }
                 });
             }

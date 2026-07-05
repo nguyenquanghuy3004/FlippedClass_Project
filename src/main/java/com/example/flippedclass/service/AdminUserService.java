@@ -17,4 +17,6 @@ public interface AdminUserService {
     void lockUser(Long userId);
     
     void unlockUser(Long userId);
+    
+    void resetUserPassword(Long userId, String newPassword);
 }

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <head>
@@ -10,42 +10,37 @@
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
   <link rel="manifest" th:href="@{/assets/site.webmanifest}">
 
+  <script th:src="@{/assets/js/auth-interceptor.js}"></script>
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- FontAwesome for fallback -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" th:href="@{/assets/css/admin-layout.css}">
-  <script>
-(function() {
-    function handleUnauthorized() {
-        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
-        localStorage.removeItem('jwt_token');
-        sessionStorage.removeItem('jwt_token');
-        window.location.href = '/signin';
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif !important;
     }
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
-        try {
-            const response = await originalFetch.apply(this, args);
-            if (response.status === 401) {
-                handleUnauthorized();
-            }
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    };
-    const originalXhrOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function() {
-        this.addEventListener('load', function() {
-            if (this.status === 401) {
-                handleUnauthorized();
-            }
-        });
-        originalXhrOpen.apply(this, arguments);
-    };
-})();
-</script>
+    .fade-in-up {
+      animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .sidebar .nav-link {
+      transition: all 0.3s ease;
+    }
+    .sidebar .nav-link:hover {
+      background-color: rgba(13, 110, 253, 0.05);
+      padding-left: 28px !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -156,24 +151,21 @@
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             if (!payload.roles || (!payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
-                alert('Access Denied. Admin privileges required.');
-                window.location.href = '/signin';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: 'Admin privileges required.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = '/signin';
+                });
             }
         } catch (e) {
             window.location.href = '/signin';
         }
     }
 
-    // Sidebar Active State
-    document.addEventListener("DOMContentLoaded", function() {
-        const currentUrl = window.location.pathname;
-        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
-            const href = link.getAttribute('href');
-            if (currentUrl.startsWith(href) || (currentUrl === '/admin' && href === '/admin/dashboard')) {
-                link.classList.add('active');
-            }
-        });
-    });
+
 
     // Setup AJAX to include JWT token
     $.ajaxSetup({
@@ -189,8 +181,32 @@
       localStorage.removeItem('jwt_token');
       window.location.href = '/signin';
     }
+
+    // Auto-highlight active sidebar menu item
+    $(document).ready(function() {
+      setTimeout(function() {
+        const path = window.location.pathname;
+        $('.sidebar .nav-link').removeClass('active');
+        
+        let matched = false;
+        $('.sidebar .nav-link').each(function() {
+          const href = $(this).attr('href');
+          // Only match specific sub-paths, not just "/admin" or "/"
+          if (href && href !== '/admin' && href !== '/' && path.startsWith(href)) {
+            $(this).addClass('active');
+            matched = true;
+          }
+        });
+        
+        // Fallback to Dashboard
+        if (!matched || path === '/admin') {
+          $('.sidebar .nav-link[href="/admin/dashboard"]').addClass('active');
+        }
+      }, 50);
+    });
   </script>
   <th:block layout:fragment="scripts"></th:block>
+  <script src="/js/active-time-tracker.js"></script>
 </body>
 
 </html>

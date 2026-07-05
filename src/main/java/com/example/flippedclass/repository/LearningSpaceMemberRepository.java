@@ -31,6 +31,7 @@ public interface LearningSpaceMemberRepository extends JpaRepository<LearningSpa
 
     Page<LearningSpaceMember> findByLearningSpaceId(Long learningSpaceId, Pageable pageable);
     List<LearningSpaceMember> findByLearningSpaceId(Long learningSpaceId);
+    long countByLearningSpaceId(Long learningSpaceId);
     Optional<LearningSpaceMember> findByIdAndLearningSpaceId(Long id, Long learningSpaceId);
     Optional<LearningSpaceMember> findByLearningSpace_IdAndUser_Id(Long learningSpaceId, Long userId);
 }

@@ -4,11 +4,13 @@ import com.example.flippedclass.dto.admin.UserAdminDto;
 import com.example.flippedclass.dto.admin.UserDetailDto;
 import com.example.flippedclass.entity.Role;
 import com.example.flippedclass.entity.User;
+import com.example.flippedclass.entity.UserActivityLog;
 import com.example.flippedclass.enums.RoleName;
 import com.example.flippedclass.enums.UserStatus;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.LearningSpaceRepository;
 import com.example.flippedclass.repository.RoleRepository;
+import com.example.flippedclass.repository.UserActivityLogRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.AdminUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     private  LearningSpaceMemberRepository learningSpaceMemberRepository;
     @Autowired
     private  PasswordEncoder passwordEncoder;
+    @Autowired
+    private  UserActivityLogRepository userActivityLogRepository;
 
     @Override
     public Page<UserAdminDto> getUsers(int page, int size, String keyword, RoleName role, UserStatus status) {
@@ -67,10 +71,29 @@ public class AdminUserServiceImpl implements AdminUserService {
         int spacesOwned = learningSpaceRepository.countByOwnerId(userId);
         int spacesJoined = learningSpaceMemberRepository.countByUser_Id(userId);
 
+        Long totalSecondsObj = user.getTotalActiveTime();
+        long totalSeconds = totalSecondsObj != null ? totalSecondsObj : 0;
+        String formattedTime = "0m";
+        if (totalSeconds > 0) {
+            if (totalSeconds < 60) {
+                formattedTime = "< 1m";
+            } else {
+                long minutes = totalSeconds / 60;
+                long hours = minutes / 60;
+                minutes = minutes % 60;
+                if (hours > 0) {
+                    formattedTime = hours + "h " + minutes + "m";
+                } else {
+                    formattedTime = minutes + "m";
+                }
+            }
+        }
+
         return UserDetailDto.builder()
                 .user(mapToUserAdminDto(user))
                 .spacesOwned(spacesOwned)
                 .spacesJoined(spacesJoined)
+                .totalActiveTimeFormatted(formattedTime)
                 .build();
     }
 
@@ -106,5 +129,14 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .status(user.getStatus().name())
                 .createdAt(user.getCreatedAt())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void resetUserPassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

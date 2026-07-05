@@ -20,6 +20,15 @@ public class AdminSpaceServiceImpl implements AdminSpaceService {
     @Autowired
     private LearningSpaceRepository spaceRepository;
 
+    @Autowired
+    private com.example.flippedclass.repository.LearningSpaceMemberRepository memberRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.LearningPathRepository pathRepository;
+
+    @Autowired
+    private com.example.flippedclass.repository.LearningNodeRepository nodeRepository;
+
 
     @Override
     public Page<LearningSpaceDto> getAllPages(String keyword, LearningSpaceStatus status, Pageable pageable){
@@ -37,9 +46,9 @@ public class AdminSpaceServiceImpl implements AdminSpaceService {
 
         detailDto.setOwnerEmail(space.getOwner().getEmail());
 
-        detailDto.setMemberCount(10);
-        detailDto.setLearningPathCount(5);
-        detailDto.setLessonCount(20);
+        detailDto.setMemberCount((int) memberRepository.countByLearningSpaceId(spaceId));
+        detailDto.setLearningPathCount((int) pathRepository.countByLearningSpaceId(spaceId));
+        detailDto.setLessonCount((int) nodeRepository.countTotalNodesBySpaceId(spaceId));
 
         return detailDto;
     }

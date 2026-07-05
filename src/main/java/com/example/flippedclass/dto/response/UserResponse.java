@@ -18,4 +18,5 @@ public class UserResponse {
     private Set<String> roles;
     private boolean isSupporter;
     private LocalDateTime createdAt;
+    private String totalActiveTimeFormatted;
 }

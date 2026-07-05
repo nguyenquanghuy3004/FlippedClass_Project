@@ -14,4 +14,6 @@ public interface UserService {
     List<UserResponse> getAll();
 
     void delete(Long id);
+
+    void updateActiveTime(Long userId, int activeSeconds);
 }

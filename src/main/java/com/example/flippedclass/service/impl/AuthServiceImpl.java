@@ -157,6 +157,9 @@ public class AuthServiceImpl implements AuthService {
         }
 
         else {
+            if (com.example.flippedclass.enums.UserStatus.LOCKED.equals(user.getStatus())) {
+                throw new IllegalArgumentException("Your account has been locked. Please contact the administrator.");
+            }
             // Cập nhật ảnh đại diện nếu có thay đổi
             if (pictureUrl != null && !pictureUrl.equals(user.getAvatarUrl())) {
                 user.setAvatarUrl(pictureUrl);

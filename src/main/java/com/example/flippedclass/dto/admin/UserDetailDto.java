@@ -13,4 +13,5 @@ public class UserDetailDto {
     private UserAdminDto user;
     private int spacesOwned;
     private int spacesJoined;
+    private String totalActiveTimeFormatted;
 }

@@ -70,6 +70,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .learningSpaceId(learningPath.getLearningSpace() != null ? learningPath.getLearningSpace().getId() : null)
                 .status(savedNode.getStatus())
                 .nodeType(savedNode.getNodeType())
+                .content(savedNode.getContent())
                 .createdAt(savedNode.getCreatedAt())
                 .updatedAt(savedNode.getUpdatedAt())
                 .build();
@@ -156,6 +157,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .learningSpaceId((savedNode.getLearningPath() != null && savedNode.getLearningPath().getLearningSpace() != null) ? savedNode.getLearningPath().getLearningSpace().getId() : null)
                 .status(savedNode.getStatus())
                 .nodeType(savedNode.getNodeType())
+                .content(savedNode.getContent())
                 .createdAt(savedNode.getCreatedAt())
                 .updatedAt(savedNode.getUpdatedAt())
                 .build();
