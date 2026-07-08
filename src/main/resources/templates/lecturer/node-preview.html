@@ -767,15 +767,27 @@
             window.selectTestCase(window.activeTestCaseIndex);
         };
 
+        let pendingDeleteTestCaseIndex = -1;
+        let confirmDeleteTestCaseModal = null;
+
         window.removeTestCase = function(index) {
-            if (confirm('Are you sure you want to delete this test case?')) {
-                window.testCases.splice(index, 1);
-                if (window.activeTestCaseIndex >= window.testCases.length) {
-                    window.activeTestCaseIndex = Math.max(0, window.testCases.length - 1);
-                }
-                window.renderTestCasesNav();
-                window.selectTestCase(window.activeTestCaseIndex);
+            pendingDeleteTestCaseIndex = index;
+            if (!confirmDeleteTestCaseModal) {
+                confirmDeleteTestCaseModal = new bootstrap.Modal(document.getElementById('confirmDeleteTestCaseModal'));
+                document.getElementById('btnConfirmDeleteTestCase').addEventListener('click', function() {
+                    if (pendingDeleteTestCaseIndex > -1) {
+                        window.testCases.splice(pendingDeleteTestCaseIndex, 1);
+                        if (window.activeTestCaseIndex >= window.testCases.length) {
+                            window.activeTestCaseIndex = Math.max(0, window.testCases.length - 1);
+                        }
+                        window.renderTestCasesNav();
+                        window.selectTestCase(window.activeTestCaseIndex);
+                        confirmDeleteTestCaseModal.hide();
+                        pendingDeleteTestCaseIndex = -1;
+                    }
+                });
             }
+            confirmDeleteTestCaseModal.show();
         };
 
         window.updateTestCase = function(index, field, value) {

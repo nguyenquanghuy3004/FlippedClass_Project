@@ -1,7 +1,7 @@
 package com.example.flippedclass.controller;
 
 import com.example.flippedclass.dto.mentor.MemberDto;
-import com.example.flippedclass.service.LearningSpaceMemberManagementService;
+import com.example.flippedclass.service.LearningSpaceMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class LearningSpaceMemberRestController {
 
-    private final LearningSpaceMemberManagementService memberManagementService;
+    private final LearningSpaceMemberService memberManagementService;
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @GetMapping

@@ -41,8 +41,6 @@ public interface LearningSpaceRepository extends JpaRepository<LearningSpace, Lo
     @EntityGraph(attributePaths = {"owner"})
     List<LearningSpace> findByVisibilityAndStatus(VisibilityType visibility, LearningSpaceStatus status);
 
-
-
     @Query("SELECT ls FROM LearningSpace ls WHERE " + "(:keyword IS NULL OR LOWER(ls.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(ls.owner.email) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND (:status IS NULL OR ls.status = :status)")

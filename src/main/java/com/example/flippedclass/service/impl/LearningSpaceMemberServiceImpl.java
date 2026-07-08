@@ -7,7 +7,7 @@ import com.example.flippedclass.enums.MemberRole;
 import com.example.flippedclass.enums.MemberStatus;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.StudyGroupMemberRepository;
-import com.example.flippedclass.service.LearningSpaceMemberManagementService;
+import com.example.flippedclass.service.LearningSpaceMemberService;
 import com.example.flippedclass.service.StudyGroupMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberManagementService {
+public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberService {
 
     private final LearningSpaceMemberRepository memberRepository;
     private final StudyGroupMemberRepository studyGroupMemberRepository;

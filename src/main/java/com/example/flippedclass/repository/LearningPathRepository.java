@@ -2,7 +2,9 @@ package com.example.flippedclass.repository;
 
 import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.enums.LearningPathStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,13 +25,13 @@ public interface LearningPathRepository extends JpaRepository<LearningPath, Long
 
     Optional<LearningPath> findFirstByLearningSpaceIdAndStatusOrderByPositionDesc(Long learningSpaceId, LearningPathStatus status);
 
-    @org.springframework.data.jpa.repository.Query("SELECT p FROM LearningPath p WHERE p.learningSpace.id = :spaceId AND p.status IN :statuses ORDER BY p.position ASC")
+    @Query("SELECT p FROM LearningPath p WHERE p.learningSpace.id = :spaceId AND p.status IN :statuses ORDER BY p.position ASC")
     List<LearningPath> findByLearningSpaceIdAndStatusInOrderByPositionAsc(@org.springframework.data.repository.query.Param("spaceId") Long spaceId, @org.springframework.data.repository.query.Param("statuses") List<LearningPathStatus> statuses);
 
-    @org.springframework.data.jpa.repository.Query("SELECT p FROM LearningPath p WHERE " +
+    @Query("SELECT p FROM LearningPath p WHERE " +
             "(:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
             "(:status IS NULL OR p.status = :status)")
-    org.springframework.data.domain.Page<LearningPath> findAllForAdmin(@org.springframework.data.repository.query.Param("keyword") String keyword,
-                                                                       @org.springframework.data.repository.query.Param("status") LearningPathStatus status,
-                                                                       org.springframework.data.domain.Pageable pageable);
+    Page<LearningPath> findAllForAdmin(@org.springframework.data.repository.query.Param("keyword") String keyword,
+                                       @org.springframework.data.repository.query.Param("status") LearningPathStatus status,
+                                       org.springframework.data.domain.Pageable pageable);
 }
