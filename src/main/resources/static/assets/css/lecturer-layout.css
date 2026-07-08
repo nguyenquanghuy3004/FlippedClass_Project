@@ -1,28 +1,28 @@
 /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
+::-webkit-scrollbar {
+  width: 6px;
+}
 
-    ::-webkit-scrollbar-track {
-      background: #f8f9fc;
-    }
+::-webkit-scrollbar-track {
+  background: #f8f9fc;
+}
 
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 3px;
-    }
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 
 /* Override sidebar active colors to match student page (indigo/purple) */
 .sidebar .nav-link.active {
-    background-color: #eef2ff !important;
-    color: #4f46e5 !important;
-    font-weight: 600;
+  background-color: #eef2ff !important;
+  color: #4f46e5 !important;
+  font-weight: 600;
 }
 
 .sidebar .nav-link.active i {
-    color: #4f46e5 !important;
+  color: #4f46e5 !important;
 }

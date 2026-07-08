@@ -2,22 +2,28 @@ package com.example.flippedclass.service.impl;
 
 import com.example.flippedclass.dto.mentor.MemberDto;
 import com.example.flippedclass.entity.LearningSpaceMember;
+import com.example.flippedclass.entity.StudyGroupMember;
 import com.example.flippedclass.enums.MemberRole;
+import com.example.flippedclass.enums.MemberStatus;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
+import com.example.flippedclass.repository.StudyGroupMemberRepository;
 import com.example.flippedclass.service.LearningSpaceMemberManagementService;
+import com.example.flippedclass.service.StudyGroupMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
-public class LearningSpaceMemberManagementServiceImpl implements LearningSpaceMemberManagementService {
+public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberManagementService {
 
     private final LearningSpaceMemberRepository memberRepository;
-    private final com.example.flippedclass.repository.StudyGroupMemberRepository studyGroupMemberRepository;
-    private final com.example.flippedclass.service.StudyGroupMemberService studyGroupMemberService;
+    private final StudyGroupMemberRepository studyGroupMemberRepository;
+    private final StudyGroupMemberService studyGroupMemberService;
 
     @Override
     public Page<MemberDto> getSpaceMembers(Long spaceId, Pageable pageable) {
@@ -68,14 +74,15 @@ public class LearningSpaceMemberManagementServiceImpl implements LearningSpaceMe
         }
         
         // Remove from all study groups within this space
-        java.util.List<com.example.flippedclass.entity.StudyGroupMember> groupMembers = 
+        List<StudyGroupMember> groupMembers =
                 studyGroupMemberRepository.findByStudentIdAndLearningSpaceId(member.getUser().getId(), spaceId);
         
-        for (com.example.flippedclass.entity.StudyGroupMember gm : groupMembers) {
+        for (StudyGroupMember gm : groupMembers) {
             studyGroupMemberService.leaveGroup(gm.getGroup().getId(), member.getUser().getId());
         }
 
-        memberRepository.delete(member);
+        member.setStatus(MemberStatus.INACTIVE);
+        memberRepository.save(member);
     }
     
     private LearningSpaceMember getMember(Long spaceId, Long memberId) {

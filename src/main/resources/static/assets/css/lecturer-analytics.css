@@ -1,5 +1,5 @@
 .analytics-banner {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     border-radius: 1.25rem;
     padding: 2.5rem;
     color: white;
@@ -13,13 +13,13 @@
     right: -10%;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%);
     border-radius: 50%;
 }
 .kpi-glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
     padding: 1.25rem;
     color: white;
@@ -27,11 +27,12 @@
 }
 .kpi-glass:hover {
     transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.08);
 }
 .chart-card {
     background: white;
     border-radius: 1.25rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     border: none;
     padding: 1.5rem;
 }
@@ -41,7 +42,7 @@
 }
 .leaderboard-row:hover {
     background-color: #f8fafc !important;
-    border-left-color: #7c3aed;
+    border-left-color: var(--fc-primary, #f97316);
     transform: scale(1.01);
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     z-index: 10;
@@ -93,8 +94,8 @@
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
 .ai-insight-box {
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-    border: 1px solid #bbf7d0;
+    background: linear-gradient(135deg, var(--fc-primary-subtle, #ffedd5) 0%, #fff7ed 100%);
+    border: 1px solid var(--fc-primary-border, #fed7aa);
     border-radius: 1rem;
     padding: 1.25rem;
 }

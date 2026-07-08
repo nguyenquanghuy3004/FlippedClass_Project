@@ -70,6 +70,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .learningSpaceId(learningPath.getLearningSpace() != null ? learningPath.getLearningSpace().getId() : null)
                 .status(savedNode.getStatus())
                 .nodeType(savedNode.getNodeType())
+                .isOptional(savedNode.getIsOptional())
                 .content(savedNode.getContent())
                 .createdAt(savedNode.getCreatedAt())
                 .updatedAt(savedNode.getUpdatedAt())
@@ -105,10 +106,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         entityManager.createQuery("DELETE FROM TestCase t WHERE t.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM GroupActivity g WHERE g.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
 
-        // Items and quizzes are mapped with CascadeType.ALL in LearningNode, 
-        // so Hibernate will automatically delete them when we delete the node.
-        // Do NOT use deleteAllInBatch here as it causes StaleStateException.
-        
         learningNodeRepository.delete(node);
     }
 
@@ -157,6 +154,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .learningSpaceId((savedNode.getLearningPath() != null && savedNode.getLearningPath().getLearningSpace() != null) ? savedNode.getLearningPath().getLearningSpace().getId() : null)
                 .status(savedNode.getStatus())
                 .nodeType(savedNode.getNodeType())
+                .isOptional(savedNode.getIsOptional())
                 .content(savedNode.getContent())
                 .createdAt(savedNode.getCreatedAt())
                 .updatedAt(savedNode.getUpdatedAt())

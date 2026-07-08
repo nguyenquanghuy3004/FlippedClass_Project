@@ -23,8 +23,7 @@ public class LecturerSubmissionRestController {
 
     @PutMapping("/{id}/grade")
     @PreAuthorize("hasAuthority('LECTURER')")
-    public LecturerSubmissionResponse gradeSubmission(
-            @PathVariable Long id,
+    public LecturerSubmissionResponse gradeSubmission( @PathVariable Long id,
             @Valid @RequestBody LecturerGradeRequest request) {
         return lecturerSubmissionService.gradeSubmission(id, request);
     }

@@ -51,6 +51,10 @@ public class LearningNode {
     @Column(name = "estimated_minutes")
     private Integer estimatedMinutes;
 
+    @Column(name = "is_optional")
+    @Builder.Default
+    private Boolean isOptional = false;
+
     @Column(name = "created_at", updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

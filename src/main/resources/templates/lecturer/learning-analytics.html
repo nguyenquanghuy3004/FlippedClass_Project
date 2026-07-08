@@ -59,12 +59,12 @@
                         <p class="text-muted mb-0">Ranked by overall completion and quiz scores.</p>
                     </div>
                     <div class="ai-insight-box shadow-sm d-flex align-items-center gap-3">
-                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                             <i class="ti ti-bulb fs-4"></i>
                         </div>
                         <div>
-                            <h6 class="fw-bold text-success mb-0">Class is doing great!</h6>
-                            <span class="small text-success">Average progress is at <span id="kpi-avg-progress" class="fw-bold">--%</span>.</span>
+                            <h6 class="fw-bold text-primary mb-0">Class is doing great!</h6>
+                            <span class="small text-primary">Average progress is at <span id="kpi-avg-progress" class="fw-bold">--%</span>.</span>
                         </div>
                     </div>
                 </div>
@@ -92,6 +92,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- Analytics Pagination -->
+                    <div id="analytics-pagination" class="d-flex justify-content-center p-3 border-top"></div>
                 </div>
             </div>
         </div>
@@ -167,6 +169,8 @@
             let currentStudents = [];
             let selectedStudent = null;
             let detailModal;
+            let currentAnalyticsPage = 1;
+            const analyticsPageSize = 5;
 
             $(document).ready(function() {
                 const modalEl = document.getElementById('studentDetailModal');
@@ -206,7 +210,8 @@
                         return scoreB - scoreA;
                     });
 
-                    renderLeaderboard(currentStudents);
+                    currentAnalyticsPage = 1; // Reset to page 1
+                    renderLeaderboard();
                     renderChart(currentStudents);
 
                 } catch (error) {
@@ -225,22 +230,32 @@
                 document.getElementById('kpi-candidates').textContent = data.supporterCandidates || 0;
             }
 
-            function renderLeaderboard(students) {
+            function renderLeaderboard() {
                 const tbody = document.getElementById('analytics-table-body');
-                if (students.length === 0) {
+                const pagination = document.getElementById('analytics-pagination');
+                if (currentStudents.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted">Class is currently empty.</td></tr>';
+                    pagination.innerHTML = '';
                     return;
                 }
 
+                const totalPages = Math.ceil(currentStudents.length / analyticsPageSize);
+                if (currentAnalyticsPage > totalPages) currentAnalyticsPage = totalPages;
+                if (currentAnalyticsPage < 1) currentAnalyticsPage = 1;
+
+                const start = (currentAnalyticsPage - 1) * analyticsPageSize;
+                const paginatedStudents = currentStudents.slice(start, start + analyticsPageSize);
+
                 let html = '';
-                students.forEach((s, index) => {
-                    const rank = index + 1;
+                paginatedStudents.forEach((s, i) => {
+                    const absoluteIndex = start + i;
+                    const rank = absoluteIndex + 1;
                     let rankClass = rank <= 3 ? `rank-${rank}` : '';
                     
                     // Gradient based on progress
-                    let colorStart = '#ef4444'; let colorEnd = '#f87171';
+                    let colorStart = '#94a3b8'; let colorEnd = '#cbd5e1';
                     if (s.progressPercentage >= 80) { colorStart = '#10b981'; colorEnd = '#34d399'; }
-                    else if (s.progressPercentage >= 50) { colorStart = '#3b82f6'; colorEnd = '#60a5fa'; }
+                    else if (s.progressPercentage >= 50) { colorStart = '#f59e0b'; colorEnd = '#fbbf24'; }
 
                     // Avatar
                     const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.studentName)}&background=random&color=fff&rounded=true`;
@@ -286,7 +301,7 @@
                             </td>
                             <td class="text-center py-4">${statusHtml}</td>
                             <td class="pe-4 text-end py-4">
-                                <button class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold hover-lift" onclick="showStudentDetail(${index})">
+                                <button class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold hover-lift" onclick="showStudentDetail(${absoluteIndex})">
                                     Analyze <i class="ti ti-arrow-right ms-1"></i>
                                 </button>
                             </td>
@@ -294,6 +309,28 @@
                     `;
                 });
                 tbody.innerHTML = html;
+
+                // Build pagination UI
+                if (totalPages <= 1) {
+                    pagination.innerHTML = '';
+                    return;
+                }
+                
+                let pHtml = '<ul class="pagination pagination-sm mb-0">';
+                pHtml += `<li class="page-item ${currentAnalyticsPage === 1 ? 'disabled' : ''}"><a class="page-link" href="javascript:void(0)" onclick="changeAnalyticsPage(${currentAnalyticsPage - 1})">Prev</a></li>`;
+                
+                for (let p = 1; p <= totalPages; p++) {
+                    pHtml += `<li class="page-item ${currentAnalyticsPage === p ? 'active' : ''}"><a class="page-link" href="javascript:void(0)" onclick="changeAnalyticsPage(${p})">${p}</a></li>`;
+                }
+                
+                pHtml += `<li class="page-item ${currentAnalyticsPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="javascript:void(0)" onclick="changeAnalyticsPage(${currentAnalyticsPage + 1})">Next</a></li>`;
+                pHtml += '</ul>';
+                pagination.innerHTML = pHtml;
+            }
+
+            function changeAnalyticsPage(page) {
+                currentAnalyticsPage = page;
+                renderLeaderboard();
             }
 
             function renderChart(students) {

@@ -1,5 +1,6 @@
 package com.example.flippedclass.controller;
 
+import com.example.flippedclass.annotation.LogUserActivity;
 import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.repository.LearningNodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,7 @@ public class GlobalLearningNodeController {
         return ResponseEntity.ok(response);
     }
 
-    @com.example.flippedclass.annotation.LogUserActivity(actionType = "VIEW_NODE", description = "'Học bài học: ' + #result.body.title")
+    @LogUserActivity(actionType = "VIEW_NODE", description = "'Học bài học: ' + #result.body.title")
     @GetMapping("/{nodeId}")
     @Transactional(readOnly = true)
     public ResponseEntity<LearningNodeResponse> getNodeDetail(@PathVariable Long nodeId, Authentication authentication) {

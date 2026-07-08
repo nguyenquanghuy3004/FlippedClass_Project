@@ -1,5 +1,6 @@
 package com.example.flippedclass.controller;
 
+import com.example.flippedclass.annotation.LogUserActivity;
 import com.example.flippedclass.dto.request.CreateLearningSpaceRequest;
 import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
 import com.example.flippedclass.dto.response.JoinLearningSpaceResponse;
@@ -23,7 +24,7 @@ public class LearningSpaceController {
     @Autowired
     private LearningSpaceService learningSpaceService;
 
-    @com.example.flippedclass.annotation.LogUserActivity(actionType = "CREATE_SPACE", description = "User created a new learning space")
+    @LogUserActivity(actionType = "CREATE_SPACE", description = "User created a new learning space")
     @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('STUDENT')")
     @PostMapping
     @Transactional
@@ -67,8 +68,8 @@ public class LearningSpaceController {
         LearningSpaceResponse response = learningSpaceService.cloneSpace(id, newName);
         return ResponseEntity.ok(response);
     }
-    /////////
-    @com.example.flippedclass.annotation.LogUserActivity(actionType = "JOIN_SPACE", description = "User joined a learning space")
+
+    @LogUserActivity(actionType = "JOIN_SPACE", description = "User joined a learning space")
     @PostMapping("/join")
     public ResponseEntity<JoinLearningSpaceResponse>joinLearningSpace(@RequestBody JoinLearningSpaceRequest request){
         return ResponseEntity.ok(learningSpaceService.joinLearningSpace(request));

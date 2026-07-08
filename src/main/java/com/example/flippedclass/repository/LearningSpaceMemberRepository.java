@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,9 +30,14 @@ public interface LearningSpaceMemberRepository extends JpaRepository<LearningSpa
     List<LearningSpaceMember> findByUser_IdOrderByJoinedAtDesc(Long userId);
     int countByUser_Id(Long userId);
 
-    Page<LearningSpaceMember> findByLearningSpaceId(Long learningSpaceId, Pageable pageable);
-    List<LearningSpaceMember> findByLearningSpaceId(Long learningSpaceId);
-    long countByLearningSpaceId(Long learningSpaceId);
+    @Query("SELECT m FROM LearningSpaceMember m WHERE m.learningSpace.id = :spaceId AND m.status != 'INACTIVE'")
+    Page<LearningSpaceMember> findByLearningSpaceId(@org.springframework.data.repository.query.Param("spaceId") Long learningSpaceId, Pageable pageable);
+
+    @Query("SELECT m FROM LearningSpaceMember m WHERE m.learningSpace.id = :spaceId AND m.status != 'INACTIVE'")
+    List<LearningSpaceMember> findByLearningSpaceId(@org.springframework.data.repository.query.Param("spaceId") Long learningSpaceId);
+
+    @Query("SELECT COUNT(m) FROM LearningSpaceMember m WHERE m.learningSpace.id = :spaceId AND m.status != 'INACTIVE'")
+    long countByLearningSpaceId(@org.springframework.data.repository.query.Param("spaceId") Long learningSpaceId);
     Optional<LearningSpaceMember> findByIdAndLearningSpaceId(Long id, Long learningSpaceId);
     Optional<LearningSpaceMember> findByLearningSpace_IdAndUser_Id(Long learningSpaceId, Long userId);
 }
