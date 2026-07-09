@@ -142,14 +142,25 @@
     }
     function nodeTypeLabel(type) {
       const labels = {
-        LESSON: 'Lesson',
-        VIDEO: 'Video',
-        PRACTICE: 'Practice',
-        QUIZ: 'Quiz',
-        REVIEW: 'Review',
-        DOCUMENT: 'Document'
+        LESSON: 'Vào xem bài học',
+        VIDEO: 'Vào xem video',
+        PRACTICE: 'Vào làm thực hành',
+        QUIZ: 'Vào làm quiz',
+        REVIEW: 'Vào xem review',
+        DOCUMENT: 'Vào xem document'
       };
-      return labels[type] || type || 'Node';
+      return labels[type] || type || 'Vào xem';
+    }
+    function nodeTypeIcon(type) {
+      const icons = {
+        VIDEO: 'ti-player-play',
+        DOCUMENT: 'ti-file-text',
+        QUIZ: 'ti-help-circle',
+        PRACTICE: 'ti-code',
+        LESSON: 'ti-book-2',
+        REVIEW: 'ti-checklist'
+      };
+      return icons[type] || 'ti-book-2';
     }
     function roleLabel(role) {
       const labels = {
@@ -505,39 +516,43 @@
     }
     function nodeTemplate(node, index) {
       const isDocument = node.nodeType === 'DOCUMENT';
+      const isLocked = node.status === 'LOCKED';
       const params = new URLSearchParams({
         nodeId: node.id,
         spaceId: state.selectedSpaceId || ''
       });
 
+      const cardStyle = isLocked ? 'opacity: 0.6; pointer-events: none; cursor: not-allowed; background: #f8fafc;' : 'cursor: pointer;';
+      const statusIcon = isLocked ? 'ti-lock text-danger' : 'ti-lock-open';
+
       if (isDocument) {
         return `
-        <a class="node-card" href="javascript:void(0)" onclick="openDocumentNode(event, ${node.id})" style="cursor: pointer;">
+        <a class="node-card" href="javascript:void(0)" onclick="openDocumentNode(event, ${node.id})" style="${cardStyle}">
           <div class="node-index">${index + 1}</div>
           <div>
             <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
             <p class="node-content">${escapeHtml(node.content || 'Click to open document in new tab.')}</p>
           </div>
           <div class="node-badges">
-            <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-            <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
+            <span class="soft-chip"><i class="ti ${nodeTypeIcon(node.nodeType)}"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+            <span class="soft-chip ${isLocked ? 'text-danger bg-danger-subtle' : ''}"><i class="ti ${statusIcon}"></i>${escapeHtml(statusLabel(node.status))}</span>
           </div>
           <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
         </a>`;
       }
 
-      const href = `/student/learning-node?${params.toString()}`;
+      const href = isLocked ? 'javascript:void(0)' : `/student/learning-node?${params.toString()}`;
 
       return `
-      <a class="node-card" href="${href}">
+      <a class="node-card" href="${href}" style="${cardStyle}">
         <div class="node-index">${index + 1}</div>
         <div>
           <h4 class="node-title">${escapeHtml(node.title || `Node ${index + 1}`)}</h4>
           <p class="node-content">${escapeHtml(node.content || 'Click to open this node learning page.')}</p>
         </div>
         <div class="node-badges">
-          <span class="soft-chip"><i class="ti ti-layers-subtract"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
-          <span class="soft-chip"><i class="ti ti-lock-open"></i>${escapeHtml(statusLabel(node.status))}</span>
+          <span class="soft-chip"><i class="ti ${nodeTypeIcon(node.nodeType)}"></i>${escapeHtml(nodeTypeLabel(node.nodeType))}</span>
+          <span class="soft-chip ${isLocked ? 'text-danger bg-danger-subtle border-danger' : ''}"><i class="ti ${statusIcon}"></i>${escapeHtml(statusLabel(node.status))}</span>
         </div>
         <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
       </a>`;

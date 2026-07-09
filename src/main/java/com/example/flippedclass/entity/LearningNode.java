@@ -33,6 +33,12 @@ public class LearningNode {
     @Column(name = "content", columnDefinition = "NVARCHAR(MAX)")
     private String content;
 
+    @Column(name = "starter_code", columnDefinition = "NVARCHAR(MAX)")
+    private String starterCode;
+
+    @Column(name = "solution_code", columnDefinition = "NVARCHAR(MAX)")
+    private String solutionCode;
+
     @Column(name = "node_type", length = 50)
     private String nodeType;
 
@@ -44,6 +50,10 @@ public class LearningNode {
 
     @Column(name = "estimated_minutes")
     private Integer estimatedMinutes;
+
+    @Column(name = "is_optional")
+    @Builder.Default
+    private Boolean isOptional = false;
 
     @Column(name = "created_at", updatable = false)
     @Builder.Default

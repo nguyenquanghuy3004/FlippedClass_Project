@@ -124,7 +124,7 @@
                                             <i class="ti ti-calendar-week me-1"></i>
                                             Week <span th:text="${iterStat.count}">1</span>
                                             &nbsp;&middot;&nbsp;
-                                            <span th:text="${path.nodes != null ? path.nodes.size() : 0}">0</span> lessons
+                                            <span th:text="${path.nodes != null ? path.nodes.?[nodeType != 'GROUP_ACTIVITY'].size() : 0}">0</span> lessons
                                         </span>
                                         <!-- Title -->
                                         <h5 class="card-title d-flex align-items-center gap-2 mt-1">
@@ -137,8 +137,15 @@
 
                                     <!-- Right: badge + menu -->
                                     <div class="d-flex align-items-center gap-2 ms-3 flex-shrink-0">
-                                        <span th:if="${path.status == 'PUBLISHED'}" class="badge-published">Published</span>
-                                        <span th:if="${path.status != 'PUBLISHED'}" class="badge-in-progress">In Progress</span>
+<!--                                        <span th:if="${path.status == 'PUBLISHED'}" class="badge-published">Published</span>-->
+<!--                                        <span th:if="${path.status != 'PUBLISHED'}" class="badge-in-progress">In Progress</span>-->
+
+                                        <!-- Path Collapse Button -->
+                                        <button class="path-collapse-btn"
+                                                th:data-target="'#pathNodes-' + ${path.id}"
+                                                onclick="togglePathCollapse(this)">
+                                            <i class="ti ti-chevron-down path-collapse-icon"></i>
+                                        </button>
 
                                         <div class="dropdown">
                                             <button class="btn btn-sm rounded-circle border-0 d-flex align-items-center justify-content-center"
@@ -177,14 +184,18 @@
                                 <!-- Nodes area -->
                                 <div class="card-body px-4 pb-4 pt-2">
                                     <!-- Has lessons -->
-                                    <div th:if="${path.nodes != null and !path.nodes.empty}" class="nodes-container">
+                                    <div th:if="${path.nodes != null and !path.nodes.?[nodeType != 'GROUP_ACTIVITY'].empty}" 
+                                         class="nodes-container path-collapsible-body"
+                                         th:id="'pathNodes-' + ${path.id}">
                                         <th:block th:each="node : ${path.nodes}">
-                                            <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
+                                            <th:block th:if="${node.nodeType != 'GROUP_ACTIVITY'}">
+                                                <div th:replace="~{lecturer/learningNode :: nodeCard(node=${node}, path=${path})}"></div>
+                                            </th:block>
                                         </th:block>
                                     </div>
 
                                     <!-- No lessons yet -->
-                                    <div th:if="${path.nodes == null or path.nodes.empty}" class="module-empty-box mb-3">
+                                    <div th:if="${path.nodes == null or path.nodes.?[nodeType != 'GROUP_ACTIVITY'].empty}" class="module-empty-box mb-3">
                                         <div class="module-empty-icon">
                                             <i class="ti ti-layer-difference"></i>
                                         </div>
@@ -653,23 +664,68 @@
                     $(this).removeClass('is-invalid');
                 });
 
-                // Mở popup Sửa bài học
+                // Mở Modal Cập nhật bài học
                 $('.edit-node-btn').click(function (e) {
                     e.preventDefault();
-                    const pathId = $(this).data('pathid');
-                    const nodeId = $(this).data('nodeid');
-                    const title = $(this).data('title');
-                    const description = $(this).data('description');
-                    const type = $(this).data('type');
+                    $('#editNodeError').hide();
 
-                    $('#editNodePathId').val(pathId);
+                    const nodeId = $(this).data('nodeid');
+                    const pathId = $(this).data('pathid');
+                    const title = $(this).data('title');
+                    const desc = $(this).data('description');
+                    const type = $(this).data('type');
+                    const prereq = $(this).data('prereq');
+
                     $('#editNodeId').val(nodeId);
+                    $('#editNodePathId').val(pathId);
                     $('#editNodeTitle').val(title);
-                    $('#editNodeDescription').val(description !== 'null' ? description : '');
-                    $('#editNodeType').val(type || 'VIDEO');
+                    $('#editNodeDescription').val(desc !== 'null' ? desc : '');
+                    $('#editNodeType').val(type).trigger('change');
+                    if (prereq) {
+                        $('#editNodePrerequisite').val(prereq);
+                    } else {
+                        $('#editNodePrerequisite').val('');
+                    }
+
+                    $('#editYoutubeUrl').val('').removeData('original').removeData('itemid');
+                    $('#editDocumentFile').val('').removeData('itemid');
+                    $('#currentDocumentInfo').text('');
                     $('#editNodeTitle, #editNodeDescription').removeClass('is-invalid');
                     $('#editNodeError').hide();
+
+                    // Fetch existing items to pre-fill
+                    fetch(`/api/learning-nodes/${nodeId}/items`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    })
+                    .then(res => res.json())
+                    .then(items => {
+                        if (items && items.length > 0) {
+                            const item = items[0]; // assume 1 main item
+                            if (type === 'VIDEO' && item.itemType === 'VIDEO') {
+                                $('#editYoutubeUrl').val(item.url).data('original', item.url).data('itemid', item.id);
+                            } else if (type === 'DOCUMENT' && item.itemType === 'PDF') {
+                                $('#currentDocumentInfo').html(`<i class="ti ti-file-pdf"></i> Current file: ${item.title}`);
+                                $('#editDocumentFile').data('itemid', item.id);
+                            }
+                        }
+                    });
+
                     $('#editNodeModal').modal('show');
+                });
+
+                // Toggle logic for edit node type
+                $('#editNodeType').change(function() {
+                    const type = $(this).val();
+                    if (type === 'VIDEO') {
+                        $('#editVideoSection').show();
+                        $('#editDocumentSection').hide();
+                    } else if (type === 'DOCUMENT') {
+                        $('#editVideoSection').hide();
+                        $('#editDocumentSection').show();
+                    } else {
+                        $('#editVideoSection').hide();
+                        $('#editDocumentSection').hide();
+                    }
                 });
 
                 // Xóa bài học
@@ -698,55 +754,26 @@
                     });
                 });
 
-                // Xóa Video của bài học
-                $(document).on('click', '.delete-video-item-btn', function (e) {
+                // Xóa video khỏi bài học
+                $('.delete-video-btn').click(function (e) {
                     e.preventDefault();
                     const nodeId = $(this).data('nodeid');
                     Swal.fire({
                         title: 'Delete Video?',
-                        text: "Bạn có chắc chắn muốn xóa video của bài học này?",
+                        text: "Are you sure you want to delete the video from this lesson?",
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#d33',
                         cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Có, xóa nó!'
+                        confirmButtonText: 'Yes, delete video!'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            fetch(`/api/learning-nodes/${nodeId}/items`, {
+                            fetch(`/api/learning-nodes/${nodeId}/items/video`, {
+                                method: 'DELETE',
                                 headers: { 'Authorization': 'Bearer ' + token }
-                            })
-                            .then(res => {
-                                if (!res.ok) throw new Error("Không thể tải danh sách tài liệu");
-                                return res.json();
-                            })
-                            .then(items => {
-                                const videoItem = items.find(item => item.itemType === 'VIDEO');
-                                if (!videoItem) {
-                                    Swal.fire('Info', 'Bài học này hiện không có video để xóa', 'info');
-                                    return null;
-                                }
-                                return fetch(`/api/learning-nodes/${nodeId}/items/item/${videoItem.id}`, {
-                                    method: 'DELETE',
-                                    headers: { 'Authorization': 'Bearer ' + token }
-                                });
-                            })
-                            .then(res => {
-                                if (res && res.ok) {
-                                    Swal.fire({
-                                        title: 'Success!',
-                                        text: 'Đã xóa video thành công',
-                                        icon: 'success',
-                                        timer: 1500,
-                                        showConfirmButton: false
-                                    }).then(() => {
-                                        window.location.reload();
-                                    });
-                                } else if (res) {
-                                    Swal.fire('Error!', 'Lỗi khi xóa video', 'error');
-                                }
-                            })
-                            .catch(err => {
-                                Swal.fire('Error!', err.message, 'error');
+                            }).then(res => {
+                                if (res.ok) window.location.reload();
+                                else Swal.fire('Error!', 'Failed to delete video', 'error');
                             });
                         }
                     });
@@ -755,15 +782,21 @@
                 // Lưu bài học mới (Create)
                 $('#btnSaveNode').click(function () {
                     $('#createNodeError').hide();
-                    if (!checkValid(['#nodeTitle', '#nodeDescription'])) return;
+                    if (!checkValid(['#nodeTitle'])) return;
 
                     const btn = $(this);
                     const pathId = $('#nodePathId').val();
                     const title = $('#nodeTitle').val().trim();
                     const desc = $('#nodeDescription').val().trim();
                     const type = $('#nodeType').val();
+                    const prereq = $('#nodePrerequisite').val();
 
                     btn.prop('disabled', true).text('Adding...');
+
+                    const payload = { title: title, description: desc, nodeType: type, learningPathId: pathId };
+                    if (prereq && prereq !== "") {
+                        payload.prerequisiteNodeId = prereq;
+                    }
 
                     fetch(`/api/learning-spaces/${spaceId}/learning-paths/${pathId}/learning-nodes`, {
                         method: 'POST',
@@ -771,7 +804,7 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
+                        body: JSON.stringify(payload)
                     })
                         .then(res => {
                             if (!res.ok) throw new Error("Failed to add lesson");
@@ -789,7 +822,7 @@
                 // Cập nhật bài học (Edit)
                 $('#btnUpdateNode').click(function () {
                     $('#editNodeError').hide();
-                    if (!checkValid(['#editNodeTitle', '#editNodeDescription'])) return;
+                    if (!checkValid(['#editNodeTitle'])) return;
 
                     const btn = $(this);
                     const pathId = $('#editNodePathId').val();
@@ -797,8 +830,17 @@
                     const title = $('#editNodeTitle').val().trim();
                     const desc = $('#editNodeDescription').val().trim();
                     const type = $('#editNodeType').val();
+                    const prereq = $('#editNodePrerequisite').val();
+
+                    const youtubeUrl = $('#editYoutubeUrl').val().trim();
+                    const docFile = $('#editDocumentFile')[0].files[0];
 
                     btn.prop('disabled', true).text('Saving...');
+
+                    const payload = { title: title, description: desc, nodeType: type, learningPathId: pathId };
+                    if (prereq && prereq !== "") {
+                        payload.prerequisiteNodeId = prereq;
+                    }
 
                     fetch(`/api/learning-spaces/${spaceId}/learning-paths/${pathId}/learning-nodes/${nodeId}`, {
                         method: 'PUT',
@@ -806,19 +848,60 @@
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + token
                         },
-                        body: JSON.stringify({ title: title, description: desc, nodeType: type, learningPathId: pathId })
+                        body: JSON.stringify(payload)
                     })
-                        .then(res => {
-                            if (!res.ok) throw new Error("Failed to update lesson");
-                            return res.json();
-                        })
-                        .then(data => {
-                            window.location.reload();
-                        })
-                        .catch(err => {
-                            $('#editNodeError').text(err.message).show();
-                            btn.prop('disabled', false).text('Save Changes');
-                        });
+                    .then(res => {
+                        if (!res.ok) throw new Error("Failed to update lesson");
+                        return res.json();
+                    })
+                    .then(data => {
+                        let promises = [];
+                        const oldVideoItemId = $('#editYoutubeUrl').data('itemid');
+                        const originalYoutubeUrl = $('#editYoutubeUrl').data('original');
+                        const oldDocItemId = $('#editDocumentFile').data('itemid');
+
+                        if (type === 'VIDEO' && youtubeUrl && youtubeUrl !== originalYoutubeUrl) {
+                            if (oldVideoItemId) {
+                                promises.push(fetch(`/api/learning-nodes/items/${oldVideoItemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
+                            }
+                            promises.push(
+                                fetch(`/api/learning-nodes/${nodeId}/items`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                    body: JSON.stringify({ title: 'Youtube Video', itemType: 'VIDEO', url: youtubeUrl, learningNodeId: nodeId })
+                                })
+                            );
+                        } else if (type === 'DOCUMENT' && docFile) {
+                            if (oldDocItemId) {
+                                promises.push(fetch(`/api/learning-nodes/items/${oldDocItemId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }));
+                            }
+                            let formData = new FormData();
+                            formData.append('file', docFile);
+                            let uploadPromise = fetch(`/api/learning-nodes/${nodeId}/items/upload-document`, {
+                                method: 'POST',
+                                headers: { 'Authorization': 'Bearer ' + token },
+                                body: formData
+                            })
+                            .then(r => r.json())
+                            .then(uploadData => {
+                                return fetch(`/api/learning-nodes/${nodeId}/items`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                    body: JSON.stringify({ title: docFile.name, itemType: 'PDF', url: uploadData.url, learningNodeId: nodeId })
+                                });
+                            });
+                            promises.push(uploadPromise);
+                        }
+                        
+                        return Promise.all(promises);
+                    })
+                    .then(() => {
+                        window.location.reload();
+                    })
+                    .catch(err => {
+                        $('#editNodeError').text(err.message).show();
+                        btn.prop('disabled', false).text('Save Changes');
+                    });
                 });
 
 
@@ -1074,16 +1157,19 @@
                                     } else if (item.itemType === 'PDF') {
                                         html += `
                                     <div class="mb-3">
-                                        <div class="border rounded-3 p-3 d-flex align-items-center gap-3 shadow-sm bg-white">
-                                            <div class="bg-danger-subtle text-danger p-2 rounded-2">
-                                                <i class="ti ti-file-pdf fs-3"></i>
-                                            </div>
-                                            <div class="flex-grow-1 overflow-hidden">
-                                                <a href="${item.fullUrl}" target="_blank" class="text-decoration-none text-dark">
+                                        <div class="border rounded-3 p-3 d-flex align-items-center justify-content-between shadow-sm bg-white">
+                                            <div class="d-flex align-items-center gap-3 overflow-hidden flex-grow-1">
+                                                <div class="bg-danger-subtle text-danger p-2 rounded-2">
+                                                    <i class="ti ti-file-pdf fs-3"></i>
+                                                </div>
+                                                <a href="${item.fullUrl}" target="_blank" class="text-decoration-none text-dark d-flex align-items-center gap-2">
                                                     <h6 class="mb-0 text-truncate fw-bold hover-text-primary" style="transition: color 0.2s;">${item.title}</h6>
+                                                    <span class="action-cta-badge" data-type="DOCUMENT">
+                                                        Vào xem document <i class="ti ti-chevron-right ms-1" style="font-size: 0.75rem; opacity: 0.7;"></i>
+                                                    </span>
                                                 </a>
                                             </div>
-                                            <button class="btn btn-sm btn-outline-danger border-0 delete-item-btn" data-itemid="${item.id}" title="Remove Document">
+                                            <button class="btn btn-sm btn-outline-danger border-0 delete-item-btn ms-2" data-itemid="${item.id}" title="Remove Document">
                                                 <i class="ti ti-trash"></i>
                                             </button>
                                         </div>
@@ -1122,21 +1208,6 @@
                                         </div>
                                     </div>`;
                                 });
-                                if (nodeType === 'VIDEO') {
-                                    html += `
-                                    <div class="mt-3 text-end">
-                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 create-quiz-btn" data-nodeid="${nodeId}">
-                                            <i class="ti ti-plus me-1"></i> Add Another Quiz
-                                        </button>
-                                    </div>`;
-                                }
-                            } else if (nodeType === 'VIDEO') {
-                                html += `
-                                <div class="mt-3 text-center p-3 bg-light border border-dashed rounded-4">
-                                    <button class="btn btn-outline-primary rounded-pill px-4 create-quiz-btn" data-nodeid="${nodeId}">
-                                        <i class="ti ti-brain me-1"></i> Create Quiz
-                                    </button>
-                                </div>`;
                             }
 
                             if (html !== '') {
@@ -1146,6 +1217,27 @@
                         .catch(err => console.error('Failed to load items for node', nodeId, err));
                 });
             });
+        </script>
+
+        <script>
+        // ── Path Collapse / Expand ──
+        function togglePathCollapse(btn) {
+            const targetId = btn.getAttribute('data-target');
+            const body = document.querySelector(targetId);
+            if (!body) return;
+
+            const isCollapsed = body.classList.contains('is-collapsed');
+
+            if (isCollapsed) {
+                body.classList.remove('is-collapsed');
+                btn.classList.remove('collapsed');
+                btn.title = 'Thu gọn';
+            } else {
+                body.classList.add('is-collapsed');
+                btn.classList.add('collapsed');
+                btn.title = 'Mở rộng';
+            }
+        }
         </script>
     </th:block>
 </body>

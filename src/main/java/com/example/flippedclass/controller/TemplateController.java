@@ -19,7 +19,20 @@ public class TemplateController {
         return "homePage";
     }
 
+    @GetMapping("/inventory")
+    public String inventory() {
+        return "inventory";
+    }
 
+    @GetMapping("/create-product")
+    public String createProduct() {
+        return "create-product";
+    }
+
+    @GetMapping("/reports")
+    public String reports() {
+        return "reports";
+    }
 
     @GetMapping("/signin")
     public String signin() {
@@ -87,6 +100,11 @@ public class TemplateController {
         return "student/learning-node";
     }
 
+    @GetMapping("/student/learning-nodes/{nodeId}/practice")
+    public String studentPracticeNode() {
+        return "student/student-practice";
+    }
+
     @GetMapping("/student/my-quizzes")
     public String studentMyQuizzes() {
         return "student/my-quizzes";
@@ -125,11 +143,9 @@ public class TemplateController {
         model.addAttribute("spaceId", spaceId);
         model.addAttribute("activeTab", activeTab);
         try {
-            List<LearningPathResponse> paths = learningPathService.getLearningPath(spaceId);
-            model.addAttribute("paths", paths);
-        } catch (Exception e) {
-            List<LearningPathResponse> emptyPaths = Collections.emptyList();
-            model.addAttribute("paths", emptyPaths);
+            model.addAttribute("paths", learningPathService.getLearningPath(spaceId, null));
+        } catch(Exception e) {
+            model.addAttribute("paths", java.util.Collections.emptyList());
         }
     }
 
@@ -143,6 +159,11 @@ public class TemplateController {
     public String supporterLearningPath(@PathVariable Long spaceId, Model model) {
         loadSpaceCommonData(spaceId, "roadmap", model);
         model.addAttribute("isSupporter", true);
+        try {
+            model.addAttribute("paths", learningPathService.getLearningPath(spaceId, null));
+        } catch(Exception e) {
+            model.addAttribute("paths", java.util.Collections.emptyList());
+        }
         return "supporter/learningPath";
     }
 

@@ -56,11 +56,11 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         return principal.toString();
     }
 
-    // Kiểm tra user hiện tại có phải ADMIN không — ADMIN bypass mọi kiểm tra owner
+    // Kiểm tra user hiện tại có phải ADMIN hoặc MENTOR không — ADMIN/MENTOR bypass mọi kiểm tra owner
     private boolean isCurrentUserAdmin() {
         return SecurityContextHolder.getContext().getAuthentication()
                 .getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ADMIN") || a.getAuthority().equals("MENTOR"));
     }
 
 
@@ -140,16 +140,26 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Override
     public List<LearningSpaceResponse> getMySpaces() {
         User currentUser = getCurrentUser();
-        List<LearningSpace> ownedSpaces = learningSpaceRepository.findByOwnerId(currentUser.getId());
-        List<LearningSpace> joinedSpaces = memberRepository.findByUser_IdOrderByJoinedAtDesc(currentUser.getId()).stream()
-                .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
-                .map(LearningSpaceMember::getLearningSpace)
-                .collect(Collectors.toList());
+        boolean isLecturerOrAdmin = currentUser.getRoles().stream()
+                .anyMatch(r -> r.getName() == com.example.flippedclass.enums.RoleName.MENTOR || r.getName() == com.example.flippedclass.enums.RoleName.ADMIN);
 
-        java.util.Set<LearningSpace> allSpaces = new java.util.HashSet<>(ownedSpaces);
-        allSpaces.addAll(joinedSpaces);
+        List<LearningSpace> spaces;
+        if (isLecturerOrAdmin) {
+            spaces = learningSpaceRepository.findByStatus(LearningSpaceStatus.ACTIVE);
+        } else {
+            List<LearningSpace> ownedSpaces = learningSpaceRepository.findByOwnerIdAndStatus(currentUser.getId(), LearningSpaceStatus.ACTIVE);
+            List<LearningSpace> joinedSpaces = memberRepository.findByUser_IdOrderByJoinedAtDesc(currentUser.getId()).stream()
+                    .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
+                    .map(LearningSpaceMember::getLearningSpace)
+                    .filter(s -> s.getStatus() == LearningSpaceStatus.ACTIVE)
+                    .collect(Collectors.toList());
 
-        return allSpaces.stream().map(space -> LearningSpaceResponse.builder()
+            java.util.Set<LearningSpace> allSpaces = new java.util.HashSet<>(ownedSpaces);
+            allSpaces.addAll(joinedSpaces);
+            spaces = new java.util.ArrayList<>(allSpaces);
+        }
+
+        return spaces.stream().map(space -> LearningSpaceResponse.builder()
                 .id(space.getId())
                 .name(space.getName())
                 .description(space.getDescription())

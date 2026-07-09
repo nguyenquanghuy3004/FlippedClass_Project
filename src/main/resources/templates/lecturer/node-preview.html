@@ -36,6 +36,11 @@
       window.location.href = '/login';
     }
   </script>
+  
+  <!-- SockJS & STOMP cho Realtime -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
@@ -55,8 +60,26 @@
     </a>
     <div class="topbar-spacer"></div>
     <div class="topbar-user-menu">
-      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
-        <li class="dropdown" style="list-style: none;">
+      <ul class="list-unstyled d-flex align-items-center mb-0 gap-3">
+        <!-- Notification Bell -->
+        <li class="dropdown position-relative" style="list-style: none;">
+          <a href="#" id="bellIcon" class="nav-link text-dark position-relative" data-bs-toggle="dropdown" aria-expanded="false" onclick="markAsReadOnOpen()" style="display: flex; align-items: center;">
+            <i class="ti ti-bell" style="font-size: 1.4rem;"></i>
+            <span id="notifBadge" class="badge bg-danger position-absolute top-0 start-100 translate-middle" style="display:none; font-size: 0.6rem;">!</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0" style="width: 350px; border-radius: 12px; overflow: hidden; z-index: 9999;">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center text-white" style="background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);">
+              <h6 class="mb-0 fw-bold"><i class="ti ti-bell-ringing me-2"></i>Thông báo mới</h6>
+            </div>
+            <div id="notifList" class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
+              <div class="text-center p-4 text-muted small">
+                <i class="ti ti-inbox" style="font-size: 2rem; display: block; margin-bottom: 8px;"></i>
+                Không có thông báo nào
+              </div>
+            </div>
+          </div>
+        </li>
+        <!-- User dropdown -->
           <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; color: #1e293b; font-weight: bold; display: flex; align-items: center; gap: 8px;">
             <img th:src="@{/assets/images/avatar-2.jpg}" alt="User" class="rounded-circle border" style="width: 35px; height: 35px; object-fit: cover;" />
             FCMS Mentor
@@ -257,6 +280,19 @@
       if (!resources.length) return emptyLightTemplate('ti-folder-off', 'No resources.');
       return `<div class="resource-list">${resources.map((item) => resourceItemTemplate(item)).join('')}</div>`;
     }
+
+      if (nodeId) {
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+        stompClient.connect({}, function() {
+            stompClient.subscribe('/topic/nodes/' + nodeId + '/comments', function(res) {
+                if (res.body === "REFRESH") {
+                    loadDiscussions();
+                }
+            });
+        });
+      }
 
     function commentsTemplate() {
       return `
@@ -479,111 +515,127 @@
         pageRoot.className = 'practice-layout';
         pageRoot.style.padding = '0';
         pageRoot.style.gap = '0';
-        pageRoot.style.background = '#f0f0f0';
+        pageRoot.style.background = '#1a1a1a'; // Leetcode dark background
+
+        // Tải thư viện marked.js để render Markdown Preview
+        if (!window.marked) {
+            const script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+            document.head.appendChild(script);
+        }
 
         pageRoot.innerHTML = `
         <style>
-          .practice-layout { display: grid !important; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr) !important; align-items: stretch !important; height: calc(100vh - 65px); gap: 8px !important; padding: 8px !important; background: #f0f0f0 !important; }
+          .practice-layout { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; align-items: stretch !important; height: calc(100vh - 65px); gap: 8px !important; padding: 8px !important; background: #000000 !important; }
           
-          /* Left Pane */
-          .lc-left-pane { background: #fff; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-          .lc-tabs-header { display: flex; gap: 16px; padding: 0 16px; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
-          .lc-tab { padding: 12px 4px; font-size: 0.85rem; font-weight: 500; color: #5c5c5c; cursor: pointer; border-bottom: 2px solid transparent; }
-          .lc-tab.active { color: #2cbb5d; border-bottom-color: #2cbb5d; }
+          /* Common Panes */
+          .lc-pane { background: #282828; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #333; }
+          .lc-tabs-header { display: flex; padding: 0 12px; background: #333333; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #111; }
+          .lc-tab { padding: 10px 14px; font-size: 0.85rem; font-weight: 500; color: #a1a1aa; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
+          .lc-tab:hover { color: #f4f4f5; background: rgba(255,255,255,0.05); }
+          .lc-tab.active { color: #fff; border-bottom-color: #2cbb5d; background: #282828; }
           .lc-tab i { margin-right: 6px; font-size: 1rem; vertical-align: middle; }
           
-          /* Right Pane Wrapper */
-          .lc-right-pane { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
+          /* Content Areas */
+          .lc-content { flex: 1; overflow-y: auto; padding: 16px; color: #d4d4d8; font-size: 0.95rem; }
+          .lc-textarea { width: 100%; height: 100%; background: #1e1e1e; color: #d4d4d8; border: 1px solid #3f3f46; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; resize: none; outline: none; }
+          .lc-textarea:focus { border-color: #2cbb5d; }
           
-          /* Editor Top Bar */
-          .lc-editor-card { background: #fff; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-          .lc-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #fafafa; border-bottom: 1px solid #f0f0f0; position: relative; }
+          /* Right Pane Split */
+          .lc-right-split { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
           
-          /* Terminal Bottom Bar */
-          .lc-terminal-card { background: #fff; border-radius: 8px; display: flex; flex-direction: column; height: 45vh; min-height: 250px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: height 0.3s ease, min-height 0.3s ease; }
-          .lc-terminal-card.collapsed { height: 45px !important; min-height: 45px !important; }
+          /* Editor Actions */
+          .lc-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #333333; border-bottom: 1px solid #111; }
+          .btn-lc-save { background: #2cbb5d; color: #fff; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+          .btn-lc-save:hover { background: #22994c; }
+          .btn-lc-save:disabled { opacity: 0.7; cursor: not-allowed; }
+          
+          .btn-lc-run { background: #3f3f46; color: #fff; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+          .btn-lc-run:hover { background: #52525b; }
+          .btn-lc-run:disabled { opacity: 0.7; cursor: not-allowed; }
+
+          /* Terminal / Test Cases */
+          .lc-terminal-card { background: #282828; border-radius: 8px; display: flex; flex-direction: column; height: 35vh; min-height: 250px; border: 1px solid #333; overflow: hidden; }
+          .tc-nav { display: flex; gap: 4px; padding: 8px 12px; background: #333333; overflow-x: auto; border-bottom: 1px solid #111; align-items: center; }
+          .tc-pill { padding: 6px 14px; border-radius: 6px; background: #404040; color: #a1a1aa; font-size: 0.8rem; font-weight: 500; cursor: pointer; border: none; transition: 0.2s; white-space: nowrap; }
+          .tc-pill:hover { background: #4a4a4a; color: #fff; }
+          .tc-pill.active { background: #52525b; color: #fff; font-weight: 600; }
+          .tc-pill.add-btn { background: transparent; color: #2cbb5d; font-size: 1.1rem; padding: 4px 10px; }
+          .tc-pill.add-btn:hover { background: rgba(44, 187, 93, 0.1); }
+          
+          .tc-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; overflow-y: auto; }
+          .tc-label { font-size: 0.75rem; font-weight: 600; color: #a1a1aa; margin-bottom: 6px; display: block; }
+          
+          .tc-action-bar { display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; padding: 8px 12px; border-radius: 6px; border: 1px solid #3f3f46; }
+          
+          /* Markdown Preview Styles */
+          .markdown-body { color: #d4d4d8; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+          .markdown-body h1, .markdown-body h2 { border-bottom: 1px solid #3f3f46; padding-bottom: 0.3em; }
+          .markdown-body code { background-color: rgba(255,255,255,0.1); padding: 0.2em 0.4em; border-radius: 6px; font-family: monospace; }
+          .markdown-body pre { background-color: #1e1e1e; padding: 16px; border-radius: 6px; overflow: auto; border: 1px solid #3f3f46; }
         </style>
         
-        <!-- CỘT TRÁI: ĐỀ BÀI / Q&A / SUBMISSIONS -->
-        <section class="lc-left-pane">
+        <!-- LEFT PANE: DESCRIPTION & OTHERS -->
+        <section class="lc-pane">
             <div class="lc-tabs-header">
-              <div class="lc-tab active" onclick="switchLeftTab('problem')" id="tab-problem"><i class="ti ti-file-description" style="color: #007bff;"></i> Problem Description</div>
-              <div class="lc-tab" onclick="switchLeftTab('qa')" id="tab-qa"><i class="ti ti-messages" style="color: #facc15;"></i> Q&A</div>
-              <div class="lc-tab" onclick="switchLeftTab('submissions')" id="tab-submissions"><i class="ti ti-checklist" style="color: #2cbb5d;"></i> Submissions</div>
+              <div class="lc-tab active" onclick="switchLeftTab('problem')" id="tab-problem"><i class="ti ti-edit" style="color: #60a5fa;"></i> Edit Description</div>
+              <div class="lc-tab" onclick="switchLeftTab('submissions')" id="tab-submissions"><i class="ti ti-checklist" style="color: #a78bfa;"></i> Submissions</div>
             </div>
           
-          <!-- TAB: PROBLEM -->
-          <div id="pane-problem" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 16px;">
-            <label style="font-size: 0.8rem; font-weight: 600; color: #8c8c8c; margin-bottom: 8px;">Markdown Content</label>
-            <textarea id="problemDescriptionInput" style="flex: 1; width: 100%; border: 1px solid #e5e7eb; border-radius: 6px; background: #f7f9fa; color: #262626; resize: none; font-size: 0.95rem; line-height: 1.6; padding: 16px; outline: none;" placeholder="Write problem description in Markdown..."></textarea>
+          <!-- TAB: PROBLEM (EDIT) -->
+          <div id="pane-problem" class="lc-content" style="display: flex; flex-direction: column;">
+            <textarea id="problemDescriptionInput" class="lc-textarea" placeholder="Write problem description in Markdown..."></textarea>
           </div>
 
-          <!-- TAB: Q&A -->
-          <div id="pane-qa" style="flex: 1; overflow-y: auto; display: none; flex-direction: column; padding: 16px;">
-            <div id="nodeCommentsContainer">
-              <div class="empty-light">
-                <div><i class="ti ti-loader-2 ti-spin"></i> Loading Q&A...</div>
-              </div>
-            </div>
-          </div>
 
           <!-- TAB: SUBMISSIONS -->
-          <div id="pane-submissions" style="flex: 1; overflow-y: auto; display: none; flex-direction: column; padding: 16px; background: #f8fafc;">
+          <div id="pane-submissions" class="lc-content" style="display: none;">
             <div id="summaries-container">
-              <div class="empty-light">
-                <div><i class="ti ti-loader-2 ti-spin"></i> Loading submissions...</div>
-              </div>
+              <div style="text-align: center; color: #71717a; padding: 40px 0;"><i class="ti ti-loader-2 ti-spin fs-2"></i><br>Loading submissions...</div>
             </div>
           </div>
         </section>
 
-        <!-- CỘT PHẢI: CODE & TEST CASES -->
-        <section class="lc-right-pane">
+        <!-- RIGHT PANE SPLIT: EDITOR & TEST CASES -->
+        <section class="lc-right-split">
             
-            <!-- Phần Code Editor -->
-            <div class="lc-editor-card">
-                <div class="lc-toolbar" style="padding: 0 12px;">
-                    <ul class="nav nav-tabs border-0" id="codeEditorTabs" role="tablist" style="margin-top: 4px; display: flex; gap: 16px;">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="starter-tab" data-bs-toggle="tab" data-bs-target="#starter-pane" type="button" role="tab" style="background: transparent; color: #5c5c5c; border: none; border-bottom: 2px solid transparent; padding: 8px 4px; font-weight: 500; font-size: 0.85rem;" onclick="switchEditorTab('starter')"><i class="ti ti-code" style="color: #007bff;"></i> Starter Code</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="solution-tab" data-bs-toggle="tab" data-bs-target="#solution-pane" type="button" role="tab" style="background: transparent; color: #5c5c5c; border: none; border-bottom: 2px solid transparent; padding: 8px 4px; font-weight: 500; font-size: 0.85rem;" onclick="switchEditorTab('solution')"><i class="ti ti-bulb" style="color: #facc15;"></i> Solution Code</button>
-                        </li>
-                    </ul>
-                    <button id="btnSaveLab" style="background: #2cbb5d; color: #fff; border: none; padding: 5px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s;"><i class="ti ti-device-floppy"></i> Save Config</button>
+            <!-- EDITOR CARD -->
+            <div class="lc-pane" style="flex: 1;">
+                <div class="lc-toolbar">
+                    <div style="display: flex; gap: 8px;">
+                        <div class="lc-tab active" id="starter-tab" style="padding: 6px 12px; background: transparent;" onclick="switchEditorTab('starter')"><i class="ti ti-code" style="color: #60a5fa;"></i> Starter Code</div>
+                        <div class="lc-tab" id="solution-tab" style="padding: 6px 12px; background: transparent;" onclick="switchEditorTab('solution')"><i class="ti ti-bulb" style="color: #fbbf24;"></i> Solution Code</div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="btnRunAllTestCases" class="btn-lc-run" onclick="runAllTestCases()"><i class="ti ti-player-play"></i> Run Code</button>
+                        <button id="btnSaveLab" class="btn-lc-save"><i class="ti ti-cloud-upload"></i> Save Config</button>
+                    </div>
                 </div>
                 <div id="editor" style="flex: 1; width: 100%; min-height: 0;"></div>
             </div>
 
-            <!-- Phần Test Cases -->
+            <!-- TEST CASES CARD -->
             <div class="lc-terminal-card" id="terminalCard">
-                <div style="padding: 6px 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between;">
-                    <div style="font-weight: 500; color: #5c5c5c; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; padding: 8px 0;">
-                        <i class="ti ti-list-check text-primary"></i> Test Cases Configuration
-                    </div>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <button style="background: #f2f3f4; color: #3c3c3c; border: none; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 6px;" onclick="addTestCaseUI()"><i class="ti ti-plus"></i> Add Test Case</button>
-                        <button id="btnToggleTerminal" title="Toggle Terminal" style="background: transparent; border: none; color: #5c5c5c; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;">
-                            <i class="ti ti-chevron-down" id="terminalToggleIcon" style="font-size: 1.1rem;"></i>
-                        </button>
+                <div style="padding: 8px 16px; background: #333333; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #111;">
+                    <div style="font-weight: 600; color: #e4e4e7; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="ti ti-terminal-2" style="color: #2cbb5d;"></i> Test Cases Configuration
                     </div>
                 </div>
-                <div id="testCasesContainer" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; background: #fff;">
-                    <!-- Danh sách Test Cases sẽ render ở đây -->
+                
+                <!-- Test Cases Tab Nav -->
+                <div class="tc-nav" id="testCaseNav">
+                    <!-- Nav pills rendered via JS -->
+                </div>
+                
+                <!-- Test Case Body -->
+                <div class="tc-body" id="testCaseBody">
+                    <!-- Body rendered via JS -->
                 </div>
             </div>
         </section>
         `;
         
         document.getElementById('problemDescriptionInput').value = node.content || '';
-
-        // Add CSS active state cho tab tự làm
-        const style = document.createElement('style');
-        style.innerHTML = `
-            #codeEditorTabs .nav-link.active { color: #6366f1 !important; border-bottom-color: #6366f1 !important; }
-        `;
-        document.head.appendChild(style);
 
         // Lưu trữ code cho 2 tabs
         window.codeStore = {
@@ -600,7 +652,7 @@
                 window.myCodeEditor = monaco.editor.create(editorDiv, {
                     value: window.codeStore.starter,
                     language: "java",
-                    theme: "vs",
+                    theme: "vs-dark",
                     automaticLayout: true,
                     fontSize: 14,
                     minimap: { enabled: false }
@@ -615,111 +667,127 @@
         // Hàm chuyển tab editor
         window.switchEditorTab = function(tab) {
             if (!window.myCodeEditor || window.currentEditorTab === tab) return;
+            
+            document.getElementById('starter-tab').classList.remove('active');
+            document.getElementById('solution-tab').classList.remove('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+
             window.currentEditorTab = tab;
             window.myCodeEditor.setValue(window.codeStore[tab]);
         };
 
-        // Hàm chuyển tab trái (Problem, Q&A, Submissions)
+        // Hàm chuyển tab trái (Problem, Submissions)
         window.switchLeftTab = function(tabId) {
-            document.querySelectorAll('.lc-left-pane .lc-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
+            const leftPaneTabs = document.getElementById('tab-problem').parentElement;
+            leftPaneTabs.querySelectorAll('.lc-tab').forEach(t => t.classList.remove('active'));
+            const activeTab = document.getElementById('tab-' + tabId);
+            if (activeTab) activeTab.classList.add('active');
             
-            document.getElementById('pane-problem').style.display = 'none';
-            document.getElementById('pane-qa').style.display = 'none';
-            document.getElementById('pane-submissions').style.display = 'none';
+            const problemPane = document.getElementById('pane-problem');
+            const subPane = document.getElementById('pane-submissions');
+            if (problemPane) problemPane.style.display = 'none';
+            if (subPane) subPane.style.display = 'none';
             
-            document.getElementById('pane-' + tabId).style.display = 'flex';
+            const targetPane = document.getElementById('pane-' + tabId);
+            if (targetPane) {
+                targetPane.style.display = 'flex';
+            }
         };
-
-        // JS logic thu gọn/mở rộng Test Case
-        const terminalCard = document.getElementById('terminalCard');
-        const btnToggleTerminal = document.getElementById('btnToggleTerminal');
-        const terminalToggleIcon = document.getElementById('terminalToggleIcon');
-
-        if (btnToggleTerminal) {
-            btnToggleTerminal.addEventListener('click', function() {
-                terminalCard.classList.toggle('collapsed');
-                if (terminalCard.classList.contains('collapsed')) {
-                    terminalToggleIcon.classList.replace('ti-chevron-down', 'ti-chevron-up');
-                } else {
-                    terminalToggleIcon.classList.replace('ti-chevron-up', 'ti-chevron-down');
-                }
-                setTimeout(() => { if (window.myCodeEditor) window.myCodeEditor.layout(); }, 350);
-            });
-        }
 
         // Biến toàn cục lưu Test Cases
         window.testCases = [];
+        window.activeTestCaseIndex = 0;
 
-        // Hàm render Test Cases
-        window.renderTestCases = function() {
-            const container = document.getElementById('testCasesContainer');
-            if (window.testCases.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center text-muted" style="padding: 40px 0;">
-                        <i class="ti ti-database-off" style="font-size: 2rem; opacity: 0.5;"></i>
-                        <p class="mt-2 mb-0">No test cases found. Click "Add Test Case" to begin.</p>
+        // Hàm render Tab Navigation cho Test Cases
+        window.renderTestCasesNav = function() {
+            const nav = document.getElementById('testCaseNav');
+            let html = '';
+            window.testCases.forEach((tc, i) => {
+                const isActive = window.activeTestCaseIndex === i ? 'active' : '';
+                html += `<button class="tc-pill ${isActive}" onclick="selectTestCase(${i})">Case ${i + 1}</button>`;
+            });
+            html += `<button class="tc-pill add-btn" onclick="addTestCaseUI()" title="Add Test Case"><i class="ti ti-plus"></i></button>`;
+            nav.innerHTML = html;
+        };
+
+        // Hàm chọn Test Case
+        window.selectTestCase = function(index) {
+            if (index < 0 || index >= window.testCases.length) {
+                document.getElementById('testCaseBody').innerHTML = `
+                    <div style="text-align: center; color: #71717a; padding: 40px 0;">
+                        <i class="ti ti-database-off fs-2"></i><br>No test cases. Click + to add one.
                     </div>
                 `;
                 return;
             }
-
-            container.innerHTML = window.testCases.map((tc, index) => `
-                <div style="background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <div style="padding: 6px 12px; background: #fafafa; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: bold; color: #262626; font-size: 0.85rem;"><i class="ti ti-check text-success"></i> Test Case #${index + 1}</span>
-                        <div style="display: flex; gap: 16px; align-items: center;">
-                            <label style="font-size: 0.8rem; color: #5c5c5c; display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0;">
-                                <input type="checkbox" onchange="updateTestCase(${index}, 'isHidden', this.checked)" ${tc.isHidden ? 'checked' : ''}> Hidden Test
-                            </label>
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <span style="font-size: 0.8rem; color: #5c5c5c;">Points:</span>
-                                <input type="number" value="${tc.points || 10}" onchange="updateTestCase(${index}, 'points', this.value)" style="width: 50px; background: #fff; color: #262626; font-size: 0.8rem; padding: 4px; border: 1px solid #e5e7eb; border-radius: 4px; outline: none; text-align: center;" title="Points">
-                            </div>
-                            <button id="btnRunTest-${index}" class="btn btn-sm btn-primary p-0" onclick="runTestCase(${index})" title="Auto-fill Expected Output" style="font-size: 0.85rem; padding: 2px 8px !important; display: flex; align-items: center; gap: 4px; background: #3b82f6; border: none; border-radius: 4px; color: white;">
-                                <i class="ti ti-player-play-filled"></i> Run
-                            </button>
-                            <button class="btn btn-sm text-danger p-0" onclick="removeTestCase(${index})" title="Delete" style="font-size: 1.1rem;"><i class="ti ti-trash"></i></button>
+            window.activeTestCaseIndex = index;
+            window.renderTestCasesNav();
+            
+            const tc = window.testCases[index];
+            const body = document.getElementById('testCaseBody');
+            body.innerHTML = `
+                <div class="tc-action-bar">
+                    <div style="display: flex; gap: 16px; align-items: center;">
+                        <label style="color: #d4d4d8; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 0;">
+                            <input type="checkbox" onchange="updateTestCase(${index}, 'isHidden', this.checked)" ${tc.isHidden ? 'checked' : ''} style="accent-color: #2cbb5d; width: 16px; height: 16px;"> 
+                            Hidden from students
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="color: #a1a1aa; font-size: 0.85rem;">Points:</span>
+                            <input type="number" value="${tc.points || 10}" onchange="updateTestCase(${index}, 'points', this.value)" style="width: 60px; background: #282828; color: #fff; border: 1px solid #3f3f46; border-radius: 4px; padding: 2px 6px; outline: none; text-align: center;">
                         </div>
                     </div>
-                    <div style="padding: 8px; display: flex; gap: 10px; background: #fff;">
-                        <div style="flex: 1;">
-                            <label style="font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: #8c8c8c; margin-bottom: 4px; display: block;">Input (stdin)</label>
-                            <textarea onchange="updateTestCase(${index}, 'inputData', this.value)" style="width: 100%; height: 50px; background: #f7f9fa; color: #262626; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border: 1px solid #e5e7eb; border-radius: 4px; padding: 6px; resize: vertical; outline: none;" placeholder="Enter standard input...">${escapeHtml(tc.inputData)}</textarea>
-                        </div>
-                        <div style="flex: 1;">
-                            <label style="font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: #8c8c8c; margin-bottom: 4px; display: block;">Expected Output</label>
-                            <textarea onchange="updateTestCase(${index}, 'expectedOutput', this.value)" style="width: 100%; height: 50px; background: #f7f9fa; color: #262626; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border: 1px solid #e5e7eb; border-radius: 4px; padding: 6px; resize: vertical; outline: none;" placeholder="Expected output...">${escapeHtml(tc.expectedOutput)}</textarea>
-                        </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="btnRunTest-${index}" onclick="runTestCase(${index})" style="background: rgba(44, 187, 93, 0.1); color: #2cbb5d; border: 1px solid #2cbb5d; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
+                            <i class="ti ti-player-play-filled"></i> Auto-fill Output
+                        </button>
+                        <button onclick="removeTestCase(${index})" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.1)'" onmouseout="this.style.background='transparent'">
+                            <i class="ti ti-trash"></i> Delete Case
+                        </button>
                     </div>
                 </div>
-            `).join('');
+                
+                <div style="display: flex; gap: 16px; height: 100%;">
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <span class="tc-label">Input (stdin)</span>
+                        <textarea class="lc-textarea" onchange="updateTestCase(${index}, 'inputData', this.value)" placeholder="Enter standard input...">${escapeHtml(tc.inputData)}</textarea>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <span class="tc-label">Expected Output</span>
+                        <textarea class="lc-textarea" onchange="updateTestCase(${index}, 'expectedOutput', this.value)" placeholder="Expected standard output...">${escapeHtml(tc.expectedOutput)}</textarea>
+                    </div>
+                </div>
+            `;
         };
 
         window.addTestCaseUI = function() {
             window.testCases.push({ inputData: '', expectedOutput: '', isHidden: false, points: 10 });
-            window.renderTestCases();
-            const container = document.getElementById('testCasesContainer');
-            setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
+            window.activeTestCaseIndex = window.testCases.length - 1;
+            window.renderTestCasesNav();
+            window.selectTestCase(window.activeTestCaseIndex);
         };
 
-        let testCaseToDelete = null;
-        let deleteTestCaseModal = null;
+        let pendingDeleteTestCaseIndex = -1;
+        let confirmDeleteTestCaseModal = null;
 
         window.removeTestCase = function(index) {
-            testCaseToDelete = index;
-            if (!deleteTestCaseModal) {
-                deleteTestCaseModal = new bootstrap.Modal(document.getElementById('confirmDeleteTestCaseModal'));
+            pendingDeleteTestCaseIndex = index;
+            if (!confirmDeleteTestCaseModal) {
+                confirmDeleteTestCaseModal = new bootstrap.Modal(document.getElementById('confirmDeleteTestCaseModal'));
                 document.getElementById('btnConfirmDeleteTestCase').addEventListener('click', function() {
-                    if (testCaseToDelete !== null) {
-                        window.testCases.splice(testCaseToDelete, 1);
-                        window.renderTestCases();
-                        deleteTestCaseModal.hide();
-                        testCaseToDelete = null;
+                    if (pendingDeleteTestCaseIndex > -1) {
+                        window.testCases.splice(pendingDeleteTestCaseIndex, 1);
+                        if (window.activeTestCaseIndex >= window.testCases.length) {
+                            window.activeTestCaseIndex = Math.max(0, window.testCases.length - 1);
+                        }
+                        window.renderTestCasesNav();
+                        window.selectTestCase(window.activeTestCaseIndex);
+                        confirmDeleteTestCaseModal.hide();
+                        pendingDeleteTestCaseIndex = -1;
                     }
                 });
             }
-            deleteTestCaseModal.show();
+            confirmDeleteTestCaseModal.show();
         };
 
         window.updateTestCase = function(index, field, value) {
@@ -729,11 +797,11 @@
 
         window.runTestCase = function(index) {
             const tc = window.testCases[index];
-            const codeString = window.codeStore.solution || window.myCodeEditor.getValue();
+            const codeString = window.myCodeEditor.getValue();
             const btn = document.getElementById(`btnRunTest-${index}`);
             
             if (btn) {
-                btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
+                btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Running...';
                 btn.disabled = true;
             }
 
@@ -747,14 +815,93 @@
                 let out = result.output || '';
                 if (result.error) { out = "Error: " + result.error; }
                 window.testCases[index].expectedOutput = out.trim();
-                window.renderTestCases();
+                window.selectTestCase(index); // Re-render to show updated output
             })
             .catch(err => alert("Error running code: " + err.message))
             .finally(() => {
                 if (btn) {
-                    btn.innerHTML = '<i class="ti ti-player-play-filled"></i> Run';
+                    btn.innerHTML = '<i class="ti ti-player-play-filled"></i> Auto-fill Output';
                     btn.disabled = false;
                 }
+            });
+        };
+
+        window.runAllTestCases = async function() {
+            if (!window.testCases || window.testCases.length === 0) {
+                Swal.fire('No Test Cases', 'Please add at least one test case to run.', 'info');
+                return;
+            }
+            const codeString = window.myCodeEditor.getValue();
+            const btn = document.getElementById('btnRunAllTestCases');
+            if (btn) {
+                btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Running...';
+                btn.disabled = true;
+            }
+
+            let passed = 0;
+            let resultsHTML = '<div style="text-align: left; max-height: 350px; overflow-y: auto; font-family: sans-serif;">';
+
+            for (let i = 0; i < window.testCases.length; i++) {
+                const tc = window.testCases[i];
+                try {
+                    const res = await fetch('/api/compiler/execute', {
+                        method: 'POST',
+                        headers: authHeaders(true),
+                        body: JSON.stringify({ script: codeString, stdin: tc.inputData })
+                    });
+                    const result = await res.json();
+                    let out = result.output ? result.output.trim() : '';
+                    if (result.error) out = "Error: " + result.error;
+
+                    let expected = tc.expectedOutput ? tc.expectedOutput.trim() : '';
+                    let isPass = (out === expected);
+                    if (isPass) passed++;
+
+                    resultsHTML += `
+                        <div style="margin-bottom: 12px; padding: 12px; border-radius: 6px; background: ${isPass ? '#f0fdf4' : '#fef2f2'}; border: 1px solid ${isPass ? '#bbf7d0' : '#fecaca'};">
+                            <strong style="color: ${isPass ? '#166534' : '#991b1b'}; display: block; margin-bottom: 8px;"><i class="ti ${isPass ? 'ti-check' : 'ti-x'}"></i> Case ${i+1}: ${isPass ? 'Passed' : 'Failed'}</strong>
+                            ${!isPass ? `
+                                <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 8px;">
+                                    <div>
+                                        <strong style="color: #374151;">Input:</strong>
+                                        <pre style="margin:0; background: rgba(0,0,0,0.03); padding: 8px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); font-family: monospace;">${escapeHtml(tc.inputData)}</pre>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #374151;">Expected:</strong>
+                                        <pre style="margin:0; background: rgba(0,0,0,0.03); padding: 8px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); font-family: monospace;">${escapeHtml(expected)}</pre>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #374151;">Actual Output:</strong>
+                                        <pre style="margin:0; background: rgba(0,0,0,0.03); padding: 8px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); font-family: monospace;">${escapeHtml(out)}</pre>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } catch (err) {
+                    resultsHTML += `
+                        <div style="margin-bottom: 12px; padding: 12px; border-radius: 6px; background: #fef2f2; border: 1px solid #fecaca;">
+                            <strong style="color: #991b1b;"><i class="ti ti-x"></i> Case ${i+1}: Error</strong>
+                            <div style="font-size: 0.85rem; margin-top: 4px; color: #7f1d1d;">${err.message}</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            resultsHTML += '</div>';
+
+            if (btn) {
+                btn.innerHTML = '<i class="ti ti-player-play"></i> Run Code';
+                btn.disabled = false;
+            }
+
+            Swal.fire({
+                title: `<span style="font-size: 1.25rem;">Test Results: ${passed} / ${window.testCases.length} Passed</span>`,
+                html: resultsHTML,
+                icon: passed === window.testCases.length ? 'success' : 'warning',
+                width: 700,
+                confirmButtonColor: '#2cbb5d',
+                confirmButtonText: 'Close'
             });
         };
 
@@ -763,7 +910,8 @@
             .then(res => res.json())
             .then(data => {
                 window.testCases = data || [];
-                window.renderTestCases();
+                window.renderTestCasesNav();
+                window.selectTestCase(0);
             })
             .catch(err => console.error("Error loading Test Cases:", err));
 
@@ -772,7 +920,7 @@
             const btn = this;
             const content = document.getElementById('problemDescriptionInput').value;
             
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+            btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Saving...';
             btn.disabled = true;
 
             try {
@@ -805,16 +953,16 @@
                 
                 // Show success
                 btn.innerHTML = '<i class="ti ti-check"></i> Saved!';
-                btn.classList.replace('btn-primary', 'btn-success');
+                btn.style.background = '#059669'; // darker green
                 setTimeout(() => {
-                    btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
-                    btn.classList.replace('btn-success', 'btn-primary');
+                    btn.innerHTML = '<i class="ti ti-cloud-upload"></i> Save Config';
+                    btn.style.background = '#2cbb5d';
                     btn.disabled = false;
                 }, 2000);
                 
             } catch (err) {
                 alert("Error saving Lab: " + err.message);
-                btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save Lab Config';
+                btn.innerHTML = '<i class="ti ti-cloud-upload"></i> Save Config';
                 btn.disabled = false;
             }
         });
@@ -983,10 +1131,8 @@
         }
 
         renderNodePage(node, items);
-        if (!isSupporter) {
-            loadDiscussions();
-            loadSummaries();
-        }
+        loadDiscussions();
+        loadSummaries();
       } catch (error) {
         renderError('Could not load node', error.message || 'Please try again later.');
       }
@@ -1225,7 +1371,7 @@
     }
 
     setInterval(() => {
-      if (!isSupporter && !shouldPausePolling()) {
+      if (!shouldPausePolling()) {
         loadDiscussions();
       }
     }, 2000);
@@ -1260,6 +1406,98 @@
           paneQA.style.display = 'none';
       }
     };
+  </script>
+
+  <!-- NOTIFICATION LOGIC (identical to lecturer/layout.html) -->
+  <script>
+    const notifUserId = localStorage.getItem('user_id');
+
+    function renderNotifItem(notif) {
+        const timeStr = new Date(notif.createdAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+        return `
+            <a href="${notif.link || notif.targetUrl || '#'}" class="list-group-item list-group-item-action p-3 border-bottom-0 border-bottom">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.65rem;">Mới</span>
+                    <small class="text-muted" style="font-size: 0.75rem;"><i class="ti ti-clock me-1"></i>${timeStr}</small>
+                </div>
+                <p class="mb-0 text-dark small" style="font-weight: 500; line-height: 1.4;">${notif.message}</p>
+            </a>
+        `;
+    }
+
+    function markAsReadOnOpen() {
+        const badge = document.getElementById('notifBadge');
+        if (badge) badge.style.display = 'none';
+        fetch('/api/notifications/read-all', {
+            method: 'PUT',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+        }).catch(err => console.error(err));
+    }
+
+    if (notifUserId) {
+        // Fetch notifications on page load
+        fetch('/api/notifications', {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const listEl = document.getElementById('notifList');
+            if (data && data.length > 0) {
+                listEl.innerHTML = data.map(n => renderNotifItem(n)).join('');
+            }
+            const unreadCount = data.filter(n => !n.isRead).length;
+            if (unreadCount > 0) {
+                const badge = document.getElementById('notifBadge');
+                if (badge) {
+                    badge.innerText = unreadCount;
+                    badge.style.display = 'inline-block';
+                }
+            }
+        })
+        .catch(err => console.error("Error fetching notifications", err));
+
+        // Real-time notifications via WebSocket
+        const notifSocket = new SockJS('/ws');
+        const notifStomp = Stomp.over(notifSocket);
+        notifStomp.debug = null;
+        notifStomp.connect({}, function() {
+            notifStomp.subscribe('/topic/notifications/' + notifUserId, function(res) {
+                const notif = JSON.parse(res.body);
+                const listEl = document.getElementById('notifList');
+                if (listEl.innerHTML.includes('Không có thông báo')) {
+                    listEl.innerHTML = '';
+                }
+                listEl.insertAdjacentHTML('afterbegin', renderNotifItem(notif));
+
+                const badge = document.getElementById('notifBadge');
+                if (badge) {
+                    let currentCount = parseInt(badge.innerText) || 0;
+                    badge.innerText = currentCount + 1;
+                    badge.style.display = 'inline-block';
+                }
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'info',
+                        iconColor: '#4f46e5',
+                        title: notif.message,
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        showCloseButton: true,
+                        customClass: { popup: 'premium-toast' },
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer);
+                            toast.addEventListener('mouseleave', Swal.resumeTimer);
+                        }
+                    });
+                }
+            });
+        });
+    }
   </script>
 </body>
 

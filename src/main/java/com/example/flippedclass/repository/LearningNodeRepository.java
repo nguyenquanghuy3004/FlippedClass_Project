@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface LearningNodeRepository extends JpaRepository<LearningNode,Long> {
 
-    @Query("SELECT COUNT(n) FROM LearningNode n WHERE n.learningPath.learningSpace.id = :spaceId")
+    @Query("SELECT COUNT(n) FROM LearningNode n WHERE n.learningPath.learningSpace.id = :spaceId AND (n.isOptional = false OR n.isOptional IS NULL)")
     long countTotalNodesBySpaceId(@Param("spaceId") Long spaceId);
 
     List<LearningNode> findByLearningPathId(Long learningPathId);

@@ -15,4 +15,5 @@ public class StudentAnalyticsDTO {
     private double quizAvg;
     private String lastActive; // Format: "dd/MM/yyyy HH:mm" or "N/A"
     private boolean supporterCandidate;
+    private String totalActiveTimeFormatted;
 }

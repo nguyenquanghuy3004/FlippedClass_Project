@@ -22,6 +22,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
   <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/student-layout.css}">
+  <!-- Load marked.js globally before require.js to prevent AMD conflicts -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     /* --- Inlined from student-user-menu.js --- */
     (function () {
@@ -222,7 +226,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="shareSolutionModalLabel">Congratulations! 🎉</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" onclick="closeModalSafe('shareSolutionModal')" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <p>You have successfully passed all test cases! Would you like to share your solution with the class to help others learn?</p>
@@ -232,7 +236,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Maybe Later</button>
+            <button type="button" class="btn btn-light" onclick="closeModalSafe('shareSolutionModal')" style="font-weight: 500;">Maybe Later</button>
             <button type="button" class="btn btn-primary" id="btnConfirmShareSolution">Share My Solution</button>
           </div>
         </div>
@@ -260,6 +264,48 @@
       if (includeJson) headers['Content-Type'] = 'application/json';
       return headers;
     }
+
+    // Safe modal handling bypassing Bootstrap 5 AMD class bugs
+    window.openModalSafe = function(modalId) {
+        console.log('openModalSafe called for', modalId);
+        const modalEl = document.getElementById(modalId);
+        if (!modalEl) {
+            console.error('Modal not found:', modalId);
+            return;
+        }
+        modalEl.style.display = 'block';
+        setTimeout(() => modalEl.classList.add('show'), 10);
+        modalEl.removeAttribute('aria-hidden');
+        modalEl.setAttribute('aria-modal', 'true');
+        modalEl.setAttribute('role', 'dialog');
+        let backdrop = document.querySelector('.modal-backdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade';
+            document.body.appendChild(backdrop);
+            setTimeout(() => backdrop.classList.add('show'), 10);
+        }
+        document.body.classList.add('modal-open');
+    };
+
+    window.closeModalSafe = function(modalId) {
+        console.log('closeModalSafe called for', modalId);
+        const modalEl = document.getElementById(modalId);
+        if (!modalEl) return;
+        modalEl.classList.remove('show');
+        setTimeout(() => {
+            modalEl.style.display = 'none';
+        }, 150);
+        modalEl.setAttribute('aria-hidden', 'true');
+        modalEl.removeAttribute('aria-modal');
+        modalEl.removeAttribute('role');
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.classList.remove('show');
+            setTimeout(() => backdrop.remove(), 150);
+        }
+        document.body.classList.remove('modal-open');
+    };
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -733,7 +779,7 @@
       pageRoot.className = 'lesson-layout practice-layout';
       pageRoot.style.padding = '0';
       pageRoot.style.gap = '0';
-      pageRoot.style.background = '#f8fafc';
+      pageRoot.style.background = '#000000';
 
       setTimeout(() => {
         initMonaco(node.starterCode);
@@ -741,79 +787,100 @@
 
       pageRoot.innerHTML = `
         <style>
-          /* Clean, light-themed LeetCode style CSS */
-          .practice-layout { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr) !important; align-items: stretch !important; height: calc(100vh - 65px); gap: 8px !important; padding: 8px !important; background: #f0f0f0 !important; }
+          /* Full Dark Theme LeetCode style CSS */
+          .practice-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; align-items: stretch !important; height: calc(100vh - 65px); gap: 8px !important; padding: 8px !important; background: #000000 !important; }
           
-          /* Left Pane */
-          .lc-left-pane { background: #fff; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-          .lc-tabs-header { display: flex; gap: 16px; padding: 0 16px; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
-          .lc-tab { padding: 12px 4px; font-size: 0.85rem; font-weight: 500; color: #5c5c5c; cursor: pointer; border-bottom: 2px solid transparent; }
-          .lc-tab.active { color: #2cbb5d; border-bottom-color: #2cbb5d; }
+          /* Common Panes */
+          .lc-pane { background: #282828; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #333; }
+          .lc-tabs-header { display: flex; gap: 16px; padding: 0 16px; background: #333333; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #111; }
+          .lc-tab { padding: 12px 4px; font-size: 0.85rem; font-weight: 500; color: #a1a1aa; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
+          .lc-tab:hover { color: #f4f4f5; background: rgba(255,255,255,0.05); }
+          .lc-tab.active { color: #fff; border-bottom-color: #2cbb5d; background: #282828; }
           .lc-tab i { margin-right: 6px; font-size: 1rem; vertical-align: middle; }
-          .lc-content { padding: 20px; overflow-y: auto; flex: 1; font-size: 0.95rem; color: #262626; line-height: 1.6; }
-          .lc-content h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; color: #262626; }
           
-          /* Markdown styling similar to Leetcode */
-          .lc-content pre { background: #f7f9fa !important; border: 1px solid #e5e7eb !important; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; margin-bottom: 16px; white-space: pre-wrap; color: #262626 !important; }
-          .lc-content code { background: #f7f9fa; padding: 2px 6px; border-radius: 4px; color: #262626; font-size: 0.85rem; }
+          /* Content Areas */
+          .lc-content { flex: 1; overflow-y: auto; padding: 20px; color: #d4d4d8; font-size: 0.95rem; line-height: 1.6; }
+          .lc-content h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; color: #fff; }
+          
+          /* Markdown Preview Styles */
+          .markdown-body { color: #d4d4d8; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+          .markdown-body h1, .markdown-body h2 { border-bottom: 1px solid #3f3f46; padding-bottom: 0.3em; }
+          .markdown-body code { background-color: rgba(255,255,255,0.1); padding: 0.2em 0.4em; border-radius: 6px; font-family: monospace; }
+          .markdown-body pre { background-color: #1e1e1e !important; padding: 16px; border-radius: 6px; overflow: auto; border: 1px solid #3f3f46 !important; }
           
           /* Right Pane Wrapper */
-          .lc-right-pane { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
+          .lc-right-split { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow: hidden; }
           
-          /* Editor Top Bar */
-          .lc-editor-card { background: #fff; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-          .lc-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #fafafa; border-bottom: 1px solid #f0f0f0; position: relative; }
+          /* Editor Actions */
+          .lc-editor-card { background: #282828; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 0; border: 1px solid #333; }
+          .lc-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #333333; border-bottom: 1px solid #111; position: relative; }
           .lc-toolbar-left { display: flex; align-items: center; gap: 12px; }
-          .lc-lang-select { background: #f2f3f4; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; color: #262626; cursor: pointer; }
+          .lc-lang-select { background: #404040; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; color: #fff; cursor: pointer; }
           
           /* Top Central Run/Submit buttons */
           .lc-toolbar-center { display: flex; align-items: center; gap: 8px; position: absolute; left: 50%; transform: translateX(-50%); }
-          .btn-lc-run { background: #f2f3f4; color: #3c3c3c; border: none; padding: 5px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-          .btn-lc-run:hover { background: #e5e7eb; }
+          .btn-lc-run { background: #3f3f46; color: #fff; border: none; padding: 5px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+          .btn-lc-run:hover { background: #52525b; }
           .btn-lc-submit { background: #2cbb5d; color: #fff; border: none; padding: 5px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
           .btn-lc-submit:hover { background: #23994c; }
           
           /* Terminal Bottom Bar */
-          .lc-terminal-card { background: #fff; border-radius: 8px; display: flex; flex-direction: column; height: 35vh; min-height: 250px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: height 0.3s ease, min-height 0.3s ease; }
+          .lc-terminal-card { background: #282828; border-radius: 8px; display: flex; flex-direction: column; height: 35vh; min-height: 250px; border: 1px solid #333; overflow: hidden; transition: height 0.3s ease, min-height 0.3s ease; }
           .lc-terminal-card.collapsed { height: 40px !important; min-height: 40px !important; }
-          .lc-term-tabs { display: flex; padding: 0 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; justify-content: space-between; align-items: center; }
-          .lc-term-tab { padding: 8px 12px; font-size: 0.8rem; font-weight: 500; color: #5c5c5c; border: none; background: transparent; cursor: pointer; border-bottom: 2px solid transparent; }
-          .lc-term-tab.active { color: #262626; border-bottom-color: #262626; }
-          .lc-term-toggle { background: transparent; border: none; color: #5c5c5c; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
-          .lc-term-toggle:hover { background: #e5e7eb; color: #262626; }
+          .lc-term-tabs { display: flex; padding: 0 16px; background: #333333; border-bottom: 1px solid #111; justify-content: space-between; align-items: center; }
+          .lc-term-tab { padding: 8px 12px; font-size: 0.8rem; font-weight: 500; color: #a1a1aa; border: none; background: transparent; cursor: pointer; border-bottom: 2px solid transparent; }
+          .lc-term-tab.active { color: #fff; border-bottom-color: #fff; }
+          .lc-term-toggle { background: transparent; border: none; color: #a1a1aa; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
+          .lc-term-toggle:hover { background: #52525b; color: #fff; }
           
           /* Input/Output areas */
           .lc-io-box { flex: 1; display: flex; flex-direction: column; padding: 12px; }
-          .lc-io-label { font-size: 0.8rem; font-weight: 600; color: #5c5c5c; margin-bottom: 6px; }
-          .lc-io-input { flex: 1; background: #f7f9fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #262626; outline: none; resize: none; }
-          .lc-io-output { flex: 1; background: #f7f9fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #262626; overflow-y: auto; margin: 0; white-space: pre-wrap; }
+          .lc-io-label { font-size: 0.8rem; font-weight: 600; color: #a1a1aa; margin-bottom: 6px; }
+          .lc-io-input { flex: 1; background: #1e1e1e; border: 1px solid #3f3f46; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #d4d4d8; outline: none; resize: none; }
+          .lc-io-output { flex: 1; background: #1e1e1e; border: 1px solid #3f3f46; border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #10b981; overflow-y: auto; margin: 0; white-space: pre-wrap; }
         </style>
         
         <!-- Cột Trái: Đề Bài (Problem Description) -->
-        <section class="lc-left-pane">
+        <section class="lc-pane">
           <div class="lc-tabs-header">
             <div class="lc-tab active" data-target="lc-desc-pane"><i class="ti ti-file-description" style="color: #007bff;"></i> Description</div>
-            <div class="lc-tab" data-target="lc-editorial-pane"><i class="ti ti-bulb"></i> Editorial</div>
-            <div class="lc-tab" data-target="lc-solutions-pane"><i class="ti ti-flask"></i> Solutions</div>
+            <div class="lc-tab" data-target="lc-solution-pane"><i class="ti ti-flask" style="color: #facc15;"></i> Solution</div>
+            <div class="lc-tab" data-target="lc-community-pane"><i class="ti ti-users" style="color: #a855f7;"></i> Community</div>
           </div>
           <div class="lc-content lc-pane-content" id="lc-desc-pane">
             <h1>${escapeHtml(node.title || 'Practice Problem')}</h1>
-            <div style="white-space: pre-wrap;">${node.content ? escapeHtml(node.content) : '<p class="text-muted">No specific problem description provided.</p>'}</div>
+            <div id="markdownPreviewContainer" style="white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6;">
+                <div class="text-center mt-4"><i class="ti ti-loader-2 ti-spin"></i> Loading description...</div>
+            </div>
           </div>
-          <div class="lc-content lc-pane-content" id="lc-editorial-pane" style="display:none;">
-            <p class="text-muted">Editorial is not available yet.</p>
-          </div>
-          <div class="lc-content lc-pane-content" id="lc-solutions-pane" style="display:none;">
-            <div class="text-center" style="padding-top: 40px; color: #8c8c8c;">
+          <div class="lc-content lc-pane-content" id="lc-solution-pane" style="display:none;">
+            <div id="solutionLockScreen" class="text-center" style="padding-top: 40px; color: #8c8c8c;">
                 <i class="ti ti-lock" style="font-size: 3rem; opacity: 0.5;"></i>
                 <h4 class="mt-3">Solution Locked</h4>
                 <p>You must get an <strong>Accepted</strong> submission to view the instructor's solution.</p>
+            </div>
+            <div id="solutionContent" style="display: none;"></div>
+          </div>
+          <div class="lc-content lc-pane-content" id="lc-community-pane" style="display:none;">
+            <div id="communityLockScreen" class="text-center" style="padding-top: 40px; color: #8c8c8c;">
+                <i class="ti ti-lock" style="font-size: 3rem; opacity: 0.5;"></i>
+                <h4 class="mt-3">Community Locked</h4>
+                <p>You must get an <strong>Accepted</strong> submission to view and share community solutions.</p>
+            </div>
+            <div id="communityContent" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f0f0f0; padding-bottom: 12px;">
+                    <h3 style="margin: 0; color: #334155; font-size: 1.2rem;"><i class="ti ti-world"></i> Community Solutions</h3>
+                    <button class="btn btn-sm" style="background: #a855f7; color: white; border: none; font-weight: 600; border-radius: 6px; padding: 6px 12px;" onclick="openModalSafe('shareSolutionModal')"><i class="ti ti-share"></i> Share Solution</button>
+                </div>
+                <div id="sharedSolutionsList">
+                    <div class="text-center text-muted" style="padding: 20px;"><i class="ti ti-loader-2 ti-spin"></i> Loading community solutions...</div>
+                </div>
             </div>
           </div>
         </section>
 
         <!-- Cột Phải: Online IDE & Terminal -->
-        <aside class="lc-right-pane">
+        <aside class="lc-right-split">
           
           <!-- Code Editor Area -->
           <div class="lc-editor-card">
@@ -891,6 +958,13 @@
           </div>
         </aside>
       `;
+
+      // Use globally loaded marked.js
+      if (window.marked) {
+          const container = document.getElementById('markdownPreviewContainer');
+          if (container) container.innerHTML = window.marked.parse(node.content || '*No description provided*');
+      }
+
       // --- START: INIT MONACO EDITOR ---
       require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
@@ -898,7 +972,7 @@
         require(['vs/editor/editor.main'], function () {
           const editorDiv = document.getElementById('editor');
           if (editorDiv) {
-            const storageKey = 'saved_code_node_' + nodeId;
+            const storageKey = 'saved_code_node_' + nodeId + '_user_' + userId;
             const savedCode = localStorage.getItem(storageKey);
 
             // Code ưu tiên: Code SV đang gõ dang dở -> Code mẫu giảng viên -> Code mặc định Hello World
@@ -913,6 +987,37 @@
               fontSize: 14,
               minimap: { enabled: false }
             });
+
+            // Markdown rendering has been moved outside of initMonaco to prevent blockages
+
+            // Check if already passed previously to unlock
+            fetch(`/api/shared-solutions/node/${nodeId}/status`, { headers: authHeaders(false) })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.isPassed) {
+                        const solLock = document.getElementById('solutionLockScreen');
+                        const solContent = document.getElementById('solutionContent');
+                        if (solLock && solContent) {
+                            solLock.style.display = 'none';
+                            solContent.style.display = 'block';
+                            const codeHtml = node.solutionCode ? escapeHtml(node.solutionCode) : 'No solution code provided by instructor.';
+                            solContent.innerHTML = `
+                                <h3>Instructor's Solution</h3>
+                                <p class="text-success"><i class="ti ti-check"></i> You have unlocked the solution!</p>
+                                <pre style="background: #2d2d2d; color: #fff; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${codeHtml}</code></pre>
+                            `;
+                        }
+
+                        const commLock = document.getElementById('communityLockScreen');
+                        const commContent = document.getElementById('communityContent');
+                        if (commLock && commContent) {
+                            commLock.style.display = 'none';
+                            commContent.style.display = 'block';
+                            loadSharedSolutions();
+                        }
+                    }
+                })
+                .catch(console.error);
 
             // Tab switching logic for Left Pane
             const tabs = document.querySelectorAll('.lc-tab');
@@ -963,6 +1068,7 @@
             setTimeout(() => { if (myCodeEditor) myCodeEditor.layout(); }, 350);
           });
         }
+
 
         function expandTerminal() {
           if (terminalCard && terminalCard.classList.contains('collapsed')) {
@@ -1097,26 +1203,29 @@
 
                   // Unlock Solution if allPassed
                   if (result.allPassed && currentNode) {
-                    const editorialPane = document.getElementById('lc-editorial-pane');
-                    if (editorialPane) {
-                      const solutionContent = currentNode.solutionCode
-                        ? `<pre style="background: #2d2d2d; color: #fff; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${escapeHtml(currentNode.solutionCode)}</code></pre>`
-                        : '<p class="text-muted">No solution provided by the instructor.</p>';
-                      editorialPane.innerHTML = `<h3>Instructor's Solution</h3><p class="text-success"><i class="ti ti-check"></i> You have unlocked the solution!</p>${solutionContent}`;
+                    const solLock = document.getElementById('solutionLockScreen');
+                    const solContent = document.getElementById('solutionContent');
+                    if (solLock && solContent) {
+                        solLock.style.display = 'none';
+                        solContent.style.display = 'block';
+                        const codeHtml = currentNode.solutionCode ? escapeHtml(currentNode.solutionCode) : 'No solution code provided by instructor.';
+                        solContent.innerHTML = `
+                            <h3>Instructor's Solution</h3>
+                            <p class="text-success"><i class="ti ti-check"></i> You have unlocked the solution!</p>
+                            <pre style="background: #2d2d2d; color: #fff; padding: 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;"><code>${codeHtml}</code></pre>
+                        `;
                     }
 
-                    const solutionsPane = document.getElementById('lc-solutions-pane');
-                    if (solutionsPane) {
-                      solutionsPane.innerHTML = ''; // Clear locked message
-                      loadSharedSolutions();
+                    const commLock = document.getElementById('communityLockScreen');
+                    const commContent = document.getElementById('communityContent');
+                    if (commLock && commContent) {
+                        commLock.style.display = 'none';
+                        commContent.style.display = 'block';
+                        loadSharedSolutions();
                     }
 
                     // Show Share Solution modal if they haven't shared yet
-                    const shareModalEl = document.getElementById('shareSolutionModal');
-                    if (shareModalEl) {
-                       const shareModal = new bootstrap.Modal(shareModalEl);
-                       shareModal.show();
-                    }
+                    openModalSafe('shareSolutionModal');
                   }
                 })
                 .catch(err => {
@@ -1136,10 +1245,46 @@
       } // Đóng function initMonaco
       // --- END: INIT MONACO EDITOR ---
 
-      // --- START: HANDLE SUMMARY SUBMIT ---
+      // --- START: HANDLE SUMMARY SUBMIT AND LOAD ---
       const summaryForm = document.getElementById('summaryForm');
       const saveSummaryBtn = document.getElementById('saveSummaryBtn');
       const summaryStatus = document.getElementById('summaryStatus');
+
+      // Load existing summary
+      fetch(`/api/lesson-summaries/learning-node/${nodeId}/my-summary`, { headers: authHeaders(false) })
+        .then(res => {
+          if (res.status === 204 || res.status === 404) return null;
+          return res.json();
+        })
+        .then(data => {
+          if (data && summaryForm) {
+            try {
+              const contentObj = JSON.parse(data.summaryContent);
+              document.getElementById('keyTakeaways').value = contentObj.keyTakeaways || '';
+              document.getElementById('questions').value = contentObj.questions || '';
+            } catch (e) {
+              document.getElementById('keyTakeaways').value = data.summaryContent;
+            }
+            if (saveSummaryBtn) {
+              saveSummaryBtn.innerHTML = '<i class="ti ti-check"></i> Đã cập nhật bài';
+            }
+            if (summaryStatus) {
+              summaryStatus.innerHTML = '<span class="text-success"><i class="ti ti-check"></i> Đã nộp vào ' + new Date(data.submittedAt).toLocaleString() + '</span>';
+              summaryStatus.classList.add('show');
+            }
+            if (data.lecturerFeedback) {
+              const feedbackHtml = `
+                <div class="lecturer-feedback mt-4 p-3 rounded" style="background-color: #f0fdf4; border-left: 4px solid #16a34a;">
+                    <h5 style="color: #166534; font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;"><i class="ti ti-message-circle-2"></i> Nhận xét của giảng viên</h5>
+                    <p style="margin-bottom: 0.5rem; color: #15803d;">${data.lecturerFeedback.replace(/\\n/g, '<br>')}</p>
+                    <small class="text-muted" style="color: #166534 !important; opacity: 0.8;">Đánh giá lúc: ${new Date(data.reviewedAt).toLocaleString()}</small>
+                </div>
+              `;
+              summaryForm.insertAdjacentHTML('afterend', feedbackHtml);
+            }
+          }
+        })
+        .catch(err => console.error("Error loading summary:", err));
 
       if (summaryForm && saveSummaryBtn && summaryStatus) {
         summaryForm.addEventListener('submit', async (e) => {
@@ -1208,12 +1353,11 @@
             if (!res.ok) throw new Error(await readError(res));
 
             // Close modal
-            const shareModalEl = document.getElementById('shareSolutionModal');
-            if (shareModalEl) {
-               const shareModal = bootstrap.Modal.getInstance(shareModalEl);
-               if (shareModal) shareModal.hide();
-            }
-            alert("Your solution has been shared successfully!");
+            closeModalSafe('shareSolutionModal');
+            document.getElementById('shareSolutionTitle').value = '';
+            // Switch to community tab
+            const commTab = document.querySelector('.lc-tab[data-target="lc-community-pane"]');
+            if (commTab) commTab.click();
             // Refresh solutions pane if open
             loadSharedSolutions();
           } catch (err) {
@@ -1229,8 +1373,8 @@
 
     async function loadSharedSolutions() {
       if (!nodeId) return;
-      const solutionsPane = document.getElementById('lc-solutions-pane');
-      if (!solutionsPane) return;
+      const listDiv = document.getElementById('sharedSolutionsList');
+      if (!listDiv) return;
       
       try {
         const res = await fetch(`/api/shared-solutions/node/${nodeId}`, { headers: authHeaders() });
@@ -1239,20 +1383,22 @@
         
         let html = '';
         if (solutions.length === 0) {
-          html = '<p class="text-muted mt-3">No student solutions shared yet. Be the first!</p>';
+          html = '<div class="text-center text-muted" style="padding: 20px;">No student solutions shared yet. Be the first!</div>';
         } else {
-          html = '<h4 class="mt-4">Community Solutions</h4><div style="display:flex; flex-direction:column; gap: 12px; margin-top: 12px;">';
+          html = '<div style="display:flex; flex-direction:column; gap: 16px;">';
           solutions.forEach(sol => {
             html += `
               <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
-                <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <h5 style="margin: 0; font-size: 1rem; color: #0f172a;">${escapeHtml(sol.title)}</h5>
-                  <button onclick="upvoteSolution(${sol.id}, this)" style="background: none; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; cursor: pointer; color: #475569; display: flex; align-items: center; gap: 4px;">
+                <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                  <div>
+                    <h4 style="margin: 0 0 4px 0; font-size: 1rem; color: #1e293b;">${escapeHtml(sol.title)}</h4>
+                    <div style="font-size: 0.8rem; color: #64748b;">
+                      By <strong style="color: #3b82f6;">${escapeHtml(sol.studentName)}</strong> • ${new Date(sol.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                  <button class="btn btn-sm btn-outline-primary" onclick="upvoteSolution(${sol.id}, this)" style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px;">
                     <i class="ti ti-thumb-up"></i> <span>${sol.upvotes}</span>
                   </button>
-                </div>
-                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
-                  Shared by <span style="font-weight: 500; color: #3b82f6;">${escapeHtml(sol.studentName)}</span>
                 </div>
                 <pre style="background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; overflow-x: auto; margin: 0;"><code>${escapeHtml(sol.codeContent)}</code></pre>
               </div>
@@ -1261,16 +1407,10 @@
           html += '</div>';
         }
         
-        // Find or create the community-solutions container
-        let commDiv = document.getElementById('community-solutions-container');
-        if (!commDiv) {
-          commDiv = document.createElement('div');
-          commDiv.id = 'community-solutions-container';
-          solutionsPane.appendChild(commDiv);
-        }
-        commDiv.innerHTML = html;
+        listDiv.innerHTML = html;
 
       } catch (err) {
+        listDiv.innerHTML = `<div class="text-center text-danger">Error loading community solutions: ${err.message}</div>`;
         console.error("Failed to load shared solutions", err);
       }
     }

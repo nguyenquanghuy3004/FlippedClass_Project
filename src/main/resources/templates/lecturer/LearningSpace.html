@@ -3,7 +3,7 @@
 
 <body>
     <th:block th:fragment="learningSpaceContent">
-        <!-- Khung chứa danh sách Không gian học tập (Grid) sẽ được nạp dữ liệu từ JS -->
+        <!-- Grid container for Learning Spaces (Grid) will be populated via JS -->
         <!-- Grid of Cards -->
         <div class="row g-4 mb-5" id="spaceGrid">
             <!-- Dynamic content will be loaded here via JS -->
@@ -12,10 +12,10 @@
 
     <th:block th:fragment="learningSpaceScripts">
         <!-- ============================================== -->
-        <!-- CÁC POPUP (MODAL) VÀ TEMPLATE CỦA GIAO DIỆN -->
+        <!-- UI MODALS AND TEMPLATES -->
         <!-- ============================================== -->
 
-        <!-- Popup Tạo mới Không gian học tập (Create Space Modal) -->
+        <!-- Create New Learning Space Modal -->
         <div class="modal fade" id="createSpaceModal" tabindex="-1" aria-labelledby="createSpaceModalLabel"
             aria-hidden="true">
             <div class="modal-dialog">
@@ -58,7 +58,7 @@
             </div>
         </div>
 
-        <!-- Popup Chỉnh sửa thông tin Không gian học tập (Edit Space Modal) -->
+        <!-- Edit Learning Space Modal -->
         <div class="modal fade" id="editSpaceModal" tabindex="-1" aria-labelledby="editSpaceModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -102,7 +102,7 @@
             </div>
         </div>
 
-        <!-- Popup Hiển thị và Copy Mã mời (Invite Code Modal) -->
+        <!-- Display and Copy Invite Code Modal -->
         <div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
                 <div class="modal-content border-0 shadow-lg rounded-4">
@@ -132,7 +132,7 @@
             </div>
         </div>
 
-        <!-- Popup Thùng rác chứa các Không gian học tập đã xóa (Trash Modal) -->
+        <!-- Trash Bin Modal containing deleted Learning Spaces -->
         <div class="modal fade" id="trashModal" tabindex="-1" aria-labelledby="trashModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow">
@@ -154,7 +154,7 @@
             </div>
         </div>
 
-        <!-- Template HTML mẫu cho mỗi thẻ Không gian học tập (Space Card) -->
+        <!-- HTML Template for each Learning Space Card -->
         <template id="spaceCardTemplate">
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="classroom-card">
@@ -204,9 +204,6 @@
                         <div class="d-flex gap-1">
                             <div class="footer-icon share-btn" title="Share Invite Code"><i class="ti ti-share"></i>
                             </div>
-                            <div class="footer-icon" title="Open in class"><i class="ti ti-id-badge-2"></i></div>
-                            <div class="footer-icon" title="Open folder"><i class="ti ti-folder"></i></div>
-                            <div class="footer-icon" title="More"><i class="ti ti-dots-vertical"></i></div>
                         </div>
                     </div>
                 </div>
@@ -215,11 +212,19 @@
 
         <script>
             // ==============================================================
-            // LEARNING SPACE JS (Logic quản lý Không gian học tập)
+            // LEARNING SPACE JS (Learning Space Management Logic)
             // ==============================================================
-            // --- Khởi tạo và xử lý sự kiện khi trang đã tải xong ---
+            // --- Initialization and event handling when page is loaded ---
             $(document).ready(function () {
-                // Đổi trạng thái active cho các filter pill
+                // Check if 'create=true' parameter is in URL to trigger createSpaceModal
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('create') === 'true') {
+                    $('#createSpaceModal').modal('show');
+                    // Remove query parameter without reload
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+
+                // Toggle active state for filter pills
                 $('.filter-pill').click(function () {
                     $('.filter-pill').removeClass('active');
                     $(this).addClass('active');
@@ -233,7 +238,7 @@
                 const banners = ['banner-green', 'banner-blue', 'banner-darkblue', 'banner-red', 'banner-gray'];
                 const avatars = ['avatar-blue', 'avatar-orange', 'avatar-green', 'avatar-red'];
 
-                // Hàm lấy danh sách Learning Space của giảng viên từ API
+                // Function to fetch lecturer's Learning Spaces from API
                 function fetchSpaces() {
                     fetch('/api/learning-spaces/my-spaces', {
                         headers: {
@@ -242,7 +247,7 @@
                     })
                         .then(res => {
                             if (res.status === 401) {
-                                alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+                                alert("Session expired. Please log in again.");
                                 localStorage.removeItem('jwt_token');
                                 window.location.href = '/signin';
                                 throw new Error("Unauthorized");
@@ -259,7 +264,7 @@
 
                             $('#statActiveSpaces').text(activeSpaces.length);
 
-                            // Hiển thị danh sách Active Spaces
+                            // Display Active Spaces
                             activeSpaces.forEach((space, index) => {
                                 const bannerClass = banners[index % banners.length];
                                 const avatarClass = avatars[index % avatars.length];
@@ -319,7 +324,7 @@
                                 grid.appendChild(clone);
                             });
 
-                            // Hiển thị danh sách Không gian học tập trong thùng rác
+                            // Display Trashed Spaces
                             const trashList = document.getElementById('trashList');
                             trashList.innerHTML = '';
                             if (trashedSpaces.length === 0) {
@@ -340,7 +345,7 @@
                                     trashList.appendChild(item);
                                 });
 
-                                // Bind sự kiện Khôi phục (Restore)
+                                // Bind Restore event
                                 document.querySelectorAll('.restore-space-btn').forEach(btn => {
                                     btn.addEventListener('click', function () {
                                         const spaceId = this.dataset.id;
@@ -387,7 +392,7 @@
                     window.location.href = '/signin';
                 }
 
-                // Hàm kiểm tra input trống
+                // Function to check for empty inputs
                 const checkValid = (selectors) => {
                     let valid = true;
                     $(selectors.join(',')).removeClass('is-invalid').each(function () {
@@ -401,7 +406,7 @@
                     $(this).removeClass('is-invalid');
                 });
 
-                // Xử lý tạo mới Learning Space
+                // Handle Create Learning Space
                 $('#btnCreateSpace').click(function () {
                     $('#createSpaceError').hide();
                     if (!checkValid(['#spaceName'])) return;
@@ -443,7 +448,7 @@
                         });
                 });
 
-                // Mở popup chia sẻ mã mời (Invite Code)
+                // Open Invite Code Modal
                 $(document).on('click', '.share-btn', function (e) {
                     e.preventDefault();
                     let code = $(this).data('code') || 'N/A';
@@ -456,7 +461,7 @@
                     $('#inviteModal').modal('show');
                 });
 
-                // Xử lý copy mã mời
+                // Handle Copy Invite Code
                 $('#copyInviteCodeBtn').click(function () {
                     const code = $(this).data('code');
                     const btn = $(this);
@@ -480,7 +485,7 @@
                     }
                 });
 
-                // Mở popup Edit Space
+                // Open Edit Space Modal
                 $(document).on('click', '.edit-space-btn', function (e) {
                     e.preventDefault();
                     $('#editSpaceId').val($(this).data('id'));
@@ -492,7 +497,7 @@
                     $('#editSpaceModal').modal('show');
                 });
 
-                // Lưu thông tin Edit Space
+                // Save Edit Space info
                 $('#btnUpdateSpace').click(function () {
                     $('#editSpaceError').hide();
                     if (!checkValid(['#editSpaceName'])) return;
@@ -600,7 +605,7 @@
                     }
                 });
 
-                // Delete Space (Xóa tạm vào thùng rác)
+                // Delete Space (Move to trash)
                 $(document).on('click', '.delete-space-btn', function (e) {
                     e.preventDefault();
                     Swal.fire({
@@ -622,10 +627,10 @@
                                     Swal.fire('Deleted!', 'The space has been moved to trash.', 'success');
                                     fetchSpaces();
                                 } else {
-                                    Swal.fire('Error', 'Failed to delete space.', 'error');
+                                    return res.json().then(data => { throw new Error(data.message || 'Failed to delete space.') });
                                 }
                             }).catch(err => {
-                                Swal.fire('Error', 'An error occurred.', 'error');
+                                Swal.fire('Error', err.message, 'error');
                             });
                         }
                     });

@@ -1,67 +1,75 @@
-﻿<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{lecturer/layout}">
+
 <head>
     <title>Manage Learning Spaces</title>
     <th:block layout:fragment="head">
         <link rel="stylesheet" crossorigin th:href="@{/assets/css/dashboard.css}">
         <link rel="stylesheet" th:href="@{/assets/css/lecturer-LearningSpace.css}">
     </th:block>
-  <script>
-(function() {
-    function handleUnauthorized() {
-        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
-        localStorage.removeItem('jwt_token');
-        sessionStorage.removeItem('jwt_token');
-        window.location.href = '/signin';
-    }
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
-        try {
-            const response = await originalFetch.apply(this, args);
-            if (response.status === 401) {
-                handleUnauthorized();
+    <script>
+        (function () {
+            function handleUnauthorized() {
+                console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
+                localStorage.removeItem('jwt_token');
+                sessionStorage.removeItem('jwt_token');
+                window.location.href = '/signin';
             }
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    };
-    const originalXhrOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function() {
-        this.addEventListener('load', function() {
-            if (this.status === 401) {
-                handleUnauthorized();
-            }
-        });
-        originalXhrOpen.apply(this, arguments);
-    };
-})();
-</script>
+            const originalFetch = window.fetch;
+            window.fetch = async function (...args) {
+                try {
+                    const response = await originalFetch.apply(this, args);
+                    if (response.status === 401) {
+                        handleUnauthorized();
+                    }
+                    return response;
+                } catch (error) {
+                    throw error;
+                }
+            };
+            const originalXhrOpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function () {
+                this.addEventListener('load', function () {
+                    if (this.status === 401) {
+                        handleUnauthorized();
+                    }
+                });
+                originalXhrOpen.apply(this, arguments);
+            };
+        })();
+    </script>
 </head>
+
 <body>
     <div layout:fragment="content">
         <!-- Header Section -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-5 gap-4">
             <div>
-                <div class="text-primary fw-bold mb-3 text-uppercase d-flex align-items-center gap-2" style="font-size: 0.75rem; letter-spacing: 1px;">
-                    <i class="ti ti-box-seam fs-6"></i> YOUR WORKSPACES <span class="text-muted mx-1">/</span> LEARNING PATH CREATOR
+                <div class="text-primary fw-bold mb-3 text-uppercase d-flex align-items-center gap-2"
+                    style="font-size: 0.75rem; letter-spacing: 1px;">
+                    <i class="ti ti-box-seam fs-6"></i> YOUR WORKSPACES <span class="text-muted mx-1">/</span> LEARNING
+                    PATH CREATOR
                 </div>
                 <h1 class="fs-2 fw-bold mb-3 text-dark">Manage Learning Spaces</h1>
                 <p class="text-muted mb-0" style="font-size: 0.95rem; line-height: 1.6;">
                     Create and organize digital learning spaces for your courses.
-                    <br>Invite students, assign mentors, and design comprehensive learning roadmaps.</p>
+                    <br>Invite students, assign mentors, and design comprehensive learning roadmaps.
+                </p>
             </div>
-            
+
             <!-- Stats & Action -->
             <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
                 <div class="d-flex bg-white rounded-3 border shadow-sm p-2">
                     <div class="text-center stat-box border-end">
                         <h3 class="text-success fw-bold mb-1" id="statActiveSpaces">0</h3>
-                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Active Spaces</small>
+                        <small class="text-muted text-uppercase fw-bold"
+                            style="font-size: 0.65rem; letter-spacing: 0.5px;">Active Spaces</small>
                     </div>
                     <div class="text-center stat-box">
                         <h3 class="fw-bold mb-1 text-dark">0</h3>
-                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Students</small>
+                        <small class="text-muted text-uppercase fw-bold"
+                            style="font-size: 0.65rem; letter-spacing: 0.5px;">Total Students</small>
                     </div>
                 </div>
             </div>
@@ -69,21 +77,24 @@
 
         <!-- Filters Section / Search Bar -->
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
-            <div class="input-group shadow-sm rounded-pill overflow-hidden" style="max-width: 350px;">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden d-none" style="max-width: 350px;">
                 <span class="input-group-text bg-white border-0 ps-4 text-muted"><i class="ti ti-search"></i></span>
-                <input type="text" id="spaceSearchInput" class="form-control border-0 bg-white py-2 shadow-none" placeholder="Search by name, skill, or company...">
+                <input type="text" id="spaceSearchInput" class="form-control border-0 bg-white py-2 shadow-none"
+                    placeholder="Search by name, skill, or company...">
             </div>
-<!--            -->
-<!--            <div class="d-flex flex-wrap gap-2">-->
-<!--                <span class="filter-pill active shadow-sm">All</span>-->
-<!--                <span class="filter-pill shadow-sm">Java</span>-->
-<!--                <span class="filter-pill shadow-sm">Spring Boot</span>-->
-<!--                <span class="filter-pill shadow-sm">System Design</span>-->
-<!--                <span class="filter-pill shadow-sm">DevOps</span>-->
-<!--                <span class="filter-pill shadow-sm">Security</span>-->
-<!--            </div>-->
-            
-            <button id="btnOpenTrash" class="btn btn-light rounded-pill px-3 text-muted d-flex align-items-center gap-2 border shadow-sm" data-bs-toggle="modal" data-bs-target="#trashModal">
+            <!--            -->
+            <!--            <div class="d-flex flex-wrap gap-2">-->
+            <!--                <span class="filter-pill active shadow-sm">All</span>-->
+            <!--                <span class="filter-pill shadow-sm">Java</span>-->
+            <!--                <span class="filter-pill shadow-sm">Spring Boot</span>-->
+            <!--                <span class="filter-pill shadow-sm">System Design</span>-->
+            <!--                <span class="filter-pill shadow-sm">DevOps</span>-->
+            <!--                <span class="filter-pill shadow-sm">Security</span>-->
+            <!--            </div>-->
+
+            <button id="btnOpenTrash"
+                class="btn btn-light rounded-pill px-3 text-muted d-flex align-items-center gap-2 border shadow-sm"
+                data-bs-toggle="modal" data-bs-target="#trashModal">
                 <i class="ti ti-trash"></i> Trash
             </button>
         </div>
@@ -91,32 +102,28 @@
         <th:block th:replace="~{lecturer/LearningSpace :: learningSpaceContent}"></th:block>
 
         <!-- Bottom Banner -->
-        <div class="banner-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center shadow-lg mb-4">
+        <div
+            class="banner-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center shadow-lg mb-4">
             <div class="mb-4 mb-md-0">
-                <div class="text-info fw-bold mb-3 d-flex align-items-center gap-2" style="font-size: 0.75rem; letter-spacing: 1px;">
+                <div class="text-info fw-bold mb-3 d-flex align-items-center gap-2"
+                    style="font-size: 0.75rem; letter-spacing: 1px;">
                     <i class="ti ti-code"></i> BUILD THE FUTURE
                 </div>
                 <h3 class="fw-bold mb-2">Start designing a learning path.</h3>
-                <p class="text-white-50 mb-0" style="font-size: 0.95rem;">Add curriculum, manage students, and track progress all in one place.</p>
+                <p class="text-white-50 mb-0" style="font-size: 0.95rem;">Add curriculum, manage students, and track
+                    progress all in one place.</p>
             </div>
-            <button class="btn btn-primary px-4 py-3 rounded-pill d-flex align-items-center gap-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createSpaceModal" style="background-color: #6366f1; border-color: #6366f1;">
+            <button class="btn btn-primary px-4 py-3 rounded-pill d-flex align-items-center gap-2 fw-bold shadow-sm"
+                data-bs-toggle="modal" data-bs-target="#createSpaceModal"
+                style="background-color: #6366f1; border-color: #6366f1;">
                 Create Workspace <i class="ti ti-arrow-right"></i>
             </button>
         </div>
-    </div>
-
-    <div layout:fragment="sidebar-bottom" class="p-3">
-        <button class="btn btn-primary w-100 rounded d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createSpaceModal" style="background-color: #6366f1; border-color: #6366f1; padding: 0.6rem;">
-            <i class="ti ti-plus fs-5"></i> New Space
-        </button>
     </div>
 
     <th:block layout:fragment="scripts">
         <th:block th:replace="~{lecturer/LearningSpace :: learningSpaceScripts}"></th:block>
     </th:block>
 </body>
+
 </html>
-
-
-
-

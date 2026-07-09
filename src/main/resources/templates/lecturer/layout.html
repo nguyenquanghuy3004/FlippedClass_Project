@@ -62,16 +62,16 @@
   <aside id="sidebar" class="sidebar bg-white border-end-0 shadow-sm d-flex flex-column">
     <div class="logo-area border-bottom border-light">
       <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
-        <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center me-2">
+        <div class="text-white rounded p-1 d-flex align-items-center justify-content-center me-2" style="background-color: #e15b31 !important;">
           <i class="fa-solid fa-chalkboard-user fs-5" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;"></i>
         </div>
-        <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">FCMS<span class="text-primary">Lecture</span></span>
+        <span class="logo-text fw-bolder fs-4 text-dark" style="letter-spacing: -0.5px;">FCMS<span style="color: #e15b31 !important;">Lecture</span></span>
       </a>
     </div>
     
     <ul class="nav flex-column mt-4 mb-auto">
       <li>
-        <a class="nav-link rounded-pill mx-3 mb-2 px-4 active fw-bold" href="/lecturer/dashboard" data-nav-path="/lecturer/dashboard">
+        <a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" href="/lecturer/dashboard" data-nav-path="/lecturer/dashboard">
           <i class="ti ti-box-seam fs-5"></i><span class="nav-text">My Spaces</span>
         </a>
       </li>
@@ -95,12 +95,66 @@
           <i class="ti ti-heart-handshake fs-5"></i><span class="nav-text">Supporter Portal</span>
         </a>
       </li>
-
-      <li layout:fragment="sidebar-bottom" class="p-3 mt-4">
-          <!-- Button placeholder if a specific page wants to add something below menu -->
-      </li>
     </ul>
+
+    <!-- Permanent "+ New Space" button in sidebar -->
+    <div class="p-3">
+        <button
+            class="btn btn-primary w-100 rounded d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm"
+            onclick="handleNewSpaceClick()"
+            style="background-color: #5c67f2; border-color: #5c67f2; padding: 0.6rem;">
+            <i class="ti ti-plus fs-5"></i> New Space
+        </button>
+    </div>
   </aside>
+
+  <!-- Synchronous Navigation Highlighting script to prevent flickering -->
+  <script>
+    (function() {
+      const path = window.location.pathname;
+      const links = document.querySelectorAll('.sidebar .nav-link');
+      let matched = false;
+      links.forEach(link => {
+        const navPath = link.getAttribute('data-nav-path');
+        if (navPath && path.startsWith(navPath)) {
+          link.classList.remove('text-secondary', 'fw-semibold');
+          link.classList.add('active', 'fw-bold');
+          matched = true;
+        } else {
+          link.classList.remove('active', 'fw-bold');
+          link.classList.add('text-secondary', 'fw-semibold');
+        }
+      });
+      // Special case for Evaluate Student
+      if (path.startsWith('/lecturer/grading') || path.startsWith('/lecturer/evaluation-sessions')) {
+        links.forEach(link => {
+          if (link.getAttribute('data-nav-path') === '/lecturer/evaluation-sessions') {
+            link.classList.remove('text-secondary', 'fw-semibold');
+            link.classList.add('active', 'fw-bold');
+          } else {
+            link.classList.remove('active', 'fw-bold');
+            link.classList.add('text-secondary', 'fw-semibold');
+          }
+        });
+        matched = true;
+      }
+      if (!matched) {
+        const dashLink = document.querySelector('.sidebar .nav-link[data-nav-path="/lecturer/dashboard"]');
+        if (dashLink) {
+          dashLink.classList.remove('text-secondary', 'fw-semibold');
+          dashLink.classList.add('active', 'fw-bold');
+        }
+      }
+    })();
+    
+    function handleNewSpaceClick() {
+      if (window.location.pathname === '/lecturer/dashboard') {
+        $('#createSpaceModal').modal('show');
+      } else {
+        window.location.href = '/lecturer/dashboard?create=true';
+      }
+    }
+  </script>
 
   <!-- MAIN CONTENT -->
   <main id="content" class="content py-10">
@@ -207,28 +261,6 @@
           if (t) t.setAttribute('aria-expanded', 'false');
         });
       });
-
-      const path = window.location.pathname;
-      $('.sidebar .nav-link').removeClass('active fw-bold').addClass('text-secondary fw-semibold');
-      
-      let matched = false;
-      $('.sidebar .nav-link').each(function() {
-        const navPath = $(this).attr('data-nav-path');
-        if (navPath && path.startsWith(navPath)) {
-          $(this).removeClass('text-secondary fw-semibold').addClass('active fw-bold');
-          matched = true;
-        }
-      });
-      // Special case for Evaluate Student
-      if (path.startsWith('/lecturer/grading') || path.startsWith('/lecturer/evaluation-sessions')) {
-         $('.sidebar .nav-link').removeClass('active fw-bold').addClass('text-secondary fw-semibold');
-         $('.sidebar .nav-link[data-nav-path="/lecturer/evaluation-sessions"]').removeClass('text-secondary fw-semibold').addClass('active fw-bold');
-         matched = true;
-      }
-      // Fallback
-      if (!matched) {
-        $('.sidebar .nav-link[data-nav-path="/lecturer/dashboard"]').removeClass('text-secondary fw-semibold').addClass('active fw-bold');
-      }
     });
   </script>
   <th:block layout:fragment="scripts"></th:block>

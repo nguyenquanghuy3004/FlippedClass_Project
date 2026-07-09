@@ -16,9 +16,9 @@ public interface LearningPathService {
 
     LearningPathResponse createLearningPath(Long spaceId, CreateLearningPathRequest request);
 
-    java.util.List<LearningPathResponse> getLearningPath(Long spaceId);
+    List<LearningPathResponse> getLearningPath(Long spaceId, Long studentId);
 
-    LearningPathResponse getLearningPathDetail(Long spaceId, Long pathId);
+    LearningPathResponse getLearningPathDetail(Long spaceId, Long pathId, Long studentId);
 
     LearningPathResponse updateLearningPath(Long spaceId, Long pathId, UpdateLearningPathRequest request);
 
@@ -32,5 +32,5 @@ public interface LearningPathService {
 
     void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request);
 
-    java.util.List<LearningPathResponse> getDeletedLearningPaths(Long spaceId);
+    List<LearningPathResponse> getDeletedLearningPaths(Long spaceId);
 }

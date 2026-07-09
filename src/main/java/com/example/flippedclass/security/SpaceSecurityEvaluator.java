@@ -22,9 +22,9 @@ public class SpaceSecurityEvaluator {
             return false;
         }
 
-        // ĐẶC QUYỀN ADMIN: Nếu người dùng là Admin hệ thống thì tự động cho phép truy cập luôn
+        // ĐẶC QUYỀN ADMIN & MENTOR: Nếu người dùng là Admin hoặc Giảng viên hệ thống thì tự động cho phép truy cập luôn
         for (org.springframework.security.core.GrantedAuthority authority : auth.getAuthorities()) {
-            if (authority.getAuthority().equals("ADMIN")) {
+            if (authority.getAuthority().equals("ADMIN") || authority.getAuthority().equals("MENTOR")) {
                 return true;
             }
         }
@@ -50,7 +50,7 @@ public class SpaceSecurityEvaluator {
         }
 
         for (org.springframework.security.core.GrantedAuthority authority : auth.getAuthorities()) {
-            if (authority.getAuthority().equals("ADMIN")) {
+            if (authority.getAuthority().equals("ADMIN") || authority.getAuthority().equals("MENTOR")) {
                 return true;
             }
         }
