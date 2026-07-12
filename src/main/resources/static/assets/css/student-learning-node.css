@@ -43,13 +43,13 @@ a {
 
 
 .lesson-shell {
-  width: min(1500px, calc(100% - 2rem));
+  width: min(1750px, calc(100% - 2rem));
   margin: 1.4rem auto 2.2rem;
 }
 
 .lesson-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(400px, 1.3fr);
+  grid-template-columns: minmax(0, 2.6fr) minmax(400px, 1fr);
   gap: 1.5rem;
   align-items: start;
 }
