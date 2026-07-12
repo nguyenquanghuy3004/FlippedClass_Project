@@ -163,10 +163,7 @@ public class QuizServiceImpl implements QuizService {
         return toResponse(findQuiz(id));
     }
 
-    @Override
-    public List<QuizResponse> getAll() {
-        return quizRepository.findAll().stream().map(this::toResponse).toList();
-    }
+
 
     @Override
     public List<QuizResponse> getByLecturer(Long lecturerId) {
@@ -201,7 +198,7 @@ public class QuizServiceImpl implements QuizService {
         for (QuizQuestion q : questions) {
             totalPoints += q.getPoints();
             String answer = answers.get(q.getId());
-            if (answer != null && answer.trim().equalsIgnoreCase(q.getCorrectAnswer().trim())) {
+            if (isAnswerCorrect(answer, q)) {
                 correct++;
                 earnedPoints += q.getPoints();
             }
@@ -252,12 +249,7 @@ public class QuizServiceImpl implements QuizService {
                 .toList();
     }
 
-    @Override
-    public QuizAttemptResponse getAttemptById(Long attemptId) {
-        QuizAttempt attempt = attemptRepository.findById(attemptId)
-                .orElseThrow(() -> new NotFoundException("Attempt not found: " + attemptId));
-        return toAttemptResponse(attempt);
-    }
+
 
     @Override
     public QuizStatisticsResponse getStatistics(Long quizId) {
@@ -384,6 +376,57 @@ public class QuizServiceImpl implements QuizService {
                 .averageScore(avg)
                 .passRate(passRate)
                 .build();
+    }
+
+    private boolean isAnswerCorrect(String answer, QuizQuestion question) {
+        if (answer == null || question.getCorrectAnswer() == null) {
+            return false;
+        }
+        
+        String cleanAnswer = answer.trim();
+        String cleanCorrect = question.getCorrectAnswer().trim();
+        
+        if (cleanAnswer.equalsIgnoreCase(cleanCorrect)) {
+            return true;
+        }
+        
+        String optionsJson = question.getOptions();
+        if (optionsJson != null && !optionsJson.trim().isEmpty()) {
+            try {
+                com.fasterxml.jackson.databind.JsonNode rootNode = new com.fasterxml.jackson.databind.ObjectMapper().readTree(optionsJson);
+                if (rootNode.isArray()) {
+                    try {
+                        int index = Integer.parseInt(cleanAnswer);
+                        if (index >= 0 && index < rootNode.size()) {
+                            String optionText = rootNode.get(index).asText();
+                            if (optionText != null && optionText.trim().equalsIgnoreCase(cleanCorrect)) {
+                                return true;
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                    }
+                } else if (rootNode.isObject()) {
+                    com.fasterxml.jackson.databind.JsonNode valNode = rootNode.get(cleanAnswer);
+                    if (valNode != null) {
+                        String optionText = valNode.asText();
+                        if (optionText != null && optionText.trim().equalsIgnoreCase(cleanCorrect)) {
+                            return true;
+                        }
+                    }
+                    
+                    com.fasterxml.jackson.databind.JsonNode correctValNode = rootNode.get(cleanCorrect);
+                    if (correctValNode != null) {
+                        String optionText = correctValNode.asText();
+                        if (optionText != null && optionText.trim().equalsIgnoreCase(cleanAnswer)) {
+                            return true;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+            }
+        }
+        
+        return false;
     }
 
     private QuizQuestionResponse toQuestionResponse(QuizQuestion q) {

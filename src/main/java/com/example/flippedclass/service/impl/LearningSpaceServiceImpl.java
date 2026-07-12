@@ -5,14 +5,11 @@ import com.example.flippedclass.dto.request.JoinLearningSpaceRequest;
 import com.example.flippedclass.dto.response.JoinLearningSpaceResponse;
 import com.example.flippedclass.dto.response.LearningSpaceResponse;
 import com.example.flippedclass.entity.*;
+import com.example.flippedclass.enums.*;
 import com.example.flippedclass.repository.*;
 import com.example.flippedclass.service.LearningSpaceService;
 import com.example.flippedclass.service.InviteCodeGenerator;
 import com.example.flippedclass.util.ValidateJoinLearningSpace;
-import com.example.flippedclass.enums.LearningSpaceStatus;
-import com.example.flippedclass.enums.VisibilityType;
-import com.example.flippedclass.enums.MemberRole;
-import com.example.flippedclass.enums.MemberStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +18,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,11 +55,11 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         return principal.toString();
     }
 
-    // Check if current user is ADMIN - ADMIN bypasses all owner checks
+    // Kiểm tra user hiện tại có phải ADMIN không — ADMIN bypass mọi kiểm tra owner
     private boolean isCurrentUserAdmin() {
         return SecurityContextHolder.getContext().getAuthentication()
                 .getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ADMIN") || a.getAuthority().equals("MENTOR"));
     }
 
 
@@ -75,7 +74,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         User owner = getCurrentUser();
 
         // Security check for STUDENTs: Must be a SUPPORTER in at least one space
-        if (owner.getRoles().stream().noneMatch(r -> r.getName() == com.example.flippedclass.enums.RoleName.MENTOR || r.getName() == com.example.flippedclass.enums.RoleName.ADMIN)) {
+        if (owner.getRoles().stream().noneMatch(r -> r.getName() == RoleName.MENTOR || r.getName() == RoleName.ADMIN)) {
             if (!memberRepository.existsByUser_IdAndRole(owner.getId(), MemberRole.SUPPORTER)) {
                 throw new IllegalArgumentException("Only promoted students (Supporter) have the right to create a Learning Space.");
             }
@@ -100,7 +99,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
                 .build();
         LearningSpace savedSpace = learningSpaceRepository.save(learningSpace);
 
-        // Create OWNER in member table
+        // tạo luôn OWNER trong bảng member
         LearningSpaceMember ownerMember = new LearningSpaceMember();
         ownerMember.setLearningSpace(savedSpace);
         ownerMember.setUser(owner);
@@ -109,7 +108,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         memberRepository.save(ownerMember);
 
         // Auto-add mentees of this supporter to the newly created space
-        List<com.example.flippedclass.entity.PeerPairing> mentees = peerPairingRepository.findByMentor_Id(owner.getId());
+        List<PeerPairing> mentees = peerPairingRepository.findByMentor_Id(owner.getId());
         for (com.example.flippedclass.entity.PeerPairing pairing : mentees) {
             if (pairing.getStatus() == com.example.flippedclass.enums.PeerPairingStatus.ACTIVE) {
                 if (!memberRepository.existsByLearningSpaceAndUser(savedSpace, pairing.getMentee())) {
@@ -140,16 +139,26 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Override
     public List<LearningSpaceResponse> getMySpaces() {
         User currentUser = getCurrentUser();
-        List<LearningSpace> ownedSpaces = learningSpaceRepository.findByOwnerId(currentUser.getId());
-        List<LearningSpace> joinedSpaces = memberRepository.findByUser_IdOrderByJoinedAtDesc(currentUser.getId()).stream()
-                .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
-                .map(LearningSpaceMember::getLearningSpace)
-                .collect(Collectors.toList());
+        boolean isLecturerOrAdmin = currentUser.getRoles().stream()
+                .anyMatch(r -> r.getName() == RoleName.MENTOR || r.getName() == RoleName.ADMIN);
 
-        java.util.Set<LearningSpace> allSpaces = new java.util.HashSet<>(ownedSpaces);
-        allSpaces.addAll(joinedSpaces);
+        List<LearningSpace> spaces;
+        if (isLecturerOrAdmin) {
+            spaces = learningSpaceRepository.findByStatus(LearningSpaceStatus.ACTIVE);
+        } else {
+            List<LearningSpace> ownedSpaces = learningSpaceRepository.findByOwnerIdAndStatus(currentUser.getId(), LearningSpaceStatus.ACTIVE);
+            List<LearningSpace> joinedSpaces = memberRepository.findByUser_IdOrderByJoinedAtDesc(currentUser.getId()).stream()
+                    .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
+                    .map(LearningSpaceMember::getLearningSpace)
+                    .filter(s -> s.getStatus() == LearningSpaceStatus.ACTIVE)
+                    .collect(Collectors.toList());
 
-        return allSpaces.stream().map(space -> LearningSpaceResponse.builder()
+            Set<LearningSpace> allSpaces = new HashSet<>(ownedSpaces);
+            allSpaces.addAll(joinedSpaces);
+            spaces = new java.util.ArrayList<>(allSpaces);
+        }
+
+        return spaces.stream().map(space -> LearningSpaceResponse.builder()
                 .id(space.getId())
                 .name(space.getName())
                 .description(space.getDescription())
@@ -163,7 +172,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional
     public List<LearningSpaceResponse> getPublicSpaces() {
         return learningSpaceRepository
                 .findByVisibilityAndStatus(VisibilityType.PUBLIC, LearningSpaceStatus.ACTIVE)
@@ -357,7 +366,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
         LearningSpace saveSpace = learningSpaceRepository.save(newSpace);
 
-        // Create OWNER in member table
+        // Tạo OWNER trong bảng member
         LearningSpaceMember ownerMember = new LearningSpaceMember();
         ownerMember.setLearningSpace(saveSpace);
         ownerMember.setUser(getCurrentUser());
@@ -433,7 +442,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
                     newQuiz.setLearningNode(saveNode);
 
                     Quiz savedQuiz = quizRepository.save(newQuiz);
-                    // Copy Quiz questions (Need a separate query because Quiz doesn't map Questions directly in Entity)
+                    // Copy câu hỏi của Quiz (Phải viết query riêng vì Quiz không map trực tiếp Questions trong Entity)
                     List<QuizQuestion> sourceQuestions = quizQuestionRepository.findByQuizId(quiz.getId());
 
                     for (QuizQuestion question : sourceQuestions) {

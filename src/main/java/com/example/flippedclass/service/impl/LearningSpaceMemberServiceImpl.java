@@ -2,28 +2,23 @@ package com.example.flippedclass.service.impl;
 
 import com.example.flippedclass.dto.mentor.MemberDto;
 import com.example.flippedclass.entity.LearningSpaceMember;
-import com.example.flippedclass.entity.StudyGroupMember;
 import com.example.flippedclass.enums.MemberRole;
-import com.example.flippedclass.enums.MemberStatus;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
-import com.example.flippedclass.repository.StudyGroupMemberRepository;
 import com.example.flippedclass.service.LearningSpaceMemberService;
-import com.example.flippedclass.service.StudyGroupMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberService {
 
     private final LearningSpaceMemberRepository memberRepository;
-    private final StudyGroupMemberRepository studyGroupMemberRepository;
-    private final StudyGroupMemberService studyGroupMemberService;
+    private final com.example.flippedclass.repository.StudyGroupMemberRepository studyGroupMemberRepository;
+    private final com.example.flippedclass.service.StudyGroupMemberService studyGroupMemberService;
+    private final com.example.flippedclass.service.PeerMentoringService peerMentoringService;
 
     @Override
     public Page<MemberDto> getSpaceMembers(Long spaceId, Pageable pageable) {
@@ -47,6 +42,19 @@ public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberServic
             throw new RuntimeException("Cannot change role of OWNER");
         }
         
+        // Check if student belongs to STRONG group
+        java.util.Map<String, java.util.List<java.util.Map<String, Object>>> classified = peerMentoringService.classifyStudents(spaceId);
+        java.util.List<java.util.Map<String, Object>> strongGroup = classified.get("STRONG");
+        boolean isStrong = strongGroup.stream()
+                .anyMatch(m -> {
+                    com.example.flippedclass.dto.response.UserResponse u = (com.example.flippedclass.dto.response.UserResponse) m.get("user");
+                    return u.getId().equals(member.getUser().getId());
+                });
+                
+        if (!isStrong) {
+            throw new RuntimeException("Chỉ cho phép thăng cấp thành viên thuộc nhóm học tập tốt (STRONG) làm Supporter!");
+        }
+
         member.setRole(MemberRole.SUPPORTER);
         memberRepository.save(member);
     }
@@ -74,15 +82,14 @@ public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberServic
         }
         
         // Remove from all study groups within this space
-        List<StudyGroupMember> groupMembers =
+        java.util.List<com.example.flippedclass.entity.StudyGroupMember> groupMembers = 
                 studyGroupMemberRepository.findByStudentIdAndLearningSpaceId(member.getUser().getId(), spaceId);
         
-        for (StudyGroupMember gm : groupMembers) {
+        for (com.example.flippedclass.entity.StudyGroupMember gm : groupMembers) {
             studyGroupMemberService.leaveGroup(gm.getGroup().getId(), member.getUser().getId());
         }
 
-        member.setStatus(MemberStatus.INACTIVE);
-        memberRepository.save(member);
+        memberRepository.delete(member);
     }
     
     private LearningSpaceMember getMember(Long spaceId, Long memberId) {

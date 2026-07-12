@@ -178,6 +178,19 @@ public class PeerMentoringServiceImpl implements PeerMentoringService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Student not found in space"));
 
+        // Check if student belongs to STRONG group
+        Map<String, List<Map<String, Object>>> classified = classifyStudents(spaceId);
+        List<Map<String, Object>> strongGroup = classified.get("STRONG");
+        boolean isStrong = strongGroup.stream()
+                .anyMatch(m -> {
+                    UserResponse u = (UserResponse) m.get("user");
+                    return u.getId().equals(studentId);
+                });
+                
+        if (!isStrong) {
+            throw new RuntimeException("Chỉ cho phép thăng cấp thành viên thuộc nhóm học tập tốt (STRONG) làm Supporter!");
+        }
+
         if (member.getRole() == MemberRole.MEMBER) {
             member.setRole(MemberRole.SUPPORTER);
             memberRepository.save(member);

@@ -1131,10 +1131,8 @@
         }
 
         renderNodePage(node, items);
-        if (!isSupporter) {
-            loadDiscussions();
-            loadSummaries();
-        }
+        loadDiscussions();
+        loadSummaries();
       } catch (error) {
         renderError('Could not load node', error.message || 'Please try again later.');
       }
@@ -1373,7 +1371,7 @@
     }
 
     setInterval(() => {
-      if (!isSupporter && !shouldPausePolling()) {
+      if (!shouldPausePolling()) {
         loadDiscussions();
       }
     }, 2000);

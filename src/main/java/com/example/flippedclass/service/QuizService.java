@@ -21,13 +21,13 @@ public interface QuizService {
     void deleteQuestionOwned(Long currentUserId, Long questionId);
 
     QuizResponse getById(Long id);
-    List<QuizResponse> getAll();
+
     List<QuizResponse> getByLecturer(Long lecturerId);
     List<QuizQuestionResponse> getQuestions(Long quizId);
     QuizAttemptResponse submitAttempt(Long quizId, SubmitQuizAttemptRequest request);
     List<QuizAttemptResponse> getAttempts(Long quizId);
     List<QuizAttemptResponse> getAttemptsByStudent(Long studentId);
-    QuizAttemptResponse getAttemptById(Long attemptId);
+
     QuizStatisticsResponse getStatistics(Long quizId);
     List<QuizResponse> getActiveQuizzesByLearningNode(Long learningNodeId);
 

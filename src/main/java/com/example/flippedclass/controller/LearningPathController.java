@@ -85,14 +85,14 @@ public class LearningPathController {
         return ResponseEntity.ok(new MessageResponse("Khôi phục module thành công"));
     }
 
-    @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER')")
+    @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @DeleteMapping("/{pathId}")
     public ResponseEntity<?> delete(@PathVariable Long spaceId, @PathVariable Long pathId) {
         learningPathService.deleteLearningPathModul(spaceId, pathId);
         return ResponseEntity.ok(new MessageResponse("Xóa module thành công"));
     }
 
-    @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER')")
+    @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @DeleteMapping
     public ResponseEntity<?> deleteAll(@PathVariable Long spaceId) {
         learningPathService.deleteAllLearningPaths(spaceId);

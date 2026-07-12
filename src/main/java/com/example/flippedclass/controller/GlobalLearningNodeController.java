@@ -71,7 +71,8 @@ public class GlobalLearningNodeController {
                     "id", node.getId(),
                     "title", node.getTitle(),
                     "name", node.getTitle(),
-                    "spaceName", spaceName
+                    "spaceName", spaceName,
+                    "nodeType", node.getNodeType() != null ? node.getNodeType() : ""
             );
         }).collect(Collectors.toList());
         return ResponseEntity.ok(response);
