@@ -1,5 +1,6 @@
 package com.example.flippedclass.controller;
 
+import com.example.flippedclass.repository.LearningSpaceRepository;
 import com.example.flippedclass.service.LearningPathService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +14,12 @@ import com.example.flippedclass.dto.response.LearningPathResponse;
 
 @Controller
 public class TemplateController {
+    @Autowired
+    private LearningPathService learningPathService;
+
+    @Autowired
+    private LearningSpaceRepository learningSpaceRepository;
+
 
     @GetMapping("/")
     public String index() {
@@ -136,12 +143,15 @@ public class TemplateController {
         return "lecturer/dashboard";
     }
 
-    @Autowired
-    private LearningPathService learningPathService;
 
     private void loadSpaceCommonData(Long spaceId, String activeTab, Model model) {
         model.addAttribute("spaceId", spaceId);
         model.addAttribute("activeTab", activeTab);
+        
+        learningSpaceRepository.findById(spaceId).ifPresent(space -> {
+            model.addAttribute("spaceName", space.getName());
+        });
+
         try {
             model.addAttribute("paths", learningPathService.getLearningPath(spaceId, null));
         } catch(Exception e) {

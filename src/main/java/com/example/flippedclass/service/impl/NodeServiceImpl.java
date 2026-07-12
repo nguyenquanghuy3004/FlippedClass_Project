@@ -26,7 +26,7 @@ public class NodeServiceImpl implements NodeService {
     @Override
     public List<NodeResponse> findByLearningPath(Long pathId) {
         learningPathService.getLearningPathEntity(pathId);
-        return nodeRepository.findByLearningPathIdOrderByDisplayOrderAsc(pathId).stream()
+        return nodeRepository.findByLearningPathId(pathId).stream()
                 .map(NodeResponse::from)
                 .toList();
     }
@@ -73,7 +73,7 @@ public class NodeServiceImpl implements NodeService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Node not found"));
     }
 
-    private LearningNode getNodeInLearningPath(Long pathId, Long nodeId) {
+    public LearningNode getNodeInLearningPath(Long pathId, Long nodeId) {
         LearningNode node = getNode(nodeId);
         if (!pathId.equals(node.getLearningPath().getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Node does not belong to this learning path");
@@ -81,7 +81,7 @@ public class NodeServiceImpl implements NodeService {
         return node;
     }
 
-    private void validateRequest(NodeRequest request) {
+    public void validateRequest(NodeRequest request) {
         if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Node title is required");
         }
@@ -93,7 +93,7 @@ public class NodeServiceImpl implements NodeService {
         }
     }
 
-    private void applyRequest(LearningNode node, NodeRequest request) {
+    public void applyRequest(LearningNode node, NodeRequest request) {
         node.setTitle(request.getTitle().trim());
         node.setDescription(request.getDescription());
         node.setContent(request.getContent());

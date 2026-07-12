@@ -55,7 +55,6 @@ public class DataInitializer implements CommandLineRunner {
             seedMentor("giangvien@fpt.edu.vn", "giangvien", "Giangvien", initialPassword);
         }
 
-
     }
 
 

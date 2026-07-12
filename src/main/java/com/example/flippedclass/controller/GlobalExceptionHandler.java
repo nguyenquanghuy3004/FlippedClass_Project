@@ -37,6 +37,14 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ResponseEntity<ApiErrorResponse> handleBadCredentials(Exception ex) {
+        return ResponseEntity.badRequest().body(ApiErrorResponse.builder()
+                .error("BAD_CREDENTIALS")
+                .message("Tài khoản hoặc mật khẩu không chính xác.")
+                .build());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleBodyValidation(MethodArgumentNotValidException ex) {
         return ResponseEntity.badRequest().body(ApiErrorResponse.builder()

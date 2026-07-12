@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
@@ -142,7 +142,10 @@
             .then(async response => {
               if (!response.ok) {
                 const err = await response.json().catch(() => ({}));
-                throw new Error(err.message || 'Sign in failed. Incorrect username or password.');
+                if (err.error === 'BAD_CREDENTIALS') {
+                    throw new Error('Incorrect username or password.');
+                }
+                throw new Error(err.message || 'Sign in failed.');
               }
               return response.json();
             })

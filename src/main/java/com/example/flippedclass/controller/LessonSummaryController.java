@@ -1,5 +1,6 @@
 package com.example.flippedclass.controller;
 
+import com.example.flippedclass.dto.request.FeedbackSummaryRequest;
 import com.example.flippedclass.dto.request.SubmitSummaryRequest;
 import com.example.flippedclass.dto.response.LessonSummaryResponse;
 import com.example.flippedclass.service.impl.UserDetailsImpl;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/lesson-summaries")
@@ -31,14 +34,12 @@ public class LessonSummaryController {
     }
 
     @GetMapping("/learning-node/{nodeId}")
-    public ResponseEntity<java.util.List<LessonSummaryResponse>> getSummariesByNode(@PathVariable Long nodeId) {
+    public ResponseEntity<List<LessonSummaryResponse>> getSummariesByNode(@PathVariable Long nodeId) {
         return ResponseEntity.ok(lessonSummaryService.getSummariesByLearningNode(nodeId));
     }
 
     @GetMapping("/learning-node/{nodeId}/my-summary")
-    public ResponseEntity<LessonSummaryResponse> getMySummary(
-            @PathVariable Long nodeId,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<LessonSummaryResponse> getMySummary(@PathVariable Long nodeId,@AuthenticationPrincipal UserDetailsImpl userDetails) {
         LessonSummaryResponse response = lessonSummaryService.getMySummaryByNode(nodeId, userDetails.getId());
         if (response == null) {
             return ResponseEntity.noContent().build();
@@ -52,9 +53,7 @@ public class LessonSummaryController {
     }
 
     @PutMapping("/{id}/feedback")
-    public ResponseEntity<LessonSummaryResponse> provideFeedback(
-            @PathVariable Long id,
-            @Valid @RequestBody com.example.flippedclass.dto.request.FeedbackSummaryRequest request) {
+    public ResponseEntity<LessonSummaryResponse> provideFeedback(@PathVariable Long id,@Valid @RequestBody FeedbackSummaryRequest request) {
         return ResponseEntity.ok(lessonSummaryService.provideFeedback(id, request));
     }
 }

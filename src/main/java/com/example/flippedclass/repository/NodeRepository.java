@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface NodeRepository extends JpaRepository<LearningNode, Long> {
 
-    List<LearningNode> findByLearningPathIdOrderByDisplayOrderAsc(Long learningPathId);
+    List<LearningNode> findByLearningPathId(Long learningPathId);
 
     boolean existsByLearningPathIdAndDisplayOrder(Long learningPathId, Integer displayOrder);
 

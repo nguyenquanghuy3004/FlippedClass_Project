@@ -34,11 +34,7 @@ public class NodeController {
     }
 
     @PutMapping("/{nodeId}")
-    public NodeResponse update(
-            @PathVariable Long pathId,
-            @PathVariable Long nodeId,
-            @Valid @RequestBody NodeRequest request
-    ) {
+    public NodeResponse update( @PathVariable Long pathId, @PathVariable Long nodeId, @Valid @RequestBody NodeRequest request) {
         return nodeService.update(pathId, nodeId, request);
     }
 

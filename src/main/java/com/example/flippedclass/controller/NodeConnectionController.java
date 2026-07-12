@@ -24,19 +24,12 @@ public class NodeConnectionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public NodeConnectionResponse create(
-            @PathVariable Long pathId,
-            @Valid @RequestBody NodeConnectionRequest request
-    ) {
+    public NodeConnectionResponse create( @PathVariable Long pathId,@Valid @RequestBody NodeConnectionRequest request) {
         return connectionService.create(pathId, request);
     }
 
     @PutMapping("/{connectionId}")
-    public NodeConnectionResponse update(
-            @PathVariable Long pathId,
-            @PathVariable Long connectionId,
-            @Valid @RequestBody NodeConnectionRequest request
-    ) {
+    public NodeConnectionResponse update(@PathVariable Long pathId,@PathVariable Long connectionId,@Valid @RequestBody NodeConnectionRequest request) {
         return connectionService.update(pathId, connectionId, request);
     }
 

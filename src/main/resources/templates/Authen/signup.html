@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8" />
-  <title>ÄÄƒng kÃ½ - FlippedClass</title>
+  <title>Sign Up - FlippedClass</title>
 
 
 
@@ -16,12 +16,12 @@
   <script th:src="@{/assets/js/auth-interceptor.js}"></script>
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
-  <link rel="stylesheet" th:href="@{/css/auth.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/auth.css}">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
 (function() {
     function handleUnauthorized() {
-        console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
+        console.warn('Session expired or invalid. Redirecting to sign in page...');
         localStorage.removeItem('jwt_token');
         sessionStorage.removeItem('jwt_token');
         window.location.href = '/signin';
@@ -51,81 +51,84 @@
 </script>
 </head>
 
-<body class="bg-light">
-<div class="container d-flex align-items-center justify-content-center min-vh-100 py-4">
-  <div class="card shadow-sm border-0" style="max-width:480px; width:100%;">
-    <div class="card-body p-4 p-sm-5">
-      <div class="text-center mb-4">
-        <a href="/" class="mb-2 d-inline-flex align-items-center text-decoration-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#198754"
-               class="bi bi-mortarboard-fill me-2" viewBox="0 0 16 16">
-            <path
-                    d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z" />
-            <path
-                    d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z" />
-          </svg>
-          <span class="h4 mb-0 fw-bold text-success">FlippedClass</span>
-        </a>
-        <h1 class="card-title h4 fw-bold mt-3">ÄÄƒng kÃ½ tÃ i khoáº£n má»›i</h1>
+<body class="auth-fullbg">
+<div class="auth-fullbg-overlay"></div>
+<div class="auth-center-wrap">
+  <div class="auth-glass-card">
+    <div class="text-center mb-4">
+      <a href="/" class="mb-2 d-inline-flex align-items-center text-decoration-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-mortarboard-fill me-2" viewBox="0 0 16 16">
+          <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z"/>
+          <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z"/>
+        </svg>
+        <span class="auth-glass-logo">FlippedClass</span>
+      </a>
+      <p class="auth-glass-sub text-center mb-4">Create a new account</p>
+    </div>
+
+    <form id="signupForm" class="needs-validation" novalidate>
+
+      <div class="mb-3">
+        <label for="fullName" class="auth-glass-label">Full Name <span class="text-danger">*</span></label>
+        <input id="fullName" type="text" class="auth-glass-input" placeholder="John Doe" required autofocus>
+        <div class="invalid-feedback">Please enter your full name.</div>
       </div>
 
-      <form id="signupForm" class="needs-validation mt-3" novalidate>
-
-        <div class="mb-3">
-          <label for="fullName" class="form-label small fw-bold">Há» vÃ  tÃªn <span class="text-danger">*</span></label>
-          <input id="fullName" type="text" class="form-control" placeholder="Nguyá»…n VÄƒn A" required>
-          <div class="invalid-feedback">Vui lÃ²ng nháº­p há» tÃªn cá»§a báº¡n.</div>
-        </div>
-
-        <div class="mb-3">
-          <label for="username" class="form-label small fw-bold">TÃªn Ä‘Äƒng nháº­p <span
-                  class="text-danger">*</span></label>
-          <input id="username" type="text" class="form-control" placeholder="TÃªn viáº¿t liá»n khÃ´ng dáº¥u, VD: nvana"
-                 required minlength="3">
-          <div class="invalid-feedback">TÃªn Ä‘Äƒng nháº­p tá»‘i thiá»ƒu 3 kÃ½ tá»±.</div>
-        </div>
-
-        <div class="mb-3">
-          <label for="email" class="form-label small fw-bold">Äá»‹a chá»‰ Email <span class="text-danger">*</span></label>
-          <input id="email" type="email" class="form-control" placeholder="name@gamil.com" required>
-          <div class="invalid-feedback">Vui lÃ²ng nháº­p má»™t email há»£p lá»‡.</div>
-        </div>
-
-        <div class="mb-3">
-          <label for="password" class="form-label small fw-bold">Máº­t kháº©u <span class="text-danger">*</span></label>
-          <input id="password" type="password" class="form-control" placeholder="Táº¡o máº­t kháº©u" required minlength="6">
-          <div class="invalid-feedback">Tá»‘i thiá»ƒu 6 kÃ½ tá»±.</div>
-        </div>
-
-        <div class="mb-3">
-          <label for="confirmPassword" class="form-label small fw-bold">XÃ¡c nháº­n máº­t kháº©u <span
-                  class="text-danger">*</span></label>
-          <input id="confirmPassword" type="password" class="form-control" placeholder="Nháº­p láº¡i máº­t kháº©u" required>
-          <div class="invalid-feedback">Máº­t kháº©u khÃ´ng khá»›p.</div>
-        </div>
-
-        <div id="errorMsg" class="text-danger small mb-3 text-center fw-bold" style="display: none;"></div>
-        <div id="successMsg" class="text-success small mb-3 text-center fw-bold" style="display: none;"></div>
-
-        <button class="btn btn-success w-100 mb-3 fw-bold" type="submit">ÄÄƒng kÃ½</button>
-
-        <div class="text-center text-muted small mb-3">Hoáº·c Ä‘Äƒng kÃ½ báº±ng</div>
-
-        <div id="g_id_onload"
-             data-client_id="790885197434-tj8p3el3prc6n6fakj3udbuoqml6dpq1.apps.googleusercontent.com"
-             data-context="signup" data-ux_mode="popup" data-callback="handleGoogleLogin" data-auto_prompt="false">
-        </div>
-
-        <div class="g_id_signin d-flex justify-content-center w-100 mb-3" data-type="standard"
-             data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large"
-             data-logo_alignment="left">
-        </div>
-
-      </form>
-
-      <div class="text-center mt-3 small text-muted">
-        ÄÃ£ cÃ³ tÃ i khoáº£n? <a href="/login" class="text-success fw-bold text-decoration-none">ÄÄƒng nháº­p </a>
+      <div class="mb-3">
+        <label for="username" class="auth-glass-label">Username <span class="text-danger">*</span></label>
+        <input id="username" type="text" class="auth-glass-input" placeholder="e.g., johndoe" required minlength="3">
+        <div class="invalid-feedback">Username must be at least 3 characters.</div>
       </div>
+
+      <div class="mb-3">
+        <label for="email" class="auth-glass-label">Email Address <span class="text-danger">*</span></label>
+        <input id="email" type="email" class="auth-glass-input" placeholder="name@gmail.com" required>
+        <div class="invalid-feedback">Please enter a valid email address.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="auth-glass-label">Password <span class="text-danger">*</span></label>
+        <div class="position-relative">
+          <input id="password" type="password" class="auth-glass-input" placeholder="Create a password" required minlength="6" style="padding-right: 45px;">
+          <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none text-muted" tabindex="-1" onclick="togglePassword('password', this)" style="padding: 0 12px; z-index: 5;">
+            <i class="ti ti-eye fs-5" style="color: rgba(100,100,100,0.5);"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback">Must be at least 6 characters.</div>
+      </div>
+
+      <div class="mb-4">
+        <label for="confirmPassword" class="auth-glass-label">Confirm Password <span class="text-danger">*</span></label>
+        <div class="position-relative">
+          <input id="confirmPassword" type="password" class="auth-glass-input" placeholder="Confirm your password" required style="padding-right: 45px;">
+          <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none text-muted" tabindex="-1" onclick="togglePassword('confirmPassword', this)" style="padding: 0 12px; z-index: 5;">
+            <i class="ti ti-eye fs-5" style="color: rgba(100,100,100,0.5);"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback">Passwords do not match.</div>
+      </div>
+
+      <div id="errorMsg" class="auth-msg auth-msg-error" style="display: none;"></div>
+      <div id="successMsg" class="auth-msg auth-msg-success" style="display: none; color: #198754; background: rgba(25, 135, 84, 0.1); border: 1px solid rgba(25, 135, 84, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 1rem; text-align: center; font-weight: 500; font-size: 0.85rem;"></div>
+
+      <button class="auth-glass-btn" type="submit">Sign Up</button>
+
+      <div class="auth-glass-divider">Or sign up with</div>
+
+      <div id="g_id_onload"
+           data-client_id="790885197434-tj8p3el3prc6n6fakj3udbuoqml6dpq1.apps.googleusercontent.com"
+           data-context="signup" data-ux_mode="popup" data-callback="handleGoogleLogin" data-auto_prompt="false">
+      </div>
+
+      <div class="g_id_signin d-flex justify-content-center w-100 mb-3" data-type="standard"
+           data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large"
+           data-logo_alignment="left">
+      </div>
+
+    </form>
+
+    <div class="text-center mt-3 auth-glass-footer">
+      Already have an account? <a href="/signin">Sign In</a>
     </div>
   </div>
 </div>
@@ -134,7 +137,7 @@
   document.getElementById('confirmPassword').addEventListener('input', function () {
     const password = document.getElementById('password').value;
     if (this.value !== password) {
-      this.setCustomValidity('Máº­t kháº©u khÃ´ng khá»›p.');
+      this.setCustomValidity('Passwords do not match.');
     } else {
       this.setCustomValidity('');
     }
@@ -156,16 +159,18 @@
     errorMsg.style.display = 'none';
     successMsg.style.display = 'none';
 
-    if (!fullName || !username || !email || !password || (password !== confirmPassword)) {
-      // Trigger browser default validation UI if needed, or simply return
-      if (password !== confirmPassword) {
-        errorMsg.textContent = 'Máº­t kháº©u xÃ¡c nháº­n khÃ´ng khá»›p.';
-        errorMsg.style.display = 'block';
-      }
+    if (!this.checkValidity()) {
+      this.classList.add('was-validated');
       return;
     }
 
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Äang xá»­ lÃ½...';
+    if (password !== confirmPassword) {
+      errorMsg.textContent = 'Passwords do not match.';
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
     btn.disabled = true;
 
     fetch('/api/auth/signup', {
@@ -182,21 +187,21 @@
     })
             .then(response => {
               if (!response.ok) {
-                return response.json().then(err => { throw new Error(err.message || 'ÄÄƒng kÃ½ tháº¥t báº¡i.'); });
+                return response.json().then(err => { throw new Error(err.message || 'Sign up failed.'); });
               }
               return response.json();
             })
             .then(data => {
-              successMsg.textContent = 'ÄÄƒng kÃ½ thÃ nh cÃ´ng! Äang chuyá»ƒn hÆ°á»›ng tá»›i trang ÄÄƒng nháº­p...';
+              successMsg.textContent = 'Sign up successful! Redirecting to sign in...';
               successMsg.style.display = 'block';
               setTimeout(() => {
-                window.location.href = '/login';
+                window.location.href = '/signin';
               }, 2000);
             })
             .catch(error => {
               errorMsg.textContent = error.message;
               errorMsg.style.display = 'block';
-              btn.innerHTML = 'ÄÄƒng kÃ½';
+              btn.innerHTML = 'Sign Up';
               btn.disabled = false;
             });
   });
@@ -216,7 +221,7 @@
     })
             .then(res => {
               if (!res.ok) {
-                throw new Error('ÄÄƒng nháº­p Google tháº¥t báº¡i.');
+                throw new Error('Google sign in failed.');
               }
               return res.json();
             })
@@ -243,6 +248,20 @@
               errorMsg.textContent = error.message;
               errorMsg.style.display = 'block';
             });
+  }
+
+  function togglePassword(inputId, btnElement) {
+    const input = document.getElementById(inputId);
+    const icon = btnElement.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('ti-eye');
+      icon.classList.add('ti-eye-off');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('ti-eye-off');
+      icon.classList.add('ti-eye');
+    }
   }
 </script>
 

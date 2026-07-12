@@ -3,6 +3,7 @@ package com.example.flippedclass.controller;
 import com.example.flippedclass.dto.request.*;
 import com.example.flippedclass.dto.response.MessageResponse;
 import com.example.flippedclass.service.AuthService;
+import com.example.flippedclass.util.AuthValidator;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +18,15 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-
-
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
+      AuthValidator.validateLogin(loginRequest);
       return ResponseEntity.ok(authService.authenticateUser(loginRequest));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        AuthValidator.validateSignup(signUpRequest);
         return ResponseEntity.ok(authService.registerUser(signUpRequest));
     }
 
@@ -45,10 +45,10 @@ public class AuthController {
     }
 
     // change password
-    @PostMapping("/change-password")
-    public ResponseEntity<?> changePassWord(@RequestBody ChangePasswordRequest changePass) {
-
-        return ResponseEntity.ok(authService.changePassWord(changePass));
-    }
+//    @PostMapping("/change-password")
+//    public ResponseEntity<?> changePassWord(@RequestBody ChangePasswordRequest changePass) {
+//
+//        return ResponseEntity.ok(authService.changePassWord(changePass));
+//    }
 
 }
