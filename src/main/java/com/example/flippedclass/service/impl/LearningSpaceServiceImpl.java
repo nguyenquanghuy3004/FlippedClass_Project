@@ -139,14 +139,18 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Override
     public List<LearningSpaceResponse> getMySpaces() {
         User currentUser = getCurrentUser();
-        boolean isLecturerOrAdmin = currentUser.getRoles().stream()
-                .anyMatch(r -> r.getName() == RoleName.MENTOR || r.getName() == RoleName.ADMIN);
+        boolean isAdmin = currentUser.getRoles().stream()
+                .anyMatch(r -> r.getName() == RoleName.ADMIN);
+        boolean isMentor = currentUser.getRoles().stream()
+                .anyMatch(r -> r.getName() == RoleName.MENTOR);
 
         List<LearningSpace> spaces;
-        if (isLecturerOrAdmin) {
-            spaces = learningSpaceRepository.findByStatus(LearningSpaceStatus.ACTIVE);
+        if (isAdmin) {
+            spaces = learningSpaceRepository.findAll();
+        } else if (isMentor) {
+            spaces = learningSpaceRepository.findByOwnerId(currentUser.getId());
         } else {
-            List<LearningSpace> ownedSpaces = learningSpaceRepository.findByOwnerIdAndStatus(currentUser.getId(), LearningSpaceStatus.ACTIVE);
+            List<LearningSpace> ownedSpaces = learningSpaceRepository.findByOwnerId(currentUser.getId());
             List<LearningSpace> joinedSpaces = memberRepository.findByUser_IdOrderByJoinedAtDesc(currentUser.getId()).stream()
                     .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
                     .map(LearningSpaceMember::getLearningSpace)
