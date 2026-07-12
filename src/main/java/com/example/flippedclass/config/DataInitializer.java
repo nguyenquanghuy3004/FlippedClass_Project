@@ -24,8 +24,6 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
-    private com.example.flippedclass.repository.StudentRepository studentRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;

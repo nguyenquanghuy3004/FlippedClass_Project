@@ -110,6 +110,11 @@ public class TemplateController {
         return "student/my-quizzes";
     }
 
+    @GetMapping("/student/evaluations")
+    public String studentEvaluations() {
+        return "student/evaluations";
+    }
+
     @GetMapping("/student/take-quiz")
     public String takeQuiz() {
         return "student/take-quiz";

@@ -80,5 +80,11 @@ public class EvaluationController {
         return evaluationService.getGradesForStudentInSession(sessionId, studentId);
     }
 
+    @GetMapping("/students/{studentId}/grades")
+    public List<GradeEntryResponse> getGradesForStudent(
+            @PathVariable @Positive(message = "studentId must be a positive number") Long studentId) {
+        return evaluationService.getGradesForStudent(studentId);
+    }
+
 
 }

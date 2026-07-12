@@ -125,6 +125,7 @@
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/dashboard}" data-nav-key="dashboard"><i class="ti ti-layout-dashboard fs-5"></i><span class="nav-text">Dashboard</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/learning-spaces}" data-nav-key="learning-spaces"><i class="ti ti-books fs-5"></i><span class="nav-text">Learning Space</span></a></li>
     <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/my-quizzes}" data-nav-key="my-quiz"><i class="ti ti-list-check fs-5"></i><span class="nav-text">My Quizzes</span></a></li>
+    <li><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/student/evaluations}" data-nav-key="evaluations"><i class="ti ti-clipboard-check fs-5"></i><span class="nav-text">Evaluations</span></a></li>
     <li id="supporterPortalItem" class="d-none"><a class="nav-link rounded-pill mx-3 mb-2 px-4 text-secondary fw-semibold" th:href="@{/supporter/dashboard}" data-nav-key="supporter-portal"><i class="ti ti-heart-handshake fs-5"></i><span class="nav-text">Supporter Portal</span></a></li>
 
     <li class="sidebar-user-slot">
@@ -297,13 +298,22 @@
       }
     }
 
-    window.markReadAndGo = async function(event, id, url) {
+    window.markReadAndGo = async function(event, id, url, element) {
         event.preventDefault();
         try {
             await fetch(`/api/notifications/${id}/read`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` } });
         } catch (e) {}
-        if (url && url !== 'null') {
-            window.location.href = url;
+        
+        let targetUrl = url;
+        if (element && (targetUrl === '/student/dashboard' || !targetUrl || targetUrl === 'null')) {
+            const text = element.innerText || element.textContent || '';
+            if (text.toLowerCase().includes('evaluation') || text.toLowerCase().includes('đánh giá')) {
+                targetUrl = '/student/evaluations';
+            }
+        }
+        
+        if (targetUrl && targetUrl !== 'null') {
+            window.location.href = targetUrl;
         }
     };
 
@@ -343,12 +353,15 @@
           icon = 'ti-message-circle';
         } else if (n.type === 'QUIZ_ASSIGNED') {
           icon = 'ti-file-pencil';
+        } else if (n.type === 'REVIEW_MENTOR') {
+          icon = 'ti-clipboard-check';
+          bg = 'bg-success-subtle text-success';
         }
         
         const opacityClass = n.isRead ? 'opacity-75' : 'fw-bold bg-light';
 
         return `
-          <a class="notification-item ${opacityClass}" href="#" onclick="markReadAndGo(event, ${n.id}, '${n.targetUrl}')">
+          <a class="notification-item ${opacityClass}" href="#" onclick="markReadAndGo(event, ${n.id}, '${n.targetUrl}', this)">
             <div class="d-flex gap-3 align-items-start">
               <span class="stat-icon-bg flex-shrink-0 ${bg}" style="width: 42px; height: 42px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.25rem;">
                 <i class="ti ${icon}"></i>
@@ -467,6 +480,8 @@
         activeKey = 'learning-spaces';
       } else if (path.startsWith('/student/my-quizzes')) {
         activeKey = 'my-quiz';
+      } else if (path.startsWith('/student/evaluations')) {
+        activeKey = 'evaluations';
       } else if (path.startsWith('/student/take-quiz')) {
         activeKey = 'my-quiz';
       } else if (path.startsWith('/student/reports')) {
