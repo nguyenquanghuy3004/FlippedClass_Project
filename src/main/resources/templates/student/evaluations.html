@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{student/layout}">
+
+<head>
+  <title>My Evaluations - FlippedClass</title>
+  <th:block layout:fragment="head">
+    <link rel="stylesheet" th:href="@{/assets/css/student-evaluations.css}">
+  </th:block>
+</head>
+
+<body>
+
+<span layout:fragment="topbar-title">Evaluations & Grades</span>
+
+<!-- MAIN CONTENT -->
+<main id="content" class="content py-10" layout:fragment="content">
+  <div class="container-fluid px-xl-5 page-shell">
+    
+    <!-- Title & Subtitle -->
+    <div class="d-flex align-items-center mb-4 mt-3">
+      <div class="bg-primary text-white rounded p-2 me-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, var(--fc-primary-dark), var(--fc-primary) 58%, var(--fc-accent)) !important;">
+        <i class="ti ti-clipboard-check fs-3"></i>
+      </div>
+      <div>
+        <h2 class="h3 fw-900 text-dark mb-0" style="letter-spacing: -0.5px; font-family: 'Lexend', sans-serif;">My Evaluations</h2>
+        <p class="text-muted fw-semibold mb-0" style="font-size: 0.85rem; margin-top: 2px;">Track your academic assessments, criteria breakdown, and mentor feedback.</p>
+      </div>
+    </div>
+
+    <!-- Overview Stats Cards -->
+    <section class="stats-grid">
+      <!-- Cumulative GPA -->
+      <div class="stat-card">
+        <span>Overall GPA (10.0 Scale)</span>
+        <strong id="overallGpa">--</strong>
+      </div>
+      <!-- Graded Sessions -->
+      <div class="stat-card">
+        <span>Graded Sessions</span>
+        <strong id="totalSessions">--</strong>
+      </div>
+      <!-- Mentorship Comments -->
+      <div class="stat-card">
+        <span>Feedback Comments</span>
+        <strong id="totalComments">--</strong>
+      </div>
+    </section>
+
+    <!-- Two-Column Interactive Layout -->
+    <section class="learning-layout">
+      
+      <!-- Left Panel: Session Navigation -->
+      <aside class="panel-card">
+        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+          <h4 class="section-title">Evaluation Sessions</h4>
+          <span id="sessionCountChip" class="soft-chip">0</span>
+        </div>
+        <div class="mt-3 position-relative">
+          <input type="search" id="sessionSearch" class="form-control rounded-pill ps-5" placeholder="Search sessions..." oninput="filterSessions()" style="min-height: 40px; font-weight: 500; font-size: 0.9rem; border-color: var(--fc-border);">
+          <i class="ti ti-search position-absolute text-muted" style="left: 1.25rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem;"></i>
+        </div>
+        <div id="sessionsList" class="session-list">
+          <div class="text-center text-muted py-4" id="sessionsLoading">
+            <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+            <p class="small fw-semibold mb-0">Loading sessions...</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right Panel: Detailed Metrics -->
+      <section class="panel-card" id="sessionDetailShell">
+        <div id="sessionDetailContent">
+          <div class="empty-state">
+            <i class="ti ti-clipboard-check"></i>
+            <h5 class="fw-bold text-dark mb-1">Select an Evaluation Session</h5>
+            <p class="small fw-semibold mb-0">Choose a session from the list on the left to see its criteria breakdown, scores, and feedback.</p>
+          </div>
+        </div>
+      </section>
+
+    </section>
+
+  </div>
+</main>
+
+<th:block layout:fragment="scripts">
+<script>
+  const token = localStorage.getItem('jwt_token');
+  const userId = localStorage.getItem('user_id');
+
+  // Page state
+  let evaluationSessions = [];
+  let selectedSessionId = null;
+
+  // Format date helper
+  function formatDate(dateTimeStr) {
+    if (!dateTimeStr) return 'N/A';
+    try {
+      const date = new Date(dateTimeStr);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return dateTimeStr;
+    }
+  }
+
+  // Handle active session selection
+  window.selectSession = function(sessionId) {
+    selectedSessionId = sessionId;
+
+    // Highlight left item
+    evaluationSessions.forEach(session => {
+      const el = document.getElementById(`session-item-${session.id}`);
+      if (el) {
+        if (session.id === sessionId) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      }
+    });
+
+    // Render right details
+    const session = evaluationSessions.find(s => s.id === sessionId);
+    const detailContainer = document.getElementById('sessionDetailContent');
+    if (!session || !detailContainer) return;
+
+    // Calculate session specific GPA
+    let sessionTotal = 0;
+    let sessionMax = 0;
+    session.criteria.forEach(c => {
+      if (c.score !== null) {
+        sessionTotal += c.score;
+        sessionMax += (c.maxScore || 10);
+      }
+    });
+    const sessionGpa = sessionMax > 0 ? (sessionTotal / sessionMax) * 10 : 0;
+
+    // Criteria breakdown list
+    const criteriaHtml = session.criteria.map(c => {
+      const pct = c.maxScore > 0 ? ((c.score || 0) / c.maxScore) * 100 : 0;
+      const formattedDate = formatDate(c.gradedAt);
+      const commentBox = c.comment && c.comment.trim().length > 0
+        ? `<div class="comment-bubble">
+             <div class="comment-meta">
+               <span><i class="ti ti-user-edit"></i> Graded by ${escapeHtml(session.gradedBy)}</span>
+               <span>${formattedDate}</span>
+             </div>
+             <div class="comment-content text-wrap">${escapeHtml(c.comment)}</div>
+           </div>`
+        : '<div class="no-comment"><i class="ti ti-message-off"></i> No comments from mentor</div>';
+
+      return `
+        <div class="criterion-item">
+          <div class="criterion-header">
+            <div class="criterion-title-wrap">
+              <h6 class="criterion-name">${escapeHtml(c.criterionName)}</h6>
+            </div>
+            <div class="score-display">
+              <span class="actual-score">${c.score !== null ? c.score.toFixed(1) : '--'}</span>
+              <span class="max-score">/${c.maxScore !== null ? c.maxScore.toFixed(1) : '10.0'}</span>
+            </div>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar-fill" style="width: ${pct}%"></div>
+          </div>
+          ${commentBox}
+        </div>`;
+    }).join('');
+
+    detailContainer.innerHTML = `
+      <div class="detail-header">
+        <div class="detail-title-area">
+          <h3 class="detail-title">${escapeHtml(session.title)}</h3>
+          <div class="detail-meta-info">
+            <span><i class="ti ti-user-check"></i> Grader: ${escapeHtml(session.gradedBy)}</span>
+            <span><i class="ti ti-calendar"></i> Graded at: ${formatDate(session.gradedAt)}</span>
+          </div>
+        </div>
+        <div class="detail-score-summary">
+          <div class="average-badge">
+            <i class="ti ti-award"></i> GPA: ${sessionGpa.toFixed(2)}
+          </div>
+        </div>
+      </div>
+      <div class="criteria-list">
+        ${criteriaHtml}
+      </div>`;
+  };
+
+  // Filter left panel sessions by search string
+  window.filterSessions = function() {
+    const query = document.getElementById('sessionSearch').value.toLowerCase().trim();
+    let matchesCount = 0;
+    
+    evaluationSessions.forEach(session => {
+      const el = document.getElementById(`session-item-${session.id}`);
+      if (el) {
+        const matches = session.title.toLowerCase().includes(query);
+        el.style.display = matches ? 'block' : 'none';
+        if (matches) matchesCount++;
+      }
+    });
+
+    document.getElementById('sessionCountChip').textContent = matchesCount;
+  };
+
+  // Load all evaluation grades from endpoint
+  async function loadEvaluations() {
+    const sessionsList = document.getElementById('sessionsList');
+    if (!token || !userId) {
+      sessionsList.innerHTML = `<div class="text-center text-danger p-3 small">Session Expired</div>`;
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/evaluations/students/${userId}/grades`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to load: ${res.status}`);
+      }
+
+      const grades = await res.json();
+      renderEvaluations(grades);
+    } catch (err) {
+      console.error(err);
+      sessionsList.innerHTML = `<div class="text-center text-danger p-3 small">Failed to load evaluations</div>`;
+    }
+  }
+
+  // Render evaluations
+  function renderEvaluations(grades) {
+    const sessionsList = document.getElementById('sessionsList');
+    const detailContainer = document.getElementById('sessionDetailContent');
+
+    if (!grades || grades.length === 0) {
+      document.getElementById('overallGpa').textContent = 'N/A';
+      document.getElementById('totalSessions').textContent = '0';
+      document.getElementById('totalComments').textContent = '0';
+      document.getElementById('sessionCountChip').textContent = '0';
+      
+      sessionsList.innerHTML = `<div class="text-center text-muted p-3 small">No sessions</div>`;
+      detailContainer.innerHTML = `
+        <div class="empty-state">
+          <i class="ti ti-clipboard-check text-primary"></i>
+          <h5 class="fw-bold text-dark mt-3 mb-1">No evaluations yet</h5>
+          <p class="small fw-semibold mb-0">Evaluations will appear here once submitted by your mentor.</p>
+        </div>`;
+      return;
+    }
+
+    // Grouping by SessionId
+    const grouped = {};
+    let totalScoreSum = 0;
+    let maxScoreSum = 0;
+    let commentCount = 0;
+
+    grades.forEach(g => {
+      if (!grouped[g.sessionId]) {
+        grouped[g.sessionId] = {
+          id: g.sessionId,
+          title: g.sessionTitle || `Session #${g.sessionId}`,
+          gradedBy: g.gradedBy || 'Mentor',
+          gradedAt: g.gradedAt,
+          criteria: []
+        };
+      }
+      grouped[g.sessionId].criteria.push(g);
+
+      if (g.score !== null) {
+        totalScoreSum += g.score;
+        maxScoreSum += (g.maxScore || 10);
+      }
+      if (g.comment && g.comment.trim().length > 0) {
+        commentCount++;
+      }
+    });
+
+    evaluationSessions = Object.values(grouped);
+
+    // Update Top Overview Stats
+    const gpa = maxScoreSum > 0 ? (totalScoreSum / maxScoreSum) * 10 : 0;
+    document.getElementById('overallGpa').textContent = gpa.toFixed(2);
+    document.getElementById('totalSessions').textContent = evaluationSessions.length;
+    document.getElementById('totalComments').textContent = commentCount;
+    document.getElementById('sessionCountChip').textContent = evaluationSessions.length;
+
+    // Render Left Session Navigation Items
+    sessionsList.innerHTML = evaluationSessions.map(session => {
+      // Calculate session specific GPA
+      let sessionTotal = 0;
+      let sessionMax = 0;
+      session.criteria.forEach(c => {
+        if (c.score !== null) {
+          sessionTotal += c.score;
+          sessionMax += (c.maxScore || 10);
+        }
+      });
+      const sessionGpa = sessionMax > 0 ? (sessionTotal / sessionMax) * 10 : 0;
+
+      return `
+        <button class="session-item-btn" id="session-item-${session.id}" onclick="selectSession(${session.id})">
+          <h5 class="session-item-title">${escapeHtml(session.title)}</h5>
+          <div class="session-item-meta">
+            <span><i class="ti ti-user-check"></i> ${escapeHtml(session.gradedBy)}</span>
+            <span><i class="ti ti-award"></i> GPA: ${sessionGpa.toFixed(2)}</span>
+            <span><i class="ti ti-calendar"></i> ${formatDate(session.gradedAt)}</span>
+          </div>
+        </button>`;
+    }).join('');
+
+    // Select initial session
+    const targetSessionId = new URLSearchParams(window.location.search).get('sessionId');
+    let startSessionId = null;
+
+    if (targetSessionId && evaluationSessions.some(s => s.id == targetSessionId)) {
+      startSessionId = parseInt(targetSessionId);
+      // Highlight the targeted notification session on left side
+      setTimeout(() => {
+        const item = document.getElementById(`session-item-${startSessionId}`);
+        if (item) {
+          item.classList.add('session-item-highlighted');
+          item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 300);
+    } else if (evaluationSessions.length > 0) {
+      startSessionId = evaluationSessions[0].id;
+    }
+
+    if (startSessionId) {
+      selectSession(startSessionId);
+    }
+  }
+
+  // Escape HTML utility
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // Initial load
+  document.addEventListener('DOMContentLoaded', loadEvaluations);
+</script>
+</th:block>
+
+</body>
+</html>

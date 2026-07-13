@@ -5,6 +5,7 @@ import com.example.flippedclass.dto.request.CreateEvaluationSessionRequest;
 import com.example.flippedclass.dto.request.CreateInteractionLogRequest;
 import com.example.flippedclass.dto.request.SubmitGradeRequest;
 import com.example.flippedclass.entity.*;
+import com.example.flippedclass.enums.NotificationType;
 import com.example.flippedclass.exception.BusinessException;
 import com.example.flippedclass.exception.NotFoundException;
 import com.example.flippedclass.repository.*;
@@ -27,6 +28,7 @@ public class EvaluationServiceImpl implements EvaluationService {
     private final StudentProfileRepository studentProfileRepository;
     private final LearningPathRepository learningPathRepository;
     private final LearningSpaceMemberRepository learningSpaceMemberRepository;
+    private final NotificationRepository notificationRepository;
 
     public EvaluationServiceImpl(EvaluationSessionRepository sessionRepository,
                                  EvaluationCriterionRepository criterionRepository,
@@ -35,7 +37,8 @@ public class EvaluationServiceImpl implements EvaluationService {
                                  UserRepository userRepository,
                                  StudentProfileRepository studentProfileRepository,
                                  LearningPathRepository learningPathRepository,
-                                 LearningSpaceMemberRepository learningSpaceMemberRepository) {
+                                 LearningSpaceMemberRepository learningSpaceMemberRepository,
+                                 NotificationRepository notificationRepository) {
         this.sessionRepository = sessionRepository;
         this.criterionRepository = criterionRepository;
         this.interactionLogRepository = interactionLogRepository;
@@ -44,6 +47,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         this.studentProfileRepository = studentProfileRepository;
         this.learningPathRepository = learningPathRepository;
         this.learningSpaceMemberRepository = learningSpaceMemberRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -153,7 +157,18 @@ public class EvaluationServiceImpl implements EvaluationService {
         entry.setLecturer(lecturer);
         entry.setGradedAt(now);
 
-        return toGradeResponse(gradeEntryRepository.save(entry));
+        GradeEntry savedEntry = gradeEntryRepository.save(entry);
+
+        // Create Notification for the student
+        Notification notification = Notification.builder()
+                .recipient(student)
+                .type(NotificationType.REVIEW_MENTOR)
+                .message("You received a new evaluation grade for session: " + session.getTitle())
+                .targetUrl("/student/evaluations?sessionId=" + session.getId())
+                .build();
+        notificationRepository.save(notification);
+
+        return toGradeResponse(savedEntry);
     }
 
     @Override
@@ -161,6 +176,14 @@ public class EvaluationServiceImpl implements EvaluationService {
         findSession(sessionId);
         UserServiceImpl.findUser(userRepository, studentId);
         return gradeEntryRepository.findBySessionIdAndStudentId(sessionId, studentId).stream()
+                .map(this::toGradeResponse)
+                .toList();
+    }
+
+    @Override
+    public List<GradeEntryResponse> getGradesForStudent(Long studentId) {
+        UserServiceImpl.findUser(userRepository, studentId);
+        return gradeEntryRepository.findByStudentId(studentId).stream()
                 .map(this::toGradeResponse)
                 .toList();
     }
@@ -287,12 +310,15 @@ public class EvaluationServiceImpl implements EvaluationService {
         return GradeEntryResponse.builder()
                 .id(entry.getId())
                 .sessionId(entry.getSession().getId())
+                .sessionTitle(entry.getSession().getTitle())
                 .studentId(entry.getStudent().getId())
                 .studentName(entry.getStudent().getFullName())
                 .criterionId(entry.getCriterion().getId())
                 .criterionName(entry.getCriterion().getName())
+                .maxScore(entry.getCriterion().getMaxScore())
                 .score(entry.getScore())
                 .comment(entry.getComment())
+                .gradedBy(entry.getLecturer().getFullName())
                 .gradedAt(entry.getGradedAt())
                 .build();
     }

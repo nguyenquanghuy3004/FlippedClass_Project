@@ -21,6 +21,8 @@ public interface EvaluationService {
 
     List<GradeEntryResponse> getGradesForStudentInSession(Long sessionId, Long studentId);
 
+    List<GradeEntryResponse> getGradesForStudent(Long studentId);
+
     List<LearningPathResponse> getLearningPathsForLecturer(Long lecturerId);
 
     List<UserResponse> getStudentsForSession(Long sessionId);

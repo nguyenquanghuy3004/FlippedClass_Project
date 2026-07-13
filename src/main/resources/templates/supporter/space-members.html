@@ -93,11 +93,6 @@
 
                         let actionsHtml = '';
                         if (m.role !== 'OWNER') {
-                            if (m.role === 'MEMBER') {
-                                actionsHtml += `<button class="btn btn-sm btn-outline-success me-2" onclick="promote(${m.memberId})"><i class="ti ti-arrow-up"></i> Promote</button>`;
-                            } else if (m.role === 'SUPPORTER') {
-                                actionsHtml += `<button class="btn btn-sm btn-outline-warning me-2" onclick="demote(${m.memberId})"><i class="ti ti-arrow-down"></i> Demote</button>`;
-                            }
                             actionsHtml += `<button class="btn btn-sm btn-outline-danger" onclick="removeMember(${m.memberId})"><i class="ti ti-trash"></i> Remove</button>`;
                         } else {
                             actionsHtml = '<span class="text-muted fst-italic">No actions</span>';

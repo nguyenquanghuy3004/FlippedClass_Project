@@ -15,6 +15,9 @@ public class GradeEntryResponse {
     private String studentName;
     private Long criterionId;
     private String criterionName;
+    private String sessionTitle;
+    private BigDecimal maxScore;
+    private String gradedBy;
     private BigDecimal score;
     private String comment;
     private LocalDateTime gradedAt;
