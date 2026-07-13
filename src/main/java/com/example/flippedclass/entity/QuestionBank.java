@@ -35,4 +35,8 @@ public class QuestionBank {
     
     @Column(name = "explanation", columnDefinition = "NVARCHAR(MAX)")
     private String explanation;
+
+    @Column(name = "category", length = 100)
+    @Builder.Default
+    private String category = "General";
 }

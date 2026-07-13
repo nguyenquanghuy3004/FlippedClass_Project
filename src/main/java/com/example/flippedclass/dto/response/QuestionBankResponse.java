@@ -14,4 +14,5 @@ public class QuestionBankResponse {
     private Integer points;
     private String questionType;
     private String explanation;
+    private String category;
 }

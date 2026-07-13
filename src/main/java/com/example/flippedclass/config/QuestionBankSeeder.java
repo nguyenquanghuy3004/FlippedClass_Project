@@ -35,6 +35,7 @@ public class QuestionBankSeeder implements CommandLineRunner {
                         .questionType("SINGLE_CHOICE")
                         .points(10)
                         .explanation("A Java program requires a public static void main(String[] args) method to start execution.")
+                        .category("Java Core")
                         .build(),
 
                 QuestionBank.builder()
@@ -44,6 +45,7 @@ public class QuestionBankSeeder implements CommandLineRunner {
                         .questionType("MULTIPLE_CHOICE")
                         .points(15)
                         .explanation("@SpringBootApplication and @RestController are native Spring Boot annotations, whereas @Component is also a Spring stereotype.")
+                        .category("Spring Boot")
                         .build(),
 
                 QuestionBank.builder()
@@ -53,6 +55,7 @@ public class QuestionBankSeeder implements CommandLineRunner {
                         .questionType("SINGLE_CHOICE")
                         .points(5)
                         .explanation("React is officially described as a JavaScript library for building user interfaces.")
+                        .category("React JS")
                         .build(),
 
                 QuestionBank.builder()
@@ -62,6 +65,7 @@ public class QuestionBankSeeder implements CommandLineRunner {
                         .questionType("TRUE_FALSE")
                         .points(5)
                         .explanation("An interface cannot IMPLEMENT another interface; it can only EXTEND another interface.")
+                        .category("Java Core")
                         .build(),
 
                 QuestionBank.builder()
@@ -71,6 +75,7 @@ public class QuestionBankSeeder implements CommandLineRunner {
                         .questionType("SINGLE_CHOICE")
                         .points(10)
                         .explanation("useEffect is designed to sync components with external systems and perform side effects.")
+                        .category("React JS")
                         .build()
             );
 
@@ -78,6 +83,41 @@ public class QuestionBankSeeder implements CommandLineRunner {
             logger.info("Successfully seeded {} questions into the Question Bank.", initialQuestions.size());
         } else {
             logger.info("Question Bank already contains data. Skipping seed.");
+        }
+
+        // Auto-categorize existing questions that are currently 'General' or null
+        List<QuestionBank> allQuestions = questionBankRepository.findAll();
+        boolean updated = false;
+        for (QuestionBank qb : allQuestions) {
+            if (qb.getCategory() == null || qb.getCategory().equals("General")) {
+                String content = qb.getContent().toLowerCase();
+                String category = "General";
+                
+                if (content.contains("java") || content.contains("jvm") || content.contains("class") || content.contains("boolean") || content.contains("int variable") || content.contains("path")) {
+                    category = "Java Core";
+                } else if (content.contains("spring") || content.contains("bean") || content.contains("annotation") || content.contains("restcontroller")) {
+                    category = "Spring Boot";
+                } else if (content.contains("react") || content.contains("hook") || content.contains("useeffect") || content.contains("component") || content.contains("library")) {
+                    category = "React JS";
+                } else if (content.contains("tcp") || content.contains("osi") || content.contains("dns") || content.contains("port") || content.contains("https") || content.contains("network")) {
+                    category = "Networking";
+                } else if (content.contains("deadlock") || content.contains("thread") || content.contains("process")) {
+                    category = "Operating System";
+                } else if (content.contains("quicksort") || content.contains("algorithm") || content.contains("sort")) {
+                    category = "Algorithms";
+                } else if (content.contains("database") || content.contains("sql") || content.contains("nosql")) {
+                    category = "Database";
+                }
+                
+                if (!category.equals("General")) {
+                    qb.setCategory(category);
+                    updated = true;
+                }
+            }
+        }
+        if (updated) {
+            questionBankRepository.saveAll(allQuestions);
+            logger.info("Automatically categorized existing questions in the Question Bank.");
         }
     }
 }

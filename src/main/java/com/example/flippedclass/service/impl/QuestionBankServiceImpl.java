@@ -29,6 +29,7 @@ public class QuestionBankServiceImpl implements QuestionBankService {
                 .points(request.getPoints() != null ? request.getPoints() : 10)
                 .questionType(request.getQuestionType() != null ? request.getQuestionType() : "SINGLE_CHOICE")
                 .explanation(request.getExplanation())
+                .category(request.getCategory() != null ? request.getCategory() : "General")
                 .build();
         qb = questionBankRepository.save(qb);
         return mapToResponse(qb);
@@ -44,6 +45,7 @@ public class QuestionBankServiceImpl implements QuestionBankService {
                 .points(req.getPoints() != null ? req.getPoints() : 10)
                 .questionType(req.getQuestionType() != null ? req.getQuestionType() : "SINGLE_CHOICE")
                 .explanation(req.getExplanation())
+                .category(req.getCategory() != null ? req.getCategory() : "General")
                 .build()).collect(Collectors.toList());
 
         return questionBankRepository.saveAll(questions).stream()
@@ -78,6 +80,7 @@ public class QuestionBankServiceImpl implements QuestionBankService {
         if(request.getPoints() != null) qb.setPoints(request.getPoints());
         if(request.getQuestionType() != null) qb.setQuestionType(request.getQuestionType());
         qb.setExplanation(request.getExplanation());
+        if(request.getCategory() != null) qb.setCategory(request.getCategory());
         return mapToResponse(questionBankRepository.save(qb));
     }
 
@@ -96,6 +99,7 @@ public class QuestionBankServiceImpl implements QuestionBankService {
                 .points(qb.getPoints())
                 .questionType(qb.getQuestionType())
                 .explanation(qb.getExplanation())
+                .category(qb.getCategory())
                 .build();
     }
 }
