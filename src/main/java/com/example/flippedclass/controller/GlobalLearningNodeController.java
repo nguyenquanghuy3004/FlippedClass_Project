@@ -39,12 +39,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GlobalLearningNodeController {
 
-    private LearningNodeRepository learningNodeRepository;
-    private NodeConnectionRepository nodeConnectionRepository;
-    private UserRepository userRepository;
-    private NodeProgressRepository nodeProgressRepository;
-    private TestCaseRepository testCaseRepository;
-    private LocalCompilerService localCompilerService;
+    private final LearningNodeRepository learningNodeRepository;
+    private final NodeConnectionRepository nodeConnectionRepository;
+    private final UserRepository userRepository;
+    private final NodeProgressRepository nodeProgressRepository;
+    private final TestCaseRepository testCaseRepository;
+    private final LocalCompilerService localCompilerService;
 
     @PreAuthorize("hasAuthority('MENTOR')")
     @GetMapping

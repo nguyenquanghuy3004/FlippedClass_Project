@@ -364,6 +364,22 @@
         <!-- Hidden file inputs -->
         <input type="file" id="hiddenVideoInput" accept="video/mp4,video/x-m4v,video/*" style="display:none;">
         <input type="file" id="hiddenDocumentInput" accept=".pdf" style="display:none;">
+        
+        <script>
+            document.addEventListener('show.bs.dropdown', function(event) {
+                let card = event.target.closest('.node-card');
+                if (card) {
+                    card.style.zIndex = '1050';
+                    card.style.position = 'relative';
+                }
+            });
+            document.addEventListener('hide.bs.dropdown', function(event) {
+                let card = event.target.closest('.node-card');
+                if (card) {
+                    card.style.zIndex = '1';
+                }
+            });
+        </script>
     </div>
 
 </body>

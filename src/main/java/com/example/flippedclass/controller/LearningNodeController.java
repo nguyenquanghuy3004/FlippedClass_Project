@@ -20,9 +20,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LearningNodeController {
 
-    private LearningNodeService learningNodeService;
-    private  FileStorageService fileStorageService;
-    private  LearningNodeItemService learningNodeItemService;
+    private final LearningNodeService learningNodeService;
+    private final FileStorageService fileStorageService;
+    private final LearningNodeItemService learningNodeItemService;
 
     @PostMapping
     public ResponseEntity<LearningNodeItemResponse> create(@PathVariable Long nodeId,
