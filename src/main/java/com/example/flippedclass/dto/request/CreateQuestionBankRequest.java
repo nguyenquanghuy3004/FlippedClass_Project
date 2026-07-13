@@ -22,4 +22,6 @@ public class CreateQuestionBankRequest {
     private String questionType;
     
     private String explanation;
+
+    private String category;
 }

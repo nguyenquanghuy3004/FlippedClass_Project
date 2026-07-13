@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
 
 <head>
@@ -226,9 +226,20 @@
     <div class="modal-box" style="background: white; border-radius: 12px; width: 90%; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700;"><i class="ti ti-download me-2 text-primary" style="color:#7c3aed;"></i>Import from Question Bank</h3>
-        <button class="modal-close" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280;" onclick="closeBankModal()"><i class="ti ti-x"></i></button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" style="background-color:#7c3aed; border-color:#7c3aed; font-size:0.85rem;" onclick="openBankQEditor(null)">
+            <i class="ti ti-plus me-1"></i>Add to Bank
+          </button>
+          <button class="modal-close" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280;" onclick="closeBankModal()"><i class="ti ti-x"></i></button>
+        </div>
       </div>
       <div class="modal-body" style="padding: 1.5rem; overflow-y: auto; flex: 1;">
+        <div class="mb-3 d-flex align-items-center gap-2" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 12px;">
+          <label for="bankCategoryFilter" class="fw-semibold text-muted" style="font-size: 0.85rem;">Filter by Topic:</label>
+          <select id="bankCategoryFilter" class="form-select rounded-pill px-3" style="width: auto; min-width: 180px; font-size: 0.85rem; height: 36px; border-color: #e5e7eb;" onchange="filterBankQuestions()">
+            <option value="ALL">All Topics</option>
+          </select>
+        </div>
         <div id="bankLoading" class="text-center text-muted my-4"><span class="spinner-border spinner-border-sm" style="color:#7c3aed;"></span> Loading questions...</div>
         <div id="bankList" style="display:none; flex-direction: column; gap: 10px;">
           <!-- Items will be injected here -->
@@ -238,6 +249,84 @@
         <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="closeBankModal()">Cancel</button>
         <button class="btn btn-primary rounded-pill px-4 fw-bold" id="btnImportBank" onclick="importSelectedQuestions()" style="background-color: #7c3aed; border-color: #7c3aed;">
           <i class="ti ti-check me-1"></i>Import Selected
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question Bank Question Editor Modal -->
+  <div class="modal-overlay" id="bankQEditorModal" style="display:none; z-index: 1060; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div class="modal-box" style="background: white; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700;" id="bankQEditorTitle">Add New Bank Question</h4>
+        <button style="background: none; border: none; font-size: 1.35rem; cursor: pointer; color: #6b7280;" onclick="closeBankQEditorModal()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem; overflow-y: auto; flex: 1;">
+        <input type="hidden" id="bankQId">
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:0.9rem;">Topic / Category</label>
+          <input type="text" class="form-control rounded-pill px-3" id="bankQCategory" placeholder="e.g. Java Core, Spring Boot, React JS" list="bankQCategoryList" style="height: 38px; border-color: #e5e7eb;">
+          <datalist id="bankQCategoryList"></datalist>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:0.9rem;">Question Type</label>
+          <select class="form-select rounded-pill px-3" id="bankQType" onchange="toggleBankQOptionsLayout()" style="height: 38px; border-color: #e5e7eb;">
+            <option value="SINGLE_CHOICE">Single Choice</option>
+            <option value="MULTIPLE_CHOICE">Multiple Choice</option>
+            <option value="TRUE_FALSE">True / False</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:0.9rem;">Question Content</label>
+          <textarea class="form-control" id="bankQContent" rows="3" placeholder="Enter question text..." style="border-radius: 12px; border-color: #e5e7eb; padding: 10px 15px;"></textarea>
+        </div>
+        
+        <!-- Options Layout for Single/Multiple Choice -->
+        <div id="bankQOptionsContainer">
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-muted" style="font-size:0.82rem;">Answer Options</label>
+            <div class="d-flex gap-2 align-items-center mb-2">
+              <span class="fw-bold text-muted" style="min-width: 20px;">A.</span>
+              <input type="text" class="form-control rounded-pill px-3" id="bankQOptA" placeholder="Option A text" style="height: 36px; border-color: #e5e7eb;">
+            </div>
+            <div class="d-flex gap-2 align-items-center mb-2">
+              <span class="fw-bold text-muted" style="min-width: 20px;">B.</span>
+              <input type="text" class="form-control rounded-pill px-3" id="bankQOptB" placeholder="Option B text" style="height: 36px; border-color: #e5e7eb;">
+            </div>
+            <div class="d-flex gap-2 align-items-center mb-2">
+              <span class="fw-bold text-muted" style="min-width: 20px;">C.</span>
+              <input type="text" class="form-control rounded-pill px-3" id="bankQOptC" placeholder="Option C text" style="height: 36px; border-color: #e5e7eb;">
+            </div>
+            <div class="d-flex gap-2 align-items-center mb-2">
+              <span class="fw-bold text-muted" style="min-width: 20px;">D.</span>
+              <input type="text" class="form-control rounded-pill px-3" id="bankQOptD" placeholder="Option D text" style="height: 36px; border-color: #e5e7eb;">
+            </div>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:0.9rem;">Correct Answer</label>
+          <input type="text" class="form-control rounded-pill px-3" id="bankQCorrectAnswer" placeholder="Type correct answer string exactly (or True/False)" style="height: 38px; border-color: #e5e7eb;">
+          <small class="text-muted" style="font-size: 0.76rem; display: block; margin-top: 4px; padding-left: 8px;">Must match one of the options text exactly (case-sensitive).</small>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:0.9rem;">Default Points</label>
+          <input type="number" class="form-control rounded-pill px-3" id="bankQPoints" value="10" min="0" style="height: 38px; border-color: #e5e7eb;">
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:0.9rem;">Explanation (Optional)</label>
+          <textarea class="form-control" id="bankQExplanation" rows="2" placeholder="Explanation..." style="border-radius: 12px; border-color: #e5e7eb; padding: 10px 15px;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 1rem 1.5rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="closeBankQEditorModal()">Cancel</button>
+        <button class="btn btn-primary rounded-pill px-4 fw-bold" id="btnSaveBankQ" onclick="saveBankQuestion()" style="background-color: #7c3aed; border-color: #7c3aed;">
+          Save
         </button>
       </div>
     </div>
@@ -628,6 +717,28 @@
         if (!res.ok) throw new Error('Failed to load question bank');
         bankQuestions = await res.json();
         
+        // Populate Categories Filter & Category Datalist
+        const filterSelect = document.getElementById('bankCategoryFilter');
+        const prevSelected = filterSelect.value || 'ALL';
+        filterSelect.innerHTML = '<option value="ALL">All Topics</option>';
+        const datalist = document.getElementById('bankQCategoryList');
+        if (datalist) datalist.innerHTML = '';
+        
+        const categories = [...new Set(bankQuestions.map(q => q.category || 'General'))];
+        categories.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat;
+          opt.textContent = cat;
+          filterSelect.appendChild(opt);
+          
+          if (datalist) {
+            const datalistOpt = document.createElement('option');
+            datalistOpt.value = cat;
+            datalist.appendChild(datalistOpt);
+          }
+        });
+        filterSelect.value = prevSelected;
+
         if (bankQuestions.length === 0) {
           document.getElementById('bankList').innerHTML = '<div class="text-center text-muted my-5"><i class="ti ti-mood-empty" style="font-size:3rem; color:#d1d5db;"></i><p class="mt-2">Question Bank is currently empty.</p></div>';
         } else {
@@ -635,6 +746,7 @@
             const typeIcon = { SINGLE_CHOICE:'ti-circle-dot', TRUE_FALSE:'ti-toggle-left', SHORT_ANSWER:'ti-writing' }[q.questionType] || 'ti-help-circle';
             const item = document.createElement('label');
             item.className = 'bank-item';
+            item.dataset.category = q.category || 'General';
             item.style.cssText = 'display:flex; align-items:flex-start; gap:12px; padding:12px 16px; border:1px solid #e5e7eb; border-radius:8px; cursor:pointer; transition:all 0.2s;';
             item.onmouseover = () => item.style.borderColor = '#c4b5fd';
             item.onmouseout = () => item.style.borderColor = '#e5e7eb';
@@ -645,11 +757,21 @@
                 <div style="font-size:0.8rem; color:#6b7280; margin-top:6px; display: flex; align-items: center; gap: 8px;">
                   <span style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;"><i class="ti ${typeIcon}"></i> ${q.questionType}</span>
                   <span style="background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 4px; font-weight: 600;">${q.points} pts</span>
+                  <span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600;"><i class="ti ti-tags"></i> ${q.category || 'General'}</span>
                 </div>
+              </div>
+              <div style="display: flex; gap: 8px; align-self: center;" onclick="event.preventDefault(); event.stopPropagation();">
+                <button class="btn btn-sm btn-outline-secondary p-1" style="border-radius: 8px; border-color: #d1d5db; background: transparent;" onclick="openBankQEditor(${q.id})">
+                  <i class="ti ti-edit" style="font-size: 1.1rem; color: #4b5563;"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger p-1" style="border-radius: 8px; border-color: #fca5a5; background: transparent;" onclick="deleteBankQuestion(${q.id})">
+                  <i class="ti ti-trash" style="font-size: 1.1rem; color: #dc2626;"></i>
+                </button>
               </div>
             `;
             document.getElementById('bankList').appendChild(item);
           });
+          filterBankQuestions();
         }
       } catch (e) {
         toast(e.message, true);
@@ -659,9 +781,195 @@
       }
     }
 
+    window.filterBankQuestions = function() {
+      const selectedCat = document.getElementById('bankCategoryFilter').value;
+      const items = document.querySelectorAll('.bank-item');
+      items.forEach(item => {
+        if (selectedCat === 'ALL' || item.dataset.category === selectedCat) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    };
+
     function closeBankModal() {
       document.getElementById('bankModal').style.display = 'none';
     }
+
+    window.toggleBankQOptionsLayout = function() {
+      const qType = document.getElementById('bankQType').value;
+      const container = document.getElementById('bankQOptionsContainer');
+      const ansInput = document.getElementById('bankQCorrectAnswer');
+      if (qType === 'TRUE_FALSE') {
+        container.style.display = 'none';
+        ansInput.placeholder = 'Type True or False';
+      } else {
+        container.style.display = 'block';
+        ansInput.placeholder = 'Type correct answer string exactly';
+      }
+    };
+
+    window.openBankQEditor = function(id) {
+      document.getElementById('bankQEditorModal').style.display = 'flex';
+      if (!id) {
+        // Add Mode
+        document.getElementById('bankQEditorTitle').textContent = 'Add New Bank Question';
+        document.getElementById('bankQId').value = '';
+        document.getElementById('bankQCategory').value = '';
+        document.getElementById('bankQType').value = 'SINGLE_CHOICE';
+        document.getElementById('bankQContent').value = '';
+        document.getElementById('bankQOptA').value = '';
+        document.getElementById('bankQOptB').value = '';
+        document.getElementById('bankQOptC').value = '';
+        document.getElementById('bankQOptD').value = '';
+        document.getElementById('bankQCorrectAnswer').value = '';
+        document.getElementById('bankQPoints').value = '10';
+        document.getElementById('bankQExplanation').value = '';
+      } else {
+        // Edit Mode
+        const q = bankQuestions.find(x => x.id === id);
+        if (!q) return;
+        document.getElementById('bankQEditorTitle').textContent = 'Edit Bank Question';
+        document.getElementById('bankQId').value = q.id;
+        document.getElementById('bankQCategory').value = q.category || 'General';
+        document.getElementById('bankQType').value = q.questionType;
+        document.getElementById('bankQContent').value = q.content;
+        document.getElementById('bankQPoints').value = q.points || 10;
+        document.getElementById('bankQExplanation').value = q.explanation || '';
+        document.getElementById('bankQCorrectAnswer').value = q.correctAnswer || '';
+        
+        // Parse options
+        document.getElementById('bankQOptA').value = '';
+        document.getElementById('bankQOptB').value = '';
+        document.getElementById('bankQOptC').value = '';
+        document.getElementById('bankQOptD').value = '';
+        
+        if (q.questionType !== 'TRUE_FALSE' && q.options) {
+          try {
+            const parsed = JSON.parse(q.options);
+            if (Array.isArray(parsed)) {
+              if (parsed[0]) document.getElementById('bankQOptA').value = parsed[0];
+              if (parsed[1]) document.getElementById('bankQOptB').value = parsed[1];
+              if (parsed[2]) document.getElementById('bankQOptC').value = parsed[2];
+              if (parsed[3]) document.getElementById('bankQOptD').value = parsed[3];
+            } else if (typeof parsed === 'object') {
+              const keys = Object.keys(parsed);
+              if (keys[0]) document.getElementById('bankQOptA').value = parsed[keys[0]];
+              if (keys[1]) document.getElementById('bankQOptB').value = parsed[keys[1]];
+              if (keys[2]) document.getElementById('bankQOptC').value = parsed[keys[2]];
+              if (keys[3]) document.getElementById('bankQOptD').value = parsed[keys[3]];
+            }
+          } catch(e) {}
+        }
+      }
+      toggleBankQOptionsLayout();
+    };
+
+    window.closeBankQEditorModal = function() {
+      document.getElementById('bankQEditorModal').style.display = 'none';
+    };
+
+    window.saveBankQuestion = async function() {
+      const id = document.getElementById('bankQId').value;
+      const category = document.getElementById('bankQCategory').value.trim() || 'General';
+      const questionType = document.getElementById('bankQType').value;
+      const content = document.getElementById('bankQContent').value.trim();
+      const points = parseInt(document.getElementById('bankQPoints').value) || 10;
+      const explanation = document.getElementById('bankQExplanation').value.trim();
+      const correctAnswer = document.getElementById('bankQCorrectAnswer').value.trim();
+      
+      if (!content) { toast('Question content is required!', true); return; }
+      if (!correctAnswer) { toast('Correct answer is required!', true); return; }
+      
+      let optionsList = [];
+      if (questionType === 'TRUE_FALSE') {
+        optionsList = ["True", "False"];
+        const correctUpper = correctAnswer.toUpperCase();
+        if (correctUpper !== 'TRUE' && correctUpper !== 'FALSE') {
+          toast('Correct answer for True/False must be exactly "True" or "False"!', true);
+          return;
+        }
+      } else {
+        const optA = document.getElementById('bankQOptA').value.trim();
+        const optB = document.getElementById('bankQOptB').value.trim();
+        const optC = document.getElementById('bankQOptC').value.trim();
+        const optD = document.getElementById('bankQOptD').value.trim();
+        
+        if (!optA || !optB) {
+          toast('At least two options (A and B) are required!', true);
+          return;
+        }
+        
+        optionsList.push(optA);
+        optionsList.push(optB);
+        if (optC) optionsList.push(optC);
+        if (optD) optionsList.push(optD);
+        
+        const answerExists = optionsList.some(o => o.toUpperCase() === correctAnswer.toUpperCase());
+        if (!answerExists) {
+          toast('Correct answer must match one of the entered options exactly!', true);
+          return;
+        }
+      }
+      
+      const payload = {
+        content,
+        options: JSON.stringify(optionsList),
+        correctAnswer,
+        points,
+        questionType,
+        explanation,
+        category
+      };
+      
+      const btn = document.getElementById('btnSaveBankQ');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      
+      try {
+        const isUpdate = !!id;
+        const url = isUpdate ? `/api/question-bank/${id}` : '/api/question-bank';
+        const method = isUpdate ? 'PUT' : 'POST';
+        
+        const res = await fetch(url, {
+          method,
+          headers: authHeaders(),
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || 'Failed to save question');
+        }
+        
+        toast(isUpdate ? 'Question bank item updated!' : 'Question bank item added!');
+        closeBankQEditorModal();
+        await openBankModal(); // reload list
+      } catch (e) {
+        toast(e.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+      }
+    };
+
+    window.deleteBankQuestion = async function(id) {
+      if (!confirm('Are you sure you want to delete this question from the Question Bank?')) return;
+      try {
+        const res = await fetch(`/api/question-bank/${id}`, {
+          method: 'DELETE',
+          headers: authHeaders()
+        });
+        if (!res.ok) {
+          throw new Error('Failed to delete question bank item');
+        }
+        toast('Question bank item deleted successfully!');
+        await openBankModal(); // reload list
+      } catch (e) {
+        toast(e.message, true);
+      }
+    };
 
     async function importSelectedQuestions() {
       const checkedBoxes = document.querySelectorAll('.bank-checkbox:checked');
