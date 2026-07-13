@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/spaces/{spaceId}/members")
 @RequiredArgsConstructor
-public class LearningSpaceMemberRestController {
+public class LearningSpaceMemberController {
 
     private final LearningSpaceMemberService memberManagementService;
 

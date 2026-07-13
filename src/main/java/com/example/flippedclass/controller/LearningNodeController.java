@@ -19,12 +19,9 @@ import java.util.Map;
 @RequestMapping("/api/learning-nodes/{nodeId}/items")
 @RequiredArgsConstructor
 public class LearningNodeController {
-    @Autowired
-    private LearningNodeService learningNodeService;
 
-    @Autowired
+    private LearningNodeService learningNodeService;
     private  FileStorageService fileStorageService;
-    @Autowired
     private  LearningNodeItemService learningNodeItemService;
 
     @PostMapping

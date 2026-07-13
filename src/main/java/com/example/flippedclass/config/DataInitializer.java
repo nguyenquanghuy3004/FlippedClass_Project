@@ -45,8 +45,6 @@ public class DataInitializer implements CommandLineRunner {
             }
         }
 
-
-
         if (userRepository.countByRolesName(RoleName.ADMIN) == 0) {
             seedAdmin("admin@system.vn", "admin", "Admin", initialPassword);
         }
@@ -54,9 +52,7 @@ public class DataInitializer implements CommandLineRunner {
         if (userRepository.countByRolesName(RoleName.MENTOR) == 0) {
             seedMentor("giangvien@fpt.edu.vn", "giangvien", "Giangvien", initialPassword);
         }
-
     }
-
 
     // Tạo tài khoản Admin hệ thống
     private void seedAdmin(String email, String username, String fullName, String password) {

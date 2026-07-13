@@ -1,0 +1,1678 @@
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.SubmissionStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "activity_submissions")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ActivitySubmission {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id", nullable = false, unique = true)
+    @JsonIgnore
+    private StudyGroup group;
+
+    @Column(name = "github_repo_url", length = 500)
+    private String githubRepoUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "submitted_by")
+    @JsonIgnore
+    private User submittedBy;
+
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by")
+    @JsonIgnore
+    private User updatedBy;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String note;
+
+    @Column(columnDefinition = "DECIMAL(5,2)")
+    private Double score;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String feedback;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    @Builder.Default
+    private SubmissionStatus status = SubmissionStatus.NOT_SUBMITTED;
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+public abstract class BaseEntity {
+
+    @CreatedDate
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @CreatedBy
+    @Column(name = "created_by", updatable = false)
+    private String createdBy;
+
+    @LastModifiedBy
+    @Column(name = "updated_by")
+    private String updatedBy;
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.ActivityStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "classroom_activities")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ClassroomActivity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classroom_id", nullable = false)
+    @JsonIgnore
+    private LearningSpace classroom;
+
+    @NotBlank(message = "Title is required")
+    @Column(nullable = false)
+    private String title;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+
+    @Column(name = "min_members_per_group")
+    @Builder.Default
+    private Integer minMembersPerGroup = 1;
+
+    @Column(name = "max_members_per_group")
+    private Integer maxMembersPerGroup;
+
+    @Column(name = "allow_late_submission")
+    @Builder.Default
+    private boolean allowLateSubmission = false;
+
+    @Column(name = "auto_group_enabled")
+    @Builder.Default
+    private boolean autoGroupEnabled = false;
+
+    @Future(message = "Deadline must be in the future")
+    @Column(nullable = false)
+    private LocalDateTime deadline;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private ActivityStatus status = ActivityStatus.DRAFT;
+    
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+//    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @Builder.Default
+//    private List<ActivityGroup> groups = new ArrayList<>();
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "course_documents")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class CourseDocument {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_path_id", nullable = false)
+    private LearningPath learningPath;
+
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    private String title;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+
+    @Column(name = "document_type", length = 50)
+    private String documentType;
+
+    @Column(length = 1000)
+    private String url;
+
+    @Column(name = "created_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "evaluation_criteria")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class EvaluationCriterion {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id", nullable = false)
+    private EvaluationSession session;
+
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    private String name;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+
+    @Column(precision = 5, scale = 2)
+    private BigDecimal maxScore;
+
+    @Column
+    @Builder.Default
+    private Integer sortOrder = 0;
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "evaluation_sessions")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class EvaluationSession {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_path_id", nullable = false)
+    private LearningPath learningPath;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lecturer_id", nullable = false)
+    private User lecturer;
+
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    private String title;
+
+    private LocalDateTime gradingStartAt;
+
+    private LocalDateTime gradingDeadlineAt;
+
+    @Column(updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<EvaluationCriterion> criteria = new ArrayList<>();
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "grade_entries", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"session_id", "student_id", "criterion_id"})
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class GradeEntry {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id", nullable = false)
+    private EvaluationSession session;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "criterion_id", nullable = false)
+    private EvaluationCriterion criterion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lecturer_id", nullable = false)
+    private User lecturer;
+
+    @Column(precision = 5, scale = 2)
+    private BigDecimal score;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String comment;
+
+    @Column
+    @Builder.Default
+    private LocalDateTime gradedAt = LocalDateTime.now();
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.ActivityStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "group_activities")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class GroupActivity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_node_id", nullable = false)
+    @JsonIgnore
+    private LearningNode learningNode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_space_id", nullable = false)
+    @JsonIgnore
+    private LearningSpace learningSpace;
+
+    @NotBlank(message = "Title is required")
+    @Column(nullable = false)
+    private String title;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+
+    @Column(name = "max_members", nullable = false)
+    @Builder.Default
+    private Integer maxMembers = 4;
+
+    @Column
+    private LocalDateTime deadline;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    @Builder.Default
+    private ActivityStatus status = ActivityStatus.OPEN;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    @JsonIgnore
+    private User createdBy;
+    
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<StudyGroup> groups = new ArrayList<>();
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "interaction_logs")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class InteractionLog {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_path_id", nullable = false)
+    private LearningPath learningPath;
+
+    @Column(name = "interaction_type", length = 50)
+    private String interactionType;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String summary;
+
+    @Column(updatable = false)
+    @Builder.Default
+    private LocalDateTime occurredAt = LocalDateTime.now();
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "learning_nodes")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class LearningNode {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_path_id", nullable = false)
+    private LearningPath learningPath;
+
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    private String title;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+
+    @Column(name = "content", columnDefinition = "NVARCHAR(MAX)")
+    private String content;
+
+    @Column(name = "starter_code", columnDefinition = "NVARCHAR(MAX)")
+    private String starterCode;
+
+    @Column(name = "solution_code", columnDefinition = "NVARCHAR(MAX)")
+    private String solutionCode;
+
+    @Column(name = "node_type", length = 50)
+    private String nodeType;
+
+    @Column(length = 50)
+    private String status;
+
+    @Column(name = "display_order")
+    private Integer displayOrder;
+
+    @Column(name = "estimated_minutes")
+    private Integer estimatedMinutes;
+
+    @Column(name = "is_optional")
+    @Builder.Default
+    private Boolean isOptional = false;
+
+    @Column(name = "created_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "learningNode", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
+    @Builder.Default
+    private List<LearningNodeItem> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "learningNode", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Quiz> quizzes = new ArrayList<>();
+}
+package com.example.flippedclass.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.flippedclass.enums.ItemType;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "learning_node_items")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class LearningNodeItem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    private String title;
+
+    @Column(nullable = false, length = 50)
+    private ItemType itemType;
+
+    @Column(name = "url", columnDefinition = "NVARCHAR(MAX)")
+    private String url;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String content;
+
+    @Column(nullable = false)
+    private Integer position;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_node_id", nullable = false)
+    private LearningNode learningNode;
+
+    @Column(name = "quiz_id")
+    private Long quizId;
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.LearningPathStatus;
+import com.example.flippedclass.enums.VisibilityType;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "learning_paths")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class LearningPath {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_space_id", nullable = false)
+    private LearningSpace learningSpace;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lecturer_id", nullable = false)
+    private User lecturer;
+
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    private String title;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private LearningPathStatus status = LearningPathStatus.ACTIVE;
+
+    @Column(name = "position")
+    @Builder.Default
+    private Integer position = 0;
+
+
+    @Column(name = "estimated_duration_hours")
+    @Builder.Default
+    private Integer estimatedDurationHours = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private VisibilityType visibility = VisibilityType.PRIVATE;
+
+    @Column(name = "created_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "learningPath", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<LearningNode> nodes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "learningPath", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CourseDocument> courseDocuments = new ArrayList<>();
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.VisibilityType;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "learning_spaces")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class LearningSpace {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
+    private String name;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+    @Column(name = "invite_code", length = 255, nullable = false, unique = true)
+    private String inviteCode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private LearningSpaceStatus status = LearningSpaceStatus.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private VisibilityType visibility = VisibilityType.PRIVATE;
+
+    @Column(name = "created_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+
+
+
+
+
+
+//    @OneToMany(mappedBy = "learningSpace", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<LearningPath> paths = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "learningSpace", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<LearningSpaceMember> members = new ArrayList<>();
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.MemberRole;
+import com.example.flippedclass.enums.MemberStatus;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "learning_space_members",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"learning_space_id", "user_id"})
+    })
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class LearningSpaceMember {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_space_id", nullable = false)
+    private LearningSpace learningSpace;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private MemberRole role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private MemberStatus status;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime joinedAt;
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.SummaryStatus;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "lesson_summaries")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class LessonSummary {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_node_id", nullable = false)
+    private LearningNode learningNode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
+
+    @Column(name = "summary_content", columnDefinition = "NVARCHAR(MAX)", nullable = false)
+    private String summaryContent;
+
+    @Column(name = "lecturer_feedback", columnDefinition = "NVARCHAR(MAX)")
+    private String lecturerFeedback;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    @Builder.Default
+    private SummaryStatus status = SummaryStatus.SUBMITTED;
+
+    @Column(name = "submitted_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime submittedAt = LocalDateTime.now();
+
+    @Column(name = "reviewed_at")
+    private LocalDateTime reviewedAt;
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "node_comments")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class NodeComment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "node_id", nullable = false)
+    private LearningNode learningNode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private NodeComment parentComment;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)", nullable = false)
+    private String content;
+
+    @Column(name = "created_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "node_connections")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class NodeConnection {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_path_id", nullable = false)
+    private LearningPath learningPath;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_node_id", nullable = false)
+    private LearningNode sourceNode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_node_id", nullable = false)
+    private LearningNode targetNode;
+
+    @Column(name = "condition_type", length = 50)
+    private String conditionType;
+
+    @Column(name = "condition_value", length = 255)
+    private String conditionValue;
+
+    @Column(name = "created_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.DiscussionStatus;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "node_discussions")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class NodeDiscussion {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_node_id", nullable = false)
+    private LearningNode learningNode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id") //// trong database đang chưa có cột này
+    private StudyGroup studyGroup;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)", nullable = false)
+    private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private NodeDiscussion parentDiscussion;
+
+    @OneToMany(mappedBy = "parentDiscussion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<NodeDiscussion> replies = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private DiscussionStatus status = DiscussionStatus.OPEN;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isPinned = false;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column
+    private LocalDateTime updatedAt;
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.ProgressStatus;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "node_progress", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"student_id", "learning_node_id"})
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class NodeProgress {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_node_id", nullable = false)
+    private LearningNode learningNode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private ProgressStatus status = ProgressStatus.NOT_STARTED;
+
+    @Column
+    private LocalDateTime completedAt;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column
+    private LocalDateTime updatedAt;
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.NotificationType;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "notifications")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Notification {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipient_id", nullable = false)
+    private User recipient;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private NotificationType type;
+
+    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    private String message;
+
+    @Column(name = "target_url", length = 500)
+    private String targetUrl;
+
+    @Column(name = "is_read", nullable = false)
+    @Builder.Default
+    private Boolean isRead = false;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.PeerPairingStatus;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "peer_pairings", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"learning_space_id", "mentor_id", "mentee_id"})
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PeerPairing {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_space_id", nullable = false)
+    private LearningSpace learningSpace;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentor_id", nullable = false)
+    private User mentor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentee_id", nullable = false)
+    private User mentee;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private PeerPairingStatus status = PeerPairingStatus.ACTIVE;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime pairedAt;
+
+    @UpdateTimestamp
+    @Column
+    private LocalDateTime updatedAt;
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "question_bank")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class QuestionBank {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    private String content;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String options;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String correctAnswer;
+
+    @Column
+    @Builder.Default
+    private Integer points = 10;
+
+    @Column(name = "question_type", length = 50)
+    @Builder.Default
+    private String questionType = "SINGLE_CHOICE";
+    
+    @Column(name = "explanation", columnDefinition = "NVARCHAR(MAX)")
+    private String explanation;
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "quizzes")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Quiz {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_node_id", nullable = false)
+    private LearningNode learningNode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lecturer_id", nullable = false)
+    private User lecturer;
+
+    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
+    private String title;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+
+    @Column(nullable = false)
+    private Integer durationMinutes;
+
+    @Column(nullable = false)
+    private boolean active;
+
+    @Column(updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "pass_score")
+    @Builder.Default
+    private Integer passScore = 50;
+
+    @Column(length = 20)
+    private String difficulty;
+
+    @Column(name = "thumbnail_url", length = 1000)
+    private String thumbnailUrl;
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "quiz_attempts")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class QuizAttempt {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quiz_id", nullable = false)
+    private Quiz quiz;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
+
+    @Column(precision = 5, scale = 2)
+    @Builder.Default
+    private BigDecimal score = BigDecimal.ZERO;
+
+    @Column
+    @Builder.Default
+    private Integer totalQuestions = 0;
+
+    @Column
+    @Builder.Default
+    private Integer correctAnswers = 0;
+
+    @Column
+    @Builder.Default
+    private LocalDateTime submittedAt = LocalDateTime.now();
+
+    @Column
+    private LocalDateTime startedAt;
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "quiz_questions")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class QuizQuestion {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quiz_id", nullable = false)
+    private Quiz quiz;
+
+    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    private String content;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String options;
+
+    @Column(length = 50)
+    private String correctAnswer;
+
+    @Column
+    @Builder.Default
+    private Integer points = 1;
+
+    @Column(name = "question_type", length = 50)
+    @Builder.Default
+    private String questionType = "SINGLE_CHOICE";
+
+    @Column(name = "sort_order")
+    @Builder.Default
+    private Integer sortOrder = 0;
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.RoleName;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "roles")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Role {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, unique = true, length = 50)
+    private RoleName name;
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "shared_solutions")
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class SharedSolution {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long Id;
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "learning_node_id", nullable = false)
+        private LearningNode learningNode;
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "student_id", nullable = false)
+        private User student;
+
+        @Column(name = "title" , nullable = false, length = 255)
+        private String title;
+
+
+        @Column(name = "code_content", columnDefinition = "NVARCHAR(MAX)", nullable = false)
+        private String codeContent;
+
+        @CreationTimestamp
+        @Column(name = "created_at", updatable = false)
+        private LocalDateTime createdAt;
+
+    @Column(name = "upvotes", nullable = false)
+    @Builder.Default
+    private int upvotes = 0;
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.OneToOne;
+import lombok.*;
+
+@Entity
+@Table(name = "students")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Student {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(columnDefinition = "NVARCHAR(255)")
+    private String name;
+
+    @OneToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "user_id")
+    private User user;
+
+    @OneToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "profile_id")
+    private StudentProfile studentProfile;
+
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "student_profiles")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class StudentProfile {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(nullable = false, unique = true, columnDefinition = "NVARCHAR(50)")
+    private String studentCode;
+
+    @Column(columnDefinition = "NVARCHAR(255)")
+    private String className;
+
+    @Column(columnDefinition = "NVARCHAR(255)")
+    private String major;
+
+    private Integer enrollmentYear;
+
+    @Column(length = 20)
+    private String phoneNumber;
+
+    @Column(columnDefinition = "NVARCHAR(1000)")
+    private String bio;
+}
+package com.example.flippedclass.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.flippedclass.enums.GroupStatus;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "study_groups")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class StudyGroup {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "activity_id", nullable = false)
+    @JsonIgnore
+    private GroupActivity activity;
+
+    @NotBlank(message = "Group name cannot be empty")
+    @Size(max = 100, message = "Group name max 100 characters")
+    @Column(name = "group_name", nullable = false, length = 100)
+    private String groupName;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "leader_id", nullable = false)
+    @JsonIgnore
+    private User leader;
+
+    @Column(name = "invite_code", length = 50)
+    private String inviteCode;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private GroupStatus status = GroupStatus.FORMING;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<StudyGroupMember> members = new ArrayList<>();
+
+    @OneToOne(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ActivitySubmission submission;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.GroupRole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "study_group_members", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_group_member", columnNames = {"group_id", "student_id"})
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class StudyGroupMember {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id", nullable = false)
+    @JsonIgnore
+    private StudyGroup group;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    @JsonIgnore
+    private User student;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    @Builder.Default
+    private GroupRole role = GroupRole.MEMBER;
+
+    @Column(name = "joined_at", updatable = false)
+    private LocalDateTime joinedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        joinedAt = LocalDateTime.now();
+    }
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "test_cases")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class TestCase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_node_id", nullable = false)
+    private LearningNode learningNode;
+
+    @Column(name = "input_data", columnDefinition = "NVARCHAR(MAX)")
+    private String inputData;
+
+    @Column(name = "expected_output", columnDefinition = "NVARCHAR(MAX)")
+    private String expectedOutput;
+
+    @Column(name = "is_hidden")
+    private Boolean isHidden;
+
+    @Column(name = "points")
+    private Integer points;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (isHidden == null) isHidden = false;
+        if (points == null) points = 10;
+    }
+}
+package com.example.flippedclass.entity;
+
+import com.example.flippedclass.enums.AuthProvider;
+import com.example.flippedclass.enums.UserStatus;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, length = 100)
+    private String username;
+
+    @Column(nullable = false, unique = true, length = 255)
+    private String email;
+
+    @Column(length = 255)
+    private String password;
+
+    @Column(columnDefinition = "NVARCHAR(255)")
+    private String fullName;
+
+    @Column(length = 1000)
+    private String avatarUrl;
+
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'ACTIVE'")
+    @Builder.Default
+    private UserStatus status = UserStatus.ACTIVE;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private StudentProfile studentProfile;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
+
+    @Column(updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Builder.Default
+    private Integer contributionPoints = 0;
+
+    @Column(name = "total_active_time")
+    private Long totalActiveTime;
+}
+package com.example.flippedclass.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "user_activity_logs")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class UserActivityLog {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(name = "action_type", nullable = false, length = 100)
+    private String actionType;
+
+    @Column(name = "description", nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    private String description;
+
+    @Column(name = "created_at", updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+}

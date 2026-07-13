@@ -25,9 +25,7 @@ public class DiscussionController {
     }
 
     @PostMapping
-    public ResponseEntity<DiscussionResponse> addDiscussion(
-            @PathVariable Long nodeId,
-            @RequestParam(required = false) Long groupId,
+    public ResponseEntity<DiscussionResponse> addDiscussion(@PathVariable Long nodeId,@RequestParam(required = false) Long groupId,
             @RequestBody DiscussionRequest request,
             Authentication authentication) {
         return ResponseEntity.ok(discussionService.addDiscussion(nodeId, groupId, authentication.getName(), request));

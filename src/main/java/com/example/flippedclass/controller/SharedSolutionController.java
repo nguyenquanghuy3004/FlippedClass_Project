@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/shared-solutions")
-public class SharedSolutionRestController {
+public class SharedSolutionController {
 
     @Autowired
     private SharedSolutionService sharedSolutionService;

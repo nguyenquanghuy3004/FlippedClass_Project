@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/lecturer/submissions")
 @RequiredArgsConstructor
-public class LecturerSubmissionRestController {
+public class LecturerSubmissionController {
 
     private final LecturerSubmissionService lecturerSubmissionService;
 

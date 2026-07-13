@@ -68,39 +68,39 @@
 
     <form id="signupForm" class="needs-validation" novalidate>
 
-      <div class="mb-3">
+      <div class="mb-3 position-relative">
         <label for="fullName" class="auth-glass-label">Full Name <span class="text-danger">*</span></label>
-        <input id="fullName" type="text" class="auth-glass-input" placeholder="John Doe" required autofocus>
-        <div class="invalid-feedback">Please enter your full name.</div>
+        <input id="fullName" type="text" class="auth-glass-input" placeholder="John Doe" required minlength="3" maxlength="50" autofocus oninput="validateField(this)">
+        <div class="invalid-feedback">Full name must be between 3 and 50 characters.</div>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 position-relative">
         <label for="username" class="auth-glass-label">Username <span class="text-danger">*</span></label>
-        <input id="username" type="text" class="auth-glass-input" placeholder="e.g., johndoe" required minlength="3">
-        <div class="invalid-feedback">Username must be at least 3 characters.</div>
+        <input id="username" type="text" class="auth-glass-input" placeholder="e.g., johndoe" required minlength="5" maxlength="20" pattern="^[a-z0-9_]{5,20}$" oninput="validateField(this)">
+        <div class="invalid-feedback">Must be 5-20 characters (lowercase letters, numbers, underscores).</div>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 position-relative">
         <label for="email" class="auth-glass-label">Email Address <span class="text-danger">*</span></label>
-        <input id="email" type="email" class="auth-glass-input" placeholder="name@gmail.com" required>
-        <div class="invalid-feedback">Please enter a valid email address.</div>
+        <input id="email" type="email" class="auth-glass-input" placeholder="name@gmail.com" required maxlength="50" oninput="validateField(this)">
+        <div class="invalid-feedback">Please enter a valid email address (Ex: name@gmail.com).</div>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 position-relative">
         <label for="password" class="auth-glass-label">Password <span class="text-danger">*</span></label>
         <div class="position-relative">
-          <input id="password" type="password" class="auth-glass-input" placeholder="Create a password" required minlength="6" style="padding-right: 45px;">
+          <input id="password" type="password" class="auth-glass-input" placeholder="Create a password" required minlength="8" maxlength="40" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,40}$" oninput="validateField(this); document.getElementById('confirmPassword').dispatchEvent(new Event('input'))" style="padding-right: 45px;">
           <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none text-muted" tabindex="-1" onclick="togglePassword('password', this)" style="padding: 0 12px; z-index: 5;">
             <i class="ti ti-eye fs-5" style="color: rgba(100,100,100,0.5);"></i>
           </button>
         </div>
-        <div class="invalid-feedback">Must be at least 6 characters.</div>
+        <div class="invalid-feedback">8-40 chars, needs uppercase, lowercase, number, & special char.</div>
       </div>
 
-      <div class="mb-4">
+      <div class="mb-4 position-relative">
         <label for="confirmPassword" class="auth-glass-label">Confirm Password <span class="text-danger">*</span></label>
         <div class="position-relative">
-          <input id="confirmPassword" type="password" class="auth-glass-input" placeholder="Confirm your password" required style="padding-right: 45px;">
+          <input id="confirmPassword" type="password" class="auth-glass-input" placeholder="Confirm your password" required style="padding-right: 45px;" oninput="validateField(this)">
           <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none text-muted" tabindex="-1" onclick="togglePassword('confirmPassword', this)" style="padding: 0 12px; z-index: 5;">
             <i class="ti ti-eye fs-5" style="color: rgba(100,100,100,0.5);"></i>
           </button>
@@ -134,14 +134,18 @@
 </div>
 
 <script>
-  document.getElementById('confirmPassword').addEventListener('input', function () {
-    const password = document.getElementById('password').value;
-    if (this.value !== password) {
-      this.setCustomValidity('Passwords do not match.');
-    } else {
-      this.setCustomValidity('');
+  function validateField(element) {
+    if (element.id === 'confirmPassword') {
+      const password = document.getElementById('password').value;
+      if (element.value !== password) {
+        element.setCustomValidity('Passwords do not match.');
+      } else {
+        element.setCustomValidity('');
+      }
     }
-  });
+    // Gắn class was-validated vào thẻ cha để hiển thị lỗi realtime
+    element.closest('.position-relative').classList.add('was-validated');
+  }
 
   document.getElementById('signupForm').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -187,7 +191,10 @@
     })
             .then(response => {
               if (!response.ok) {
-                return response.json().then(err => { throw new Error(err.message || 'Sign up failed.'); });
+                return response.json().then(err => { 
+                    // Handle specific backend errors if needed, but primarily throw general error
+                    throw new Error(err.message || 'Sign up failed.'); 
+                });
               }
               return response.json();
             })
@@ -199,8 +206,19 @@
               }, 2000);
             })
             .catch(error => {
-              errorMsg.textContent = error.message;
-              errorMsg.style.display = 'block';
+              // Backend error fallback
+              if (error.message.includes('Username')) {
+                document.getElementById('username').setCustomValidity(error.message);
+                document.getElementById('username').closest('.position-relative').classList.add('was-validated');
+                document.getElementById('username').nextElementSibling.textContent = error.message;
+              } else if (error.message.includes('Email')) {
+                document.getElementById('email').setCustomValidity(error.message);
+                document.getElementById('email').closest('.position-relative').classList.add('was-validated');
+                document.getElementById('email').nextElementSibling.textContent = error.message;
+              } else {
+                errorMsg.textContent = error.message;
+                errorMsg.style.display = 'block';
+              }
               btn.innerHTML = 'Sign Up';
               btn.disabled = false;
             });

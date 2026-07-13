@@ -2,7 +2,8 @@ package com.example.flippedclass.controller;
 
 import com.example.flippedclass.annotation.LogUserActivity;
 import com.example.flippedclass.entity.LearningNode;
-import com.example.flippedclass.repository.LearningNodeRepository;
+import com.example.flippedclass.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.flippedclass.service.LocalCompilerService;
 import com.example.flippedclass.dto.response.LearningNodeResponse;
-import com.example.flippedclass.repository.NodeConnectionRepository;
-import com.example.flippedclass.repository.NodeProgressRepository;
 import com.example.flippedclass.service.impl.UserDetailsImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
@@ -24,7 +23,6 @@ import com.example.flippedclass.dto.request.SubmitCodeRequest;
 import com.example.flippedclass.dto.request.TestCaseDTO;
 import com.example.flippedclass.dto.response.TestResultResponse;
 import com.example.flippedclass.entity.TestCase;
-import com.example.flippedclass.repository.TestCaseRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,24 +36,14 @@ import java.util.stream.Collectors;
 @CrossOrigin(originPatterns = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/learning-nodes")
+@RequiredArgsConstructor
 public class GlobalLearningNodeController {
 
-    @Autowired
     private LearningNodeRepository learningNodeRepository;
-
-    @Autowired
     private NodeConnectionRepository nodeConnectionRepository;
-
-    @Autowired
-    private com.example.flippedclass.repository.UserRepository userRepository;
-
-    @Autowired
+    private UserRepository userRepository;
     private NodeProgressRepository nodeProgressRepository;
-
-    @Autowired
     private TestCaseRepository testCaseRepository;
-
-    @Autowired
     private LocalCompilerService localCompilerService;
 
     @PreAuthorize("hasAuthority('MENTOR')")
@@ -94,6 +82,7 @@ public class GlobalLearningNodeController {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
             boolean isStudent = userDetails.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals("STUDENT"));
+
             if (isStudent && prereqId != null && !"DOCUMENT".equals(node.getNodeType())) {
                 var progress = nodeProgressRepository.findByStudentIdAndLearningNodeId(userDetails.getId(), prereqId).orElse(null);
                 if (progress == null || !progress.getStatus().name().equals("COMPLETED")) {
