@@ -746,9 +746,15 @@
                             fetch(`/api/learning-spaces/${spaceId}/learning-paths/${pathId}/learning-nodes/${nodeId}`, {
                                 method: 'DELETE',
                                 headers: { 'Authorization': 'Bearer ' + token }
-                            }).then(res => {
-                                if (res.ok) window.location.reload();
-                                else Swal.fire('Error!', 'Failed to delete lesson', 'error');
+                            }).then(async res => {
+                                if (res.ok) {
+                                    window.location.reload();
+                                } else {
+                                    const errData = await res.json().catch(() => ({}));
+                                    Swal.fire('Cannot delete!', errData.message || 'Unknown error when deleting lesson', 'error');
+                                }
+                            }).catch(err => {
+                                Swal.fire('Error!', 'Server connection error', 'error');
                             });
                         }
                     });

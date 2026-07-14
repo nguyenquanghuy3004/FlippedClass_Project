@@ -409,6 +409,11 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
             }
 
             for (LearningNode node : path.getNodes()) {
+                // Bỏ qua Group Activity, chỉ copy Video, Document, Practice, Quiz
+                if ("GROUP_ACTIVITY".equals(node.getNodeType())) {
+                    continue;
+                }
+                
                 LearningNode newNode = new LearningNode();
 
                 newNode.setTitle(node.getTitle());

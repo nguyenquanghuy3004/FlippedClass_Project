@@ -100,6 +100,19 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         LearningNode node = learningNodeRepository.findById(nodeId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài học"));
         
+        // KIỂM TRA ĐIỀU KIỆN CHẶN XÓA (Restrict Delete)
+        // 1. Kiểm tra xem có học sinh nào đã làm bài Quiz chưa
+        Long attemptCount = entityManager.createQuery("SELECT COUNT(qa) FROM QuizAttempt qa WHERE qa.quiz.learningNode.id = :nodeId", Long.class)
+                .setParameter("nodeId", nodeId).getSingleResult();
+        
+        // 2. Kiểm tra xem có học sinh nào đã hoàn thành bài học này chưa
+        Long progressCount = entityManager.createQuery("SELECT COUNT(np) FROM NodeProgress np WHERE np.learningNode.id = :nodeId", Long.class)
+                .setParameter("nodeId", nodeId).getSingleResult();
+
+        if (attemptCount > 0 || progressCount > 0) {
+            throw new IllegalArgumentException("Cannot delete this lesson because students have already participated. Please archive the module instead.");
+        }
+        
         // Break self-referencing relationships first
         entityManager.createQuery("UPDATE NodeDiscussion d SET d.parentDiscussion = null WHERE d.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         
@@ -110,6 +123,14 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         entityManager.createQuery("DELETE FROM LessonSummary s WHERE s.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM SharedSolution s WHERE s.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM TestCase t WHERE t.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        
+        // Delete Quiz related entities (vì Quiz không có @OneToMany cascade sang QuizQuestion)
+        entityManager.createQuery("DELETE FROM QuizAttempt qa WHERE qa.quiz.id IN (SELECT q.id FROM Quiz q WHERE q.learningNode.id = :nodeId)").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM QuizQuestion qq WHERE qq.quiz.id IN (SELECT q.id FROM Quiz q WHERE q.learningNode.id = :nodeId)").setParameter("nodeId", nodeId).executeUpdate();
+        
+        // Delete GroupActivity related entities
+        entityManager.createQuery("DELETE FROM StudyGroupMember sgm WHERE sgm.group.id IN (SELECT sg.id FROM StudyGroup sg WHERE sg.activity.learningNode.id = :nodeId)").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM StudyGroup sg WHERE sg.activity.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM GroupActivity g WHERE g.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
 
         learningNodeRepository.delete(node);
