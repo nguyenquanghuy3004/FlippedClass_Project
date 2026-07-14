@@ -29,6 +29,11 @@ public class StudyGroup {
     @JsonIgnore
     private GroupActivity activity;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learning_space_id", nullable = false)
+    @JsonIgnore
+    private LearningSpace learningSpace;
+
     @NotBlank(message = "Group name cannot be empty")
     @Size(max = 100, message = "Group name max 100 characters")
     @Column(name = "group_name", nullable = false, length = 100)

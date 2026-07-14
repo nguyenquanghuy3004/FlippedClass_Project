@@ -351,6 +351,27 @@
 
   // Initial load
   document.addEventListener('DOMContentLoaded', loadEvaluations);
+
+  // Real-time update when a mentor evaluation notification arrives
+  window.addEventListener('notificationReceived', function(e) {
+      if (e.detail && e.detail.type === 'REVIEW_MENTOR') {
+          // Re-fetch evaluations automatically
+          loadEvaluations();
+          
+          // Show a subtle toast specifically for the page update
+          if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                  toast: true,
+                  position: 'bottom-end',
+                  icon: 'success',
+                  title: 'Grades Updated',
+                  text: 'New feedback has been loaded.',
+                  showConfirmButton: false,
+                  timer: 3000
+              });
+          }
+      }
+  });
 </script>
 </th:block>
 

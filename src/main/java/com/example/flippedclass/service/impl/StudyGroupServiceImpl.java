@@ -59,6 +59,7 @@ public class StudyGroupServiceImpl implements StudyGroupService {
 
         StudyGroup group = StudyGroup.builder()
                 .activity(activity)
+                .learningSpace(activity.getLearningSpace())
                 .groupName(request.getGroupName())
                 .inviteCode(UUID.randomUUID().toString().substring(0, 8).toUpperCase())
                 .status(GroupStatus.FORMING)

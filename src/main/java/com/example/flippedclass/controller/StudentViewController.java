@@ -1,6 +1,7 @@
 package com.example.flippedclass.controller;
 
 import com.example.flippedclass.dto.response.CourseDocumentResponse;
+import com.example.flippedclass.dto.response.DashboardLearningSpaceResponse;
 import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.service.StudentDashboardService;
 import com.example.flippedclass.service.impl.UserDetailsImpl;
@@ -9,6 +10,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -22,7 +26,7 @@ public class StudentViewController {
             StudentDashboardResponse dashboard = dashboardService.getDashboard(user.getId());
             model.addAttribute("dashboard", dashboard);
             
-            java.util.List<com.example.flippedclass.dto.response.DashboardLearningSpaceResponse> joinedSpaces = new java.util.ArrayList<>();
+            List<DashboardLearningSpaceResponse> joinedSpaces = new ArrayList<>();
             if (dashboard.getLearningSpaces() != null) {
                 joinedSpaces = dashboard.getLearningSpaces().stream()
                     .filter(space -> !"ARCHIVED".equals(space.getStatus()) && (space.isJoined() || "STUDENT".equals(space.getMemberRole())))
@@ -31,7 +35,7 @@ public class StudentViewController {
             model.addAttribute("joinedSpaces", joinedSpaces);
             
             // Filter recent documents to remove videos and youtube links, matching frontend logic, and limit to 8
-            java.util.List<CourseDocumentResponse> recentDocs = dashboard.getRecentDocuments();
+           List<CourseDocumentResponse> recentDocs = dashboard.getRecentDocuments();
             if (recentDocs != null) {
                 java.util.List<CourseDocumentResponse> filteredDocs = recentDocs.stream()
                     .filter(doc -> {

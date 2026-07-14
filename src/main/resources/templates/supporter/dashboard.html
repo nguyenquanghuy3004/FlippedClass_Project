@@ -59,7 +59,6 @@
                                     <th>Student</th>
                                     <th>Email</th>
                                     <th>Status</th>
-                                    <th>Actions</th>
                                 </tr>
                                 </thead>
                                 <tbody id="menteesTableBody">
@@ -300,7 +299,7 @@
                 }
                 
                 if (allMentees.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No mentees assigned yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-4">No mentees assigned yet.</td></tr>';
                     return;
                 }
 
@@ -321,17 +320,12 @@
                             </td>
                             <td>${m.email || 'N/A'}</td>
                             <td><span class="badge bg-warning-subtle text-warning">Needs Support</span></td>
-                            <td>
-                                <a href="/lecturer/student/${m.id}/profile" class="btn btn-sm btn-outline-info rounded-pill">
-                                    <i class="ti ti-id"></i> Profile
-                                </a>
-                            </td>
                         </tr>
                     `;
                 });
             } catch (error) {
                 console.error(error);
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4">Error loading mentees. Please try again.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger py-4">Error loading mentees. Please try again.</td></tr>';
             } finally {
                 loader.classList.add('d-none');
             }

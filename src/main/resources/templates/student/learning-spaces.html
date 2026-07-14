@@ -491,7 +491,18 @@
       </div>`;
     }
     function pathTemplate(path, index) {
-      const nodes = [...(path.nodes || [])].sort((a, b) => (a.id || 0) - (b.id || 0));
+      const nodeTypeOrder = {
+          'VIDEO': 1,
+          'DOCUMENT': 2,
+          'PRACTICE': 3,
+          'GROUP_ACTIVITY': 4
+      };
+      const nodes = [...(path.nodes || [])].sort((a, b) => {
+          const orderA = nodeTypeOrder[a.nodeType] || 99;
+          const orderB = nodeTypeOrder[b.nodeType] || 99;
+          if (orderA !== orderB) return orderA - orderB;
+          return (a.id || 0) - (b.id || 0);
+      });
       const openNodes = nodes.filter((node) => ['UNLOCKED', 'ACTIVE'].includes(node.status)).length;
       const percent = nodes.length ? Math.round((openNodes / nodes.length) * 100) : 0;
       return `

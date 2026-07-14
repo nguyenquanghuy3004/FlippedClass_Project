@@ -4,6 +4,5 @@ public enum NodeType {
     LESSON,
     VIDEO,
     PRACTICE,
-    QUIZ,
-    REVIEW
+    QUIZ
 }

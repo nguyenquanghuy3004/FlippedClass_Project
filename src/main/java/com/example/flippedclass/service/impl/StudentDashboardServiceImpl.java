@@ -38,6 +38,8 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     private final QuizQuestionRepository quizQuestionRepository;
     private final CourseDocumentRepository courseDocumentRepository;
     private final com.example.flippedclass.repository.LearningNodeItemRepository learningNodeItemRepository;
+    private final com.example.flippedclass.repository.NodeConnectionRepository nodeConnectionRepository;
+    private final com.example.flippedclass.repository.NodeProgressRepository nodeProgressRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -64,6 +66,18 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
         memberships.forEach(member -> {
             Long spaceId = member.getLearningSpace().getId();
             List<QuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(spaceId).stream()
+                    .filter(q -> {
+                        if (q.getLearningNode() == null) return true;
+                        var connections = nodeConnectionRepository.findByTargetNodeId(q.getLearningNode().getId());
+                        if (!connections.isEmpty()) {
+                            Long prereqId = connections.get(0).getSourceNode().getId();
+                            var progress = nodeProgressRepository.findByStudentIdAndLearningNodeId(studentId, prereqId).orElse(null);
+                            if (progress == null || !progress.getStatus().name().equals("COMPLETED")) {
+                                return false; // LOCKED
+                            }
+                        }
+                        return true;
+                    })
                     .map(q -> QuizResponse.builder()
                             .id(q.getId())
                             .title(q.getTitle())
@@ -82,6 +96,18 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
             if (!joinedSpaceIds.contains(space.getId())) {
                 allSpaceIds.add(space.getId());
                 List<QuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(space.getId()).stream()
+                        .filter(q -> {
+                            if (q.getLearningNode() == null) return true;
+                            var connections = nodeConnectionRepository.findByTargetNodeId(q.getLearningNode().getId());
+                            if (!connections.isEmpty()) {
+                                Long prereqId = connections.get(0).getSourceNode().getId();
+                                var progress = nodeProgressRepository.findByStudentIdAndLearningNodeId(studentId, prereqId).orElse(null);
+                                if (progress == null || !progress.getStatus().name().equals("COMPLETED")) {
+                                    return false; // LOCKED
+                                }
+                            }
+                            return true;
+                        })
                         .map(q -> QuizResponse.builder()
                                 .id(q.getId())
                                 .title(q.getTitle())

@@ -22,6 +22,39 @@
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css?v=1.1}">
   <link rel="stylesheet" th:href="@{/assets/css/student-layout.css?v=1.2}">
 
+  <style>
+    .notification-menu {
+      width: 380px !important;
+      max-height: 85vh;
+      overflow-y: hidden;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+      border: 1px solid rgba(0,0,0,0.05) !important;
+    }
+    .notification-list {
+      max-height: 400px; /* Fixed reasonable max height */
+      overflow-y: auto;
+      overflow-x: hidden;
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      /* Hide scrollbar for IE, Edge and Firefox */
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    .notification-item {
+      display: block;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .notification-item:hover {
+      background-color: #f8fafc !important;
+    }
+  </style>
+
   <script th:src="@{/assets/js/fetch-interceptor.js}"></script>
 
   <!-- BỘ KIỂM TRA QUYỀN HẠN & ĐĂNG NHẬP -->
@@ -100,37 +133,43 @@
       </h5>
     </div>
     
-    <ul class="topbar-actions list-unstyled" layout:fragment="topbar-actions">
-      <!-- Notification Bell -->
-      <li class="dropdown">
-        <button class="notification-trigger position-relative text-secondary d-flex align-items-center justify-content-center border-0"
-                type="button"
-                id="notificationDropdown"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                aria-label="Pending quiz notifications">
-          <i class="ti ti-bell-ringing fs-5 text-dark"></i>
-          <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm d-none">0</span>
-        </button>
-        <div class="dropdown-menu dropdown-menu-end notification-menu p-0 border-0" aria-labelledby="notificationDropdown">
-          <div class="p-3 border-bottom bg-white">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <h6 class="fw-900 text-dark mb-1">Notifications</h6>
-                <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Loading notifications...</p>
+    <div class="d-flex align-items-center gap-3">
+      <!-- Page-specific actions (like 'My Quizzes') -->
+      <ul class="topbar-actions list-unstyled d-flex align-items-center gap-2 mb-0" layout:fragment="topbar-actions">
+      </ul>
+      
+      <!-- Global Notification Bell -->
+      <ul class="list-unstyled mb-0">
+        <li class="dropdown position-relative">
+          <button class="notification-trigger position-relative text-secondary d-flex align-items-center justify-content-center border-0 bg-transparent"
+                  type="button"
+                  id="notificationDropdown"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  aria-label="Pending quiz notifications">
+            <i class="ti ti-bell-ringing fs-5 text-dark"></i>
+            <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm d-none">0</span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end notification-menu p-0 border-0 shadow-lg" aria-labelledby="notificationDropdown" style="width: 380px; max-height: 85vh; overflow-y: hidden; border-radius: 12px; position: absolute; right: 0; left: auto; top: 100%; margin-top: 0.5rem;">
+            <div class="p-3 border-bottom bg-white">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 class="fw-900 text-dark mb-1">Notifications</h6>
+                  <p class="small text-muted fw-semibold mb-0" id="notificationSummary">Loading notifications...</p>
+                </div>
+                <button onclick="markAllAsRead(event)" class="btn btn-sm btn-light text-primary fw-bold border-0 p-1" title="Mark all as read"><i class="ti ti-checks fs-5"></i></button>
               </div>
-              <button onclick="markAllAsRead(event)" class="btn btn-sm btn-light text-primary fw-bold border-0 p-1" title="Mark all as read"><i class="ti ti-checks fs-5"></i></button>
+            </div>
+            <div id="notificationList" class="notification-list">
+              <div class="text-center text-muted py-4 px-3">
+                <div class="spinner-border text-primary mb-2" role="status"></div>
+                <p class="small fw-semibold mb-0">Loading notifications...</p>
+              </div>
             </div>
           </div>
-          <div id="notificationList" class="notification-list">
-            <div class="text-center text-muted py-4 px-3">
-              <div class="spinner-border text-primary mb-2" role="status"></div>
-              <p class="small fw-semibold mb-0">Loading notifications...</p>
-            </div>
-          </div>
-        </div>
-      </li>
-    </ul>
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>
 
@@ -715,6 +754,9 @@
                       </div>
                     </a>`;
                   
+                  // Dispatch custom event for page-specific real-time updates
+                  window.dispatchEvent(new CustomEvent('notificationReceived', { detail: notif }));
+                  
                   const list = document.getElementById('notificationList');
                   if (list) {
                       // Remove empty state if present
@@ -749,8 +791,29 @@
       }
 
       const notificationDropdown = document.getElementById('notificationDropdown');
+      const notificationMenu = document.querySelector('.notification-menu');
       if (notificationDropdown) {
           notificationDropdown.addEventListener('show.bs.dropdown', fetchNotifications);
+          
+          // Fallback for pages where Bootstrap JS might fail (e.g. learning-node with require.js)
+          notificationDropdown.addEventListener('click', function(e) {
+              // If Bootstrap didn't add the show class automatically after a tiny delay, do it manually
+              setTimeout(() => {
+                  if (notificationMenu && !notificationMenu.classList.contains('show')) {
+                      notificationMenu.classList.add('show');
+                      fetchNotifications();
+                  } else if (notificationMenu && notificationMenu.classList.contains('show') && !notificationDropdown.getAttribute('aria-expanded')) {
+                      notificationMenu.classList.remove('show');
+                  }
+              }, 10);
+          });
+          
+          // Click outside to close (fallback)
+          document.addEventListener('click', function(e) {
+              if (notificationMenu && notificationMenu.classList.contains('show') && !notificationMenu.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                  notificationMenu.classList.remove('show');
+              }
+          });
       }
 
       // Dropdown toggle handler

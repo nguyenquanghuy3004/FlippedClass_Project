@@ -27,7 +27,7 @@ public class GroupActivityValidator {
     }
 
     public void validateUserNotInAnyGroup(Long studentId, Long activityId) {
-        boolean exists = memberRepository.existsByActivityIdAndStudentIdWithLock(activityId, studentId);
+        boolean exists = memberRepository.existsByActivityIdAndStudentId(activityId, studentId);
         if (exists) {
             throw new BusinessException("ALREADY_IN_GROUP: Student already in a group for this activity");
         }

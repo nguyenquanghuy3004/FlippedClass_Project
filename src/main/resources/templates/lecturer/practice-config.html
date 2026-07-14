@@ -266,9 +266,14 @@
             <div><i class="ti ti-loader-2 ti-spin"></i> Loading discussions...</div>
          </div>
       </div>
-      <div class="comment-compose" style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-        <textarea id="discussion-input" placeholder="Write a comment or question..." style="width: 100%; border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1; font-size: 0.875rem; resize: vertical; margin-bottom: 8px;" rows="3"></textarea>
-        <button id="discussion-submit" type="button" onclick="submitDiscussion()" style="width: 100%; padding: 8px; border-radius: 6px; background: #818cf8; color: white; border: none; font-weight: 500; cursor: pointer; transition: background 0.2s;">Send Comment</button>
+      <div class="comment-compose" style="margin-top: 16px; display: flex; gap: 8px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+        <img src="/assets/images/avatar-1.jpg" alt="avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='/assets/images/avatar-1.jpg'">
+        <div style="flex: 1;">
+          <textarea id="discussion-input" placeholder="Write a comment..." style="width: 100%; border-radius: 20px; padding: 10px 14px; border: 1px solid #ccd0d5; font-size: 0.9rem; background: #f0f2f5; resize: none; overflow: hidden; min-height: 42px;" rows="1" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+          <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+            <button id="discussion-submit" type="button" onclick="submitDiscussion()" style="padding: 6px 16px; border-radius: 6px; background: #0866ff; color: white; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s;">Send</button>
+          </div>
+        </div>
       </div>`;
     }
 
@@ -290,10 +295,12 @@
         if (input && btn) {
           input.addEventListener('input', () => {
             btn.disabled = input.value.trim().length === 0;
-            btn.style.background = btn.disabled ? '#a5b4fc' : '#6366f1';
+            btn.style.background = btn.disabled ? '#e4e6eb' : '#0866ff';
+            btn.style.color = btn.disabled ? '#bcc0c4' : 'white';
           });
           btn.disabled = input.value.trim().length === 0;
-          btn.style.background = btn.disabled ? '#a5b4fc' : '#6366f1';
+          btn.style.background = btn.disabled ? '#e4e6eb' : '#0866ff';
+          btn.style.color = btn.disabled ? '#bcc0c4' : 'white';
         }
       }, 100);
 
@@ -301,11 +308,11 @@
     }
 
     function renderDiscussionItem(d, isReply = false, rootId = null) {
-      const isPinned = d.pinned ? `<span class="badge bg-warning-subtle text-warning ms-2" style="font-size: 0.6rem;"><i class="ti ti-pin"></i> Pinned</span>` : '';
-      const isSolved = d.status === 'SOLVED' ? `<span class="badge bg-success-subtle text-success ms-2" style="font-size: 0.6rem;"><i class="ti ti-check"></i> Solved</span>` : '';
+      const isPinned = d.pinned ? `<span class="badge bg-warning-subtle text-warning ms-1" style="font-size: 0.6rem; padding: 0.2em 0.4em;"><i class="ti ti-pin"></i></span>` : '';
+      const isSolved = d.status === 'SOLVED' ? `<span class="badge bg-success-subtle text-success ms-1" style="font-size: 0.6rem; padding: 0.2em 0.4em;"><i class="ti ti-check"></i> Solved</span>` : '';
 
-      const roleBadge = d.authorRole === 'LECTURER' ? `<span class="badge bg-primary-subtle text-primary ms-2" style="font-size: 0.6rem;">Lecturer</span>` :
-        (d.authorRole === 'SUPPORTER' ? `<span class="badge bg-info-subtle text-info ms-2" style="font-size: 0.6rem;">Supporter</span>` : '');
+      const roleBadge = d.authorRole === 'LECTURER' ? `<span class="badge bg-primary-subtle text-primary ms-1" style="font-size: 0.6rem; padding: 0.2em 0.4em;">Lecturer</span>` :
+        (d.authorRole === 'SUPPORTER' ? `<span class="badge bg-info-subtle text-info ms-1" style="font-size: 0.6rem; padding: 0.2em 0.4em;">Supporter</span>` : '');
 
       const dateStr = new Date(d.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -318,45 +325,46 @@
       let moderationButtons = '';
       if (!isReply) {
         moderationButtons = `
-             <button onclick="toggleSolved(${d.id})" title="Mark as Solved" style="border:none; background:none; color:#10b981; cursor:pointer; padding:0; margin-right: 8px;">Solved</button>
-             <button onclick="togglePin(${d.id})" title="Pin/Unpin" style="border:none; background:none; color:#f59e0b; cursor:pointer; padding:0; margin-right: 8px;">Pin</button>
+             <button onclick="toggleSolved(${d.id})" title="Mark as Solved" style="border:none; background:none; color:#65676B; cursor:pointer; padding:0; margin-right: 12px; font-weight: bold; font-size: 12px;">Solved</button>
+             <button onclick="togglePin(${d.id})" title="Pin/Unpin" style="border:none; background:none; color:#65676B; cursor:pointer; padding:0; margin-right: 12px; font-weight: bold; font-size: 12px;">Pin</button>
          `;
       }
       moderationButtons += `
-         <button onclick="deleteDiscussion(${d.id})" title="Delete" style="border:none; background:none; color:#ef4444; cursor:pointer; padding:0;">Delete</button>
+         <button onclick="deleteDiscussion(${d.id})" title="Delete" style="border:none; background:none; color:#65676B; cursor:pointer; padding:0; font-weight: bold; font-size: 12px;">Delete</button>
       `;
 
       let html = `
-      <div class="comment-item ${isReply ? 'comment-reply' : ''}" style="display: flex; gap: 12px; margin-bottom: 16px;">
-        <img src="${escapeHtml(avatar)}" alt="avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='${defaultAvt}'">
-        <div style="flex: 1; background: #f8f9fa; border-radius: 8px; padding: 10px 14px; ${d.pinned ? 'border-left: 3px solid #f59e0b;' : ''}">
-          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-            <div>
-              <strong style="font-size: 0.9rem; color: #1e293b;">${escapeHtml(author)}</strong>
+      <div class="comment-item ${isReply ? 'comment-reply' : ''}" style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <img src="${escapeHtml(avatar)}" alt="avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-top: 4px;" onerror="this.src='${defaultAvt}'">
+        <div style="flex: 1;">
+          <div style="background: ${d.pinned ? '#fffbeb' : '#f0f2f5'}; border-radius: 18px; padding: 8px 12px; display: inline-block; max-width: 100%; border: ${d.pinned ? '1px solid #fcd34d' : '1px solid transparent'};">
+            <strong style="font-size: 0.85rem; color: #050505; display: block; margin-bottom: 2px;">
+              ${escapeHtml(author)}
               ${roleBadge}
               ${isPinned}
               ${isSolved}
-            </div>
-            <span style="font-size: 0.75rem; color: #64748b;">${escapeHtml(dateStr)}</span>
+            </strong>
+            <div style="font-size: 0.9rem; color: #050505; white-space: pre-wrap; line-height: 1.4; word-break: break-word;" id="comment-content-${d.id}">${escapeHtml(d.content)}</div>
           </div>
-          <div style="font-size: 0.875rem; color: #334155; margin-bottom: 8px; white-space: pre-wrap;" id="comment-content-${d.id}">${escapeHtml(d.content)}</div>
           
-          <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #64748b; justify-content: space-between;">
-            <div>
-              <button type="button" onclick="openReplyBox(${currentRootId}, '${safeAuthor}')" style="border:none; background:none; color:#3b82f6; cursor:pointer; padding:0; font-weight: 500;">Reply</button>
-            </div>
-            <div>
-              ${moderationButtons}
-            </div>
+          <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #65676B; margin-top: 4px; padding-left: 12px; align-items: center;">
+            <span style="font-weight: normal;">${escapeHtml(dateStr)}</span>
+            <button type="button" onclick="openReplyBox(${currentRootId}, '${safeAuthor}')" style="border:none; background:none; color:#65676B; cursor:pointer; padding:0; font-weight: bold; font-size: 12px;">Reply</button>
+            ${moderationButtons}
           </div>
 
           <!-- Reply Form -->
           ${!isReply ? `
-          <div id="reply-form-${d.id}" style="display: none; margin-top: 12px;">
-            <textarea id="reply-input-${d.id}" placeholder="Write a reply..." class="form-control" style="width: 100%; border-radius: 6px; padding: 8px; border: 1px solid #e2e8f0; font-size: 0.875rem; margin-bottom: 8px;" rows="2"></textarea>
+          <div id="reply-form-${d.id}" style="display: none; margin-top: 8px; padding-left: 12px;">
             <div style="display: flex; gap: 8px;">
-              <button type="button" onclick="submitDiscussion(${d.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #3b82f6; color: white; border: none; cursor: pointer;">Reply</button>
-              <button type="button" onclick="hideReplyForm(${d.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 4px; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
+              <img src="${defaultAvt}" alt="me" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; margin-top: 4px;">
+              <div style="flex: 1;">
+                <textarea id="reply-input-${d.id}" placeholder="Write a reply..." class="form-control" style="width: 100%; border-radius: 18px; padding: 8px 12px; border: 1px solid #ccd0d5; font-size: 0.85rem; background: #f0f2f5; resize: none; overflow: hidden; min-height: 38px;" rows="1" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                  <button type="button" onclick="submitDiscussion(${d.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 6px; background: #0866ff; color: white; border: none; cursor: pointer; font-weight: bold;">Reply</button>
+                  <button type="button" onclick="hideReplyForm(${d.id})" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 6px; background: transparent; color: #65676B; border: none; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#f0f2f5'" onmouseout="this.style.background='transparent'">Cancel</button>
+                </div>
+              </div>
             </div>
           </div>
           ` : ''}
@@ -365,7 +373,7 @@
       `;
 
       if (!isReply && d.replies && d.replies.length > 0) {
-        html += `<div style="padding-left: 32px; border-left: 2px solid #e2e8f0; margin-left: 16px; margin-bottom: 16px;">`;
+        html += `<div style="padding-left: 40px; margin-bottom: 12px;">`;
         d.replies.forEach(r => {
           html += renderDiscussionItem(r, true, d.id);
         });

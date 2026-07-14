@@ -44,7 +44,7 @@
                     </a>
 
                     <!-- Right: options menu -->
-                    <div class="dropdown" th:unless="${isSupporter != null and isSupporter}">
+                    <div class="dropdown">
                         <button class="node-options-btn" data-bs-toggle="dropdown" th:style="${node.nodeType == 'PRACTICE'} ? 'color: #94a3b8;' : ''">
                             <i class="ti ti-dots-vertical"></i>
                         </button>
@@ -68,20 +68,19 @@
                                     <i class="ti ti-trash"></i> Delete Lesson
                                 </a>
                             </li>
-
-                            <li th:if="${node.nodeType == 'VIDEO'}">
+                            <li th:if="${node.nodeType == 'VIDEO' or node.nodeType == 'LESSON'}">
                                 <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-video-btn"
                                    href="#" th:data-nodeid="${node.id}">
                                     <i class="ti ti-upload" style="color:#4f46e5;"></i> Upload Video (MP4)
                                 </a>
                             </li>
-                            <li th:if="${node.nodeType == 'VIDEO'}">
+                            <li th:if="${node.nodeType == 'VIDEO' or node.nodeType == 'LESSON'}">
                                 <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 delete-video-btn"
                                    href="#" th:data-nodeid="${node.id}">
                                     <i class="ti ti-trash" style="color:#ef4444;"></i> Delete Video
                                 </a>
                             </li>
-                            <li th:if="${node.nodeType == 'VIDEO'}">
+                            <li th:if="${node.nodeType == 'VIDEO' or node.nodeType == 'LESSON'}">
                                 <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 add-youtube-btn"
                                    href="#" th:data-nodeid="${node.id}" style="color:#ef4444;">
                                     <i class="ti ti-brand-youtube"></i> Add Youtube Link
@@ -91,12 +90,6 @@
                                 <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 upload-document-btn"
                                    href="#" th:data-nodeid="${node.id}" style="color:#059669;">
                                     <i class="ti ti-file-upload"></i> Upload Document (PDF)
-                                </a>
-                            </li>
-                            <li th:if="${node.nodeType == 'VIDEO'}">
-                                <a class="dropdown-item rounded-3 d-flex align-items-center gap-2 create-quiz-btn"
-                                   href="#" th:data-nodeid="${node.id}" style="color:#8b5cf6;">
-                                    <i class="ti ti-brain"></i> Create Quiz
                                 </a>
                             </li>
                         </ul>
@@ -208,11 +201,10 @@
                             <div class="mb-3">
                                 <label for="nodeType" class="form-label fw-semibold small" style="color:#312e81;">Lesson Type</label>
                                 <select class="form-select border-0 rounded-3" style="background:#f4f5fb;" id="nodeType">
-<!--                                    <option value="LESSON" th:unless="${isSupporter != null and isSupporter}">📖 Theory Lesson</option>-->
                                     <option value="PRACTICE">💻 Practice Module</option>
                                     <option value="VIDEO">▶️ Video Lesson</option>
                                     <option value="DOCUMENT">📄 Document</option>
-<!--                                    <option value="REVIEW" th:unless="${isSupporter != null and isSupporter}">🔁 Review Session</option>-->
+
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -274,11 +266,11 @@
                             <div class="mb-3">
                                 <label for="editNodeType" class="form-label fw-semibold small" style="color:#312e81;">Lesson Type</label>
                                 <select class="form-select border-0 rounded-3" style="background:#f4f5fb;" id="editNodeType">
-                                    <option value="LESSON" th:unless="${isSupporter != null and isSupporter}">📖 Theory Lesson</option>
+                                    <option value="LESSON">📖 Theory Lesson</option>
                                     <option value="PRACTICE">💻 Practice Module</option>
                                     <option value="VIDEO">▶️ Video Lesson</option>
                                     <option value="DOCUMENT">📄 Document</option>
-                                    <option value="REVIEW" th:unless="${isSupporter != null and isSupporter}">🔁 Review Session</option>
+                                    <option value="REVIEW">🔁 Review Session</option>
                                 </select>
                             </div>
                             <!-- Video Section -->
@@ -364,7 +356,6 @@
         <!-- Hidden file inputs -->
         <input type="file" id="hiddenVideoInput" accept="video/mp4,video/x-m4v,video/*" style="display:none;">
         <input type="file" id="hiddenDocumentInput" accept=".pdf" style="display:none;">
-        
         <script>
             document.addEventListener('show.bs.dropdown', function(event) {
                 let card = event.target.closest('.node-card');

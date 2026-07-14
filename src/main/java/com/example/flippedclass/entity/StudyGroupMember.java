@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "study_group_members", uniqueConstraints = {
-    @UniqueConstraint(name = "uq_group_member", columnNames = {"group_id", "student_id"})
+    @UniqueConstraint(name = "uq_group_member", columnNames = {"study_group_id", "student_id"})
 })
 @Getter
 @Setter
@@ -23,7 +23,7 @@ public class StudyGroupMember {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", nullable = false)
+    @JoinColumn(name = "study_group_id", nullable = false)
     @JsonIgnore
     private StudyGroup group;
 
