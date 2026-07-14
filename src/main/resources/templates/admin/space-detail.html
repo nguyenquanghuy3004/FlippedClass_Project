@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{admin/layout}">
 <head>
     <title>Space Detail - Admin</title>
@@ -146,6 +146,25 @@
                             <span class="visually-hidden">Loading...</span>
                         </div>
                         <p>Loading roadmap...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white p-4 border-bottom-0">
+                    <h5 class="mb-0 fw-bold"><i class="ti ti-chart-bar me-2 text-success"></i>Learning Analytics</h5>
+                </div>
+                <div class="card-body p-4 pt-0" id="analytics-container">
+                    <div class="text-center text-muted py-5">
+                        <div class="spinner-border text-success mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>Loading analytics...</p>
                     </div>
                 </div>
             </div>
@@ -363,7 +382,93 @@
         document.addEventListener("DOMContentLoaded", function() {
             loadSpaceDetail();
             loadSpaceRoadmap();
+            loadSpaceAnalytics();
         });
+
+        function loadSpaceAnalytics() {
+            $.ajax({
+                url: `/api/admin/spaces/${spaceId}/analytics`,
+                type: 'GET',
+                success: function(data) {
+                    let html = `
+                        <div class="row g-4 mb-4 text-center">
+                            <div class="col-md-3">
+                                <div class="p-3 bg-light rounded">
+                                    <h3 class="fw-bold text-dark mb-1">${data.totalStudents}</h3>
+                                    <p class="text-muted small mb-0">Total Students</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-light rounded">
+                                    <h3 class="fw-bold text-primary mb-1">${data.averageProgress}%</h3>
+                                    <p class="text-muted small mb-0">Avg Progress</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-light rounded">
+                                    <h3 class="fw-bold text-success mb-1">${data.activeStudents}</h3>
+                                    <p class="text-muted small mb-0">Active (Last 7d)</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-light rounded">
+                                    <h3 class="fw-bold text-warning mb-1">${data.supporterCandidates}</h3>
+                                    <p class="text-muted small mb-0">Top Students</p>
+                                </div>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold mb-3 mt-4">Student Progress Details</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Student Name</th>
+                                        <th>Username</th>
+                                        <th>Progress</th>
+                                        <th>Quiz Avg</th>
+                                        <th>Last Active</th>
+                                        <th>Top Student</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    if (!data.students || data.students.length === 0) {
+                        html += '<tr><td colspan="6" class="text-center text-muted py-3">No students found.</td></tr>';
+                    } else {
+                        data.students.forEach(student => {
+                            const progressColor = student.progressPercentage >= 80 ? 'success' : (student.progressPercentage >= 50 ? 'primary' : 'warning');
+                            const topBadge = student.supporterCandidate ? '<span class="badge bg-warning"><i class="ti ti-star-filled me-1"></i> YES</span>' : '<span class="text-muted">-</span>';
+                            
+                            html += `
+                                <tr>
+                                    <td class="fw-bold text-dark">${student.studentName || 'N/A'}</td>
+                                    <td class="text-muted small">${student.username}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height: 6px;">
+                                                <div class="progress-bar bg-${progressColor}" role="progressbar" style="width: ${student.progressPercentage}%;"></div>
+                                            </div>
+                                            <span class="small fw-bold text-${progressColor}">${student.progressPercentage}%</span>
+                                        </div>
+                                        <div class="small text-muted mt-1">${student.completedNodes} / ${student.totalNodes} nodes</div>
+                                    </td>
+                                    <td class="fw-medium">${student.quizAvg}</td>
+                                    <td class="text-muted small">${student.lastActive}</td>
+                                    <td>${topBadge}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    html += `</tbody></table></div>`;
+                    $('#analytics-container').html(html);
+                },
+                error: function(err) {
+                    console.error("Failed to load analytics", err);
+                    $('#analytics-container').html('<div class="alert alert-danger">Failed to load learning analytics.</div>');
+                }
+            });
+        }
 
         function scrollToRoadmap() {
             document.getElementById('roadmap-container').scrollIntoView({ behavior: 'smooth', block: 'start' });

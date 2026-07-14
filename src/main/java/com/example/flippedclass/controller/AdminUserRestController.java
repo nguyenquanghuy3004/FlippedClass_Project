@@ -11,6 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.multipart.MultipartFile;
+import com.example.flippedclass.dto.admin.AdminUserCreateDto;
+
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
@@ -32,6 +35,16 @@ public class AdminUserRestController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDetailDto> getUserDetail(@PathVariable Long id) {
         return ResponseEntity.ok(adminUserService.getUserDetail(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<UserAdminDto> createUser(@RequestBody AdminUserCreateDto dto) {
+        return ResponseEntity.ok(adminUserService.createUser(dto));
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<java.util.Map<String, Object>> importUsers(@RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(adminUserService.importUsersFromExcel(file));
     }
 
     @com.example.flippedclass.annotation.LogUserActivity(actionType = "LOCK_USER", description = "'Đã khóa tài khoản user có ID: ' + #id")

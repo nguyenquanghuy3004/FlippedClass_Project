@@ -34,6 +34,7 @@ public class LearningPathController {
         return ResponseEntity.ok(learningPathService.createLearningPath(spaceId, request));
     }
 
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "CREATE_NODE", description = "'Tạo mới bài học: ' + #request.title")
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PostMapping("/{pathId}/learning-nodes")
     public ResponseEntity<LearningNodeResponse> createLearningNode( @PathVariable Long spaceId, @PathVariable Long pathId,

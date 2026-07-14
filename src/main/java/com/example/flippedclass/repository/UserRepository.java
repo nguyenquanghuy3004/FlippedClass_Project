@@ -18,11 +18,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByRolesName(RoleName name);
 
-    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u JOIN u.roles r WHERE " +
+    @org.springframework.data.jpa.repository.Query("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE " +
             "(:keyword IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
             "(:role IS NULL OR r.name = :role) AND " +
             "(:status IS NULL OR u.status = :status)")
-
     Page<User> findUsersWithFilters(
             @org.springframework.data.repository.query.Param("keyword") String keyword,
             @org.springframework.data.repository.query.Param("role") RoleName role,

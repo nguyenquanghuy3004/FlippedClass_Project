@@ -150,6 +150,7 @@ public class QuizController {
         return quizService.getStatistics(quizId);
     }
 
+    @com.example.flippedclass.annotation.LogUserActivity(actionType = "SUBMIT_QUIZ", description = "'Đã nộp bài Quiz ID: ' + #quizId")
     @PostMapping("/{quizId}/attempts")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Submit a quiz attempt")

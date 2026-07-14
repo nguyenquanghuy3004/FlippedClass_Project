@@ -6,6 +6,8 @@ import com.example.flippedclass.dto.LearningSpaceDto;
 import com.example.flippedclass.dto.response.MessageResponse;
 import com.example.flippedclass.enums.LearningSpaceStatus;
 import com.example.flippedclass.service.AdminSpaceService;
+import com.example.flippedclass.dto.response.SpaceAnalyticsDTO;
+import com.example.flippedclass.service.LearningAnalyticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 public class AdminSpaceRestController {
     @Autowired
     private AdminSpaceService adminSpaceService;
+    
+    @Autowired
+    private LearningAnalyticsService analyticsService;
 
     @GetMapping
     public ResponseEntity<Page<LearningSpaceDto>> getAllSpaces(
@@ -46,4 +51,8 @@ public class AdminSpaceRestController {
         return ResponseEntity.ok(new MessageResponse("Space status updated to " + status));
     }
 
+    @GetMapping("/{spaceId}/analytics")
+    public ResponseEntity<SpaceAnalyticsDTO> getSpaceAnalytics(@PathVariable Long spaceId) {
+        return ResponseEntity.ok(analyticsService.getSpaceAnalytics(spaceId));
+    }
 }
