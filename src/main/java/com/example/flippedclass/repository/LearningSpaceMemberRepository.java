@@ -50,4 +50,10 @@ public interface LearningSpaceMemberRepository extends JpaRepository<LearningSpa
     Optional<LearningSpaceMember> findByIdAndLearningSpaceId(Long id, Long learningSpaceId);
     
     Optional<LearningSpaceMember> findByLearningSpace_IdAndUser_Id(Long learningSpaceId, Long userId);
+
+    @Query("SELECT u FROM User u JOIN LearningSpaceMember lsm ON u.id = lsm.user.id " +
+           "WHERE lsm.learningSpace.id = :spaceId AND lsm.role = 'MEMBER' AND lsm.status != 'INACTIVE' " +
+           "AND u.id NOT IN (SELECT sgm.student.id FROM StudyGroupMember sgm WHERE sgm.group.activity.id = :activityId) " +
+           "AND (:keyword IS NULL OR :keyword = '' OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    List<User> findAvailableStudentsForActivity(@Param("spaceId") Long spaceId, @Param("activityId") Long activityId, @Param("keyword") String keyword);
 }

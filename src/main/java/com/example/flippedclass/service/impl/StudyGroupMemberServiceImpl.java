@@ -25,6 +25,7 @@ public class StudyGroupMemberServiceImpl implements StudyGroupMemberService {
     private final StudyGroupRepository groupRepository;
     private final StudyGroupMemberRepository memberRepository;
     private final UserRepository userRepository;
+    private final com.example.flippedclass.repository.LearningSpaceMemberRepository learningSpaceMemberRepository;
     private final GroupActivityValidator validator;
 
     @Override
@@ -106,5 +107,43 @@ public class StudyGroupMemberServiceImpl implements StudyGroupMemberService {
 
         memberRepository.saveAll(List.of(currentLeaderMember, newLeaderMember));
         groupRepository.save(group);
+    }
+
+    @Override
+    @Transactional
+    public void addMember(Long groupId, Long currentUserId, Long studentId) {
+        if (currentUserId.equals(studentId)) {
+            throw new BusinessException("CANNOT_ADD_SELF: Cannot add yourself");
+        }
+
+        StudyGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException("Group not found"));
+
+        if (!group.getLeader().getId().equals(currentUserId)) {
+            throw new BusinessException("ONLY_LEADER: Only the leader can add members");
+        }
+
+        validator.validateActivityOpen(group.getActivity());
+        validator.validateGroupCapacity(group, group.getActivity());
+
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new NotFoundException("Student not found"));
+
+        Long spaceId = group.getActivity().getLearningSpace().getId();
+        boolean inSpace = learningSpaceMemberRepository.existsByLearningSpaceIdAndUserId(spaceId, studentId);
+        if (!inSpace) {
+            throw new BusinessException("NOT_IN_SPACE: Student is not in this learning space");
+        }
+
+        validator.validateUserNotInAnyGroup(studentId, group.getActivity().getId());
+
+        StudyGroupMember newMember = StudyGroupMember.builder()
+                .group(group)
+                .student(student)
+                .role(GroupRole.MEMBER)
+                .joinedAt(LocalDateTime.now())
+                .build();
+
+        memberRepository.save(newMember);
     }
 }

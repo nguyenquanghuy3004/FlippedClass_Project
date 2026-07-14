@@ -179,7 +179,10 @@ window.renderGroupActivityPage = async function(node, nodeId) {
 
                 <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; margin-top: 24px;">
                     <div>
-                        <h3 style="font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">Thành viên</h3>
+                        <h3 style="font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            Thành viên
+                            ${isLeader && activity.status === 'OPEN' && myGroup.members.length < activity.maxMembers ? `<button class="ga-btn ga-btn-primary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="window.openAddMemberModal(${activity.id}, ${myGroup.id}, ${nodeId})"><i class="ti ti-user-plus"></i> Thêm thành viên</button>` : ''}
+                        </h3>
                         <div class="member-list">
                             ${myGroup.members.map(m => `
                                 <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: white;">
@@ -343,6 +346,76 @@ window.handleSubmitWork = async (groupId, nodeId) => {
             body: JSON.stringify({ githubRepoUrl: repoUrl, note })
         });
         if (!res.ok) throw new Error(await readError(res));
+        window.renderGroupActivityPage({ nodeType: 'GROUP_ACTIVITY' }, nodeId);
+    } catch (e) { alert(e.message); }
+};
+
+window.openAddMemberModal = async (activityId, groupId, nodeId) => {
+    let modal = document.getElementById('addMemberModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'addMemberModal';
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;';
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 12px; width: 400px; max-width: 90%; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">Thêm thành viên</h3>
+                    <button onclick="document.getElementById('addMemberModal').style.display='none'" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+                </div>
+                <input type="text" id="addMemberSearchInput" class="ga-input" placeholder="Tìm kiếm sinh viên..." onkeyup="window.searchAvailableStudents(${activityId}, ${groupId}, ${nodeId})" />
+                <div id="addMemberList" style="margin-top: 16px; max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    modal.style.display = 'flex';
+    document.getElementById('addMemberSearchInput').value = '';
+    window.searchAvailableStudents(activityId, groupId, nodeId);
+};
+
+window.searchAvailableStudents = async (activityId, groupId, nodeId) => {
+    const keyword = document.getElementById('addMemberSearchInput').value.trim();
+    const listContainer = document.getElementById('addMemberList');
+    try {
+        const res = await fetch(`/api/v1/activities/${activityId}/available-students${keyword ? '?keyword=' + encodeURIComponent(keyword) : ''}`, {
+            headers: authHeaders()
+        });
+        if (!res.ok) throw new Error("Lỗi khi tìm kiếm sinh viên");
+        const students = await res.json();
+        
+        if (students.length === 0) {
+            listContainer.innerHTML = '<div style="text-align: center; color: #64748b; font-size: 0.9rem;">Không có kết quả</div>';
+            return;
+        }
+        
+        const escapeHtml = (unsafe) => {
+            return (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        };
+
+        listContainer.innerHTML = students.map(s => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <div>
+                    <div style="font-weight: 600; font-size: 0.9rem; color: #0f172a;">${escapeHtml(s.fullName || 'User')}</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">${escapeHtml(s.username)}</div>
+                </div>
+                <button class="ga-btn ga-btn-primary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="window.handleAddMember(${groupId}, ${s.id}, ${nodeId})">Thêm</button>
+            </div>
+        `).join('');
+    } catch (e) {
+        listContainer.innerHTML = `<div style="text-align: center; color: #ef4444; font-size: 0.9rem;">${e.message}</div>`;
+    }
+};
+
+window.handleAddMember = async (groupId, studentId, nodeId) => {
+    try {
+        const res = await fetch(`/api/v1/groups/${groupId}/members`, {
+            method: 'POST',
+            headers: authHeaders(true),
+            body: JSON.stringify({ studentId })
+        });
+        if (!res.ok) throw new Error(await readError(res));
+        document.getElementById('addMemberModal').style.display = 'none';
         window.renderGroupActivityPage({ nodeType: 'GROUP_ACTIVITY' }, nodeId);
     } catch (e) { alert(e.message); }
 };
