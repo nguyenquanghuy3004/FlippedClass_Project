@@ -27,6 +27,19 @@
           </a>
         </div>
 
+        <ul class="nav nav-pills mb-3 mt-2" id="spaceTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill px-4 fw-bold shadow-sm" id="tab-student" data-bs-toggle="pill" type="button" role="tab" onclick="switchSpaceTab('student')">
+              <i class="ti ti-school me-1"></i> As Student
+            </button>
+          </li>
+          <li class="nav-item ms-2" role="presentation">
+            <button class="nav-link rounded-pill px-4 fw-bold shadow-sm" id="tab-supporter" data-bs-toggle="pill" type="button" role="tab" onclick="switchSpaceTab('supporter')">
+              <i class="ti ti-star me-1"></i> As Supporter
+            </button>
+          </li>
+        </ul>
+
         <div class="row g-3" id="learningSpaceList">
           <div class="col-12">
             <div class="bento-card text-center text-muted py-4">
@@ -170,12 +183,29 @@
     );
   }
 
+  window.currentSpaceTab = 'student';
+
+  window.switchSpaceTab = function(tab) {
+    window.currentSpaceTab = tab;
+    currentLearningSpacePage = 1;
+    if (window.currentDashboardData && window.currentDashboardData.learningSpaces) {
+      renderLearningSpaces(window.currentDashboardData.learningSpaces);
+    }
+  };
+
   function getJoinedSpaces(learningSpaces) {
     return (learningSpaces || []).filter((space) => {
-      if (typeof space.joined === 'boolean') {
-        return space.joined;
+      let isJoined = typeof space.joined === 'boolean' ? space.joined : true;
+      if (!isJoined) return false;
+      
+      let spaceRole = space.memberRole || 'MEMBER';
+      if (window.currentSpaceTab === 'student') {
+        // Sinh viên dù được thăng cấp làm SUPPORTER ở lớp chính thì vẫn là người đi học ở lớp đó
+        return spaceRole === 'MEMBER' || spaceRole === 'SUPPORTER';
+      } else {
+        // Tab "As Supporter" (hoặc Mentoring) chỉ hiện những nhóm do TỰ TAY họ tạo ra (OWNER)
+        return spaceRole === 'OWNER';
       }
-      return true;
     });
   }
 

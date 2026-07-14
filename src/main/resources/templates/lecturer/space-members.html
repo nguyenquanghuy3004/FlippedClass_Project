@@ -161,10 +161,16 @@
                     url: `/api/spaces/${spaceId}/members/${memberId}/promote`,
                     method: 'POST',
                     success: function() {
+                        Swal.fire('Thành công', 'Đã thăng cấp thành viên lên Supporter!', 'success');
                         loadMembers();
                     },
                     error: function(err) {
-                        alert('Error promoting member');
+                        try {
+                            const response = JSON.parse(err.responseText);
+                            Swal.fire('Lỗi', response.message || 'Error promoting member', 'error');
+                        } catch (e) {
+                            Swal.fire('Lỗi', 'Error promoting member', 'error');
+                        }
                     }
                 });
             }
@@ -176,10 +182,11 @@
                     url: `/api/spaces/${spaceId}/members/${memberId}/demote`,
                     method: 'POST',
                     success: function() {
+                        Swal.fire('Thành công', 'Đã giáng cấp thành viên xuống Member!', 'success');
                         loadMembers();
                     },
                     error: function(err) {
-                        alert('Error demoting member');
+                        Swal.fire('Lỗi', 'Error demoting member', 'error');
                     }
                 });
             }

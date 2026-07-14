@@ -1,8 +1,10 @@
 package com.example.flippedclass.service.impl;
 
 import com.example.flippedclass.dto.mentor.MemberDto;
+import com.example.flippedclass.dto.response.UserResponse;
 import com.example.flippedclass.entity.LearningSpaceMember;
 import com.example.flippedclass.enums.MemberRole;
+import com.example.flippedclass.exception.BusinessException;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.service.LearningSpaceMemberService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -42,19 +47,6 @@ public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberServic
             throw new RuntimeException("Cannot change role of OWNER");
         }
         
-        // Check if student belongs to STRONG group
-        java.util.Map<String, java.util.List<java.util.Map<String, Object>>> classified = peerMentoringService.classifyStudents(spaceId);
-        java.util.List<java.util.Map<String, Object>> strongGroup = classified.get("STRONG");
-        boolean isStrong = strongGroup.stream()
-                .anyMatch(m -> {
-                    com.example.flippedclass.dto.response.UserResponse u = (com.example.flippedclass.dto.response.UserResponse) m.get("user");
-                    return u.getId().equals(member.getUser().getId());
-                });
-                
-        if (!isStrong) {
-            throw new RuntimeException("Chỉ cho phép thăng cấp thành viên thuộc nhóm học tập tốt (STRONG) làm Supporter!");
-        }
-
         member.setRole(MemberRole.SUPPORTER);
         memberRepository.save(member);
     }

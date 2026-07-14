@@ -775,13 +775,21 @@
             method: 'DELETE',
             headers: authHeaders()
           });
-          if (!res.ok && res.status !== 204) throw new Error('Delete failed');
+          if (!res.ok && res.status !== 204) {
+            let errorMsg = 'Delete failed';
+            try {
+              const errJson = await res.json();
+              if (errJson.message) errorMsg = errJson.message;
+            } catch(e) {}
+            throw new Error(errorMsg);
+          }
           toast('Quiz deleted successfully!');
         }
         document.getElementById('deleteModal').classList.remove('show');
         await fetchMyQuizzes();
       } catch (e) {
         toast(e.message, true);
+        console.error('Delete error:', e);
       } finally {
         btn.disabled = false;
       }

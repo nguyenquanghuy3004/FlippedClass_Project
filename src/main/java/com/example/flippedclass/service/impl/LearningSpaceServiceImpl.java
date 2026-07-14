@@ -181,6 +181,8 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         return learningSpaceRepository
                 .findByVisibilityAndStatus(VisibilityType.PUBLIC, LearningSpaceStatus.ACTIVE)
                 .stream()
+                .filter(space -> space.getOwner().getRoles().stream()
+                        .anyMatch(role -> role.getName() == RoleName.MENTOR))
                 .map(space -> LearningSpaceResponse.builder()
                         .id(space.getId())
                         .name(space.getName())

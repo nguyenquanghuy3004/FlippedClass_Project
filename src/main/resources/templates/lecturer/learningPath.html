@@ -1227,17 +1227,38 @@
             if (!body) return;
 
             const isCollapsed = body.classList.contains('is-collapsed');
+            const storageKey = 'fcms_collapse_' + targetId;
 
             if (isCollapsed) {
                 body.classList.remove('is-collapsed');
                 btn.classList.remove('collapsed');
                 btn.title = 'Thu gọn';
+                localStorage.removeItem(storageKey);
             } else {
                 body.classList.add('is-collapsed');
                 btn.classList.add('collapsed');
                 btn.title = 'Mở rộng';
+                localStorage.setItem(storageKey, 'true');
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const collapseBtns = document.querySelectorAll('.path-collapse-btn');
+            collapseBtns.forEach(btn => {
+                const targetId = btn.getAttribute('data-target');
+                if (targetId) {
+                    const storageKey = 'fcms_collapse_' + targetId;
+                    if (localStorage.getItem(storageKey) === 'true') {
+                        const body = document.querySelector(targetId);
+                        if (body) {
+                            body.classList.add('is-collapsed');
+                            btn.classList.add('collapsed');
+                            btn.title = 'Mở rộng';
+                        }
+                    }
+                }
+            });
+        });
         </script>
     </th:block>
 </body>

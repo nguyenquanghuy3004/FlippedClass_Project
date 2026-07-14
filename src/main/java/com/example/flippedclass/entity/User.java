@@ -69,4 +69,8 @@ public class User {
     @Builder.Default
     private Integer contributionPoints = 0;
 
+    @Column(name = "total_active_time")
+    @Builder.Default
+    private Long totalActiveTime = 0L;
+
 }
