@@ -38,7 +38,7 @@ public class LearningPathController {
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @PostMapping("/{pathId}/learning-nodes")
     public ResponseEntity<LearningNodeResponse> createLearningNode( @PathVariable Long spaceId, @PathVariable Long pathId,
-              @RequestBody CreateLearningNodeRequest request) {
+              @Valid @RequestBody CreateLearningNodeRequest request) {
         return ResponseEntity.ok(learningNodeService.createLearningNode(pathId, request));
     }
 
@@ -119,7 +119,7 @@ public class LearningPathController {
     @PutMapping("/{pathId}/learning-nodes/{nodeId}")
     public ResponseEntity<LearningNodeResponse> updateNode(@PathVariable Long spaceId, @PathVariable Long pathId,
             @PathVariable Long nodeId,
-                @RequestBody CreateLearningNodeRequest request) {
+                @Valid @RequestBody CreateLearningNodeRequest request) {
         return ResponseEntity.ok(learningNodeService.updateLearningNode(nodeId, request));
     }
 

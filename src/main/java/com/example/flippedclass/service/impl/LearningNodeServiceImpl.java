@@ -40,12 +40,20 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         LearningPath learningPath = learningPathRepository.findById(pathId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Learning Path"));
 
+        Integer displayOrder = request.getDisplayOrder();
+        if (displayOrder == null) {
+            List<LearningNode> existingNodes = learningNodeRepository.findByLearningPathId(pathId);
+            displayOrder = existingNodes.size() + 1;
+        }
+
         LearningNode node = LearningNode.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .learningPath(learningPath)
                 .status("ACTIVE")
                 .nodeType(request.getNodeType() != null ? request.getNodeType() : "VIDEO")
+                .displayOrder(displayOrder)
+                .estimatedMinutes(request.getEstimatedMinutes() != null ? request.getEstimatedMinutes() : 15) // default 15 minutes
                 .build();
 
         LearningNode savedNode = learningNodeRepository.save(node);
@@ -94,13 +102,11 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         
         // Break self-referencing relationships first
         entityManager.createQuery("UPDATE NodeDiscussion d SET d.parentDiscussion = null WHERE d.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
-        entityManager.createQuery("UPDATE NodeComment c SET c.parentComment = null WHERE c.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         
         // Delete all dependent records via bulk JPQL to avoid FK constraints
         entityManager.createQuery("DELETE FROM NodeConnection c WHERE c.sourceNode.id = :nodeId OR c.targetNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM NodeProgress p WHERE p.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM NodeDiscussion d WHERE d.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
-        entityManager.createQuery("DELETE FROM NodeComment c WHERE c.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM LessonSummary s WHERE s.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM SharedSolution s WHERE s.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM TestCase t WHERE t.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
@@ -129,6 +135,12 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         }
         if (request.getNodeType() != null) {
             node.setNodeType(request.getNodeType());
+        }
+        if (request.getDisplayOrder() != null) {
+            node.setDisplayOrder(request.getDisplayOrder());
+        }
+        if (request.getEstimatedMinutes() != null) {
+            node.setEstimatedMinutes(request.getEstimatedMinutes());
         }
 
         LearningNode savedNode = learningNodeRepository.save(node);
