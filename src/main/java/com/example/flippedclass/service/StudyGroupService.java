@@ -12,4 +12,5 @@ public interface StudyGroupService {
     StudyGroupDetailResponse createGroup(Long activityId, Long currentUserId, StudyGroupCreateRequest request);
     StudyGroupDetailResponse getMyGroup(Long activityId, Long currentUserId);
     void reviewGroup(Long groupId, ReviewRequest request);
+    List<com.example.flippedclass.dto.response.activity.AvailableStudentResponse> getAvailableStudents(Long activityId, Long currentUserId, String keyword);
 }

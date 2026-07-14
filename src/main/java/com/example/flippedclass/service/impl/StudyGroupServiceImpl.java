@@ -30,6 +30,7 @@ public class StudyGroupServiceImpl implements StudyGroupService {
     private final GroupActivityRepository activityRepository;
     private final UserRepository userRepository;
     private final StudyGroupMemberRepository memberRepository;
+    private final LearningSpaceMemberRepository learningSpaceMemberRepository;
     private final GroupActivityValidator validator;
 
     @Override
@@ -133,5 +134,25 @@ public class StudyGroupServiceImpl implements StudyGroupService {
                 .members(memberInfos)
                 .submission(submissionInfo)
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.example.flippedclass.dto.response.activity.AvailableStudentResponse> getAvailableStudents(Long activityId, Long currentUserId, String keyword) {
+        GroupActivity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new NotFoundException("Activity not found"));
+        
+        Long spaceId = activity.getLearningSpace().getId();
+        
+        List<User> users = learningSpaceMemberRepository.findAvailableStudentsForActivity(spaceId, activityId, keyword);
+        
+        return users.stream()
+                .filter(u -> !u.getId().equals(currentUserId)) // Optional: exclude current user if they are searching (though usually leader is already in group, so this is just extra safety)
+                .map(u -> com.example.flippedclass.dto.response.activity.AvailableStudentResponse.builder()
+                        .id(u.getId())
+                        .username(u.getUsername())
+                        .fullName(u.getFullName())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

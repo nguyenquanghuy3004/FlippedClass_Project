@@ -16,6 +16,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.flippedclass.dto.request.activity.AddMemberRequest;
+import com.example.flippedclass.dto.response.activity.AvailableStudentResponse;
 import java.util.List;
 
 @RestController
@@ -99,5 +101,25 @@ public class StudyGroupController {
             @RequestBody TransferLeaderRequest request,
             @AuthenticationPrincipal UserDetailsImpl currentUser) {
         memberService.transferLeader(groupId, currentUser.getId(), request.getNewLeaderId());
+    }
+
+    // Lấy danh sách sinh viên khả dụng để thêm vào nhóm
+    @GetMapping("/activities/{activityId}/available-students")
+    @PreAuthorize("hasAuthority('STUDENT')")
+    public List<AvailableStudentResponse> getAvailableStudents(
+            @PathVariable Long activityId,
+            @RequestParam(required = false) String keyword,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        return groupService.getAvailableStudents(activityId, currentUser.getId(), keyword);
+    }
+
+    // Thêm thành viên vào nhóm
+    @PostMapping("/groups/{groupId}/members")
+    @PreAuthorize("hasAuthority('STUDENT')")
+    public void addMember(
+            @PathVariable Long groupId,
+            @RequestBody AddMemberRequest request,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        memberService.addMember(groupId, currentUser.getId(), request.getStudentId());
     }
 }
