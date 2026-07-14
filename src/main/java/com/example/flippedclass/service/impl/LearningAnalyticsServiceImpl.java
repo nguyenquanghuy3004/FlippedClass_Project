@@ -81,13 +81,6 @@ public class LearningAnalyticsServiceImpl implements LearningAnalyticsService {
                 supporterCandidates++;
             }
 
-            Long totalActiveSecs = member.getUser().getTotalActiveTime();
-            String formattedTime = "0h 0m";
-            if (totalActiveSecs != null && totalActiveSecs > 0) {
-                long hours = totalActiveSecs / 3600;
-                long minutes = (totalActiveSecs % 3600) / 60;
-                formattedTime = hours + "h " + minutes + "m";
-            }
 
             StudentAnalyticsDTO studentDto = StudentAnalyticsDTO.builder()
                     .studentId(studentId)
@@ -99,7 +92,7 @@ public class LearningAnalyticsServiceImpl implements LearningAnalyticsService {
                     .quizAvg(quizAvg)
                     .lastActive(lastActiveStr)
                     .supporterCandidate(isCandidate)
-                    .totalActiveTimeFormatted(formattedTime)
+
                     .build();
 
             studentAnalyticsList.add(studentDto);

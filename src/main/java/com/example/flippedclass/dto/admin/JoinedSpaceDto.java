@@ -4,17 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDetailDto {
-    private UserAdminDto user;
-    private int spacesOwned;
-    private int spacesJoined;
-
-    private List<JoinedSpaceDto> joinedSpaces;
+public class JoinedSpaceDto {
+    private Long id;
+    private String name;
+    private String role;
+    private LocalDateTime joinedAt;
 }
