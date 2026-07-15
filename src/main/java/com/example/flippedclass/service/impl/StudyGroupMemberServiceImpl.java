@@ -67,6 +67,10 @@ public class StudyGroupMemberServiceImpl implements StudyGroupMemberService {
         StudyGroupMember member = memberRepository.findByGroupIdAndStudentId(groupId, currentUserId)
                 .orElseThrow(() -> new NotFoundException("Member not found in this group"));
 
+        if (group.getLeader().getId().equals(currentUserId) && group.getMembers().size() == 1) {
+            throw new BusinessException("Không thể rời nhóm khi bạn là thành viên duy nhất. Vui lòng thêm ít nhất 1 thành viên khác.");
+        }
+
         memberRepository.delete(member);
         group.getMembers().remove(member);
 

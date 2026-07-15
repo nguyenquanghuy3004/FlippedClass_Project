@@ -174,7 +174,7 @@ window.renderGroupActivityPage = async function(node, nodeId) {
                         </h2>
                         <p style="color: #64748b; font-size: 0.9rem;">${myGroup.members.length} / ${activity.maxMembers} Members | Vai trò của bạn: ${isLeader ? '<span style="color:#eab308; font-weight:bold;"><i class="ti ti-crown"></i> LEADER</span>' : 'Thành viên'}</p>
                     </div>
-                    ${activity.status === 'LOCKED' ? '' : `<button class="ga-btn ga-btn-danger" onclick="window.handleLeaveGroup(${myGroup.id}, ${nodeId})"><i class="ti ti-logout"></i> Rời nhóm</button>`}
+                    ${activity.status === 'LOCKED' ? '' : `<button class="ga-btn ga-btn-danger" onclick="window.handleLeaveGroup(${myGroup.id}, ${nodeId}, ${myGroup.members.length})"><i class="ti ti-logout"></i> Rời nhóm</button>`}
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; margin-top: 24px;">
@@ -323,7 +323,11 @@ window.handleJoinGroup = async (activityId, groupId, nodeId) => {
     } catch (e) { alert(e.message); }
 };
 
-window.handleLeaveGroup = async (groupId, nodeId) => {
+window.handleLeaveGroup = async (groupId, nodeId, memberCount) => {
+    if (memberCount === 1) {
+        alert('Bạn là thành viên duy nhất (Leader). Không thể rời nhóm! Vui lòng thêm ít nhất 1 thành viên khác.');
+        return;
+    }
     if(!confirm('Bạn có chắc chắn muốn rời nhóm?')) return;
     try {
         const res = await fetch(`/api/v1/groups/${groupId}/leave`, {
