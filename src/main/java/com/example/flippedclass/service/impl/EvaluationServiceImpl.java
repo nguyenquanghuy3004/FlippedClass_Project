@@ -97,7 +97,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         User student = UserServiceImpl.findUser(userRepository, studentId);
 
         List<InteractionLogResponse> history = interactionLogRepository
-                .findByStudentIdAndLearningPathIdOrderByOccurredAtDesc(studentId, session.getLearningPath().getId())
+                .findTop20ByStudentIdAndLearningPath_LearningSpace_IdOrderByOccurredAtDesc(studentId, session.getLearningPath().getLearningSpace().getId())
                 .stream()
                 .map(this::toInteractionResponse)
                 .toList();
