@@ -12,6 +12,7 @@ public class EvaluationSessionResponse {
     private Long id;
     private Long learningPathId;
     private String learningPathTitle;
+    private String learningSpaceTitle;
     private Long lecturerId;
     private String lecturerName;
     private String title;

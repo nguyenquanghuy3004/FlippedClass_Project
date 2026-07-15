@@ -18,9 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -219,7 +217,8 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Transactional
     @Override
     public LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail) {
-        LearningSpace space = learningSpaceRepository.findById(id).orElseThrow(() -> new RuntimeException("Learning Space not found or has been deleted"));
+        LearningSpace space = learningSpaceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Learning Space not found or has been deleted"));
 
         // ADMIN bypasses owner check
         if (!isCurrentUserAdmin()) {
@@ -359,6 +358,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Override
     @Transactional
     public LearningSpaceResponse cloneSpace(Long sourseSpaceId, String newName) {
+        
         LearningSpace soureSpace = learningSpaceRepository.findById(sourseSpaceId)
                 .orElseThrow(() -> new IllegalArgumentException("Original space not found"));
 
@@ -388,7 +388,6 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
             newPath.setTitle(path.getTitle());
             newPath.setDescription(path.getDescription());
             newPath.setPosition(path.getPosition());
-            newPath.setEstimatedDurationHours(path.getEstimatedDurationHours());
             newPath.setVisibility(path.getVisibility());
             newPath.setStatus(path.getStatus());
             newPath.setLecturer(getCurrentUser());
@@ -427,17 +426,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
                 LearningNode saveNode = learningNodeRepository.save(newNode);
 
-                for (LearningNodeItem nodeItem : node.getItems()) {
-                    LearningNodeItem newItem = new LearningNodeItem();
-
-                    newItem.setTitle(nodeItem.getTitle());
-                    newItem.setItemType(nodeItem.getItemType());
-                    newItem.setUrl(nodeItem.getUrl());
-                    newItem.setContent(nodeItem.getContent());
-                    newItem.setPosition(nodeItem.getPosition());
-                    newItem.setLearningNode(saveNode);
-                    learningNodeItemRepository.save(newItem);
-                }
+               Map<Long, Long> quizIdMap = new HashMap<>();
 
                 for (Quiz quiz : node.getQuizzes()) {
                     Quiz newQuiz = new Quiz();
@@ -453,6 +442,8 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
                     newQuiz.setLearningNode(saveNode);
 
                     Quiz savedQuiz = quizRepository.save(newQuiz);
+                    quizIdMap.put(quiz.getId(), savedQuiz.getId());
+
                     // Copy câu hỏi của Quiz (Phải viết query riêng vì Quiz không map trực tiếp Questions trong Entity)
                     List<QuizQuestion> sourceQuestions = quizQuestionRepository.findByQuizId(quiz.getId());
 
@@ -467,8 +458,24 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
                         newQuestion.setSortOrder(question.getSortOrder());
                         newQuestion.setQuiz(savedQuiz);
                         quizQuestionRepository.save(newQuestion);
-
                     }
+                }
+
+                for (LearningNodeItem nodeItem : node.getItems()) {
+                    LearningNodeItem newItem = new LearningNodeItem();
+
+                    newItem.setTitle(nodeItem.getTitle());
+                    newItem.setItemType(nodeItem.getItemType());
+                    newItem.setUrl(nodeItem.getUrl());
+                    newItem.setContent(nodeItem.getContent());
+                    newItem.setPosition(nodeItem.getPosition());
+                    newItem.setLearningNode(saveNode);
+
+                    if (nodeItem.getItemType() == ItemType.QUIZ && nodeItem.getQuizId() != null) {
+                        newItem.setQuizId(quizIdMap.get(nodeItem.getQuizId()));
+                    }
+
+                    learningNodeItemRepository.save(newItem);
                 }
             }
         }

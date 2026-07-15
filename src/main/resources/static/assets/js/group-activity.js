@@ -342,7 +342,19 @@ window.handleLeaveGroup = async (groupId, nodeId, memberCount) => {
 window.handleSubmitWork = async (groupId, nodeId) => {
     const repoUrl = document.getElementById('repoUrlInput').value.trim();
     const note = document.getElementById('submitNoteInput').value.trim();
-    if (!repoUrl || !repoUrl.startsWith('https://github.com/')) return alert('URL phải bắt đầu bằng https://github.com/');
+    if (!repoUrl || !repoUrl.startsWith('https://github.com/')) {
+        if (typeof Swal !== 'undefined') {
+            return Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: 'The URL must start with https://github.com/',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
+        return alert('The URL must start with https://github.com/');
+    }
     try {
         const res = await fetch(`/api/v1/groups/${groupId}/submission`, {
             method: 'PUT',

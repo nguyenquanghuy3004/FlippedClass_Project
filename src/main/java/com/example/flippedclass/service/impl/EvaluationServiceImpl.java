@@ -285,6 +285,7 @@ public class EvaluationServiceImpl implements EvaluationService {
                 .id(session.getId())
                 .learningPathId(session.getLearningPath().getId())
                 .learningPathTitle(session.getLearningPath().getTitle())
+                .learningSpaceTitle(session.getLearningPath().getLearningSpace().getName())
                 .lecturerId(session.getLecturer().getId())
                 .lecturerName(session.getLecturer().getFullName())
                 .title(session.getTitle())
