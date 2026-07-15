@@ -587,7 +587,7 @@
         <section class="lc-pane">
             <div class="lc-tabs-header">
               <div class="lc-tab active" onclick="switchLeftTab('problem')" id="tab-problem"><i class="ti ti-edit" style="color: #60a5fa;"></i> Edit Description</div>
-              <div class="lc-tab" onclick="switchLeftTab('submissions')" id="tab-submissions"><i class="ti ti-checklist" style="color: #a78bfa;"></i> Submissions</div>
+<!--              <div class="lc-tab" onclick="switchLeftTab('submissions')" id="tab-submissions"><i class="ti ti-checklist" style="color: #a78bfa;"></i> Submissions</div>-->
             </div>
           
           <!-- TAB: PROBLEM (EDIT) -->
@@ -946,7 +946,10 @@
                         nodeType: node.nodeType,
                         content: content,
                         starterCode: window.codeStore.starter,
-                        solutionCode: window.codeStore.solution
+                        solutionCode: window.codeStore.solution,
+                        learningPathId: node.learningPathId,
+                        displayOrder: node.displayOrder || 1,
+                        estimatedMinutes: node.estimatedMinutes || 30
                     })
                 });
                 if (!resNode.ok) throw new Error(await readError(resNode));

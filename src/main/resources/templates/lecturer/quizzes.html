@@ -476,15 +476,15 @@
                 </div>
                 <h4 class="fw-bold mb-0 text-secondary fs-5">Module: ${course}</h4>
               </div>
-              <div class="row g-4">`;
+              <div class="d-flex gap-4 overflow-x-auto pb-3 custom-scrollbar" style="scroll-snap-type: x mandatory;">`;
               
           groups[ls][course].forEach(quiz => {
             const passRate = (quiz.passRate || 0).toFixed(0);
             const escapedTitle = (quiz.title || '').replace(/"/g, '&quot;');
             const escapedDesc = (quiz.description || 'No description provided.').replace(/"/g, '&quot;');
             html += `
-              <div class="col-12 col-md-6 col-xl-4">
-                <div class="quiz-card" style="cursor: pointer;" onclick="window.location.href='/lecturer/quizzes/${quiz.id}/statistics'">
+              <div style="flex: 0 0 auto; width: 340px; max-width: 85vw; scroll-snap-align: start;">
+                <div class="quiz-card" style="cursor: pointer; height: 100%;" onclick="window.location.href='/lecturer/quizzes/${quiz.id}/statistics'">
                   <div class="card-top" style="justify-content: flex-end;">
                     <span class="status-badge ${quiz.active ? 'active' : 'inactive'}">
                       ${quiz.active ? '● Active' : '○ Inactive'}
