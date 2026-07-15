@@ -66,7 +66,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     @Transactional
     @Override
     public LearningSpaceResponse createLearningSpace(CreateLearningSpaceRequest request) {
-
+        // Kiểm tra nếu name title trống và null
         if (request.getName() == null || request.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Learning Space name cannot be empty");
         }
@@ -201,7 +201,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     public LearningSpaceResponse getSpaceByInviteCode(String inviteCode) {
         String normalizedInviteCode = inviteCode == null ? "" : inviteCode.trim();
         LearningSpace learningSpace = learningSpaceRepository.findByInviteCodeIgnoreCaseAndStatus(normalizedInviteCode, LearningSpaceStatus.ACTIVE)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid invite code or the space has been deleted"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid invite code"));
 
         return LearningSpaceResponse.builder()
                 .id(learningSpace.getId())
@@ -243,32 +243,33 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         LearningSpace learningSpace;
 
         String inviteCode = request.getInviteCode() == null ? "" : request.getInviteCode().trim();
-
+        // Phần kiểm tra là có nhập code sai hay không nhập gì
         if (!inviteCode.isEmpty()) {
             learningSpace = learningSpaceRepository.findByInviteCodeIgnoreCaseAndStatus(inviteCode, LearningSpaceStatus.ACTIVE)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid invite code or the space has been deleted"));
         } else if (request.getSpaceId() != null) {
             learningSpace = learningSpaceRepository.findByIdAndStatus(request.getSpaceId(), LearningSpaceStatus.ACTIVE)
                     .orElseThrow(() -> new IllegalArgumentException("Learning Space not found"));
-
+            // Nếu sinh biên
             if (learningSpace.getVisibility() == VisibilityType.PRIVATE) {
                 throw new IllegalArgumentException("This space is private, you need an invite code to join");
             }
         } else {
             throw new IllegalArgumentException("Please provide an invite code or space ID");
         }
-
+        // tạo biếm lấy user hiện tại
         User currentUser = getCurrentUser();
-
+        // Kiểm tra xem đã join lớp chưa
         if (memberRepository.existsByLearningSpaceAndUser(learningSpace, currentUser)) {
             throw new IllegalArgumentException("You have already joined this space");
         }
-
+        //Đoạn nay chỉ được tạo khi đẫ tham gia learning space
         LearningSpaceMember member = new LearningSpaceMember();
         member.setLearningSpace(learningSpace);
         member.setUser(currentUser);
         member.setRole(MemberRole.MEMBER);
         member.setStatus(MemberStatus.ACTIVE);
+        // Lưu sinh viên đó vào danh sách space
         memberRepository.save(member);
 
         // Return Response

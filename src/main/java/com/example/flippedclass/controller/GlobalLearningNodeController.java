@@ -46,15 +46,20 @@ public class GlobalLearningNodeController {
     private final TestCaseRepository testCaseRepository;
     private final LocalCompilerService localCompilerService;
 
+    // Hàm lấy tất cả node có trong một learning Path
     @PreAuthorize("hasAuthority('MENTOR')")
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getAllNodesForDropdown() {
+        // Gọi repo find all Node
         List<LearningNode> nodes = learningNodeRepository.findAll();
+        // Không có tác dụng vì trong thiết kế DB learningspace không thể null
+        // Đoạn code này có ý nghĩa trong trường hợp Defensive Programming, nếu data có dữ liệu 1 learning space null
         List<Map<String, Object>> response = nodes.stream().map(node -> {
             String spaceName = "Uncategorized";
             if (node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null) {
                 spaceName = node.getLearningPath().getLearningSpace().getName();
             }
+            // Map sang Json
             return Map.<String, Object>of(
                     "id", node.getId(),
                     "title", node.getTitle(),
