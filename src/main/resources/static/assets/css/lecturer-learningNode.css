@@ -177,7 +177,9 @@
 /* ── Collapsible Body (dùng cho cả node và path) ── */
 .node-collapsible-body,
 .path-collapsible-body {
-    overflow: hidden;
+    overflow: visible;
+    position: relative;
+    z-index: 10;
     max-height: 5000px;
     transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.3s ease;
     opacity: 1;
@@ -185,6 +187,7 @@
 
 .node-collapsible-body.is-collapsed,
 .path-collapsible-body.is-collapsed {
+    overflow: hidden;
     max-height: 0 !important;
     opacity: 0;
     padding-top: 0 !important;
