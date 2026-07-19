@@ -1293,6 +1293,7 @@
           saveSummaryBtn.disabled = true;
           saveSummaryBtn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Saving...';
 
+          let isSuccess = false;
           try {
             const response = await fetch('/api/lesson-summaries', {
               method: 'POST',
@@ -1307,11 +1308,36 @@
               throw new Error(await readError(response));
             }
             summaryStatus.innerHTML = '<span class="text-success"><i class="ti ti-check"></i> Ghi nhận thành công.</span>';
+            summaryStatus.classList.add('show');
+            saveSummaryBtn.innerHTML = '<i class="ti ti-check"></i> Đã nộp thành công';
+            isSuccess = true;
+
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Đã nộp bài thu hoạch thành công!',
+                showConfirmButton: false,
+                timer: 2500
+              });
+            }
+            loadMySummary();
           } catch (err) {
             summaryStatus.innerHTML = `<span class="text-danger"><i class="ti ti-alert-circle"></i> ${err.message}</span>`;
+            summaryStatus.classList.add('show');
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: err.message
+              });
+            }
           } finally {
             saveSummaryBtn.disabled = false;
-            saveSummaryBtn.innerHTML = 'Lưu và nộp thu hoạch';
+            if (!isSuccess) {
+              saveSummaryBtn.innerHTML = 'Lưu và nộp thu hoạch';
+            }
           }
         });
       }

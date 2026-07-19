@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
 
 <head>
@@ -172,12 +172,14 @@
       loadGradingContext();
     });
 
-    function showAlert(message, type = 'success') {
+    function showAlert(message, type = 'success', persistent = false) {
       const alertEl = document.getElementById('alertMessage');
       alertEl.innerText = message;
       alertEl.className = `alert alert-${type} mb-4 fw-bold rounded-3 border-0`;
       alertEl.classList.remove('d-none');
-      setTimeout(() => alertEl.classList.add('d-none'), 5000);
+      if (!persistent) {
+        setTimeout(() => alertEl.classList.add('d-none'), 5000);
+      }
     }
 
     async function loadGradingContext() {
@@ -222,6 +224,26 @@
     function renderContext(data) {
       currentStudentInfo = data.student;
       currentCriteria = data.session ? data.session.criteria : data.criteria; // fallback for mock data
+
+      // Check deadline
+      if (data.session && data.session.gradingDeadlineAt) {
+        const deadline = new Date(data.session.gradingDeadlineAt);
+        const now = new Date();
+        if (now > deadline) {
+          showAlert(`Hạn đánh giá cho phiên này đã qua (${deadline.toLocaleString()}). Hệ thống đã đóng nhận điểm.`, 'danger', true);
+          const submitBtn = document.getElementById('submitBtn');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ti ti-lock"></i> Đã hết hạn đánh giá';
+            submitBtn.className = 'btn btn-secondary btn-lg rounded-pill fw-bold shadow-sm';
+          }
+          // Disable form inputs
+          setTimeout(() => {
+            const inputs = document.querySelectorAll('#gradeForm input, #gradeForm textarea');
+            inputs.forEach(input => input.disabled = true);
+          }, 100);
+        }
+      }
 
       // Student Info
       if(data.student) {
@@ -318,6 +340,7 @@
       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
 
       let hasError = false;
+      let errorMsg = 'Some grades failed to submit. Make sure the API is running correctly.';
 
       for (const crit of currentCriteria) {
         const score = form.elements[`score_${crit.id}`].value;
@@ -351,10 +374,15 @@
             },
             body: JSON.stringify(payload)
           });
-          if (!response.ok) throw new Error('Submission failed');
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Submission failed');
+          }
         } catch(error) {
           console.error(error);
+          errorMsg = error.message;
           hasError = true;
+          break; // Stop submitting remaining grades on error
         }
       }
 
@@ -362,7 +390,7 @@
       btn.innerHTML = '<i class="ti ti-device-floppy"></i> Submit Grades';
 
       if (hasError) {
-        showAlert('Some grades failed to submit. Make sure the API is running correctly.', 'danger');
+        showAlert(errorMsg, 'danger');
       } else {
         showAlert('All grades submitted successfully!', 'success');
         // Reload context to see past grades
