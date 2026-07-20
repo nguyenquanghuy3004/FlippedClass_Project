@@ -1,5 +1,6 @@
 package com.example.flippedclass.controller;
 
+import com.example.flippedclass.annotation.LogUserActivity;
 import com.example.flippedclass.dto.admin.UserAdminDto;
 import com.example.flippedclass.dto.admin.UserDetailDto;
 import com.example.flippedclass.enums.RoleName;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 import com.example.flippedclass.dto.admin.AdminUserCreateDto;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/users")
@@ -47,23 +50,23 @@ public class AdminUserRestController {
         return ResponseEntity.ok(adminUserService.importUsersFromExcel(file));
     }
 
-    @com.example.flippedclass.annotation.LogUserActivity(actionType = "LOCK_USER", description = "'Đã khóa tài khoản user có ID: ' + #id")
+    @LogUserActivity(actionType = "LOCK_USER", description = "'Đã khóa tài khoản user có ID: ' + #id")
     @PostMapping("/{id}/lock")
     public ResponseEntity<Void> lockUser(@PathVariable Long id) {
         adminUserService.lockUser(id);
         return ResponseEntity.ok().build();
     }
 
-    @com.example.flippedclass.annotation.LogUserActivity(actionType = "UNLOCK_USER", description = "'Đã mở khóa tài khoản user có ID: ' + #id")
+    @LogUserActivity(actionType = "UNLOCK_USER", description = "'Đã mở khóa tài khoản user có ID: ' + #id")
     @PostMapping("/{id}/unlock")
     public ResponseEntity<Void> unlockUser(@PathVariable Long id) {
         adminUserService.unlockUser(id);
         return ResponseEntity.ok().build();
     }
 
-    @com.example.flippedclass.annotation.LogUserActivity(actionType = "RESET_PASSWORD", description = "'Đã reset mật khẩu cho user có ID: ' + #id")
+    @LogUserActivity(actionType = "RESET_PASSWORD", description = "'Đã reset mật khẩu cho user có ID: ' + #id")
     @PostMapping("/{id}/reset-password")
-    public ResponseEntity<java.util.Map<String, String>> resetPassword(@PathVariable Long id, @RequestBody java.util.Map<String, String> payload) {
+    public ResponseEntity<Map<String, String>> resetPassword(@PathVariable Long id, @RequestBody Map<String, String> payload) {
         String newPassword = payload.get("newPassword");
         if (newPassword == null || newPassword.isBlank()) {
             return ResponseEntity.badRequest().build();

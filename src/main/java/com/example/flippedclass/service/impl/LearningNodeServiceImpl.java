@@ -34,6 +34,14 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
     @Autowired
     private NodeConnectionRepository nodeConnectionRepository;
+    @Autowired
+    private LearningNodeItemRepository learningNodeItemRepository;
+
+    @Autowired
+    private QuizRepository quizRepository;
+
+    @jakarta.persistence.PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public LearningNodeResponse createLearningNode(Long pathId, CreateLearningNodeRequest request) {
@@ -85,14 +93,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .build();
     }
 
-    @Autowired
-    private LearningNodeItemRepository learningNodeItemRepository;
-
-    @Autowired
-    private QuizRepository quizRepository;
-
-    @jakarta.persistence.PersistenceContext
-    private EntityManager entityManager;
 
     @Override
     @Transactional

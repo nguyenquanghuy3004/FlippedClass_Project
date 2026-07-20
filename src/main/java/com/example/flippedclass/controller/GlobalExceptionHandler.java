@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleBadCredentials(Exception ex) {
         return ResponseEntity.badRequest().body(ApiErrorResponse.builder()
                 .error("BAD_CREDENTIALS")
-                .message("Tài khoản hoặc mật khẩu không chính xác.")
+                .message("Incorrect account or password.")
                 .build());
     }
 

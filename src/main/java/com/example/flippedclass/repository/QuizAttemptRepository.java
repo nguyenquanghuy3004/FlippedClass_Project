@@ -35,4 +35,9 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
            "WHERE qa.student.id = :studentId " +
            "AND qa.quiz.learningNode.learningPath.learningSpace.id = :spaceId")
     BigDecimal findAverageScoreByStudentAndSpace(@Param("studentId") Long studentId, @Param("spaceId") Long spaceId);
+
+    @Query("SELECT qa.student.id, AVG(qa.score) FROM QuizAttempt qa " +
+           "WHERE qa.quiz.learningNode.learningPath.learningSpace.id = :spaceId " +
+           "GROUP BY qa.student.id")
+    List<Object[]> findAverageScoreGroupedByStudent(@Param("spaceId") Long spaceId);
 }

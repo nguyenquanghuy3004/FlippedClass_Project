@@ -2,21 +2,18 @@ package com.example.flippedclass.service.impl;
 
 import com.example.flippedclass.dto.request.DiscussionRequest;
 import com.example.flippedclass.dto.response.DiscussionResponse;
-import com.example.flippedclass.entity.LearningNode;
-import com.example.flippedclass.entity.NodeDiscussion;
-import com.example.flippedclass.entity.Role;
-import com.example.flippedclass.entity.User;
+import com.example.flippedclass.entity.*;
 import com.example.flippedclass.enums.DiscussionStatus;
 import com.example.flippedclass.repository.LearningNodeRepository;
 import com.example.flippedclass.repository.NodeDiscussionRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.repository.StudyGroupRepository;
-import com.example.flippedclass.entity.StudyGroup;
 import com.example.flippedclass.service.DiscussionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -47,8 +44,10 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Override
     @Transactional
     public DiscussionResponse addDiscussion(Long nodeId, Long groupId, String username, DiscussionRequest request) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        LearningNode node = nodeRepository.findById(nodeId).orElseThrow(() -> new RuntimeException("Node not found"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        LearningNode node = nodeRepository.findById(nodeId)
+                .orElseThrow(() -> new RuntimeException("Node not found"));
 
         NodeDiscussion discussion = NodeDiscussion.builder()
                 .learningNode(node)
@@ -87,7 +86,7 @@ public class DiscussionServiceImpl implements DiscussionService {
                     }
                 }
                 
-                com.example.flippedclass.entity.Notification notification = com.example.flippedclass.entity.Notification.builder()
+                Notification notification = Notification.builder()
                         .recipient(parentAuthor)
                         .type(com.example.flippedclass.enums.NotificationType.COMMENT_REPLY)
                         .message(user.getFullName() + " replied to your comment.")
@@ -178,7 +177,7 @@ public class DiscussionServiceImpl implements DiscussionService {
         List<DiscussionResponse> replyResponses = null;
         if (discussion.getReplies() != null && !discussion.getReplies().isEmpty()) {
             replyResponses = discussion.getReplies().stream()
-                .sorted(java.util.Comparator.comparing(NodeDiscussion::getCreatedAt))
+                .sorted(Comparator.comparing(NodeDiscussion::getCreatedAt))
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
         }
