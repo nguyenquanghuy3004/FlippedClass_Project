@@ -322,6 +322,11 @@
       const questionsContainer = document.getElementById('questions-container');
       const swalColors = { confirmButtonColor: '#5b5ce2', cancelButtonColor: '#b42318' };
 
+      /**
+       * Hàm escapeHtml: Tránh lỗi bảo mật XSS bằng cách mã hóa các ký tự đặc biệt trong HTML.
+       * @param {string} value - Chuỗi ký tự cần mã hóa
+       * @returns {string} Chuỗi đã được mã hóa an toàn
+       */
       function escapeHtml(value) {
         return String(value ?? '')
           .replace(/&/g, '&amp;')
@@ -331,12 +336,22 @@
           .replace(/'/g, '&#039;');
       }
 
+      /**
+       * Hàm authHeaders: Tạo HTTP Header chứa JWT Token phục vụ cho việc gọi API cần xác thực.
+       * @param {boolean} json - Nếu true, sẽ thêm thuộc tính Content-Type: application/json
+       * @returns {object} Đối tượng Headers chứa thông tin Authorization
+       */
       function authHeaders(json = false) {
         const headers = { Authorization: `Bearer ${token}` };
         if (json) headers['Content-Type'] = 'application/json';
         return headers;
       }
 
+      /**
+       * Hàm questionTypeLabel: Trả về nhãn hiển thị thân thiện của loại câu hỏi.
+       * @param {string} type - Mã loại câu hỏi từ Backend (ví dụ: SINGLE_CHOICE)
+       * @returns {string} Nhãn tiếng Anh thân thiện tương ứng (ví dụ: Single Choice)
+       */
       function questionTypeLabel(type) {
         const normalizedType = normalizeQuestionType(type);
         const labels = {
@@ -348,11 +363,22 @@
         return labels[normalizedType] || type || 'Question';
       }
 
+      /**
+       * Hàm normalizeOptionKey: Chuẩn hóa nhãn của đáp án (A, B, C, D) từ index/key của đáp án.
+       * @param {string|number} key - Khóa hoặc số thứ tự đáp án
+       * @param {number} index - Vị trí của đáp án trong danh sách
+       * @returns {string} Nhãn chữ cái (ví dụ: A, B, C, D)
+       */
       function normalizeOptionKey(key, index) {
         if (/^\d+$/.test(String(key))) return String.fromCharCode(65 + Number(key));
         return String(key || String.fromCharCode(65 + index));
       }
 
+      /**
+       * Hàm parseOptions: Chuyển đổi dữ liệu JSON options từ DB thành mảng [khóa, nội dung] tương ứng.
+       * @param {string} rawOptions - Chuỗi JSON chứa các phương án lựa chọn
+       * @returns {Array} Mảng các phương án lựa chọn
+       */
       function parseOptions(rawOptions) {
         if (!rawOptions) return [];
         try {
@@ -365,10 +391,20 @@
         return [['Ans', rawOptions]];
       }
 
+      /**
+       * Hàm normalizeQuestionType: Chuyển chuỗi loại câu hỏi sang viết hoa để so sánh chính xác.
+       * @param {string} type - Chuỗi loại câu hỏi
+       * @returns {string} Chuỗi viết hoa
+       */
       function normalizeQuestionType(type) {
         return String(type || '').toUpperCase();
       }
 
+      /**
+       * Hàm optionsForQuestion: Lấy danh sách các đáp án cho một câu hỏi dựa vào loại câu hỏi.
+       * @param {object} question - Đối tượng câu hỏi
+       * @returns {Array} Danh sách các đáp án [optionKey, optionText]
+       */
       function optionsForQuestion(question) {
         const type = normalizeQuestionType(question.questionType);
         const parsedOptions = parseOptions(question.options);
@@ -377,11 +413,18 @@
         return [];
       }
 
+      /**
+       * Hàm setStudentName: Hiển thị tên sinh viên trên thanh Topbar của giao diện.
+       * @param {string} name - Tên sinh viên cần hiển thị
+       */
       function setStudentName(name) {
         const studentName = document.getElementById('studentName');
         if (studentName && name) studentName.textContent = name;
       }
 
+      /**
+       * Hàm setupLayoutControls: Cài đặt sự kiện đóng/mở Sidebar (trên cả PC và giao diện Mobile).
+       */
       function setupLayoutControls() {
         const toggleBtn = document.getElementById('toggleBtn');
         const mobileBtn = document.getElementById('mobileBtn');
@@ -399,6 +442,11 @@
         overlay?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
       }
 
+      /**
+       * Hàm readError: Đọc thông tin lỗi trả về từ API (hỗ trợ cả định dạng JSON lẫn text thuần).
+       * @param {Response} response - Đối tượng Response từ fetch
+       * @returns {Promise<string>} Thông điệp lỗi
+       */
       async function readError(response) {
         try {
           const data = await response.json();
@@ -409,6 +457,10 @@
         }
       }
 
+      /**
+       * Hàm requireQuizId: Kiểm tra xem ID bài kiểm tra có trên URL không. Nếu không có sẽ thông báo lỗi và quay lại.
+       * @returns {boolean} True nếu hợp lệ, False nếu thiếu ID
+       */
       function requireQuizId() {
         if (quizId) return true;
         Swal.fire({
@@ -423,7 +475,13 @@
         return false;
       }
 
-      // Hàm chính: Khởi tạo bài kiểm tra (lấy thông tin quiz và danh sách câu hỏi từ backend)
+      /**
+       * Hàm khởi tạo bài kiểm tra (initQuiz):
+       * 1. Kiểm tra xem sinh viên đã làm bài này chưa (nếu rồi thì chặn không cho làm tiếp).
+       * 2. Lấy thông tin bài Quiz (Tên, thời gian, ...) hiển thị lên Giao diện.
+       * 3. Lấy danh sách câu hỏi của bài Quiz từ API Backend.
+       * 4. Gọi các hàm vẽ câu hỏi (renderQuestions) và vẽ danh sách lưới điều hướng (renderNavGrid).
+       */
       async function initQuiz() {
         if (!token || !userId) {
           window.location.href = '/login';
@@ -491,8 +549,10 @@
         }
       }
 
-
-
+      /**
+       * Hàm renderTimer: Cập nhật hiển thị thời gian đếm ngược lên giao diện (mm:ss).
+       * Chuyển sang màu cảnh báo đỏ nếu thời gian còn lại ít hơn 5 phút (300 giây).
+       */
       function renderTimer() {
         const minutes = Math.floor(timeRemaining / 60);
         const seconds = timeRemaining % 60;
@@ -500,11 +560,13 @@
         countdownEl.classList.toggle('is-warning', timeRemaining <= 300);
       }
 
-      // Hàm bắt đầu đếm ngược thời gian làm bài
+      /**
+       * Hàm startTimer: Kích hoạt đếm ngược thời gian làm bài mỗi giây.
+       * Khi hết giờ, tự động khóa bài thi và thực hiện gửi kết quả lên hệ thống (submitQuiz(true)).
+       */
       function startTimer() {
         clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-          // Nếu hết giờ
           if (timeRemaining <= 0) {
             clearInterval(timerInterval);
             Swal.fire({
@@ -518,9 +580,13 @@
           }
           timeRemaining -= 1;
           renderTimer();
-        }, 1000); // Đếm ngược mỗi 1 giây
+        }, 1000);
       }
 
+      /**
+       * Hàm renderQuestions: Duyệt danh sách các câu hỏi từ Backend và vẽ (render) cấu trúc HTML câu hỏi
+       * lên khung làm bài, hỗ trợ các loại: SINGLE_CHOICE (radio), MULTIPLE_CHOICE (checkbox), TRUE_FALSE (radio), ESSAY (textarea).
+       */
       function renderQuestions() {
         if (!quizQuestions.length) {
           questionsContainer.innerHTML = `
@@ -568,6 +634,10 @@
         });
       }
 
+      /**
+       * Hàm renderNavGrid: Tạo danh sách các nút số thứ tự câu hỏi ở Sidebar bên phải.
+       * Cho phép click vào số thứ tự để cuộn nhanh đến câu hỏi đó (scrollToQuestion).
+       */
       function renderNavGrid() {
         navGrid.innerHTML = '';
         quizQuestions.forEach((question, index) => {
@@ -582,6 +652,11 @@
         });
       }
 
+      /**
+       * Hàm markAnswered: Đánh dấu trạng thái câu hỏi đã được làm hay chưa (đổi màu nút điều hướng bên phải
+       * và đổi màu viền của card câu hỏi) đồng thời cập nhật thanh tiến trình tổng quát.
+       * @param {number|string} questionId - ID của câu hỏi
+       */
       function markAnswered(questionId) {
         const answered = isQuestionAnswered(questionId);
         const navButton = document.getElementById(`nav-btn-${questionId}`);
@@ -591,6 +666,11 @@
         updateProgress();
       }
 
+      /**
+       * Hàm isQuestionAnswered: Kiểm tra thực tế một câu hỏi đã được chọn đáp án hoặc đã nhập text tự luận chưa.
+       * @param {number|string} questionId - ID của câu hỏi
+       * @returns {boolean} True nếu đã được trả lời, ngược lại trả về False
+       */
       function isQuestionAnswered(questionId) {
         const checked = document.querySelectorAll(`input[name="q${questionId}"]:checked`);
         if (checked.length) return true;
@@ -598,6 +678,10 @@
         return Boolean(textarea && textarea.value.trim());
       }
 
+      /**
+       * Hàm updateProgress: Cập nhật tỷ lệ hoàn thành làm bài kiểm tra (ví dụ: 1/5 câu - 20%).
+       * Cập nhật thông số số lượng câu và tăng chiều rộng của thanh tiến trình (progress-bar).
+       */
       function updateProgress() {
         quizQuestions.forEach((question) => {
           const answered = isQuestionAnswered(question.id);
@@ -612,6 +696,10 @@
         document.getElementById('progress-bar').style.width = `${percent}%`;
       }
 
+      /**
+       * Hàm scrollToQuestion: Thực hiện hiệu ứng cuộn mượt mà (smooth scrolling) tới vị trí của câu hỏi.
+       * @param {number|string} questionId - ID câu hỏi cần cuộn tới
+       */
       function scrollToQuestion(questionId) {
         const questionEl = document.getElementById(`q-card-${questionId}`);
         if (!questionEl) return;
@@ -619,6 +707,13 @@
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
 
+      /**
+       * Hàm confirmSubmit: Hiển thị hộp thoại (Swal) xác nhận nộp bài thi.
+       * Cảnh báo nếu sinh viên vẫn còn các câu hỏi chưa làm.
+       * @param {boolean} autoSubmit - Nếu là tự động nộp bài khi hết giờ, bỏ qua xác nhận
+       * @param {number} answeredCount - Số lượng câu hỏi đã trả lời
+       * @returns {Promise<boolean>} Trả về True nếu đồng ý nộp bài
+       */
       async function confirmSubmit(autoSubmit, answeredCount) {
         if (autoSubmit) return true;
         const isIncomplete = answeredCount < totalQuestions;
@@ -637,16 +732,19 @@
         return result.isConfirmed;
       }
 
-      // Hàm nộp bài (Submit Quiz) lên backend để chấm điểm
+      /**
+       * Hàm submitQuiz: Thu thập tất cả câu trả lời của sinh viên, định dạng dữ liệu
+       * và gọi POST API `/api/quizzes/{quizId}/attempts` gửi lên máy chủ để chấm điểm.
+       * Sau đó hiển thị kết quả điểm số (%) nhận được lên màn hình.
+       * @param {boolean} autoSubmit - Khóa tự động nộp bài (khi hết giờ)
+       */
       async function submitQuiz(autoSubmit = false) {
-        if (isSubmitting) return; // Tránh bấm nhiều lần
+        if (isSubmitting) return;
 
-        // Kiểm tra xem đã trả lời hết chưa, nếu chưa thì hỏi lại
         const answeredCount = quizQuestions.filter((question) => isQuestionAnswered(question.id)).length;
         const shouldSubmit = await confirmSubmit(autoSubmit, answeredCount);
         if (!shouldSubmit) return;
 
-        // Lấy đáp án người dùng đã chọn
         const answers = {};
         quizQuestions.forEach(question => {
           const type = normalizeQuestionType(question.questionType);
@@ -664,13 +762,12 @@
 
         isSubmitting = true;
         try {
-          // Gửi đáp án lên backend
           const response = await fetch(`/api/quizzes/${quizId}/attempts`, {
             method: 'POST',
             headers: authHeaders(true),
             body: JSON.stringify({
               studentId: Number(userId),
-              answers // object chứa các đáp án { questionId: 'đáp án đã chọn' }
+              answers
             })
           });
 
@@ -705,6 +802,9 @@
         }
       }
 
+      /**
+       * Hàm logout: Thực hiện xóa JWT token và thông tin người dùng khỏi localStorage rồi chuyển về trang chủ.
+       */
       function logout() {
         localStorage.removeItem('jwt_token');
         localStorage.removeItem('user_id');

@@ -149,6 +149,10 @@
             document.getElementById('btnCreateSpace').addEventListener('click', createSpace);
         });
 
+        /**
+         * Hàm loadMySpaces: Tải danh sách tất cả các lớp học (Spaces) do Supporter này sở hữu/tạo ra.
+         * API: GET `/api/learning-spaces/my-spaces`
+         */
         async function loadMySpaces() {
             const grid = document.getElementById('mySpacesGrid');
             const token = localStorage.getItem('jwt_token');
@@ -193,6 +197,10 @@
             }
         }
 
+        /**
+         * Hàm deleteSpace: Hiển thị cảnh báo và thực hiện xóa một lớp học (Space) qua API DELETE.
+         * API: DELETE `/api/learning-spaces/{spaceId}/delete`
+         */
         async function deleteSpace(spaceId) {
             Swal.fire({
                 title: 'Delete Space?',
@@ -224,6 +232,10 @@
             });
         }
 
+        /**
+         * Hàm createSpace: Lấy thông tin từ form và thực hiện tạo mới một lớp học (Space).
+         * API: POST `/api/learning-spaces`
+         */
         async function createSpace() {
             const name = document.getElementById('spaceName').value.trim();
             const desc = document.getElementById('spaceDescription').value.trim();
@@ -264,6 +276,11 @@
             }
         }
 
+        /**
+         * Hàm loadMentees: Tải danh sách toàn bộ các sinh viên yếu (Mentees) được gán cho Supporter này hỗ trợ
+         * từ tất cả các lớp học (spaces) mà Supporter tham gia.
+         * API: GET `/api/learning-spaces/{spaceId}/mentoring/mentees/{mentorId}`
+         */
         async function loadMentees() {
             const loader = document.getElementById('loader');
             const tbody = document.getElementById('menteesTableBody');
@@ -331,7 +348,10 @@
             }
         }
 
-        function notifyMentees() {
+        /**
+         * Hàm notifyMentees: Chuẩn bị nội dung để gửi mã mời (invite code) của lớp học cho các mentees.
+         */
+         function notifyMentees() {
             if (mySpacesList.length === 0) {
                 Swal.fire('No Spaces Found', 'You need to create a Mentoring Space first before inviting mentees!', 'warning');
                 return;
@@ -346,7 +366,10 @@
             $('#notifyModal').modal('show');
         }
 
-        function sendNotification() {
+        /**
+         * Hàm sendNotification: Gửi mã mời tham gia lớp học tới các sinh viên yếu đang cần hỗ trợ.
+         */
+         function sendNotification() {
             const select = document.getElementById('notifySpaceSelect');
             const inviteCode = select.value;
             const spaceName = select.options[select.selectedIndex].text;

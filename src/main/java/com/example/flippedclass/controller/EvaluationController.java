@@ -30,8 +30,6 @@ public class EvaluationController {
         return evaluationService.createSession(request);
     }
 
-
-
     @GetMapping("/sessions")
     public List<EvaluationSessionResponse> getSessionsByLecturer(
             @RequestParam @Positive(message = "lecturerId must be a positive number") Long lecturerId) {
@@ -60,12 +58,9 @@ public class EvaluationController {
     @GetMapping("/students/{studentId}/interactions")
     public List<InteractionLogResponse> getInteractionHistory(
             @PathVariable @Positive(message = "studentId must be a positive number") Long studentId,
-            @RequestParam(required = false)
-            @Positive(message = "learningPathId must be a positive number") Long learningPathId) {
+            @RequestParam(required = false) @Positive(message = "learningPathId must be a positive number") Long learningPathId) {
         return evaluationService.getInteractionHistory(studentId, learningPathId);
     }
-
-
 
     @PostMapping("/grades")
     @ResponseStatus(HttpStatus.CREATED)
@@ -85,6 +80,5 @@ public class EvaluationController {
             @PathVariable @Positive(message = "studentId must be a positive number") Long studentId) {
         return evaluationService.getGradesForStudent(studentId);
     }
-
 
 }

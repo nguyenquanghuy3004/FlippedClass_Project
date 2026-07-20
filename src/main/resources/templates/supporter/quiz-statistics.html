@@ -104,7 +104,23 @@
   <th:block layout:fragment="scripts">
     <script>
       const TOKEN_KEY = 'jwt_token';
+      /**
+       * Hàm getToken: Lấy JWT token từ localStorage để xác thực.
+       * @returns {string} Token đã lưu
+       */
+      /**
+       * Hàm getToken: Lấy JWT token từ localStorage để xác thực.
+       * @returns {string} Token đã lưu
+       */
       function getToken() { return localStorage.getItem(TOKEN_KEY); }
+      /**
+       * Hàm authHeaders: Thiết lập HTTP headers chứa Bearer Token để gọi API được bảo mật.
+       * @returns {object} Đối tượng header
+       */
+      /**
+       * Hàm authHeaders: Thiết lập HTTP headers chứa Bearer Token để gọi API được bảo mật.
+       * @returns {object} Đối tượng header
+       */
       function authHeaders() {
         const t = getToken();
         return t ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t } : { 'Content-Type': 'application/json' };
@@ -123,6 +139,14 @@
         await loadAttempts();
       });
 
+      /**
+       * Hàm loadStatistics: Lấy thông tin tóm tắt kết quả làm bài của Quiz (Số lượt làm, Điểm TB, Điểm cao nhất/Thấp nhất)
+       * thông qua API: GET `/api/quizzes/{quizId}/statistics`.
+       */
+      /**
+       * Hàm loadStatistics: Lấy thông tin tóm tắt kết quả làm bài của Quiz (Số lượt làm, Điểm TB, Điểm cao nhất/Thấp nhất)
+       * thông qua API: GET `/api/quizzes/{quizId}/statistics`.
+       */
       async function loadStatistics() {
         try {
           fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() })
@@ -147,6 +171,18 @@
         }
       }
 
+      /**
+       * Hàm loadAttempts: Lấy danh sách toàn bộ các lượt nộp bài của sinh viên cho bài Quiz này:
+       * API: GET `/api/quizzes/{quizId}/attempts`.
+       * Vẽ kết quả lên bảng thống kê (sắp xếp theo thời gian nộp bài mới nhất lên trên)
+       * và gọi hàm vẽ biểu đồ phân phối điểm số (renderChart).
+       */
+      /**
+       * Hàm loadAttempts: Lấy danh sách toàn bộ các lượt nộp bài của sinh viên cho bài Quiz này:
+       * API: GET `/api/quizzes/{quizId}/attempts`.
+       * Vẽ kết quả lên bảng thống kê (sắp xếp theo thời gian nộp bài mới nhất lên trên)
+       * và gọi hàm vẽ biểu đồ phân phối điểm số (renderChart).
+       */
       async function loadAttempts() {
         try {
           const res = await fetch(`/api/quizzes/${quizId}/attempts`, { headers: authHeaders() });
@@ -200,6 +236,16 @@
         }
       }
 
+      /**
+       * Hàm renderChart: Tạo và vẽ biểu đồ hình cột phân phối điểm số của sinh viên (bins: 0-20, 21-40, 41-60, 61-80, 81-100)
+       * sử dụng thư viện ApexCharts.
+       * @param {Array} attempts - Danh sách các lượt nộp bài của sinh viên
+       */
+      /**
+       * Hàm renderChart: Tạo và vẽ biểu đồ hình cột phân phối điểm số của sinh viên (bins: 0-20, 21-40, 41-60, 61-80, 81-100)
+       * sử dụng thư viện ApexCharts.
+       * @param {Array} attempts - Danh sách các lượt nộp bài của sinh viên
+       */
       function renderChart(attempts) {
           // Bins: 0-20, 21-40, 41-60, 61-80, 81-100
           const bins = [0, 0, 0, 0, 0];

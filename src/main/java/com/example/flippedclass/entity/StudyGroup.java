@@ -30,7 +30,7 @@ public class StudyGroup {
     private GroupActivity activity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "learning_space_id", nullable = false)
+    @JoinColumn(name = "learning_space_id", nullable = true)
     @JsonIgnore
     private LearningSpace learningSpace;
 

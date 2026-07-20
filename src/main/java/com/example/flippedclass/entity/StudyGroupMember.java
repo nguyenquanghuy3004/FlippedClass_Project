@@ -23,7 +23,7 @@ public class StudyGroupMember {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "study_group_id", nullable = false)
+    @JoinColumn(name = "study_group_id", nullable = true)
     @JsonIgnore
     private StudyGroup group;
 
