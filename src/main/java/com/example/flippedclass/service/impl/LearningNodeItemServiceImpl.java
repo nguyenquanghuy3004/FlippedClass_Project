@@ -21,10 +21,8 @@ public class LearningNodeItemServiceImpl implements LearningNodeItemService {
 
     @Autowired
     private LearningNodeItemRepository learningNodeItemRepository;
-
     @Autowired
     private LearningNodeRepository learningNodeRepository;
-
     @Autowired
     private FileStorageService fileStorageService;
 

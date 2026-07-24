@@ -1033,6 +1033,9 @@
 
         if (btnSubmitCode) {
             btnSubmitCode.addEventListener('click', function() {
+
+
+
                 expandTerminal();
                 testResultTab.show();
                 const container = document.getElementById('testResultContainer');
@@ -1279,6 +1282,10 @@
       });
 
       if (summaryForm && saveSummaryBtn && summaryStatus) {
+
+
+
+
         summaryForm.addEventListener('submit', async (e) => {
           e.preventDefault();
 
@@ -1484,6 +1491,31 @@
         } else {
             renderNodePage(node, sortedItems);
             loadComments();
+
+            // Check if the learning space is ARCHIVED and disable buttons accordingly
+            if (node && node.spaceStatus === 'ARCHIVE') {
+                // Disable Submit Code button
+                const btnSubmitCode = document.getElementById('btnSubmitCode');
+                if (btnSubmitCode) {
+                    btnSubmitCode.disabled = true;
+                    btnSubmitCode.innerHTML = '<i class="ti ti-lock"></i> Class Archived';
+                    btnSubmitCode.title = "Cannot submit assignments because this class is archived.";
+                }
+
+                // Disable Save Summary button
+                const saveSummaryBtn = document.getElementById('saveSummaryBtn');
+                if (saveSummaryBtn) {
+                    saveSummaryBtn.disabled = true;
+                    saveSummaryBtn.innerHTML = '<i class="ti ti-lock"></i> Class Archived';
+                }
+
+                // Show warning text for Summary
+                const summaryStatus = document.getElementById('summaryStatus');
+                if (summaryStatus) {
+                    summaryStatus.innerHTML = '<span class="text-warning fw-bold"><i class="ti ti-alert-circle"></i> You are in read-only mode.</span>';
+                    summaryStatus.classList.add('show');
+                }
+            }
         }
       } catch (error) {
         renderError('Could not load node', error.message || 'Please try again later.');
@@ -1491,6 +1523,8 @@
     }
 
     loadNodePage();
+
+
 </script>
 <script th:src="@{/assets/js/group-activity.js}"></script>
 </th:block>

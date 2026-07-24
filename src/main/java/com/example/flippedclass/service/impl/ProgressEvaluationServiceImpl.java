@@ -3,6 +3,7 @@ package com.example.flippedclass.service.impl;
 import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.NodeProgress;
 import com.example.flippedclass.entity.User;
+import com.example.flippedclass.enums.LearningSpaceStatus;
 import com.example.flippedclass.enums.ProgressStatus;
 import com.example.flippedclass.repository.LearningNodeRepository;
 import com.example.flippedclass.repository.NodeProgressRepository;
@@ -11,6 +12,7 @@ import com.example.flippedclass.service.ProgressEvaluationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +31,12 @@ public class ProgressEvaluationServiceImpl implements ProgressEvaluationService 
                 .orElseThrow(() -> new RuntimeException("Student not found"));
         LearningNode node = learningNodeRepository.findById(learningNodeId)
                 .orElseThrow(() -> new RuntimeException("Node not found"));
+
+       LearningSpaceStatus spaceStatus =node.getLearningPath().getLearningSpace().getStatus();
+        if (spaceStatus == LearningSpaceStatus.ARCHIVE) {
+            throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
+                "This class has been archived. Students can no longer submit assignments or complete lessons.");
+        }
 
         NodeProgress progress = nodeProgressRepository.findByStudentIdAndLearningNodeId(studentId, learningNodeId)
                 .orElse(NodeProgress.builder()

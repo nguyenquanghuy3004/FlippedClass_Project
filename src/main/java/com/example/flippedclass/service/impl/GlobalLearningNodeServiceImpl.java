@@ -88,6 +88,7 @@ public class GlobalLearningNodeServiceImpl implements GlobalLearningNodeService 
                 .quizzes(node.getQuizzes() != null ? node.getQuizzes().stream().map(q -> Map.<String, Object>of("id", q.getId(), "title", q.getTitle())).collect(Collectors.toList()) : List.of())
                 .createdAt(node.getCreatedAt())
                 .updatedAt(node.getUpdatedAt())
+                .spaceStatus((node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null && node.getLearningPath().getLearningSpace().getStatus() != null) ? node.getLearningPath().getLearningSpace().getStatus().name() : null)
                 .build();
     }
 

@@ -73,9 +73,12 @@
                     <!-- Action Bar -->
                     <div class="action-bar">
                         <button class="btn btn-primary rounded-pill px-4 py-2 fw-semibold d-flex align-items-center gap-2"
-                                data-bs-toggle="modal" data-bs-target="#createModuleModal">
-                            <i class="ti ti-plus fs-5"></i> New Module
+                                th:classappend="${space?.status?.name() == 'ARCHIVE' ? 'disabled opacity-50' : ''}"
+                                th:style="${space?.status?.name() == 'ARCHIVE' ? 'pointer-events: none;' : ''}"
+                                data-bs-toggle="modal" data-bs-target="#createPathModal">
+                            <i class="ti ti-plus"></i>New Module
                         </button>
+
                         <button class="btn btn-light rounded-pill px-4 py-2 border fw-semibold text-secondary d-flex align-items-center gap-2"
                                 id="btnOpenTrash" data-bs-toggle="modal" data-bs-target="#trashModal">
                             <i class="ti ti-archive fs-5"></i> Trash

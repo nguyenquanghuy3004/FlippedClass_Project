@@ -82,9 +82,10 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Override
     @Transactional
     public LearningPathResponse updateLearningPath(Long spaceId, Long pathId, UpdateLearningPathRequest request) {
+
         LearningPath path = findPathInSpace(spaceId, pathId);
 
-        if (path.getStatus() == LearningPathStatus.ARCHIVED) {
+        if (path.getLearningSpace().getStatus() == LearningSpaceStatus.ARCHIVE) {
             throw new IllegalArgumentException("Không thể chỉnh sửa roadmap đã lưu trữ. Hãy khôi phục trước.");
         }
 

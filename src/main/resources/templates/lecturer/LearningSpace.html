@@ -295,6 +295,14 @@
                                 editBtn.dataset.description = space.description || '';
                                 editBtn.dataset.visibility = space.visibility || 'PRIVATE';
 
+                                // Nếu ARCHIVE mà kh cho EDIT
+                                if (space.status === 'ARCHIVE') {
+                                    editBtn.classList.add('disabled');
+                                    editBtn.style.pointerEvents = 'none';
+                                    editBtn.style.opacity = '0.5';
+                                    editBtn.title = "Class is archived";
+                                }
+
                                 const cloneBtn = clone.querySelector('.clone-space-btn');
                                 cloneBtn.dataset.id = space.id;
                                 cloneBtn.dataset.name = space.name;

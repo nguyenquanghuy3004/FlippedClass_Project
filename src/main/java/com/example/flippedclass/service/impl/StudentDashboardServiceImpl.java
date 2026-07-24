@@ -52,7 +52,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 .orElse(null);
 
         List<LearningSpaceMember> memberships = learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId).stream()
-                .filter(m -> m.getLearningSpace().getStatus() == com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE)
+                .filter(m -> m.getLearningSpace().getStatus() != com.example.flippedclass.enums.LearningSpaceStatus.DELETE)
                 .toList();
         List<Long> joinedSpaceIds = memberships.stream()
                 .map(member -> member.getLearningSpace().getId())
