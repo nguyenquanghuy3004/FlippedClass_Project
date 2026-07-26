@@ -132,6 +132,14 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         entityManager.createQuery("DELETE FROM StudyGroupMember sgm WHERE sgm.group.id IN (SELECT sg.id FROM StudyGroup sg WHERE sg.activity.learningNode.id = :nodeId)").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM StudyGroup sg WHERE sg.activity.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM GroupActivity g WHERE g.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        
+        // Delete LearningNodeItem and Quiz directly via JPQL to prevent FK constraint errors
+        entityManager.createQuery("DELETE FROM LearningNodeItem i WHERE i.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM Quiz q WHERE q.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        
+        // Clear collections to prevent Hibernate from issuing UPDATE SET learning_node_id = NULL
+        if (node.getItems() != null) node.getItems().clear();
+        if (node.getQuizzes() != null) node.getQuizzes().clear();
 
         learningNodeRepository.delete(node);
     }

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import com.example.flippedclass.service.LearningPathService;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +39,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     private final CourseDocumentServiceImpl courseDocumentServicel;
     private final LearningPathRepository learningPathRepository;
     private final CourseDocumentRepository courseDocumentRepository;
+    private final LearningPathService learningPathService;
 
 
     private User getCurrentUser() {
@@ -303,8 +305,34 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
             }
         }
 
+        // ==========================================
+        // CÁCH 1: XÓA MỀM (Code cũ ban đầu)
+        // ==========================================
         learningSpace.setStatus(LearningSpaceStatus.DELETE);
         learningSpaceRepository.save(learningSpace);
+
+        // ==========================================
+        // CÁCH 2: XÓA CỨNG (Đang dùng để test)
+        // ==========================================
+        // // 1. Delete all paths (which will delete their nodes)
+        // if (learningSpace.getPaths() != null) {
+        //     List<com.example.flippedclass.entity.LearningPath> pathsToDel = new java.util.ArrayList<>(learningSpace.getPaths());
+        //     
+        //     for (com.example.flippedclass.entity.LearningPath path : pathsToDel) {
+        //         learningPathService.deleteLearningPathModul(id, path.getId());
+        //     }
+        //     
+        //     learningSpace.getPaths().clear();
+        // }
+        // 
+        // // 2. Delete all members
+        // if (learningSpace.getMembers() != null) {
+        //     learningSpace.getMembers().clear();
+        //     memberRepository.deleteAllByLearningSpaceId(id);
+        // }
+        // 
+        // // 3. Hard delete the space
+        // learningSpaceRepository.delete(learningSpace);
     }
 
     // restore learning Space

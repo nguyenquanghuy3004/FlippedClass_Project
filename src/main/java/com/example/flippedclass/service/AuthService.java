@@ -13,7 +13,7 @@ public interface AuthService {
     MessageResponse registerUser(SignupRequest signupRequest);
     GoogleJwtResponse googleLogin(TokenRequest tokenRequest) throws Exception;
     MessageResponse completeProfile(CompleteProfileRequest completeProfileRequest);
-    MessageResponse changePassWord(ChangePasswordRequest changePass);
+//    MessageResponse changePassWord(ChangePasswordRequest changePass);
 
 
 

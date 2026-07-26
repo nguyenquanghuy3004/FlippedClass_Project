@@ -263,7 +263,18 @@
                                    path.startsWith('/lecturer/learning-nodes');
         if (!payload.roles || (!isSupporterAllowed && !payload.roles.includes('MENTOR') && !payload.roles.includes('ROLE_MENTOR') && !payload.roles.includes('ADMIN') && !payload.roles.includes('ROLE_ADMIN'))) {
           window.location.href = '/signin';
+          return;
         }
+        
+        // Update username and avatar
+        document.querySelectorAll('[data-user-name]').forEach((element) => {
+          element.textContent = payload.sub || 'Lecturer View';
+        });
+        document.querySelectorAll('[data-user-avatar]').forEach((img) => {
+          const nameToEncode = payload.sub || 'Lecturer';
+          img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameToEncode)}&background=random&color=fff&rounded=true`;
+        });
+
       } catch (e) {
         window.location.href = '/signin';
       }

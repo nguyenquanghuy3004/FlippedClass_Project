@@ -281,6 +281,10 @@
             <label class="form-label fw-bold" for="editEnrollmentYear">Enrollment Year</label>
             <input class="form-control rounded-4" id="editEnrollmentYear" name="enrollmentYear" type="number" min="2000" max="2100">
           </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-bold" for="editPhoneNumber">Phone Number</label>
+            <input class="form-control rounded-4" id="editPhoneNumber" name="phoneNumber" type="text" maxlength="20">
+          </div>
         </div>
       </div>
       <div class="modal-footer border-0 pt-0">
@@ -463,7 +467,11 @@
         element.textContent = normalized.name;
       });
       document.querySelectorAll('[data-user-avatar]').forEach((image) => {
-        image.src = normalized.avatarUrl;
+        let finalAvatarUrl = normalized.avatarUrl;
+        if (!finalAvatarUrl || finalAvatarUrl === defaultAvatarUrl) {
+           finalAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(normalized.name)}&background=random&color=fff&rounded=true`;
+        }
+        image.src = finalAvatarUrl;
         image.onerror = () => {
           image.onerror = null;
           image.src = defaultAvatarUrl;
@@ -569,7 +577,13 @@
       const displayName = user.fullName || user.username || 'Student';
       const avatar = document.getElementById('detailAvatar');
 
-      if (avatar) avatar.src = user.avatarUrl || defaultAvatarUrl;
+      if (avatar) {
+          let finalAvatarUrl = user.avatarUrl || defaultAvatarUrl;
+          if (!finalAvatarUrl || finalAvatarUrl === defaultAvatarUrl) {
+             finalAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random&color=fff&rounded=true`;
+          }
+          avatar.src = finalAvatarUrl;
+      }
       const fName = document.getElementById('detailFullName');
       if (fName) fName.textContent = displayName;
       
@@ -610,6 +624,9 @@
 
       const editEnrollmentYear = document.getElementById('editEnrollmentYear');
       if (editEnrollmentYear) editEnrollmentYear.value = profile.enrollmentYear || '';
+
+      const editPhoneNumber = document.getElementById('editPhoneNumber');
+      if (editPhoneNumber) editPhoneNumber.value = profile.phoneNumber || '';
     }
 
     function showProfileMessage(message, type = 'danger') {
@@ -639,7 +656,8 @@
         studentCode: document.getElementById('editStudentCode')?.value.trim(),
         className: document.getElementById('editClassName')?.value.trim(),
         major: document.getElementById('editMajor')?.value.trim(),
-        enrollmentYear: yearValue ? Number(yearValue) : null
+        enrollmentYear: yearValue ? Number(yearValue) : null,
+        phoneNumber: document.getElementById('editPhoneNumber')?.value.trim()
       };
 
       if (!payload.studentCode) {

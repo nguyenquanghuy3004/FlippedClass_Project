@@ -20,6 +20,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-4">Name</th>
+<!--                                <th>ID</th>-->
                                 <th>Email</th>
                                 <th>Role</th>
                                 <th>Joined At</th>
@@ -84,7 +85,7 @@
                 const spaceId = $('#spaceId').val();
                 if (!spaceId) return;
                 $.ajax({
-                    url: `/api/spaces/${spaceId}/members?page=${page}&size=5`,
+                    url: `/api/spaces/${spaceId}/members?page=${page}&size=10`,  // Số lượng học viên trên mỗi trang của bảng xếp hạng
                     method: 'GET',
                     success: function(data) {
                         renderTable(data.content);
@@ -143,6 +144,7 @@
                                 <td class="ps-4">
                                     <div class="fw-semibold text-dark">${m.fullName || 'N/A'}</div>
                                 </td>
+                                <!--!<td>${m.userId || ''}</td>-->
                                 <td>${m.email}</td>
                                 <td><span class="badge ${badgeClass}">${m.role}</span></td>
                                 <td>${new Date(m.joinedAt).toLocaleDateString()}</td>

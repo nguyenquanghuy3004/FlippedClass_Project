@@ -38,7 +38,7 @@ public class LessonSummary {
     @Builder.Default
     private SummaryStatus status = SummaryStatus.SUBMITTED;
 
-    @Column(name = "submitted_at", updatable = false)
+    @Column(name = "submitted_at")
     @Builder.Default
     private LocalDateTime submittedAt = LocalDateTime.now();
 

@@ -573,12 +573,19 @@
                 $('#btnDeleteAll').click(function() {
                     Swal.fire({
                         title: 'Delete ALL Modules?',
-                        text: "WARNING: Are you sure you want to delete ALL modules in this space? This action cannot be undone.",
+                        html: "WARNING: Are you sure you want to delete ALL modules in this space? This action cannot be undone.<br><br>Type <b>DELETE</b> to confirm.",
                         icon: 'error',
+                        input: 'text',
+                        inputPlaceholder: 'Type DELETE here...',
                         showCancelButton: true,
                         confirmButtonColor: '#dc3545',
                         cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Yes, delete ALL!'
+                        confirmButtonText: 'Yes, delete ALL!',
+                        preConfirm: (inputValue) => {
+                            if (inputValue !== 'DELETE') {
+                                Swal.showValidationMessage('You must type DELETE to confirm');
+                            }
+                        }
                     }).then((result) => {
                         if (result.isConfirmed) {
                             fetch(`/api/learning-spaces/${spaceId}/learning-paths`, {
@@ -1147,12 +1154,28 @@
                             let html = '';
                             if (items && items.length > 0) {
                                 items.forEach(item => {
+                                    const escapeHtml = (unsafe) => (unsafe||'').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+                                    const safeTitle = escapeHtml(item.title);
+
                                     if (item.itemType === 'VIDEO') {
                                         let videoHtml = '';
                                         if (item.fullUrl.includes('youtube.com') || item.fullUrl.includes('youtu.be')) {
                                             const videoId = extractYoutubeId(item.fullUrl);
-                                            const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : item.fullUrl;
-                                            videoHtml = `<iframe src="${embedUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+                                            const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : item.fullUrl;
+                                            const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
+                                            const fallbackThumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
+                                            
+                                            if (videoId) {
+                                                videoHtml = `
+                                                <div class="w-100 h-100" style="cursor: pointer;" onclick="this.innerHTML='<iframe src=\\'${embedUrl}\\' title=\\'YouTube video player\\' frameborder=\\'0\\' allow=\\'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\\' allowfullscreen class=\\'w-100 h-100\\'></iframe>'">
+                                                    <img src="${thumbnailUrl}" onerror="this.onerror=null; this.src='${fallbackThumbUrl}';" class="w-100 h-100 object-fit-cover" alt="Video Thumbnail">
+                                                    <div class="position-absolute top-50 start-50 translate-middle">
+                                                        <i class="ti ti-player-play-filled" style="font-size: 4rem; color: #ff0000; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));"></i>
+                                                    </div>
+                                                </div>`;
+                                            } else {
+                                                videoHtml = `<iframe src="${embedUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+                                            }
                                         } else {
                                             videoHtml = `<video src="${item.fullUrl}" controls></video>`;
                                         }
@@ -1172,7 +1195,7 @@
                                                     <i class="ti ti-file-pdf fs-3"></i>
                                                 </div>
                                                 <a href="${item.fullUrl}" target="_blank" class="text-decoration-none text-dark d-flex align-items-center gap-2">
-                                                    <h6 class="mb-0 text-truncate fw-bold hover-text-primary" style="transition: color 0.2s;">${item.title}</h6>
+                                                    <h6 class="mb-0 text-truncate fw-bold hover-text-primary" style="transition: color 0.2s;">${safeTitle}</h6>
                                                     <span class="action-cta-badge" data-type="DOCUMENT">
                                                         Vào xem document <i class="ti ti-chevron-right ms-1" style="font-size: 0.75rem; opacity: 0.7;"></i>
                                                     </span>

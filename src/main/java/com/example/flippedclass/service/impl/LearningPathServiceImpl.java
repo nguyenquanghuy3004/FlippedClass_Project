@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import com.example.flippedclass.service.LearningNodeService;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,9 @@ public class LearningPathServiceImpl implements LearningPathService {
 
     @Autowired
     private NodeProgressRepository nodeProgressRepository;
+
+    @Autowired
+    private LearningNodeService learningNodeService;
 
     @Override
     public LearningPath getLearningPathEntity(Long id) {
@@ -122,7 +126,32 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Override
     @Transactional
     public void deleteLearningPathModul(Long spaceId, Long pathId) {
-        findPathInSpace(spaceId, pathId).setStatus(LearningPathStatus.DELETED);
+        LearningPath path = findPathInSpace(spaceId, pathId);
+        
+        // ==========================================
+        // CÁCH 1: XÓA MỀM (Code cũ ban đầu)
+        // ==========================================
+        path.setStatus(LearningPathStatus.DELETED);
+        learningPathRepository.save(path);
+        
+        // ==========================================
+        // CÁCH 2: XÓA CỨNG (Đang dùng để test)
+        // ==========================================
+        // 1. Xóa toàn bộ các Bài giảng (Nodes) bên trong trước để tránh lỗi Khóa ngoại (FK)
+        // if (path.getNodes() != null) {
+        //     // Copy list để tránh lỗi ConcurrentModification và cắt đứt liên kết trong bộ nhớ
+        //     // (Giúp Hibernate không tự động tạo lệnh UPDATE SET learning_path_id = NULL)
+        //     List<com.example.flippedclass.entity.LearningNode> nodesToDel = new java.util.ArrayList<>(path.getNodes());
+        //     
+        //     for (com.example.flippedclass.entity.LearningNode node : nodesToDel) {
+        //         learningNodeService.deleteNode(node.getId());
+        //     }
+        //     
+        //     path.getNodes().clear();
+        // }
+        // 
+        // // 2. Xóa cứng Chương học (Path)
+        // learningPathRepository.delete(path);
     }
 
     @Override
@@ -130,7 +159,7 @@ public class LearningPathServiceImpl implements LearningPathService {
     public void deleteAllLearningPaths(Long spaceId) {
         List<LearningPath> paths = learningPathRepository.findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.ACTIVE);
         for (LearningPath path : paths) {
-            path.setStatus(LearningPathStatus.DELETED);
+            deleteLearningPathModul(spaceId, path.getId());
         }
     }
 

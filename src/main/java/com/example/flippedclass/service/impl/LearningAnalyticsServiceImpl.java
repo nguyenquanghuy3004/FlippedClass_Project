@@ -50,7 +50,7 @@ public class LearningAnalyticsServiceImpl implements LearningAnalyticsService {
         int activeStudents = 0;
         int supporterCandidates = 0;
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
         Map<Long, Long> completedNodesMap = nodeProgressRepository.countCompletedNodesGroupedByStudent(spaceId)
                 .stream().collect(Collectors.toMap(row -> (Long) row[0], row -> ((Number) row[1]).longValue()));
@@ -92,10 +92,15 @@ public class LearningAnalyticsServiceImpl implements LearningAnalyticsService {
                 supporterCandidates++;
             }
 
+            String studentCode = member.getUser().getStudentProfile() != null  // get studentCode
+                    ? member.getUser().getStudentProfile().getStudentCode() 
+                    : "N/A";
+
             StudentAnalyticsDTO studentDto = StudentAnalyticsDTO.builder()
                     .studentId(studentId)
                     .studentName(member.getUser().getFullName())
                     .username(member.getUser().getUsername())
+                    .studentCode(studentCode)
                     .progressPercentage(progressPercentage)
                     .completedNodes(completedNodes)
                     .totalNodes(totalNodes)

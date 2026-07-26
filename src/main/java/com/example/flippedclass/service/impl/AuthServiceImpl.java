@@ -31,10 +31,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,9 +39,9 @@ import java.util.stream.Collectors;
 public class AuthServiceImpl implements AuthService {
 
 
- private final  AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    private final   UserRepository userRepository;
+    private final UserRepository userRepository;
 
     private final RoleRepository roleRepository;
 
@@ -60,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
     private String googleClientId;
 
     @Override
-    public JwtResponse authenticateUser(LoginRequest loginRequest){
+    public JwtResponse authenticateUser(LoginRequest loginRequest) {
 
         String identifier = loginRequest.getEmail() != null ? loginRequest.getEmail() : loginRequest.getUsername();
 
@@ -80,6 +77,7 @@ public class AuthServiceImpl implements AuthService {
                 userDetails.getEmail(),
                 roles);
     }
+
     @Override
     public MessageResponse registerUser(SignupRequest signUpRequest) {
 
@@ -104,10 +102,17 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new RuntimeException("Role is not found."));
         roles.add(studentRole);
         user.setRoles(roles);
-        userRepository.save(user);
+        user = userRepository.save(user);
+
+        // Tự động sinh profile và mã sinh viên (HE + 6 số ngẫu nhiên)
+        StudentProfile profile = new StudentProfile();
+        profile.setUser(user);
+        String random6 = String.format("%06d", new Random().nextInt(1000000));
+        profile.setStudentCode("HE" + random6);
+        studentProfileRepository.save(profile);
+
         return new MessageResponse("User registered successfully!");
     }
-
 
 
     @Override
@@ -154,9 +159,14 @@ public class AuthServiceImpl implements AuthService {
                     .orElseThrow(() -> new RuntimeException("Role is not found."));
             user.setRoles(new HashSet<>(Collections.singletonList(studentRole)));
             user = userRepository.save(user);
-        }
 
-        else {
+            // Tự động sinh profile và mã sinh viên (HE + 6 số ngẫu nhiên)
+            StudentProfile profile = new StudentProfile();
+            profile.setUser(user);
+            String random6 = String.format("%06d", new Random().nextInt(1000000));
+            profile.setStudentCode("HE" + random6);
+            studentProfileRepository.save(profile);
+        } else {
             if (com.example.flippedclass.enums.UserStatus.LOCKED.equals(user.getStatus())) {
                 throw new IllegalArgumentException("Your account has been locked. Please contact the administrator.");
             }
@@ -169,7 +179,7 @@ public class AuthServiceImpl implements AuthService {
         List<String> roles = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(Collectors.toList());
-                
+
         // Sinh JWT từ username
         String jwt = jwtUtils.generateJwtTokenFromUsername(user.getUsername(), roles);
         // Check xem đã hoàn thành profile
@@ -185,6 +195,7 @@ public class AuthServiceImpl implements AuthService {
                 isProfileComplete
         );
     }
+
     @Override
     public MessageResponse completeProfile(CompleteProfileRequest request) {
         ValidateProfile.validateCompleteProfile(request);
@@ -213,30 +224,31 @@ public class AuthServiceImpl implements AuthService {
         studentProfileRepository.save(profile);
         return new MessageResponse("Profile completed successfully!");
     }
-    @Override
-    public MessageResponse changePassWord(ChangePasswordRequest changePass) {
-        // Gọi validate dữ liệu thô từ component tự viết
-        validate.validatePassWord(changePass);
-        // Lấy thông tin tài khoản đăng nhập
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalArgumentException("Unauthorized!");
-        }
-        String username = authentication.getName();
-        // Tìm tk trong DB
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found."));
-        // Xác thực mật khẩu BCrypt Matches
-        if (!encoder.matches(changePass.getOldPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Incorrect old password!");
-        }
-        // Check mật khẩu mới tránh trùng với cũ
-        if (encoder.matches(changePass.getNewPassWord(), user.getPassword())) {
-            throw new IllegalArgumentException("New password must be different from old password!");
-        }
-        // Mã hóa và lưu
-        user.setPassword(encoder.encode(changePass.getNewPassWord()));
-        userRepository.save(user);
-        return new MessageResponse("Password changed successfully!");
-    }
 }
+//    @Override
+//    public MessageResponse changePassWord(ChangePasswordRequest changePass) {
+//        // Gọi validate dữ liệu thô từ component tự viết
+//        validate.validatePassWord(changePass);
+//        // Lấy thông tin tài khoản đăng nhập
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if (authentication == null || !authentication.isAuthenticated()) {
+//            throw new IllegalArgumentException("Unauthorized!");
+//        }
+//        String username = authentication.getName();
+//        // Tìm tk trong DB
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new RuntimeException("User not found."));
+//        // Xác thực mật khẩu BCrypt Matches
+//        if (!encoder.matches(changePass.getOldPassword(), user.getPassword())) {
+//            throw new IllegalArgumentException("Incorrect old password!");
+//        }
+//        // Check mật khẩu mới tránh trùng với cũ
+//        if (encoder.matches(changePass.getNewPassWord(), user.getPassword())) {
+//            throw new IllegalArgumentException("New password must be different from old password!");
+//        }
+//        // Mã hóa và lưu
+//        user.setPassword(encoder.encode(changePass.getNewPassWord()));
+//        userRepository.save(user);
+//        return new MessageResponse("Password changed successfully!");
+//    }
+

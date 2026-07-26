@@ -59,9 +59,9 @@ public class LearningSpace {
 
 
 
-//    @OneToMany(mappedBy = "learningSpace", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<LearningPath> paths = new ArrayList<>();
-//
-//    @OneToMany(mappedBy = "learningSpace", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<LearningSpaceMember> members = new ArrayList<>();
+    @OneToMany(mappedBy = "learningSpace", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LearningPath> paths = new ArrayList<>();
+
+    @OneToMany(mappedBy = "learningSpace", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LearningSpaceMember> members = new ArrayList<>();
 }

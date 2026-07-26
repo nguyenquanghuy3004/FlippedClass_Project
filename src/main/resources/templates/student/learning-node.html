@@ -610,7 +610,7 @@
     };
 
     window.deleteComment = async function (commentId) {
-      if (!confirm('Are you sure you want to delete this comment?')) return;
+      // if (!confirm('Are you sure you want to delete this comment?')) return;
       try {
         const groupParam = window.currentGroupId ? `?groupId=${window.currentGroupId}` : '';
         const res = await fetch(`/api/nodes/${nodeId}/discussions/${commentId}${groupParam}`, {
@@ -1235,10 +1235,10 @@
                 document.getElementById('keyTakeaways').value = data.summaryContent;
               }
               if (saveSummaryBtn) {
-                saveSummaryBtn.innerHTML = '<i class="ti ti-check"></i> Đã cập nhật bài';
+                saveSummaryBtn.innerHTML = '<i class="ti ti-check"></i> Updated';
               }
               if (summaryStatus) {
-                summaryStatus.innerHTML = '<span class="text-success"><i class="ti ti-check"></i> Đã nộp vào ' + new Date(data.submittedAt).toLocaleString() + '</span>';
+                summaryStatus.innerHTML = '<span class="text-success"><i class="ti ti-check"></i> Submitted at ' + new Date(data.submittedAt).toLocaleString() + '</span>';
                 summaryStatus.classList.add('show');
               }
               // Remove old feedback before rendering new one to avoid duplicates on re-fetch
@@ -1249,9 +1249,9 @@
               if (data.lecturerFeedback) {
                 const feedbackHtml = `
                   <div class="lecturer-feedback mt-4 p-3 rounded" style="background-color: #f0fdf4; border-left: 4px solid #16a34a;">
-                      <h5 style="color: #166534; font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;"><i class="ti ti-message-circle-2"></i> Nhận xét của giảng viên</h5>
+                      <h5 style="color: #166534; font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;"><i class="ti ti-message-circle-2"></i> Lecturer Feedback</h5>
                       <p style="margin-bottom: 0.5rem; color: #15803d;">${data.lecturerFeedback.replace(/\\n/g, '<br>')}</p>
-                      <small class="text-muted" style="color: #166534 !important; opacity: 0.8;">Đánh giá lúc: ${new Date(data.reviewedAt).toLocaleString()}</small>
+                      <small class="text-muted" style="color: #166534 !important; opacity: 0.8;">Reviewed at: ${new Date(data.reviewedAt).toLocaleString()}</small>
                   </div>
                 `;
                 summaryForm.insertAdjacentHTML('afterend', feedbackHtml);

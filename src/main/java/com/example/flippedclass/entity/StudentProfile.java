@@ -19,6 +19,7 @@ public class StudentProfile {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private User user;
 
     @Column(nullable = false, unique = true, columnDefinition = "NVARCHAR(50)")
@@ -34,7 +35,4 @@ public class StudentProfile {
 
     @Column(length = 20)
     private String phoneNumber;
-
-    @Column(columnDefinition = "NVARCHAR(1000)")
-    private String bio;
 }
