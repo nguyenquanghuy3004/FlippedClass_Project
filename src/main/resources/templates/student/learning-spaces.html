@@ -93,7 +93,7 @@
     const state = {
       spaces: [],
       allSpaces: [],
-      selectedSpaceId: null,
+      selectedSpaceId: Number(localStorage.getItem('student_last_space_id')) || null,
       searchTerm: '',
       focusRoadmapOnce: false,
       focusJoinOnce: false
@@ -422,6 +422,7 @@
         return;
       }
       state.selectedSpaceId = selected.id;
+      localStorage.setItem('student_last_space_id', selected.id);
       renderSpaces();
       renderDetailLoading(selected);
       try {

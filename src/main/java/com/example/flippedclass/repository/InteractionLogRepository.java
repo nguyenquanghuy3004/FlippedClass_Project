@@ -13,6 +13,8 @@ public interface InteractionLogRepository extends JpaRepository<InteractionLog, 
 
     List<InteractionLog> findByStudentIdAndLearningPathIdOrderByOccurredAtDesc(Long studentId, Long learningPathId);
 
+    List<InteractionLog> findTop20ByStudentIdAndLearningPath_LearningSpace_IdOrderByOccurredAtDesc(Long studentId, Long spaceId);
+
     @Query("SELECT MAX(il.occurredAt) FROM InteractionLog il " +
            "WHERE il.student.id = :studentId " +
            "AND il.learningPath.learningSpace.id = :spaceId")

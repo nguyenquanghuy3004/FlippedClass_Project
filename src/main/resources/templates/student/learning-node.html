@@ -144,6 +144,21 @@
         document.body.classList.remove('modal-open');
     };
 
+    function logInteraction(pathId, type, summary) {
+        if (!pathId || !userId) return;
+        fetch('/api/evaluations/interactions', {
+            method: 'POST',
+            headers: authHeaders(true),
+            body: JSON.stringify({
+                studentId: userId,
+                learningPathId: pathId,
+                interactionType: type,
+                summary: summary,
+                occurredAt: new Date().toISOString()
+            })
+        }).catch(err => console.warn('Failed to log interaction', err));
+    }
+
     // MỚI: Realtime Comments
     if (nodeId) {
         const nodeSocket = new SockJS('/ws');
@@ -1425,6 +1440,14 @@
 
         const hasVideo = sortedItems.some(i => String(i.itemType || '').toUpperCase() === 'VIDEO');
         // Redirection for PDF/DOC has been removed so that documents open inside the portal via iframe.
+        
+        if (hasVideo) {
+            const loggedKey = 'logged_video_' + nodeId;
+            if (!sessionStorage.getItem(loggedKey)) {
+                logInteraction(node.learningPathId, 'HOME_STUDY', `Watched video lesson: ${node.title}`);
+                sessionStorage.setItem(loggedKey, 'true');
+            }
+        }
 
         if (node.nodeType === 'GROUP_ACTIVITY') {
             if (typeof window.renderGroupActivityPage === 'function') {

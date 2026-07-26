@@ -358,16 +358,34 @@
         <input type="file" id="hiddenDocumentInput" accept=".pdf" style="display:none;">
         <script>
             document.addEventListener('show.bs.dropdown', function(event) {
-                let card = event.target.closest('.node-card');
-                if (card) {
-                    card.style.zIndex = '1050';
-                    card.style.position = 'relative';
+                let nodeCard = event.target.closest('.node-card');
+                let pathBody = event.target.closest('.path-collapsible-body');
+                let pathCard = event.target.closest('.path-card');
+                if (nodeCard) {
+                    nodeCard.style.zIndex = '1050';
+                    nodeCard.style.position = 'relative';
+                }
+                if (pathBody) {
+                    pathBody.style.zIndex = '1040';
+                    pathBody.style.position = 'relative';
+                }
+                if (pathCard) {
+                    pathCard.style.zIndex = '1030';
+                    pathCard.style.position = 'relative';
                 }
             });
             document.addEventListener('hide.bs.dropdown', function(event) {
-                let card = event.target.closest('.node-card');
-                if (card) {
-                    card.style.zIndex = '1';
+                let nodeCard = event.target.closest('.node-card');
+                let pathBody = event.target.closest('.path-collapsible-body');
+                let pathCard = event.target.closest('.path-card');
+                if (nodeCard) {
+                    nodeCard.style.zIndex = '';
+                }
+                if (pathBody) {
+                    pathBody.style.zIndex = '10'; // trả về 10 như trong css
+                }
+                if (pathCard) {
+                    pathCard.style.zIndex = '';
                 }
             });
         </script>

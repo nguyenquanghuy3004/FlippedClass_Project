@@ -17,6 +17,9 @@ import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.LessonSummaryService;
 import com.example.flippedclass.service.NotificationService;
 
+import com.example.flippedclass.repository.InteractionLogRepository;
+import com.example.flippedclass.entity.InteractionLog;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +35,7 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
     private final UserRepository userRepository;
     private final ProgressEvaluationService progressEvaluationService;
     private final NotificationService notificationService;
+    private final InteractionLogRepository interactionLogRepository;
 
 
     @Override
@@ -71,6 +75,16 @@ public class LessonSummaryServiceImpl implements LessonSummaryService {
             student.getFullName() + " vừa nộp bài tóm tắt: " + learningNode.getTitle(),
             "/lecturer/summaries/" + summary.getId() + "/review"
         );
+
+        // Auto-log Interaction
+        InteractionLog log = InteractionLog.builder()
+                .student(student)
+                .learningPath(learningNode.getLearningPath())
+                .interactionType("LESSON_SUMMARY")
+                .summary("Submitted lesson summary for: " + learningNode.getTitle())
+                .occurredAt(LocalDateTime.now())
+                .build();
+        interactionLogRepository.save(log);
 
         return mapToResponse(summary);
     }
