@@ -205,6 +205,31 @@ public class PeerMentoringServiceImpl implements PeerMentoringService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    public void removeAllPairingsForMentor(Long spaceId, Long mentorId) {
+        List<PeerPairing> pairings = peerPairingRepository.findByLearningSpace_IdAndMentor_Id(spaceId, mentorId);
+        for (PeerPairing pairing : pairings) {
+            if (pairing.getStatus() == PeerPairingStatus.ACTIVE) {
+                pairing.setStatus(PeerPairingStatus.INACTIVE);
+                peerPairingRepository.save(pairing);
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void removeAllPairingsForMember(Long spaceId, Long memberId) {
+        removeAllPairingsForMentor(spaceId, memberId);
+        List<PeerPairing> menteePairings = peerPairingRepository.findByLearningSpace_IdAndMentee_Id(spaceId, memberId);
+        for (PeerPairing pairing : menteePairings) {
+            if (pairing.getStatus() == PeerPairingStatus.ACTIVE) {
+                pairing.setStatus(PeerPairingStatus.INACTIVE);
+                peerPairingRepository.save(pairing);
+            }
+        }
+    }
+
     @lombok.Data
     @lombok.AllArgsConstructor
     private static class StudentGpaInfo {

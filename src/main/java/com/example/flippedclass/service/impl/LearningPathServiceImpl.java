@@ -130,14 +130,14 @@ public class LearningPathServiceImpl implements LearningPathService {
     public void deleteLearningPathModul(Long spaceId, Long pathId) {
         LearningPath path = findPathInSpace(spaceId, pathId);
         
-        // ==========================================
-        // CÁCH 1: XÓA MỀM (Code cũ ban đầu)
+
+        // CÁCH 1: XÓA MỀM
         // ==========================================
         path.setStatus(LearningPathStatus.DELETED);
         learningPathRepository.save(path);
         
-        // ==========================================
-        // CÁCH 2: XÓA CỨNG (Đang dùng để test)
+
+        // CÁCH 2: XÓA CỨNG
         // ==========================================
         // 1. Xóa toàn bộ các Bài giảng (Nodes) bên trong trước để tránh lỗi Khóa ngoại (FK)
 //         if (path.getNodes() != null) {

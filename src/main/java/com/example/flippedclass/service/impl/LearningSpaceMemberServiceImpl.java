@@ -66,6 +66,9 @@ public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberServic
         
         member.setRole(MemberRole.MEMBER);
         memberRepository.save(member);
+        
+        // Remove mentees associated with this member
+        peerMentoringService.removeAllPairingsForMentor(spaceId, member.getUser().getId());
     }
 
     @Override
@@ -86,6 +89,9 @@ public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberServic
         }
 
         memberRepository.delete(member);
+        
+        // Remove any peer mentoring pairings associated with this member
+        peerMentoringService.removeAllPairingsForMember(spaceId, member.getUser().getId());
     }
     
     private LearningSpaceMember getMember(Long spaceId, Long memberId) {

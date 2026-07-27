@@ -317,14 +317,14 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
             }
         }
 
-        // ==========================================
-        // CÁCH 1: XÓA MỀM (Code cũ ban đầu)
+
+        // CÁCH 1: XÓA MỀM
         // ==========================================
         learningSpace.setStatus(LearningSpaceStatus.DELETE);
         learningSpaceRepository.save(learningSpace);
 
-        // ==========================================
-        // CÁCH 2: XÓA CỨNG (Đang dùng để test)
+
+        // CÁCH 2: XÓA CỨNG
         // ==========================================
         // // 1. Delete all paths (which will delete their nodes)
 //         if (learningSpace.getPaths() != null) {
