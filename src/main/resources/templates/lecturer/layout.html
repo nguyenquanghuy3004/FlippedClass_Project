@@ -10,24 +10,37 @@
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
   <link rel="manifest" th:href="@{/assets/site.webmanifest}">
 
-  <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <!-- FontAwesome for fallback -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
   <!-- SockJS & STOMP for Notifications -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   
   <link rel="stylesheet" th:href="@{/assets/css/lecturer-layout.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
 
-  <script th:src="@{/assets/js/fetch-interceptor.js}"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script th:src="@{/assets/js/fetch-interceptor.js}"></script>
 
   <!-- BỘ KIỂM TRA QUYỀN HẠN & ĐĂNG NHẬP -->
-  <script>
+  <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
     (function() {
       const token = localStorage.getItem('jwt_token');
       if (!token) {
@@ -163,7 +176,10 @@
   </aside>
 
   <!-- Synchronous Navigation Highlighting script to prevent flickering -->
-  <script>
+  <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
     (function() {
       const path = window.location.pathname;
       const links = document.querySelectorAll('.sidebar .nav-link');
@@ -228,9 +244,16 @@
     </div>
   </main>
 
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
     // Setup AJAX to include JWT token if stored in localStorage
     $.ajaxSetup({
       beforeSend: function (xhr) {
@@ -328,7 +351,10 @@
       });
     });
   </script>
-  <script>
+  <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
     const notifUserId = localStorage.getItem('user_id');
 
     // Cập nhật giao diện list thông báo
@@ -436,6 +462,9 @@
   </script>
 
   <th:block layout:fragment="scripts"></th:block>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="/js/active-time-tracker.js"></script>
 </body>
 
 </html>

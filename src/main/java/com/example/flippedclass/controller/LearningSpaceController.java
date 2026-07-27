@@ -78,8 +78,8 @@ public class LearningSpaceController {
     @PreAuthorize("hasAuthority('MENTOR') or hasAuthority('ADMIN')")
     @PutMapping("/{id}/update")
     public ResponseEntity<?> updateLearingSpace(@PathVariable Long id, @RequestBody LearningSpace spaceDetail){
-         LearningSpace update =  learningSpaceService.updateLearningSpace(id, spaceDetail);
-            return ResponseEntity.ok(update);
+         LearningSpaceResponse update =  learningSpaceService.updateLearningSpace(id, spaceDetail);
+         return ResponseEntity.ok(update);
     }
 
     @GetMapping("/public")

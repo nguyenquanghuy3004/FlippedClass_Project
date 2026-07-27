@@ -71,7 +71,9 @@
 
                 <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
                     <div class="table-responsive">
-                        <table class="table align-middle mb-0 text-nowrap">
+                        
+<!-- KHU VỰC BẢNG DỮ LIỆU (TABLE) -->
+<table class="table align-middle mb-0 text-nowrap">
                             <thead class="bg-light text-muted fw-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
                                 <tr>
                                     <th class="ps-4 py-3 border-0 rounded-start">Rank</th>
@@ -99,7 +101,12 @@
         </div>
 
     <!-- Modal hiển thị chi tiết thông tin học tập của sinh viên (Student Detail Modal) -->
-    <div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
+    
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: STUDENTDETAILMODAL 
+     ========================================== -->
+<div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header border-bottom-0 pb-0 pt-4 px-4 position-relative">
@@ -165,7 +172,10 @@
 </div>
 
     <th:block th:fragment="scripts">
-        <script>
+        <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
             // Khởi tạo các biến toàn cục để lưu trữ dữ liệu
             let currentStudents = [];
             let selectedStudent = null;

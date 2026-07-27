@@ -8,11 +8,9 @@ import com.example.flippedclass.dto.request.CreateQuizQuestionRequest;
 import com.example.flippedclass.dto.request.CreateQuizRequest;
 import com.example.flippedclass.dto.request.SubmitQuizAttemptRequest;
 import com.example.flippedclass.dto.request.UpdateQuizRequest;
-import com.example.flippedclass.entity.LearningNode;
-import com.example.flippedclass.entity.Quiz;
-import com.example.flippedclass.entity.QuizAttempt;
-import com.example.flippedclass.entity.QuizQuestion;
-import com.example.flippedclass.entity.User;
+import com.example.flippedclass.entity.*;
+import com.example.flippedclass.enums.MemberRole;
+import com.example.flippedclass.enums.RoleName;
 import com.example.flippedclass.exception.BusinessException;
 import com.example.flippedclass.exception.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -73,8 +71,8 @@ public class QuizServiceImpl implements QuizService {
         User lecturer = UserServiceImpl.findUser(userRepository, currentUserId);
         
         // Security check for STUDENTs: Must be a SUPPORTER in at least one space
-        if (lecturer.getRoles().stream().noneMatch(r -> r.getName() == com.example.flippedclass.enums.RoleName.MENTOR || r.getName() == com.example.flippedclass.enums.RoleName.ADMIN)) {
-            if (!memberRepository.existsByUser_IdAndRole(lecturer.getId(), com.example.flippedclass.enums.MemberRole.SUPPORTER)) {
+        if (lecturer.getRoles().stream().noneMatch(r -> r.getName() == RoleName.MENTOR || r.getName() ==RoleName.ADMIN)) {
+            if (!memberRepository.existsByUser_IdAndRole(lecturer.getId(), MemberRole.SUPPORTER)) {
                 throw new IllegalArgumentException("Chỉ những sinh viên được thăng cấp (Supporter) mới có quyền tạo Quiz.");
             }
         }
@@ -103,12 +101,12 @@ public class QuizServiceImpl implements QuizService {
         if (savedQuiz.isActive() && node.getLearningPath() != null && node.getLearningPath().getLearningSpace() != null) {
             Long spaceId = node.getLearningPath().getLearningSpace().getId();
             List<com.example.flippedclass.entity.LearningSpaceMember> students = memberRepository.findByLearningSpaceId(spaceId).stream()
-                .filter(m -> m.getRole() == com.example.flippedclass.enums.MemberRole.MEMBER || m.getRole() == com.example.flippedclass.enums.MemberRole.SUPPORTER)
+                .filter(m -> m.getRole() ==MemberRole.MEMBER || m.getRole() == MemberRole.SUPPORTER)
                 .collect(Collectors.toList());
                 
             String targetUrl = "/student/take-quiz?quizId=" + savedQuiz.getId();
             for (com.example.flippedclass.entity.LearningSpaceMember student : students) {
-                com.example.flippedclass.entity.Notification notification = com.example.flippedclass.entity.Notification.builder()
+               Notification notification = Notification.builder()
                         .recipient(student.getUser())
                         .type(com.example.flippedclass.enums.NotificationType.QUIZ_ASSIGNED)
                         .message("New Quiz Assigned: " + savedQuiz.getTitle())

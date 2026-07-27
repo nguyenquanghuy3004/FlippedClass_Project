@@ -202,6 +202,7 @@
         </button>
         <div class="student-menu-panel" role="menu">
           <button class="student-menu-item" type="button" data-bs-toggle="modal" data-bs-target="#profileDetailModal" role="menuitem"><i class="ti ti-user-edit"></i><span>Edit Profile</span></button>
+          <button class="student-menu-item" type="button" data-bs-toggle="modal" data-bs-target="#changePasswordModal" role="menuitem"><i class="ti ti-key"></i><span>Change Password</span></button>
           <button class="student-menu-item student-menu-item-danger" type="button" data-user-logout role="menuitem"><i class="ti ti-logout"></i><span>Logout</span></button>
         </div>
       </div>
@@ -290,6 +291,41 @@
       <div class="modal-footer border-0 pt-0">
         <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Cancel</button>
         <button type="submit" class="btn btn-primary rounded-pill fw-bold" id="saveProfileButton">Save Profile</button>
+      </div>
+    </form>
+  </div>
+</div></div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content border-0 rounded-4 shadow-lg" id="changePasswordForm">
+      <div class="modal-header border-0 pb-0">
+        <div>
+          <h5 class="modal-title fw-900 text-dark" id="changePasswordTitle">Change Password</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="changePasswordMessage" class="alert d-none rounded-4 fw-semibold" role="alert"></div>
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label fw-bold" for="oldPassword">Current Password</label>
+            <input class="form-control rounded-4" id="oldPassword" type="password" required>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold" for="newPassword">New Password</label>
+            <input class="form-control rounded-4" id="newPassword" type="password" required>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold" for="confirmPassword">Confirm New Password</label>
+            <input class="form-control rounded-4" id="confirmPassword" type="password" required>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary rounded-pill fw-bold" id="savePasswordButton">Change Password</button>
       </div>
     </form>
   </div>
@@ -696,11 +732,8 @@
           // Close modal manually
           const modalElement = document.getElementById('editProfileModal');
           if (modalElement) {
-            modalElement.classList.remove('show');
-            const backdrop = document.getElementById('joinModalBackdrop') || document.querySelector('.modal-backdrop');
-            if (backdrop) backdrop.remove();
-            document.body.classList.remove('modal-open');
-            modalElement.style.display = 'none';
+            const bsModal = bootstrap.Modal.getInstance(modalElement);
+            if (bsModal) bsModal.hide();
           }
           window.location.reload();
         }, 700);
@@ -711,6 +744,84 @@
         if (saveButton) {
           saveButton.disabled = false;
           saveButton.textContent = 'Save Profile';
+        }
+      }
+    }
+
+    function showChangePasswordMessage(message, type = 'danger') {
+      const messageEl = document.getElementById('changePasswordMessage');
+      if (!messageEl) return;
+      messageEl.textContent = message;
+      messageEl.className = `alert alert-${type} rounded-4 fw-semibold`;
+      messageEl.classList.remove('d-none');
+    }
+
+    function clearChangePasswordMessage() {
+      const messageEl = document.getElementById('changePasswordMessage');
+      if (!messageEl) return;
+      messageEl.textContent = '';
+      messageEl.className = 'alert d-none rounded-4 fw-semibold';
+    }
+
+    async function savePassword(event) {
+      event.preventDefault();
+
+      const oldPassword = document.getElementById('oldPassword')?.value;
+      const newPassword = document.getElementById('newPassword')?.value;
+      const confirmPassword = document.getElementById('confirmPassword')?.value;
+
+      if (!oldPassword || !newPassword || !confirmPassword) {
+        showChangePasswordMessage('All fields are required.');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        showChangePasswordMessage('New passwords do not match.');
+        return;
+      }
+
+      const saveButton = document.getElementById('savePasswordButton');
+      if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Changing...';
+      }
+
+      clearChangePasswordMessage();
+
+      try {
+        const response = await fetch('/api/auth/change-password', {
+          method: 'POST',
+          headers: window.authHeaders ? window.authHeaders(true) : {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwt_token'),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ oldPassword, newPassWord: newPassword, confirmPassword })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showChangePasswordMessage(data.message || 'Password changed successfully.', 'success');
+          
+          document.getElementById('changePasswordForm').reset();
+          
+          const modalElement = document.getElementById('changePasswordModal');
+          setTimeout(() => {
+            if (modalElement) {
+              const bsModal = bootstrap.Modal.getInstance(modalElement);
+              if (bsModal) bsModal.hide();
+            }
+          }, 1500);
+        } else {
+          showChangePasswordMessage(data.message || 'Error changing password.');
+        }
+
+      } catch (err) {
+        showChangePasswordMessage(err.message || 'Could not change password.');
+      } finally {
+        if (saveButton) {
+          saveButton.disabled = false;
+          saveButton.textContent = 'Change Password';
         }
       }
     }
@@ -898,6 +1009,11 @@
       if (editForm) {
         editForm.addEventListener('submit', saveProfile);
       }
+      
+      const changePasswordForm = document.getElementById('changePasswordForm');
+      if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', savePassword);
+      }
 
       window.addEventListener('hashchange', setActiveSidebarLink);
     }
@@ -923,5 +1039,6 @@
 </script>
 
 <th:block layout:fragment="scripts"></th:block>
+<script src="/js/active-time-tracker.js"></script>
 </body>
 </html>

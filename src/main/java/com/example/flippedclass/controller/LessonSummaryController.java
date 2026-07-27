@@ -22,9 +22,8 @@ public class LessonSummaryController {
     private NotificationController notifController;
 
     @PostMapping
-    public ResponseEntity<LessonSummaryResponse> submitSummary(
-            @Valid @RequestBody SubmitSummaryRequest request,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<LessonSummaryResponse> submitSummary(  @Valid @RequestBody SubmitSummaryRequest request,
+                                                                 @AuthenticationPrincipal UserDetailsImpl userDetails) {
         
         // Ensure student ID is set from the authenticated user
         request.setStudentId(userDetails.getId());

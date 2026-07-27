@@ -15,5 +15,5 @@ public interface LearningNodeItemService {
 
     void deleteVideoByNodeId(Long nodeId);
 
-    void reorderItem(List<Long> itemIdsInNewOrder);
+//    void reorderItem(List<Long> itemIdsInNewOrder);
 }

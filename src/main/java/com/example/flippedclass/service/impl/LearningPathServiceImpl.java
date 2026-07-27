@@ -5,6 +5,7 @@ import com.example.flippedclass.dto.request.ReorderLearningPathRequest;
 import com.example.flippedclass.dto.request.UpdateLearningPathRequest;
 import com.example.flippedclass.dto.response.LearningNodeResponse;
 import com.example.flippedclass.dto.response.LearningPathResponse;
+import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.repository.LearningPathRepository;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.example.flippedclass.service.LearningNodeService;
 
@@ -138,20 +140,20 @@ public class LearningPathServiceImpl implements LearningPathService {
         // CÁCH 2: XÓA CỨNG (Đang dùng để test)
         // ==========================================
         // 1. Xóa toàn bộ các Bài giảng (Nodes) bên trong trước để tránh lỗi Khóa ngoại (FK)
-        // if (path.getNodes() != null) {
-        //     // Copy list để tránh lỗi ConcurrentModification và cắt đứt liên kết trong bộ nhớ
-        //     // (Giúp Hibernate không tự động tạo lệnh UPDATE SET learning_path_id = NULL)
-        //     List<com.example.flippedclass.entity.LearningNode> nodesToDel = new java.util.ArrayList<>(path.getNodes());
-        //     
-        //     for (com.example.flippedclass.entity.LearningNode node : nodesToDel) {
-        //         learningNodeService.deleteNode(node.getId());
-        //     }
-        //     
-        //     path.getNodes().clear();
-        // }
-        // 
-        // // 2. Xóa cứng Chương học (Path)
-        // learningPathRepository.delete(path);
+//         if (path.getNodes() != null) {
+//             // Copy list để tránh lỗi ConcurrentModification và cắt đứt liên kết trong bộ nhớ
+//             // (Giúp Hibernate không tự động tạo lệnh UPDATE SET learning_path_id = NULL)
+//             List<LearningNode> nodesToDel = new ArrayList<>(path.getNodes());
+//
+//             for (com.example.flippedclass.entity.LearningNode node : nodesToDel) {
+//                 learningNodeService.deleteNode(node.getId());
+//             }
+//
+//             path.getNodes().clear();
+//         }
+//
+//         // 2. Xóa cứng Chương học (Path)
+//         learningPathRepository.delete(path);
     }
 
     @Override
@@ -160,19 +162,6 @@ public class LearningPathServiceImpl implements LearningPathService {
         List<LearningPath> paths = learningPathRepository.findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.ACTIVE);
         for (LearningPath path : paths) {
             deleteLearningPathModul(spaceId, path.getId());
-        }
-    }
-
-    @Override
-    @Transactional
-    public void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request) {
-        List<Long> orderedIds = request.getOrderedIds();
-        if (orderedIds == null || orderedIds.isEmpty()) {
-            throw new IllegalArgumentException("Danh sách id sắp xếp không được để trống");
-        }
-
-        for (int i = 0; i < orderedIds.size(); i++) {
-            findPathInSpace(spaceId, orderedIds.get(i)).setPosition(i + 1);
         }
     }
 
@@ -249,4 +238,19 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .map(path -> toResponse(path, null))
                 .toList();
     }
+
+
+    //    @Override
+//    @Transactional
+//    public void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request) {
+//        List<Long> orderedIds = request.getOrderedIds();
+//        if (orderedIds == null || orderedIds.isEmpty()) {
+//            throw new IllegalArgumentException("Danh sách id sắp xếp không được để trống");
+//        }
+//
+//        for (int i = 0; i < orderedIds.size(); i++) {
+//            findPathInSpace(spaceId, orderedIds.get(i)).setPosition(i + 1);
+//        }
+//    }
+
 }

@@ -100,12 +100,12 @@ public class LearningPathController {
         return ResponseEntity.ok(new MessageResponse("Xóa toàn bộ roadmap thành công"));
     }
 
-    @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
-    @PutMapping("/reorder")
-    public ResponseEntity<?> reorder(@PathVariable Long spaceId, @Valid @RequestBody ReorderLearningPathRequest request) {
-        learningPathService.reorderLearningPaths(spaceId, request);
-        return ResponseEntity.ok(new MessageResponse("Cập nhật thứ tự thành công"));
-    }
+//    @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
+//    @PutMapping("/reorder")
+//    public ResponseEntity<?> reorder(@PathVariable Long spaceId, @Valid @RequestBody ReorderLearningPathRequest request) {
+//        learningPathService.reorderLearningPaths(spaceId, request);
+//        return ResponseEntity.ok(new MessageResponse("Cập nhật thứ tự thành công"));
+//    }
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @DeleteMapping("/{pathId}/learning-nodes/{nodeId}")

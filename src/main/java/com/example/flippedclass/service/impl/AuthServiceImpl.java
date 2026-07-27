@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final JwtUtils jwtUtils;
 
-    ValidateChangePass validate;
+    private final ValidateChangePass validate;
 
     @Value("${flippedclass.app.googleClientId}")
     private String googleClientId;
@@ -224,31 +224,30 @@ public class AuthServiceImpl implements AuthService {
         studentProfileRepository.save(profile);
         return new MessageResponse("Profile completed successfully!");
     }
+    @Override
+    public MessageResponse changePassWord(ChangePasswordRequest changePass) {
+        // Gọi validate dữ liệu thô từ component tự viết
+        validate.validatePassWord(changePass);
+        // Lấy thông tin tài khoản đăng nhập
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalArgumentException("Unauthorized!");
+        }
+        String username = authentication.getName();
+        // Tìm tk trong DB
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found."));
+        // Xác thực mật khẩu BCrypt Matches
+        if (!encoder.matches(changePass.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Incorrect old password!");
+        }
+        // Check mật khẩu mới tránh trùng với cũ
+        if (encoder.matches(changePass.getNewPassWord(), user.getPassword())) {
+            throw new IllegalArgumentException("New password must be different from old password!");
+        }
+        // Mã hóa và lưu
+        user.setPassword(encoder.encode(changePass.getNewPassWord()));
+        userRepository.save(user);
+        return new MessageResponse("Password changed successfully!");
+    }
 }
-//    @Override
-//    public MessageResponse changePassWord(ChangePasswordRequest changePass) {
-//        // Gọi validate dữ liệu thô từ component tự viết
-//        validate.validatePassWord(changePass);
-//        // Lấy thông tin tài khoản đăng nhập
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (authentication == null || !authentication.isAuthenticated()) {
-//            throw new IllegalArgumentException("Unauthorized!");
-//        }
-//        String username = authentication.getName();
-//        // Tìm tk trong DB
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new RuntimeException("User not found."));
-//        // Xác thực mật khẩu BCrypt Matches
-//        if (!encoder.matches(changePass.getOldPassword(), user.getPassword())) {
-//            throw new IllegalArgumentException("Incorrect old password!");
-//        }
-//        // Check mật khẩu mới tránh trùng với cũ
-//        if (encoder.matches(changePass.getNewPassWord(), user.getPassword())) {
-//            throw new IllegalArgumentException("New password must be different from old password!");
-//        }
-//        // Mã hóa và lưu
-//        user.setPassword(encoder.encode(changePass.getNewPassWord()));
-//        userRepository.save(user);
-//        return new MessageResponse("Password changed successfully!");
-//    }
-

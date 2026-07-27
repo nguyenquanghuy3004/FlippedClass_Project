@@ -16,7 +16,12 @@
         <!-- ============================================== -->
 
         <!-- Create New Learning Space Modal -->
-        <div class="modal fade" id="createSpaceModal" tabindex="-1" aria-labelledby="createSpaceModalLabel"
+        
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: CREATESPACEMODAL 
+     ========================================== -->
+<div class="modal fade" id="createSpaceModal" tabindex="-1" aria-labelledby="createSpaceModalLabel"
             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content border-0 shadow">
@@ -25,7 +30,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="createSpaceForm">
+                        
+
+<!-- === BIỂU MẪU (FORM): CREATESPACEFORM === -->
+<form id="createSpaceForm">
                             <div class="mb-3">
                                 <label for="spaceName" class="form-label fw-bold">Name</label>
                                 <input type="text" class="form-control bg-light border-0" id="spaceName" required
@@ -59,7 +67,12 @@
         </div>
 
         <!-- Edit Learning Space Modal -->
-        <div class="modal fade" id="editSpaceModal" tabindex="-1" aria-labelledby="editSpaceModalLabel"
+        
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: EDITSPACEMODAL 
+     ========================================== -->
+<div class="modal fade" id="editSpaceModal" tabindex="-1" aria-labelledby="editSpaceModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4">
@@ -68,7 +81,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="editSpaceForm">
+                        
+
+<!-- === BIỂU MẪU (FORM): EDITSPACEFORM === -->
+<form id="editSpaceForm">
                             <input type="hidden" id="editSpaceId">
                             <div class="mb-3">
                                 <label for="editSpaceName" class="form-label fw-bold">Name</label>
@@ -103,7 +119,12 @@
         </div>
 
         <!-- Display and Copy Invite Code Modal -->
-        <div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
+        
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: INVITEMODAL 
+     ========================================== -->
+<div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
                 <div class="modal-content border-0 shadow-lg rounded-4">
                     <div class="modal-header border-bottom-0 pb-0 position-relative pt-4">
@@ -133,7 +154,12 @@
         </div>
 
         <!-- Trash Bin Modal containing deleted Learning Spaces -->
-        <div class="modal fade" id="trashModal" tabindex="-1" aria-labelledby="trashModalLabel" aria-hidden="true">
+        
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: TRASHMODAL 
+     ========================================== -->
+<div class="modal fade" id="trashModal" tabindex="-1" aria-labelledby="trashModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow">
                     <div class="modal-header border-bottom-0 bg-light">
@@ -210,7 +236,10 @@
             </div>
         </template>
 
-        <script>
+        <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
             // ==============================================================
             // LEARNING SPACE JS (Learning Space Management Logic)
             // ==============================================================

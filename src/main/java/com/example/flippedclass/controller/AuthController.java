@@ -45,9 +45,8 @@ public class AuthController {
     }
 
     // change password
-//    @PostMapping("/change-password")
-//    public ResponseEntity<?> changePassWord(@RequestBody ChangePasswordRequest changePass) {
-//        return ResponseEntity.ok(authService.changePassWord(changePass));
-//    }
-
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassWord(@RequestBody ChangePasswordRequest changePass) {
+        return ResponseEntity.ok(authService.changePassWord(changePass));
+    }
 }

@@ -31,7 +31,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
     @Autowired
     private LearningPathRepository learningPathRepository;
-
     @Autowired
     private NodeConnectionRepository nodeConnectionRepository;
     @Autowired
@@ -66,6 +65,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
         LearningNode savedNode = learningNodeRepository.save(node);
 
+        // Xử lý Điều kiện tiên quyết (Prerequisite)
         if (request.getPrerequisiteNodeId() != null && request.getPrerequisiteNodeId() > 0) {
             LearningNode sourceNode = learningNodeRepository.findById(request.getPrerequisiteNodeId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy Prerequisite node"));

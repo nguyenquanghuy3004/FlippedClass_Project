@@ -4,7 +4,10 @@
     <title>Activity Detail</title>
     <th:block layout:fragment="head">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-        <style>
+        <!-- BẮT ĐẦU: PHẦN CSS (STYLE) -->
+
+<!-- KHU VỰC CSS (STYLE) -->
+<style>
             .info-card {
                 border-radius: 12px;
                 border: 1px solid rgba(0,0,0,0.05);
@@ -61,7 +64,7 @@
                 </div>
             </div>
 
-            <!-- Main Content -->
+            <!-- BẮT ĐẦU: NỘI DUNG CHÍNH (MAIN CONTENT) -->
             <div id="mainContent" class="row g-4 d-none">
                 <!-- Left Column: Activity Info -->
                 <div class="col-lg-8">
@@ -168,7 +171,9 @@
 
                             <!-- Groups Table -->
                             <div class="table-responsive">
-                                <table class="table align-middle text-nowrap mb-0 border">
+                                
+<!-- KHU VỰC BẢNG DỮ LIỆU (TABLE) -->
+<table class="table align-middle text-nowrap mb-0 border">
                                     <thead class="bg-light text-muted fw-bold" style="font-size: 0.85rem; text-transform: uppercase;">
                                         <tr>
                                             <th class="ps-4 py-3 border-0">Group Info</th>
@@ -194,7 +199,10 @@
             </div>
         </div>
 
-        <script>
+        <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
             document.addEventListener('DOMContentLoaded', function() {
                 loadActivityDetails();
             });

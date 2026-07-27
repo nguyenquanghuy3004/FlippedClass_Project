@@ -8,7 +8,10 @@
         <link rel="stylesheet" crossorigin th:href="@{/assets/css/dashboard.css}">
         <link rel="stylesheet" th:href="@{/assets/css/lecturer-LearningSpace.css}">
     </th:block>
-    <script>
+    <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
         (function () {
             function handleUnauthorized() {
                 console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
@@ -43,7 +46,7 @@
 
 <body>
     <div layout:fragment="content">
-        <!-- Header Section -->
+        <!-- BẮT ĐẦU: PHẦN HEADER (TIÊU ĐỀ) -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-5 gap-4">
             <div>
                 <div class="text-primary fw-bold mb-3 text-uppercase d-flex align-items-center gap-2"
@@ -58,7 +61,7 @@
                 </p>
             </div>
 
-            <!-- Stats & Action -->
+            <!-- BẮT ĐẦU: PHẦN THỐNG KÊ (STATS) -->
             <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3 d-none">
                 <div class="d-flex bg-white rounded-3 border shadow-sm p-2">
                     <div class="text-center stat-box border-end">
@@ -75,7 +78,7 @@
             </div>
         </div>
 
-        <!-- Filters Section / Search Bar -->
+        <!-- BẮT ĐẦU: BỘ LỌC VÀ TÌM KIẾM (FILTERS & SEARCH) -->
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
             <div class="input-group shadow-sm rounded-pill overflow-hidden d-none" style="max-width: 350px;">
                 <span class="input-group-text bg-white border-0 ps-4 text-muted"><i class="ti ti-search"></i></span>
