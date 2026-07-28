@@ -111,11 +111,13 @@
     const confirmInviteCode = document.getElementById('confirmInviteCode');
     const confirmJoinButton = document.getElementById('confirmJoinButton');
     let pendingInviteCode = '';
+
     function authHeaders(includeJson = true) {
       const headers = { Authorization: `Bearer ${token}` };
       if (includeJson) headers['Content-Type'] = 'application/json';
       return headers;
     }
+    // Chuyển ký tự như <> thành dạng an toàn trước khi đưa giữ liệu vào API vào innerHTML chống XSS
     function escapeHtml(value) {
       return String(value ?? '')
               .replaceAll('&', '&amp;')
@@ -124,11 +126,13 @@
               .replaceAll('"', '&quot;')
               .replaceAll("'", '&#039;');
     }
+    // Cắt chuỗi dài và thêm ... Thành
     function truncate(value, maxLength = 110) {
       const text = String(value || '').trim();
       if (!text) return '';
       return text.length > maxLength ? `${text.slice(0, maxLength - 1)}...` : text;
     }
+    // đổi mã trạng thái như ACTIVE thành nhãn dán để hiển thị trên UI
     function statusLabel(status) {
       const labels = {
         ACTIVE: 'Active',
@@ -140,6 +144,7 @@
       };
       return labels[status] || status || 'Unknown';
     }
+    // đổi node type thành lời mời gọi hành động
     function nodeTypeLabel(type) {
       const labels = {
         LESSON: 'Vào xem bài học',
@@ -151,17 +156,19 @@
       };
       return labels[type] || type || 'Vào xem';
     }
+    // Chọn icon Tabler tương ứng với loại node
     function nodeTypeIcon(type) {
       const icons = {
-        VIDEO: 'ti-player-play',
-        DOCUMENT: 'ti-file-text',
-        QUIZ: 'ti-help-circle',
-        PRACTICE: 'ti-code',
-        LESSON: 'ti-book-2',
-        REVIEW: 'ti-checklist'
+        VIDEO: 'ti-player-play', // tên class CSS trong learningSpace
+        DOCUMENT: 'ti-file-text',// tên class CSS trong learningSpace
+        QUIZ: 'ti-help-circle',// tên class CSS trong learningSpace
+        PRACTICE: 'ti-code',// tên class CSS trong learningSpace
+        LESSON: 'ti-book-2',// tên class CSS trong learningSpace
+        REVIEW: 'ti-checklist'// tên class CSS trong learningSpace
       };
-      return icons[type] || 'ti-book-2';
+      return icons[type] || 'ti-book-2'; // trả về icon tương ứng hoặc mặc định "ti-book-2"
     }
+    // Đổi vai trò của MEMBER, OWNER, SUPPOERTER thành các nhãn hiệu
     function roleLabel(role) {
       const labels = {
         MEMBER: 'Student',
@@ -170,20 +177,23 @@
       };
       return labels[role] || role || 'Member';
     }
+    //Hiện thông báo dưới form mã mời của learning spaces
     function setJoinMessage(message, type) {
       joinMessage.textContent = message;
       joinMessage.className = `message-box show ${type}`;
-    }
+    // Xóa thng báo cũ trước khi gửi mã yêu cầu mới
     function clearJoinMessage() {
       joinMessage.textContent = '';
       joinMessage.className = 'message-box';
     }
+    // Vô hiệu nút join để tránh người dùng ấn nhiều lần, tránh taoj request giống nhau
     function setJoinButtonLoading(isLoading, label = 'Joining...') {
       joinButton.disabled = isLoading;
       joinButton.innerHTML = isLoading
               ? `<span class="spinner-border spinner-border-sm me-2" role="status"></span>${label}`
               : '<i class="ti ti-door-enter me-2"></i>Join class';
     }
+    //// Vô hiệu nút comfirm join để tránh người dùng ấn nhiều lần, tránh taoj request giống nhau
     function setConfirmJoinLoading(isLoading) {
       if (!confirmJoinButton) return;
       confirmJoinButton.disabled = isLoading;
@@ -191,6 +201,7 @@
               ? '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Joining...'
               : 'Confirm Join';
     }
+    // Tạo backfrop, hiện modal, thêm class show để chạy hiệu ứng và dánh dấu trang mổ modal
     function showJoinConfirmModal() {
       if (!joinConfirmModalElement) return;
       const backdrop = document.createElement('div');
@@ -205,6 +216,8 @@
         joinConfirmModalElement.classList.add('show');
       });
     }
+    
+    // Xóa class/backdrop, sau 200 ms mới ẩn hẳn modal để hiệu ứng đóng chạy xong.
     function hideJoinConfirmModal() {
       if (!joinConfirmModalElement) return;
       joinConfirmModalElement.classList.remove('show');
@@ -217,6 +230,8 @@
         joinConfirmModalElement.removeAttribute('aria-modal');
       }, 200);
     }
+
+    // hàm đọc body lỗi từ API, nếu body JSON, ưu tiên lấy mess - error
     async function readError(response) {
       const text = await response.text();
       if (!text) return 'Something went wrong. Please try again.';
@@ -226,12 +241,13 @@
       } catch {
         return text;
       }
-    }
+    }// Gom quiz từ các lớp đã tham gia thành một mảng phẳng - KSD
     function flattenQuizzes(learningSpaces) {
       return getJoinedSpaces(learningSpaces).flatMap((space) =>
               (space.quizzes || []).map((quiz) => ({ ...quiz, space }))
       );
     }
+    // Chỉ lọc những lớp join == true,
     function getJoinedSpaces(learningSpaces) {
       return (learningSpaces || []).filter((space) => {
         if (typeof space.joined === 'boolean') {
@@ -240,6 +256,8 @@
         return true;
       });
     }
+    
+    // hàm check joined space
     function isJoinedSpace(space) {
       if (!space) return false;
       if (typeof space.joined === 'boolean') {
@@ -247,19 +265,25 @@
       }
       return true;
     }
+    // Lấy spaceId trên URL, ví dụ ?spaceId=12, rồi kiểm tra đó là số dương hợp lệ.
     function readInitialSpaceId() {
       const value = new URLSearchParams(window.location.search).get('spaceId');
       const id = Number(value);
       return Number.isFinite(id) && id > 0 ? id : null;
     }
+    
+    // Kiểm tra URL có ?focus=roadmap hoặc #roadmap không.
     function shouldFocusRoadmap() {
       const params = new URLSearchParams(window.location.search);
       return params.get('focus') === 'roadmap' || window.location.hash === '#roadmap';
     }
+    // Kiểm tra URL có ?focus=join, #join hoặc #joinSpaceForm không.
     function shouldFocusJoinInvite() {
       const params = new URLSearchParams(window.location.search);
       return params.get('focus') === 'join' || ['#join', '#joinSpaceForm'].includes(window.location.hash);
     }
+
+    // Cuộn mượt xuống roadmap đúng một lần.
     function focusRoadmapIfNeeded() {
       if (!state.focusRoadmapOnce) return;
       state.focusRoadmapOnce = false;
@@ -267,6 +291,8 @@
         spaceDetail.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
+
+    // Cuộn tới form mã mời và đặt focus vào input đúng một lần.
     function focusJoinInviteIfNeeded() {
       if (!state.focusJoinOnce) return;
       state.focusJoinOnce = false;
@@ -276,6 +302,8 @@
         inviteCodeInput?.focus({ preventScroll: true });
       });
     }
+    
+    // hàm load danh sách lớp học
     async function loadSpaces(preferredSpaceId = null) {
       if (!token || !userId) {
         window.location.href = '/login';
@@ -314,6 +342,8 @@
         renderEmptyDetail('Could not load learning space', 'Please check your login or try again later.');
       }
     }
+
+    // hàm render danh sách lớp học áp dụng từ khóa state.searchTerm, rồi gắn click event cho từng lớp.
     function renderSpaces() {
       const keyword = state.searchTerm.trim().toLowerCase();
       const filtered = state.spaces.filter((space) => {
@@ -355,6 +385,8 @@
         button.addEventListener('click', () => selectSpace(Number(button.dataset.spaceId)));
       });
     }
+    
+    // hàm hiển thị khi chưa chọn lớp học
     function renderEmptyDetail(title = 'Select a learning space', message = 'Course roadmaps and nodes will appear here.') {
       spaceDetail.innerHTML = `
       <div class="empty-state">
@@ -365,6 +397,8 @@
         </div>
       </div>`;
     }
+    
+    // hàm hiển thị khi vào học mà chưa join lớp public
     function renderJoinPublicPrompt(space) {
       state.selectedSpaceId = null;
       renderSpaces();
@@ -381,6 +415,8 @@
       </div>`;
       document.getElementById('joinPublicSpaceButton')?.addEventListener('click', () => joinPublicSpace(space.id));
     }
+
+    // hàm tham gia lớp học public
     async function joinPublicSpace(spaceId) {
       const button = document.getElementById('joinPublicSpaceButton');
       const originalHtml = button?.innerHTML;
@@ -408,6 +444,7 @@
         }
       }
     }
+    // Khi chọn một lớp: lưu ID lớp vào localStorage, hiện loading, gọi API lấy roadmap rồi render chi tiết.
     async function selectSpace(spaceId) {
       const selected = state.spaces.find((space) => space.id === Number(spaceId));
       if (!selected) {
@@ -440,11 +477,13 @@
         focusRoadmapIfNeeded();
       }
     }
+    // Hiện header của lớp và dòng "Loading class roadmap..."
     function renderDetailLoading(space) {
       spaceDetail.innerHTML = `
       ${detailHeaderTemplate(space)}
       <div class="loading-state">Loading class roadmap...</div>`;
     }
+    // Trả về chuổi HTML header: tên, mô tả, vai trò và trạng thái lớp
     function detailHeaderTemplate(space) {
       return `
       <section class="detail-header" id="roadmap">
@@ -459,6 +498,7 @@
         </div>
       </section>`;
     }
+    // xử lý các trường hợp: API lỗi, lớp chưa có roadmap, hoặc có roadmap thì render danh sách course.
     function renderDetail(space, paths, errorMessage = '') {
       if (errorMessage) {
         spaceDetail.innerHTML = `
@@ -491,6 +531,7 @@
         ${sortedPaths.map((path, index) => pathTemplate(path, index)).join('')}
       </div>`;
     }
+    // Render một course/path, sắp xếp node, đếm node mở được và tính % unlocked.
     function pathTemplate(path, index) {
       const nodeTypeOrder = {
           'VIDEO': 1,
@@ -526,6 +567,8 @@
         </div>
       </article>`;
     }
+    
+    // hàm hiển thị node
     function nodeTemplate(node, index) {
       const isDocument = node.nodeType === 'DOCUMENT';
       const isLocked = node.status === 'LOCKED';
@@ -533,7 +576,7 @@
         nodeId: node.id,
         spaceId: state.selectedSpaceId || ''
       });
-
+      // nếu khóa thì không cho click, không cho click thì có thể set style opacity và cursor
       const cardStyle = isLocked ? 'opacity: 0.6; pointer-events: none; cursor: not-allowed; background: #f8fafc;' : 'cursor: pointer;';
       const statusIcon = isLocked ? 'ti-lock text-danger' : 'ti-lock-open';
 
@@ -552,7 +595,7 @@
           <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
         </a>`;
       }
-
+      // nếu đã mở node thì có link, nếu chưa thì không
       const href = isLocked ? 'javascript:void(0)' : `/student/learning-node?${params.toString()}`;
 
       return `
@@ -569,7 +612,7 @@
         <span class="node-open" aria-hidden="true"><i class="ti ti-arrow-up-right"></i></span>
       </a>`;
     }
-
+    // hàm mở tài liệu trong cửa sổ mới
     async function openDocumentNode(event, nodeId) {
       event.preventDefault();
       const newWindow = window.open('', '_blank');
@@ -597,6 +640,7 @@
         alert('Failed to load document: ' + err.message);
       }
     }
+    // hàm hiển thị template rỗng khi không có node
     function emptyNodesTemplate() {
       return `
       <div class="empty-state" style="min-height: 160px;">
@@ -606,6 +650,7 @@
         </div>
       </div>`;
     }
+    // hàm copy invitecode
     async function copyInviteCode(code) {
       if (!code) return;
       try {
@@ -615,6 +660,7 @@
         setJoinMessage(`Class code: ${code}`, 'success');
       }
     }
+    // Gọi API để kiểm tra mã mời và lấy tên lớp, chưa tham gia lớp.
     async function previewSpaceByInviteCode(inviteCode) {
       const response = await fetch(`/api/learning-spaces/invite-code/${encodeURIComponent(inviteCode)}`, {
         headers: authHeaders(false)
@@ -624,6 +670,7 @@
       }
       return response.json();
     }
+    // gọi post API để tham gia lớp học chính thức
     async function joinSpaceByInviteCode(inviteCode) {
       const response = await fetch('/api/learning-spaces/join', {
         method: 'POST',
@@ -635,6 +682,7 @@
       }
       return response.json();
     }
+    // Hiện thông báo thành công, xóa mã mời đã nhập, rồi tải lại danh sách lớp và chọn lớp vừa tham gia.
     async function handleJoinSuccess(data) {
       setJoinMessage(data.message || 'Joined class successfully.', 'success');
       inviteCodeInput.value = '';

@@ -102,7 +102,7 @@ public class LecturerGroupActivityServiceImpl implements LecturerGroupActivitySe
                 nodeRepository.save(node);
                 activity.setLearningSpace(path.getLearningSpace());
             }
-        }
+    }
         
         activityRepository.save(activity);
         

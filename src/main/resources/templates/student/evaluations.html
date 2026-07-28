@@ -92,7 +92,7 @@
   let evaluationSessions = [];
   let selectedSessionId = null;
 
-  // Format date helper
+  // Hàm nhận chuỗi thời gian, định dạng  Jul 26, 2026, 09:30 nếu ko có data trả N/A
   function formatDate(dateTimeStr) {
     if (!dateTimeStr) return 'N/A';
     try {
@@ -105,11 +105,13 @@
         minute: '2-digit'
       });
     } catch (e) {
-      return dateTimeStr;
+      return dateTimeStr; // return format
     }
   }
 
-  // Handle active session selection
+  // Hàm được gắn vào Window để HTML có thể gọi từ onclick
+  // Đổi buổi đánh giá đang chọn, thêm/xóa CSS class active,
+  // tính GPA riêng của buổi đó rồi vẽ tiêu chí, điểm và nhận xét ở panel bên phải.
   window.selectSession = function(sessionId) {
     selectedSessionId = sessionId;
 
@@ -193,7 +195,8 @@
       </div>`;
   };
 
-  // Filter left panel sessions by search string
+  // Đọc nội dung ô tìm kiếm #sessionSearch, hiện các buổi cos
+  // tiêu  đề khớp với từ khóa
   window.filterSessions = function() {
     const query = document.getElementById('sessionSearch').value.toLowerCase().trim();
     let matchesCount = 0;
@@ -210,7 +213,8 @@
     document.getElementById('sessionCountChip').textContent = matchesCount;
   };
 
-  // Load all evaluation grades from endpoint
+  // Kiểm tra userid trong local store. goi get API.
+  // Sau đó chuyển JSON cho hàm renderEvaluations() - 243
   async function loadEvaluations() {
     const sessionsList = document.getElementById('sessionsList');
     if (!token || !userId) {
@@ -235,7 +239,12 @@
     }
   }
 
-  // Render evaluations
+  // Xử lý dữ liệu chính: kiểm tra trạng thái rỗn, nhóm các tiêu chí
+  // theo sessionId, tính Overrall GPA
+  //                      số buổi đã chấm
+  //                      số nhận xét
+  //                      tạo danh sách buổi đánh giá
+  //                      bên trái và chọn ban đầu
   function renderEvaluations(grades) {
     const sessionsList = document.getElementById('sessionsList');
     const detailContainer = document.getElementById('sessionDetailContent');
@@ -339,7 +348,8 @@
     }
   }
 
-  // Escape HTML utility
+  //  Chuyên các ký tự HTML đặc biệt(<?>,...) sang dạn tan toán trước khi đưa giữ liệu vào
+  //  API vào innerHTML -> phòng chống XSS
   function escapeHtml(value) {
     return String(value ?? '')
       .replace(/&/g, '&amp;')

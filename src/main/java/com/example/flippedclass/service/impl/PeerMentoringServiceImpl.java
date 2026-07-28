@@ -144,6 +144,7 @@ public class PeerMentoringServiceImpl implements PeerMentoringService {
         Collections.shuffle(availableMentors);
 
         int weakIndex = 0;
+
         for (UserResponse mentorResp : availableMentors) {
             long currentMenteeCount = peerPairingRepository.countByLearningSpace_IdAndMentor_IdAndStatus(spaceId, mentorResp.getId(), PeerPairingStatus.ACTIVE);
             while (currentMenteeCount < 5 && weakIndex < unpairedWeak.size()) {
