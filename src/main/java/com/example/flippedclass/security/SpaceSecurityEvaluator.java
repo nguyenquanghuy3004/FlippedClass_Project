@@ -22,13 +22,14 @@ public class SpaceSecurityEvaluator {
             return false;
         }
 
-        // ĐẶC QUYỀN ADMIN & MENTOR: Nếu người dùng là Admin hoặc Giảng viên hệ thống thì tự động cho phép truy cập luôn
+        // ĐẶC QUYỀN ADMIN & MENTOR: Nếu người dùng là Admin hoặc Giảng viên hệ thống
+        // thì tự động cho phép truy cập luôn
         for (org.springframework.security.core.GrantedAuthority authority : auth.getAuthorities()) {
             if (authority.getAuthority().equals("ADMIN") || authority.getAuthority().equals("MENTOR")) {
                 return true;
             }
         }
-        
+
         String username = auth.getName();
 
         Optional<LearningSpaceMember> memberOpt = memberRepository
@@ -36,7 +37,8 @@ public class SpaceSecurityEvaluator {
 
         if (memberOpt.isPresent()) {
             LearningSpaceMember member = memberOpt.get();
-            // Kiểm tra xem vai trò của thành viên có thuộc danh sách các vai trò được phép không
+            // Kiểm tra xem vai trò của thành viên có thuộc danh sách các vai trò được phép
+            // không
             return Arrays.asList(roles).contains(member.getRole().name());
         }
 
