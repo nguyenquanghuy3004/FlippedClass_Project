@@ -152,14 +152,22 @@ public class PeerMentoringServiceImpl implements PeerMentoringService {
                 User mentor = new User(); mentor.setId(mentorResp.getId());
                 User mentee = new User(); mentee.setId(menteeResp.getId());
 
-                PeerPairing newPair = PeerPairing.builder()
-                        .learningSpace(space)
-                        .mentor(mentor)
-                        .mentee(mentee)
-                        .status(PeerPairingStatus.ACTIVE)
-                        .build();
+                Optional<PeerPairing> existingPairOpt = peerPairingRepository.findByLearningSpace_IdAndMentee_IdAndMentor_Id(spaceId, menteeResp.getId(), mentorResp.getId());
 
-                peerPairingRepository.save(newPair);
+                if (existingPairOpt.isPresent()) {
+                    PeerPairing existingPair = existingPairOpt.get();
+                    existingPair.setStatus(PeerPairingStatus.ACTIVE);
+                    peerPairingRepository.save(existingPair);
+                } else {
+                    PeerPairing newPair = PeerPairing.builder()
+                            .learningSpace(space)
+                            .mentor(mentor)
+                            .mentee(mentee)
+                            .status(PeerPairingStatus.ACTIVE)
+                            .build();
+
+                    peerPairingRepository.save(newPair);
+                }
                 
                 currentMenteeCount++;
                 weakIndex++;

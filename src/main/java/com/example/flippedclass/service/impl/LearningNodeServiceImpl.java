@@ -113,6 +113,15 @@ public class LearningNodeServiceImpl implements LearningNodeService {
             throw new IllegalArgumentException("Cannot delete this lesson because students have already participated. Please archive the module instead.");
         }
         
+        /*
+        // Xóa các liên kết tiên quyết (NodeConnection) để không làm hỏng chuỗi bài học
+        entityManager.createQuery("DELETE FROM NodeConnection c WHERE c.sourceNode.id = :nodeId OR c.targetNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+
+        // Xóa mềm: Chuyển trạng thái thành DELETED
+        node.setStatus("DELETED");
+        learningNodeRepository.save(node);
+        */
+
         // Break self-referencing relationships first
         entityManager.createQuery("UPDATE NodeDiscussion d SET d.parentDiscussion = null WHERE d.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         
