@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{lecturer/layout}">
 
 <head>
@@ -172,14 +172,27 @@
       loadGradingContext();
     });
 
-    function showAlert(message, type = 'success') {
+    /**
+     * Hàm showAlert: Hiển thị thông báo (thành công/thất bại) trên giao diện chấm điểm.
+     * @param {string} message - Nội dung thông điệp cần thông báo
+     * @param {string} type - Loại thông báo (ví dụ: 'success', 'danger', 'warning') để hiển thị màu CSS tương ứng
+     * @param {boolean} persistent - Nếu true, thông báo sẽ hiển thị mãi mãi (không tự biến mất sau 5s)
+     */
+    function showAlert(message, type = 'success', persistent = false) {
       const alertEl = document.getElementById('alertMessage');
       alertEl.innerText = message;
       alertEl.className = `alert alert-${type} mb-4 fw-bold rounded-3 border-0`;
       alertEl.classList.remove('d-none');
-      setTimeout(() => alertEl.classList.add('d-none'), 5000);
+      if (!persistent) {
+        setTimeout(() => alertEl.classList.add('d-none'), 5000);
+      }
     }
 
+    /**
+     * Hàm loadGradingContext: Tải ngữ cảnh chấm điểm từ API Backend dựa trên sessionId và studentId.
+     * Dữ liệu trả về bao gồm thông tin sinh viên, danh sách tiêu chí chấm, lịch sử tương tác gần đây, và các điểm số cũ.
+     * Nếu lỗi (ví dụ: API không chạy), hàm sẽ sử dụng dữ liệu giả (Mock Data) để trình diễn giao diện.
+     */
     async function loadGradingContext() {
       const loader = document.getElementById('loader');
       const content = document.getElementById('gradingContent');
@@ -198,7 +211,7 @@
         renderContext(data);
       } catch (error) {
         console.warn(error);
-        // Fallback Mock Data for UI Demonstration
+        // Dữ liệu giả (Mock Data) để hiển thị giao diện khi API lỗi
         const mockData = {
           student: { id: studentId, firstName: "Nguyen", lastName: "Van A", username: "SE123456" },
           criteria: [
@@ -219,17 +232,46 @@
       }
     }
 
+    /**
+     * Hàm renderContext: Vẽ toàn bộ giao diện chấm điểm dựa trên dữ liệu ngữ cảnh đã lấy:
+     * 1. Kiểm tra hạn đánh giá (nếu quá hạn sẽ khóa nút submit và tắt khả năng điền form).
+     * 2. Vẽ thông tin cơ bản của học sinh (Tên, Mã số sinh viên).
+     * 3. Vẽ dòng thời gian tương tác gần đây (Interaction History).
+     * 4. Hiển thị các điểm số và nhận xét đã lưu trước đó (Previous Grades).
+     * 5. Tạo các ô input nhập điểm số & bắt buộc nhập bình luận giải trình (Mandatory Comment) cho từng tiêu chí.
+     * @param {object} data - Dữ liệu ngữ cảnh chấm điểm lấy từ API hoặc mock data
+     */
     function renderContext(data) {
       currentStudentInfo = data.student;
-      currentCriteria = data.session ? data.session.criteria : data.criteria; // fallback for mock data
+      currentCriteria = data.session ? data.session.criteria : data.criteria; // fallback cho dữ liệu giả
 
-      // Student Info
+      // Kiểm tra hạn đánh giá
+      if (data.session && data.session.gradingDeadlineAt) {
+        const deadline = new Date(data.session.gradingDeadlineAt);
+        const now = new Date();
+        if (now > deadline) {
+          showAlert(`Hạn đánh giá cho phiên này đã qua (${deadline.toLocaleString()}). Hệ thống đã đóng nhận điểm.`, 'danger', true);
+          const submitBtn = document.getElementById('submitBtn');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ti ti-lock"></i> Đã hết hạn đánh giá';
+            submitBtn.className = 'btn btn-secondary btn-lg rounded-pill fw-bold shadow-sm';
+          }
+          // Khóa các trường nhập liệu
+          setTimeout(() => {
+            const inputs = document.querySelectorAll('#gradeForm input, #gradeForm textarea');
+            inputs.forEach(input => input.disabled = true);
+          }, 100);
+        }
+      }
+
+      // Thông tin học sinh
       if(data.student) {
         document.getElementById('studentName').innerText = data.student.fullName || data.student.username || 'Unknown Student';
         document.getElementById('studentRoll').innerText = data.student.username || data.student.email;
       }
 
-      // Interactions Timeline
+      // Vẽ dòng thời gian tương tác (Interactions Timeline)
       const timeline = document.getElementById('interactionTimeline');
       const interactions = data.interactionHistory || data.recentInteractions || [];
       timeline.innerHTML = '';
@@ -255,7 +297,7 @@
         timeline.innerHTML = '<p class="text-muted fst-italic">No recent interactions.</p>';
       }
 
-      // Past Grades
+      // Vẽ lịch sử điểm cũ
       const pastContainer = document.getElementById('pastGradesContainer');
       const pastGrades = data.existingGrades || data.previousGrades || [];
       pastContainer.innerHTML = '';
@@ -275,7 +317,7 @@
         pastContainer.innerHTML = '<p class="text-muted fst-italic">No previous grades found.</p>';
       }
 
-      // Render Grade Entry Form
+      // Tạo các trường nhập điểm & lời bình cho form
       const criteriaContainer = document.getElementById('criteriaContainer');
       const renderCriteria = data.session ? data.session.criteria : data.criteria;
       criteriaContainer.innerHTML = '';
@@ -309,6 +351,12 @@
       }
     }
 
+    /**
+     * Hàm submitGrades: Thu thập thông tin điểm và bình luận của từng tiêu chí chấm,
+     * thực hiện kiểm tra độ dài nhận xét (tối thiểu 10 ký tự), sau đó gửi POST API
+     * lưu điểm lên Backend `/api/evaluations/grades`.
+     * @param {Event} e - Sự kiện onSubmit của Form
+     */
     async function submitGrades(e) {
       e.preventDefault();
       const form = e.target;
@@ -318,12 +366,14 @@
       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
 
       let hasError = false;
+      let errorMsg = 'Some grades failed to submit. Make sure the API is running correctly.';
 
       for (const crit of currentCriteria) {
         const score = form.elements[`score_${crit.id}`].value;
         const commentInput = form.elements[`comment_${crit.id}`];
         const comment = commentInput.value.trim();
 
+        // Kiểm tra lời nhận xét có đủ dài hay không
         if (comment.length < 10) {
           showAlert('Comment must be at least 10 characters long.', 'danger');
           btn.disabled = false;
@@ -351,10 +401,15 @@
             },
             body: JSON.stringify(payload)
           });
-          if (!response.ok) throw new Error('Submission failed');
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Submission failed');
+          }
         } catch(error) {
           console.error(error);
+          errorMsg = error.message;
           hasError = true;
+          break; // Dừng việc gửi điểm của tiêu chí tiếp theo nếu gặp lỗi
         }
       }
 
@@ -362,15 +417,20 @@
       btn.innerHTML = '<i class="ti ti-device-floppy"></i> Submit Grades';
 
       if (hasError) {
-        showAlert('Some grades failed to submit. Make sure the API is running correctly.', 'danger');
+        showAlert(errorMsg, 'danger');
       } else {
         showAlert('All grades submitted successfully!', 'success');
-        // Reload context to see past grades
+        // Tải lại ngữ cảnh để cập nhật dữ liệu bảng điểm cũ
         loadGradingContext();
         form.reset();
       }
     }
 
+    /**
+     * Hàm openProfileModal: Gọi API lấy toàn bộ thông tin chi tiết của học sinh để hiển thị
+     * lên Modal Hồ sơ cá nhân (Student Profile). Bao gồm lịch sử tương tác đầy đủ (all interactions)
+     * và tất cả bảng điểm từ trước đến nay của học sinh này trong session.
+     */
     async function openProfileModal() {
       const loader = document.getElementById('profileLoader');
       const content = document.getElementById('profileContent');
@@ -382,12 +442,12 @@
         const token = localStorage.getItem('jwt_token');
         const headers = { 'Authorization': `Bearer ${token}` };
 
-        // Fetch Interactions
+        // Lấy toàn bộ lịch sử tương tác đầy đủ của học sinh
         const intRes = await fetch(`/api/evaluations/students/${studentId}/interactions`, { headers });
         if (!intRes.ok) throw new Error('Failed to fetch interactions');
         const interactions = await intRes.json();
 
-        // Fetch Grades
+        // Lấy toàn bộ điểm số cũ của học sinh trong phiên này
         const gradeRes = await fetch(`/api/evaluations/sessions/${sessionId}/students/${studentId}/grades`, { headers });
         let grades = [];
         if (gradeRes.ok) {
@@ -400,7 +460,7 @@
         });
       } catch (error) {
         console.warn('Failed to load real data, showing empty state or error', error);
-        // Do not use mock data anymore, show empty state instead
+        // Hiển thị trạng thái trống nếu có lỗi xảy ra
         renderProfileModal({
           allInteractions: [],
           allGrades: []
@@ -411,8 +471,12 @@
       }
     }
 
+    /**
+     * Hàm renderProfileModal: Thực hiện vẽ (render) danh sách tương tác và điểm số lên modal Profile.
+     * @param {object} data - Dữ liệu danh sách tương tác (allInteractions) và điểm số (allGrades)
+     */
     function renderProfileModal(data) {
-      // Render Full Interactions
+      // Vẽ dòng thời gian tương tác đầy đủ
       const tl = document.getElementById('fullInteractionTimeline');
       const allInteractions = data.allInteractions || data.interactionHistory || [];
       tl.innerHTML = '';
@@ -436,7 +500,7 @@
         tl.innerHTML = '<p class="text-muted fst-italic">No interactions recorded.</p>';
       }
 
-      // Render Full Grades
+      // Vẽ toàn bộ danh sách điểm của học sinh
       const gl = document.getElementById('fullGradesContainer');
       const allGrades = data.allGrades || data.existingGrades || [];
       gl.innerHTML = '';

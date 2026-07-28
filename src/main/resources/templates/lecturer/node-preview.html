@@ -10,10 +10,17 @@
   <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon-16x16.png}">
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- HTML cho Modal Xóa Test Case -->
-  <div class="modal fade" id="confirmDeleteTestCaseModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+  
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: CONFIRMDELETETESTCASEMODAL 
+     ========================================== -->
+<div class="modal fade" id="confirmDeleteTestCaseModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
         <div class="modal-body text-center p-4">
@@ -31,16 +38,24 @@
     </div>
   </div>
 
-  <script type="text/javascript">
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script type="text/javascript">
     if (!localStorage.getItem('jwt_token')) {
       window.location.href = '/login';
     }
   </script>
   
   <!-- SockJS & STOMP cho Realtime -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" th:href="@{/assets/css/student-learning-node.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
@@ -115,7 +130,12 @@
   </main>
 
   <!-- Feedback Modal -->
-  <div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
+  
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: FEEDBACKMODAL 
+     ========================================== -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
       <div class="modal-content border-0 shadow-lg rounded-4">
         <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
@@ -148,9 +168,16 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
     const token = localStorage.getItem('jwt_token');
     const urlParams = new URLSearchParams(window.location.search);
     const pathNodeMatch = window.location.pathname.match(/\/lecturer\/learning-nodes\/(\d+)\/preview/);
@@ -533,7 +560,10 @@
         }
 
         pageRoot.innerHTML = `
-        <style>
+        <!-- BẮT ĐẦU: PHẦN CSS (STYLE) -->
+
+<!-- KHU VỰC CSS (STYLE) -->
+<style>
           .practice-layout { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; align-items: stretch !important; height: calc(100vh - 65px); gap: 8px !important; padding: 8px !important; background: #000000 !important; }
           
           /* Common Panes */
@@ -1418,7 +1448,10 @@
   </script>
 
   <!-- NOTIFICATION LOGIC (identical to lecturer/layout.html) -->
-  <script>
+  <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
     const notifUserId = localStorage.getItem('user_id');
 
     function renderNotifItem(notif) {

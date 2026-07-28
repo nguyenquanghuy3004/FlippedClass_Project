@@ -153,14 +153,22 @@ public class PeerMentoringServiceImpl implements PeerMentoringService {
                 User mentor = new User(); mentor.setId(mentorResp.getId());
                 User mentee = new User(); mentee.setId(menteeResp.getId());
 
-                PeerPairing newPair = PeerPairing.builder()
-                        .learningSpace(space)
-                        .mentor(mentor)
-                        .mentee(mentee)
-                        .status(PeerPairingStatus.ACTIVE)
-                        .build();
+                Optional<PeerPairing> existingPairOpt = peerPairingRepository.findByLearningSpace_IdAndMentee_IdAndMentor_Id(spaceId, menteeResp.getId(), mentorResp.getId());
 
-                peerPairingRepository.save(newPair);
+                if (existingPairOpt.isPresent()) {
+                    PeerPairing existingPair = existingPairOpt.get();
+                    existingPair.setStatus(PeerPairingStatus.ACTIVE);
+                    peerPairingRepository.save(existingPair);
+                } else {
+                    PeerPairing newPair = PeerPairing.builder()
+                            .learningSpace(space)
+                            .mentor(mentor)
+                            .mentee(mentee)
+                            .status(PeerPairingStatus.ACTIVE)
+                            .build();
+
+                    peerPairingRepository.save(newPair);
+                }
                 
                 currentMenteeCount++;
                 weakIndex++;
@@ -204,6 +212,31 @@ public class PeerMentoringServiceImpl implements PeerMentoringService {
                 .filter(p -> p.getStatus() == PeerPairingStatus.ACTIVE)
                 .map(p -> UserServiceImpl.toResponse(p.getMentee()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void removeAllPairingsForMentor(Long spaceId, Long mentorId) {
+        List<PeerPairing> pairings = peerPairingRepository.findByLearningSpace_IdAndMentor_Id(spaceId, mentorId);
+        for (PeerPairing pairing : pairings) {
+            if (pairing.getStatus() == PeerPairingStatus.ACTIVE) {
+                pairing.setStatus(PeerPairingStatus.INACTIVE);
+                peerPairingRepository.save(pairing);
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void removeAllPairingsForMember(Long spaceId, Long memberId) {
+        removeAllPairingsForMentor(spaceId, memberId);
+        List<PeerPairing> menteePairings = peerPairingRepository.findByLearningSpace_IdAndMentee_Id(spaceId, memberId);
+        for (PeerPairing pairing : menteePairings) {
+            if (pairing.getStatus() == PeerPairingStatus.ACTIVE) {
+                pairing.setStatus(PeerPairingStatus.INACTIVE);
+                peerPairingRepository.save(pairing);
+            }
+        }
     }
 
     @lombok.Data

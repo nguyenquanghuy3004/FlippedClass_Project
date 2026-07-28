@@ -227,6 +227,7 @@ a {
 .side-card {
   overflow: hidden;
   border-radius: 28px;
+  max-height: calc(100vh - 9rem);
 }
 
 .side-card-header {

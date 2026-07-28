@@ -18,4 +18,8 @@ public interface PeerMentoringService {
     void promoteToSupporter(Long spaceId, Long studentId);
 
     List<UserResponse> getMentees(Long spaceId, Long mentorId);
+
+    void removeAllPairingsForMentor(Long spaceId, Long mentorId);
+
+    void removeAllPairingsForMember(Long spaceId, Long memberId);
 }

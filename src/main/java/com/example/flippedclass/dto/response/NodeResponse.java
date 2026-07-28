@@ -22,6 +22,7 @@ public class NodeResponse {
     private Integer estimatedMinutes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String spaceStatus;
 
     public static NodeResponse from(LearningNode node) {
         NodeResponse response = new NodeResponse();
@@ -36,6 +37,7 @@ public class NodeResponse {
         response.estimatedMinutes = node.getEstimatedMinutes();
         response.createdAt = node.getCreatedAt();
         response.updatedAt = node.getUpdatedAt();
+        response.spaceStatus = node.getLearningPath().getLearningSpace().getStatus() != null ? node.getLearningPath().getLearningSpace().getStatus().name() : null;
         return response;
     }
 

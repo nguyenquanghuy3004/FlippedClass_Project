@@ -16,4 +16,5 @@ public class UpdateStudentProfileRequest {
     private String className;
     private String major;
     private Integer enrollmentYear;
+    private String phoneNumber;
 }

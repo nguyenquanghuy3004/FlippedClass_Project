@@ -21,10 +21,8 @@ public class LearningNodeItemServiceImpl implements LearningNodeItemService {
 
     @Autowired
     private LearningNodeItemRepository learningNodeItemRepository;
-
     @Autowired
     private LearningNodeRepository learningNodeRepository;
-
     @Autowired
     private FileStorageService fileStorageService;
 
@@ -86,18 +84,18 @@ public class LearningNodeItemServiceImpl implements LearningNodeItemService {
         learningNodeItemRepository.deleteAll(videos);
     }
 
-    @Override
-    @Transactional
-    public void reorderItem(List<Long> itemIdsInNewOrder) {
-        for (int i = 0; i < itemIdsInNewOrder.size(); i++) {
-            Long itemId = itemIdsInNewOrder.get(i);
-            int newPosition = i + 1;
-            learningNodeItemRepository.findById(itemId).ifPresent(item -> {
-                item.setPosition(newPosition);
-                learningNodeItemRepository.save(item);
-            });
-        }
-    }
+//    @Override
+//    @Transactional
+//    public void reorderItem(List<Long> itemIdsInNewOrder) {
+//        for (int i = 0; i < itemIdsInNewOrder.size(); i++) {
+//            Long itemId = itemIdsInNewOrder.get(i);
+//            int newPosition = i + 1;
+//            learningNodeItemRepository.findById(itemId).ifPresent(item -> {
+//                item.setPosition(newPosition);
+//                learningNodeItemRepository.save(item);
+//            });
+//        }
+//    }
 
     private String normalizeItemUrl(ItemType itemType, String url) {
         if (url == null || url.isBlank()) {

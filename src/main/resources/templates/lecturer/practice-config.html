@@ -11,7 +11,9 @@
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 
-  <script type="text/javascript">
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script type="text/javascript">
     if (!localStorage.getItem('jwt_token')) {
       window.location.href = '/login';
     }
@@ -20,7 +22,10 @@
   <link rel="stylesheet" th:href="@{/assets/css/student-user-menu.css}">
   <link rel="stylesheet" th:href="@{/assets/css/student-typography.css}">
   <link rel="stylesheet" th:href="@{/assets/css/node-preview.css}">
-  <script>
+  <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
     (function () {
       function handleUnauthorized() {
         console.warn('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
@@ -105,7 +110,12 @@
   </main>
 
   <!-- Feedback Modal -->
-  <div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
+  
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: FEEDBACKMODAL 
+     ========================================== -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
       <div class="modal-content border-0 shadow-lg rounded-4">
         <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
@@ -138,9 +148,16 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
     const token = localStorage.getItem('jwt_token');
     const urlParams = new URLSearchParams(window.location.search);
     const pathNodeMatch = window.location.pathname.match(/\/lecturer\/learning-nodes\/(\d+)\/preview/);
@@ -872,11 +889,22 @@
 
 
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="/assets/js/notification.js?v=2"></script>
-  <script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+<!-- KHU VỰC JAVASCRIPT -->
+<script src="/assets/js/notification.js?v=2"></script>
+  <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
     // Independent STOMP connection for discussion updates
     (function() {
       if (typeof nodeId === 'undefined' || !nodeId) return;

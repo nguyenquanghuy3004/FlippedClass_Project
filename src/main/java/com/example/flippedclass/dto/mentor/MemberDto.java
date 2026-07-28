@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class MemberDto {
     private Long memberId;
     private Long userId;
+    private String studentCode;
     private String fullName;
     private String email;
     private MemberRole role;

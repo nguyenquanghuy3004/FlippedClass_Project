@@ -5,6 +5,7 @@ import com.example.flippedclass.dto.request.ReorderLearningPathRequest;
 import com.example.flippedclass.dto.request.UpdateLearningPathRequest;
 import com.example.flippedclass.dto.response.LearningNodeResponse;
 import com.example.flippedclass.dto.response.LearningPathResponse;
+import com.example.flippedclass.entity.LearningNode;
 import com.example.flippedclass.entity.LearningPath;
 import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.repository.LearningPathRepository;
@@ -19,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import com.example.flippedclass.service.LearningNodeService;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +39,9 @@ public class LearningPathServiceImpl implements LearningPathService {
 
     @Autowired
     private NodeProgressRepository nodeProgressRepository;
+
+    @Autowired
+    private LearningNodeService learningNodeService;
 
     @Override
     public LearningPath getLearningPathEntity(Long id) {
@@ -82,9 +88,10 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Override
     @Transactional
     public LearningPathResponse updateLearningPath(Long spaceId, Long pathId, UpdateLearningPathRequest request) {
+
         LearningPath path = findPathInSpace(spaceId, pathId);
 
-        if (path.getStatus() == LearningPathStatus.ARCHIVED) {
+        if (path.getLearningSpace().getStatus() == LearningSpaceStatus.ARCHIVE) {
             throw new IllegalArgumentException("Không thể chỉnh sửa roadmap đã lưu trữ. Hãy khôi phục trước.");
         }
 
@@ -121,7 +128,32 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Override
     @Transactional
     public void deleteLearningPathModul(Long spaceId, Long pathId) {
-        findPathInSpace(spaceId, pathId).setStatus(LearningPathStatus.DELETED);
+        LearningPath path = findPathInSpace(spaceId, pathId);
+        
+
+        // CÁCH 1: XÓA MỀM
+        // ==========================================
+        path.setStatus(LearningPathStatus.DELETED);
+        learningPathRepository.save(path);
+        
+
+        // CÁCH 2: XÓA CỨNG
+        // ==========================================
+        // 1. Xóa toàn bộ các Bài giảng (Nodes) bên trong trước để tránh lỗi Khóa ngoại (FK)
+//         if (path.getNodes() != null) {
+//             // Copy list để tránh lỗi ConcurrentModification và cắt đứt liên kết trong bộ nhớ
+//             // (Giúp Hibernate không tự động tạo lệnh UPDATE SET learning_path_id = NULL)
+//             List<LearningNode> nodesToDel = new ArrayList<>(path.getNodes());
+//
+//             for (com.example.flippedclass.entity.LearningNode node : nodesToDel) {
+//                 learningNodeService.deleteNode(node.getId());
+//             }
+//
+//             path.getNodes().clear();
+//         }
+//
+//         // 2. Xóa cứng Chương học (Path)
+//         learningPathRepository.delete(path);
     }
 
     @Override
@@ -129,20 +161,7 @@ public class LearningPathServiceImpl implements LearningPathService {
     public void deleteAllLearningPaths(Long spaceId) {
         List<LearningPath> paths = learningPathRepository.findByLearningSpaceIdAndStatusOrderByPositionAsc(spaceId, LearningPathStatus.ACTIVE);
         for (LearningPath path : paths) {
-            path.setStatus(LearningPathStatus.DELETED);
-        }
-    }
-
-    @Override
-    @Transactional
-    public void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request) {
-        List<Long> orderedIds = request.getOrderedIds();
-        if (orderedIds == null || orderedIds.isEmpty()) {
-            throw new IllegalArgumentException("Danh sách id sắp xếp không được để trống");
-        }
-
-        for (int i = 0; i < orderedIds.size(); i++) {
-            findPathInSpace(spaceId, orderedIds.get(i)).setPosition(i + 1);
+            deleteLearningPathModul(spaceId, path.getId());
         }
     }
 
@@ -219,4 +238,19 @@ public class LearningPathServiceImpl implements LearningPathService {
                 .map(path -> toResponse(path, null))
                 .toList();
     }
+
+
+    //    @Override
+//    @Transactional
+//    public void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request) {
+//        List<Long> orderedIds = request.getOrderedIds();
+//        if (orderedIds == null || orderedIds.isEmpty()) {
+//            throw new IllegalArgumentException("Danh sách id sắp xếp không được để trống");
+//        }
+//
+//        for (int i = 0; i < orderedIds.size(); i++) {
+//            findPathInSpace(spaceId, orderedIds.get(i)).setPosition(i + 1);
+//        }
+//    }
+
 }

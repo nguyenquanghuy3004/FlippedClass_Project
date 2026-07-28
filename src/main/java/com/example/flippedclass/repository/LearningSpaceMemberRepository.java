@@ -17,6 +17,8 @@ import java.util.Optional;
 @Repository
 public interface LearningSpaceMemberRepository extends JpaRepository<LearningSpaceMember, Long> {
 
+    void deleteAllByLearningSpaceId(Long spaceId);
+
     @Query("SELECT m FROM LearningSpaceMember m WHERE m.learningSpace.id = :spaceId AND m.user.username = :username AND m.status != 'INACTIVE'")
     Optional<LearningSpaceMember> findByLearningSpaceIdAndUserUsername(@Param("spaceId") Long spaceId, @Param("username") String username);
 

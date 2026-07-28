@@ -20,6 +20,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +50,16 @@ public class LearningAnalyticsServiceImpl implements LearningAnalyticsService {
         int activeStudents = 0;
         int supporterCandidates = 0;
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+        Map<Long, Long> completedNodesMap = nodeProgressRepository.countCompletedNodesGroupedByStudent(spaceId)
+                .stream().collect(Collectors.toMap(row -> (Long) row[0], row -> ((Number) row[1]).longValue()));
+
+        Map<Long, Double> quizAvgMap = quizAttemptRepository.findAverageScoreGroupedByStudent(spaceId)
+                .stream().collect(Collectors.toMap(row -> (Long) row[0], row -> row[1] != null ? ((Number) row[1]).doubleValue() : 0.0));
+
+        Map<Long, LocalDateTime> lastActiveMap = interactionLogRepository.findLastInteractionGroupedByStudent(spaceId)
+                .stream().collect(Collectors.toMap(row -> (Long) row[0], row -> (LocalDateTime) row[1]));
 
         for (LearningSpaceMember member : members) {
             if (member.getRole() == MemberRole.OWNER || member.getStatus() != MemberStatus.ACTIVE) {
@@ -58,14 +69,14 @@ public class LearningAnalyticsServiceImpl implements LearningAnalyticsService {
             Long studentId = member.getUser().getId();
             totalStudents++;
 
-            long completedNodes = nodeProgressRepository.countCompletedNodesByStudentAndASpace(studentId, spaceId);
+            long completedNodes = completedNodesMap.getOrDefault(studentId, 0L);
             int progressPercentage = totalNodes > 0 ? (int) ((completedNodes * 100) / totalNodes) : 0;
             sumProgress += progressPercentage;
 
-            BigDecimal quizAvgBd = quizAttemptRepository.findAverageScoreByStudentAndSpace(studentId, spaceId);
-            double quizAvg = quizAvgBd != null ? quizAvgBd.setScale(1, RoundingMode.HALF_UP).doubleValue() : 0.0;
+            double quizAvg = quizAvgMap.getOrDefault(studentId, 0.0);
+            quizAvg = BigDecimal.valueOf(quizAvg).setScale(1, RoundingMode.HALF_UP).doubleValue();
 
-            LocalDateTime lastActiveTime = interactionLogRepository.findLastInteractionByStudentAndSpace(studentId, spaceId);
+            LocalDateTime lastActiveTime = lastActiveMap.get(studentId);
             String lastActiveStr = "N/A";
             boolean isCandidate = progressPercentage >= 80 && quizAvg >= 8.0;
 
@@ -81,18 +92,21 @@ public class LearningAnalyticsServiceImpl implements LearningAnalyticsService {
                 supporterCandidates++;
             }
 
+            String studentCode = member.getUser().getStudentProfile() != null  // get studentCode
+                    ? member.getUser().getStudentProfile().getStudentCode() 
+                    : "N/A";
 
             StudentAnalyticsDTO studentDto = StudentAnalyticsDTO.builder()
                     .studentId(studentId)
                     .studentName(member.getUser().getFullName())
                     .username(member.getUser().getUsername())
+                    .studentCode(studentCode)
                     .progressPercentage(progressPercentage)
                     .completedNodes(completedNodes)
                     .totalNodes(totalNodes)
                     .quizAvg(quizAvg)
                     .lastActive(lastActiveStr)
                     .supporterCandidate(isCandidate)
-
                     .build();
 
             studentAnalyticsList.add(studentDto);

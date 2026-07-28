@@ -30,7 +30,7 @@ public interface LearningPathService {
 
     void deleteAllLearningPaths(Long spaceId);
 
-    void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request);
+//    void reorderLearningPaths(Long spaceId, ReorderLearningPathRequest request);
 
     List<LearningPathResponse> getDeletedLearningPaths(Long spaceId);
 }

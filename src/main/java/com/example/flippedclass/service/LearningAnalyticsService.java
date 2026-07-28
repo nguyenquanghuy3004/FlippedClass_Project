@@ -6,7 +6,7 @@ import com.example.flippedclass.dto.response.SpaceAnalyticsDTO;
 import java.util.List;
 
 public interface LearningAnalyticsService {
-    SpaceAnalyticsDTO getSpaceAnalytics(Long spaceId);
 
+    SpaceAnalyticsDTO getSpaceAnalytics(Long spaceId);
    List<CompletedNodeResponse> getCompletedNodesDetail(Long spaceId, Long studentId);
 }

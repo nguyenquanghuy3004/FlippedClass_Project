@@ -25,4 +25,5 @@ public class LearningNodeResponse {
     private Boolean isOptional;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String spaceStatus;
 }

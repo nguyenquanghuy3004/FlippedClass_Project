@@ -19,7 +19,7 @@ public interface LearningSpaceService {
     LearningSpaceResponse getSpaceByInviteCode(String inviteCode);
 
     @Transactional
-    LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail);
+    LearningSpaceResponse updateLearningSpace(Long id, LearningSpace spaceDetail);
 
     JoinLearningSpaceResponse joinLearningSpace(JoinLearningSpaceRequest request);
 

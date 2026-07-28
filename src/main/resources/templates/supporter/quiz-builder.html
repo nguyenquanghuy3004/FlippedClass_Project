@@ -189,7 +189,8 @@
         </div>
       </div>
 
-      <!-- Closed divs moved to the bo  <div class="modal-overlay" id="bankModal" style="display:none; z-index: 1050; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+      <!-- Closed divs moved to the bottom -->
+      <div class="modal-overlay" id="bankModal" style="display:none; z-index: 1050; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
     <div class="modal-box" style="background: white; border-radius: 12px; width: 90%; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700;"><i class="ti ti-download me-2 text-primary" style="color:#7c3aed;"></i>Import from Question Bank</h3>
@@ -307,14 +308,38 @@
   <script>
     const TOKEN_KEY = 'jwt_token';
     const USER_KEY = 'currentUser_mentor';
+    /**
+     * Hàm getToken: Lấy JWT token để xác thực API.
+     */
+    /**
+     * Hàm getToken: Lấy JWT token để xác thực API.
+     */
     function getToken() { return localStorage.getItem(TOKEN_KEY); }
+    /**
+     * Hàm getUser: Lấy thông tin user hiện tại từ localStorage.
+     */
+    /**
+     * Hàm getUser: Lấy thông tin user hiện tại từ localStorage.
+     */
     function getUser() { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch (e) { return null; } }
+    /**
+     * Hàm authHeaders: Tạo Header chứa Authorization Bearer Token.
+     */
+    /**
+     * Hàm authHeaders: Tạo Header chứa Authorization Bearer Token.
+     */
     function authHeaders() {
       const t = getToken();
       return t
         ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t }
         : { 'Content-Type': 'application/json' };
     }
+    /**
+     * Hàm logout: Thực hiện đăng xuất tài khoản và chuyển hướng về signin.
+     */
+    /**
+     * Hàm logout: Thực hiện đăng xuất tài khoản và chuyển hướng về signin.
+     */
     function logout() {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
@@ -340,6 +365,16 @@
       syncOptionHighlight();
     });
 
+    /**
+     * Hàm toast: Hiển thị thông báo góc màn hình (dạng Toast notification).
+     * @param {string} msg - Nội dung thông báo
+     * @param {boolean} isErr - Trạng thái lỗi (hiển thị màu đỏ)
+     */
+    /**
+     * Hàm toast: Hiển thị thông báo góc màn hình (dạng Toast notification).
+     * @param {string} msg - Nội dung thông báo
+     * @param {boolean} isErr - Trạng thái lỗi (hiển thị màu đỏ)
+     */
     function toast(msg, isErr = false) {
       const wrap = document.getElementById('toastWrap');
       const el = document.createElement('div');
@@ -349,6 +384,12 @@
       setTimeout(() => el.remove(), 3500);
     }
 
+     /**
+     * Hàm loadQuiz: Tải thông tin chung của bài Quiz (Tiêu đề, SpaceId).
+     */
+     /**
+     * Hàm loadQuiz: Tải thông tin chung của bài Quiz (Tiêu đề, SpaceId).
+     */
      async function loadQuiz() {
        try {
          const res = await fetch(`/api/quizzes/${quizId}`, { headers: authHeaders() });
@@ -365,6 +406,12 @@
        } catch (e) { }
      }
 
+    /**
+     * Hàm loadQuestions: Tải danh sách tất cả các câu hỏi của bài Quiz này từ Backend.
+     */
+    /**
+     * Hàm loadQuestions: Tải danh sách tất cả các câu hỏi của bài Quiz này từ Backend.
+     */
     async function loadQuestions() {
       try {
         const res = await fetch(`/api/quizzes/${quizId}/questions`, { headers: authHeaders() });
@@ -378,12 +425,24 @@
       }
     }
 
+    /**
+     * Hàm updateCounters: Cập nhật tổng số lượng câu hỏi và tổng điểm hiển thị trên header.
+     */
+    /**
+     * Hàm updateCounters: Cập nhật tổng số lượng câu hỏi và tổng điểm hiển thị trên header.
+     */
     function updateCounters() {
       const total = questions.reduce((s, q) => s + (q.points || 0), 0);
       document.getElementById('qCountDisplay').textContent = questions.length;
       document.getElementById('totalPtsDisplay').textContent = `${total} pts`;
     }
 
+    /**
+     * Hàm renderList: Vẽ danh sách câu hỏi ở thanh Sidebar bên trái (hiển thị số thứ tự, nội dung tóm tắt, số điểm).
+     */
+    /**
+     * Hàm renderList: Vẽ danh sách câu hỏi ở thanh Sidebar bên trái (hiển thị số thứ tự, nội dung tóm tắt, số điểm).
+     */
     function renderList() {
       const list = document.getElementById('questionsList');
       list.innerHTML = '';
@@ -413,6 +472,12 @@
       });
     }
 
+    /**
+     * Hàm showEmptyState: Hiển thị giao diện chào mừng (khi chưa chọn câu hỏi nào để sửa).
+     */
+    /**
+     * Hàm showEmptyState: Hiển thị giao diện chào mừng (khi chưa chọn câu hỏi nào để sửa).
+     */
     function showEmptyState() {
       selectedId = null;
       renderList();
@@ -421,6 +486,14 @@
       clearErrors();
     }
 
+    /**
+     * Hàm showEditor: Hiển thị Form biên tập câu hỏi (Thêm mới hoặc Chỉnh sửa).
+     * @param {boolean} isNew - Trạng thái thêm mới
+     */
+    /**
+     * Hàm showEditor: Hiển thị Form biên tập câu hỏi (Thêm mới hoặc Chỉnh sửa).
+     * @param {boolean} isNew - Trạng thái thêm mới
+     */
     function showEditor(isNew) {
       document.getElementById('emptyEditorState').style.display = 'none';
       const form = document.getElementById('editorForm');
@@ -433,6 +506,12 @@
       document.getElementById('btnDeleteQ').style.display = isNew ? 'none' : 'flex';
     }
 
+    /**
+     * Hàm onTypeChange: Xử lý ẩn/hiển thị các khu vực nhập liệu tương ứng với loại câu hỏi (Trắc nghiệm, Đúng/Sai, Điền từ).
+     */
+    /**
+     * Hàm onTypeChange: Xử lý ẩn/hiển thị các khu vực nhập liệu tương ứng với loại câu hỏi (Trắc nghiệm, Đúng/Sai, Điền từ).
+     */
     function onTypeChange() {
       const type = document.getElementById('qType').value;
       document.getElementById('optionsSection').style.display = type === 'SINGLE_CHOICE' ? 'block' : 'none';
@@ -440,18 +519,36 @@
       document.getElementById('shortSection').style.display = type === 'SHORT_ANSWER' ? 'block' : 'none';
     }
 
+    /**
+     * Hàm selectCorrect: Đánh dấu đáp án đúng cho câu hỏi trắc nghiệm (A, B, C, D).
+     */
+    /**
+     * Hàm selectCorrect: Đánh dấu đáp án đúng cho câu hỏi trắc nghiệm (A, B, C, D).
+     */
     function selectCorrect(letter) {
       document.getElementById('radio' + letter).checked = true;
       syncOptionHighlight();
     }
 
+    /**
+     * Hàm selectTF: Chọn đáp án đúng cho câu hỏi Đúng/Sai (TRUE/FALSE).
+     */
+    /**
+     * Hàm selectTF: Chọn đáp án đúng cho câu hỏi Đúng/Sai (TRUE/FALSE).
+     */
     function selectTF(val) {
       const key = val === 'TRUE' ? 'radioTrue' : 'radioFalse';
       document.getElementById(key).checked = true;
       syncTFHighlight();
     }
 
-    function syncOptionHighlight() {
+    /**
+     * Hàm syncOptionHighlight: Đổi màu nền của đáp án trắc nghiệm được chọn làm đáp án đúng.
+     */
+     /**
+     * Hàm syncOptionHighlight: Đổi màu nền của đáp án trắc nghiệm được chọn làm đáp án đúng.
+     */
+     function syncOptionHighlight() {
       ['A', 'B', 'C', 'D'].forEach(l => {
         const row = document.getElementById('row' + l);
         const radio = document.getElementById('radio' + l);
@@ -459,6 +556,12 @@
       });
     }
 
+    /**
+     * Hàm syncTFHighlight: Đổi màu nền của True/False được chọn làm đáp án đúng.
+     */
+    /**
+     * Hàm syncTFHighlight: Đổi màu nền của True/False được chọn làm đáp án đúng.
+     */
     function syncTFHighlight() {
       document.getElementById('tfTrue').classList.toggle('correct', document.getElementById('radioTrue').checked);
       document.getElementById('tfFalse').classList.toggle('correct', document.getElementById('radioFalse').checked);
@@ -467,6 +570,12 @@
     document.querySelectorAll('input[name="correctOpt"]').forEach(r => r.addEventListener('change', syncOptionHighlight));
     document.querySelectorAll('input[name="correctTF"]').forEach(r => r.addEventListener('change', syncTFHighlight));
 
+    /**
+     * Hàm createNewQuestion: Reset form biên tập và đưa form về trạng thái sẵn sàng thêm mới câu hỏi.
+     */
+    /**
+     * Hàm createNewQuestion: Reset form biên tập và đưa form về trạng thái sẵn sàng thêm mới câu hỏi.
+     */
     function createNewQuestion() {
       selectedId = 'NEW';
       renderList();
@@ -492,6 +601,14 @@
       document.getElementById('qContent').focus();
     }
 
+    /**
+     * Hàm selectQuestion: Chọn một câu hỏi từ danh sách bên trái để hiển thị thông tin chi tiết lên Form sửa.
+     * @param {number} id - ID của câu hỏi cần sửa
+     */
+    /**
+     * Hàm selectQuestion: Chọn một câu hỏi từ danh sách bên trái để hiển thị thông tin chi tiết lên Form sửa.
+     * @param {number} id - ID của câu hỏi cần sửa
+     */
     function selectQuestion(id) {
       const q = questions.find(x => x.id === id);
       if (!q) return;
@@ -541,6 +658,12 @@
       }
     }
 
+    /**
+     * Hàm clearErrors: Xóa sạch các thông báo lỗi kiểm tra dữ liệu đầu vào (validation errors).
+     */
+    /**
+     * Hàm clearErrors: Xóa sạch các thông báo lỗi kiểm tra dữ liệu đầu vào (validation errors).
+     */
     function clearErrors() {
       document.querySelectorAll('.invalid-feedback').forEach(el => {
         el.classList.add('d-none');
@@ -549,6 +672,12 @@
       document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
     }
 
+    /**
+     * Hàm showError: Hiển thị lỗi đầu vào cho một trường dữ liệu nhất định.
+     */
+    /**
+     * Hàm showError: Hiển thị lỗi đầu vào cho một trường dữ liệu nhất định.
+     */
     function showError(fieldId, message) {
       let mappedId = 'err-' + fieldId;
       if (fieldId === 'correctAnswer' && document.getElementById('qType').value === 'TRUE_FALSE') {
@@ -569,6 +698,12 @@
       }
     }
 
+    /**
+     * Hàm saveQuestion: Thu thập dữ liệu trên Form, kiểm tra tính hợp lệ và gửi API (POST/PUT) để lưu câu hỏi.
+     */
+    /**
+     * Hàm saveQuestion: Thu thập dữ liệu trên Form, kiểm tra tính hợp lệ và gửi API (POST/PUT) để lưu câu hỏi.
+     */
     async function saveQuestion() {
       const id = document.getElementById('qId').value;
       const content = document.getElementById('qContent').value.trim();
@@ -652,6 +787,12 @@
       }
     }
 
+    /**
+     * Hàm deleteCurrentQuestion: Xóa câu hỏi hiện tại đang hiển thị trên Form biên tập.
+     */
+    /**
+     * Hàm deleteCurrentQuestion: Xóa câu hỏi hiện tại đang hiển thị trên Form biên tập.
+     */
     async function deleteCurrentQuestion() {
       const id = document.getElementById('qId').value;
       if (!id) return;
@@ -659,11 +800,25 @@
       await doDelete(id);
     }
 
+    /**
+     * Hàm quickDelete: Xóa nhanh câu hỏi khi nhấn nút 'X' trực tiếp trên danh sách bên trái.
+     */
+    /**
+     * Hàm quickDelete: Xóa nhanh câu hỏi khi nhấn nút 'X' trực tiếp trên danh sách bên trái.
+     */
     async function quickDelete(id) {
       if (!confirm('Delete this question?')) return;
       await doDelete(id);
     }
 
+    /**
+     * Hàm doDelete: Thực hiện gửi API DELETE câu hỏi lên server.
+     * @param {number} id - ID câu hỏi cần xóa
+     */
+    /**
+     * Hàm doDelete: Thực hiện gửi API DELETE câu hỏi lên server.
+     * @param {number} id - ID câu hỏi cần xóa
+     */
     async function doDelete(id) {
       try {
         const res = await fetch(`/api/quizzes/questions/${id}`, { method: 'DELETE', headers: authHeaders() });
@@ -677,6 +832,12 @@
     }
 
     let bankQuestions = [];
+    /**
+     * Hàm openBankModal: Mở Modal Ngân hàng câu hỏi hệ thống (Question Bank) và tải danh sách câu hỏi có sẵn.
+     */
+    /**
+     * Hàm openBankModal: Mở Modal Ngân hàng câu hỏi hệ thống (Question Bank) và tải danh sách câu hỏi có sẵn.
+     */
     async function openBankModal() {
       document.getElementById('bankModal').style.display = 'flex';
       document.getElementById('bankLoading').style.display = 'block';
@@ -751,6 +912,12 @@
       }
     }
 
+    /**
+     * Hàm filterBankQuestions: Lọc danh sách câu hỏi trong ngân hàng theo Chủ đề (Category/Topic) đã chọn.
+     */
+    /**
+     * Hàm filterBankQuestions: Lọc danh sách câu hỏi trong ngân hàng theo Chủ đề (Category/Topic) đã chọn.
+     */
     window.filterBankQuestions = function() {
       const selectedCat = document.getElementById('bankCategoryFilter').value;
       const items = document.querySelectorAll('.bank-item');
@@ -763,10 +930,22 @@
       });
     };
 
+    /**
+     * Hàm closeBankModal: Đóng Modal Ngân hàng câu hỏi.
+     */
+    /**
+     * Hàm closeBankModal: Đóng Modal Ngân hàng câu hỏi.
+     */
     function closeBankModal() {
       document.getElementById('bankModal').style.display = 'none';
     }
 
+    /**
+     * Hàm toggleBankQOptionsLayout: Ẩn/hiện cấu hình đáp án trong Form biên tập câu hỏi ngân hàng.
+     */
+    /**
+     * Hàm toggleBankQOptionsLayout: Ẩn/hiện cấu hình đáp án trong Form biên tập câu hỏi ngân hàng.
+     */
     window.toggleBankQOptionsLayout = function() {
       const qType = document.getElementById('bankQType').value;
       const container = document.getElementById('bankQOptionsContainer');
@@ -780,6 +959,12 @@
       }
     };
 
+    /**
+     * Hàm openBankQEditor: Mở Form chỉnh sửa hoặc thêm mới câu hỏi trực tiếp vào Ngân hàng câu hỏi.
+     */
+    /**
+     * Hàm openBankQEditor: Mở Form chỉnh sửa hoặc thêm mới câu hỏi trực tiếp vào Ngân hàng câu hỏi.
+     */
     window.openBankQEditor = function(id) {
       document.getElementById('bankQEditorModal').style.display = 'flex';
       if (!id) {
@@ -836,10 +1021,22 @@
       toggleBankQOptionsLayout();
     };
 
+    /**
+     * Hàm closeBankQEditorModal: Đóng Modal soạn thảo câu hỏi ngân hàng.
+     */
+    /**
+     * Hàm closeBankQEditorModal: Đóng Modal soạn thảo câu hỏi ngân hàng.
+     */
     window.closeBankQEditorModal = function() {
       document.getElementById('bankQEditorModal').style.display = 'none';
     };
 
+    /**
+     * Hàm saveBankQuestion: Lưu (POST/PUT) câu hỏi trực tiếp vào Ngân hàng câu hỏi hệ thống.
+     */
+    /**
+     * Hàm saveBankQuestion: Lưu (POST/PUT) câu hỏi trực tiếp vào Ngân hàng câu hỏi hệ thống.
+     */
     window.saveBankQuestion = async function() {
       const id = document.getElementById('bankQId').value;
       const category = document.getElementById('bankQCategory').value.trim() || 'General';
@@ -926,6 +1123,12 @@
       }
     };
 
+    /**
+     * Hàm deleteBankQuestion: Xóa câu hỏi khỏi Ngân hàng câu hỏi hệ thống.
+     */
+    /**
+     * Hàm deleteBankQuestion: Xóa câu hỏi khỏi Ngân hàng câu hỏi hệ thống.
+     */
     window.deleteBankQuestion = async function(id) {
       if (!confirm('Are you sure you want to delete this question from the Question Bank?')) return;
       try {
@@ -943,6 +1146,12 @@
       }
     };
 
+    /**
+     * Hàm importSelectedQuestions: Thực hiện import (nhập) các câu hỏi đã chọn từ Ngân hàng câu hỏi vào bài Quiz này.
+     */
+    /**
+     * Hàm importSelectedQuestions: Thực hiện import (nhập) các câu hỏi đã chọn từ Ngân hàng câu hỏi vào bài Quiz này.
+     */
     async function importSelectedQuestions() {
       const checkedBoxes = document.querySelectorAll('.bank-checkbox:checked');
       if (checkedBoxes.length === 0) {

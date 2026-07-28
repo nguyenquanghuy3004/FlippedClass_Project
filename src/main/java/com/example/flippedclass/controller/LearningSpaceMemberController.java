@@ -18,8 +18,7 @@ public class LearningSpaceMemberController {
 
     @PreAuthorize("@spaceSecurity.hasRoleInSpace(#spaceId, 'OWNER', 'SUPPORTER')")
     @GetMapping
-    public ResponseEntity<Page<MemberDto>> getMembers(
-            @PathVariable Long spaceId,
+    public ResponseEntity<Page<MemberDto>> getMembers( @PathVariable Long spaceId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         

@@ -82,13 +82,21 @@
     <th:block layout:fragment="scripts">
         <th:block th:fragment="scripts">
             <script>
+                // Tiện ích lấy các tham số từ URL
                 const urlParams = new URLSearchParams(window.location.search);
                 let spaceId = urlParams.get('spaceId');
 
+                // Khi tài liệu HTML được tải xong, gọi hàm load các lớp học (loadSpaces)
                 document.addEventListener("DOMContentLoaded", async () => {
                     await loadSpaces();
                 });
 
+                /**
+                 * Hàm loadSpaces: Lấy danh sách các lớp học (learning spaces) mà giảng viên quản lý.
+                 * 1. Gọi API GET `/api/learning-spaces/my-spaces`.
+                 * 2. Vẽ danh sách các lớp vào hộp chọn (dropdown selector).
+                 * 3. Chọn lớp đầu tiên (hoặc lớp được truyền từ tham số spaceId trên URL) và gọi hàm lấy danh sách sinh viên (loadStudents).
+                 */
                 async function loadSpaces() {
                     try {
                         const token = localStorage.getItem('jwt_token');
@@ -121,12 +129,24 @@
                     }
                 }
 
+                /**
+                 * Hàm changeSpace: Kích hoạt khi giảng viên thay đổi lớp học ở hộp chọn dropdown.
+                 * Thực hiện cập nhật lại tham số `spaceId` trên URL và tải lại danh sách sinh viên tương ứng.
+                 */
                 function changeSpace() {
                     spaceId = document.getElementById('spaceSelector').value;
                     window.history.replaceState({}, '', `?spaceId=${spaceId}`);
                     loadStudents();
                 }
 
+                /**
+                 * Hàm loadStudents: Tải danh sách phân loại học tập của sinh viên trong lớp từ API Backend:
+                 * API: GET `/api/learning-spaces/{spaceId}/mentoring/students`
+                 * API này phân nhóm sinh viên thành:
+                 * - STRONG: Nhóm học tập tốt (Top 25%).
+                 * - AVERAGE: Nhóm học tập trung bình (50%).
+                 * - WEAK: Nhóm học tập yếu (Bottom 25%).
+                 */
                 async function loadStudents() {
                     const loader = document.getElementById('loader');
                     const content = document.getElementById('mentoringContent');
@@ -143,6 +163,7 @@
                         if (!response.ok) throw new Error('Failed to load students');
                         const data = await response.json();
 
+                        // Vẽ danh sách sinh viên lên các cột tương ứng trên giao diện
                         renderList('strongList', data.STRONG || [], true);
                         renderList('averageList', data.AVERAGE || [], false);
                         renderList('weakList', data.WEAK || [], false);
@@ -155,6 +176,12 @@
                     }
                 }
 
+                /**
+                 * Hàm renderList: Vẽ danh sách sinh viên lên các cột tương ứng trên giao diện HTML.
+                 * @param {string} listId - ID của thẻ <ul> hiển thị danh sách (strongList, averageList, weakList)
+                 * @param {Array} studentEntries - Mảng chứa thông tin sinh viên thuộc nhóm
+                 * @param {boolean} isStrong - Xác định xem có phải nhóm học tập tốt (STRONG) để hiển thị thêm nút thăng chức Supporter
+                 */
                 function renderList(listId, studentEntries, isStrong) {
                     const list = document.getElementById(listId);
                     list.innerHTML = '';
@@ -172,12 +199,15 @@
                         const name = s.fullName || (s.firstName + ' ' + s.lastName);
                         let btnHtml = '';
 
+                        // Nếu thuộc nhóm học tốt và chưa làm Supporter -> Hiển thị nút "Promote to Supporter"
                         if (isStrong && !isSupporter) {
                             btnHtml = `<button class="btn btn-sm btn-outline-primary rounded-pill mt-2" onclick="promoteToSupporter(${s.id})"><i class="ti ti-arrow-up"></i> Promote to Supporter</button>`;
                         } else if (isSupporter) {
+                            // Nếu đã là Supporter -> Hiển thị huy hiệu biểu trưng
                             btnHtml = `<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill mt-2 px-2 py-1"><i class="ti ti-check me-1"></i>Supporter</span>`;
                         }
 
+                        // Nếu là Supporter, hiển thị thêm danh sách các sinh viên yếu đang được hỗ trợ (Mentees)
                         let menteesHtml = '';
                         if (isSupporter && mentees.length > 0) {
                             menteesHtml = `<div class="mt-2 small text-muted"><strong>Mentees:</strong><ul class="mb-0 ps-3">`;
@@ -207,6 +237,12 @@
                     });
                 }
 
+                /**
+                 * Hàm promoteToSupporter: Gửi yêu cầu thăng cấp một sinh viên học tập tốt (STRONG) thành Supporter.
+                 * API: POST `/api/learning-spaces/{spaceId}/mentoring/promote/{studentId}`
+                 * Sau khi thăng cấp thành công, tải lại danh sách sinh viên.
+                 * @param {number|string} studentId - ID của sinh viên được thăng cấp
+                 */
                 async function promoteToSupporter(studentId) {
                     const result = await Swal.fire({
                         title: 'Are you sure?',
@@ -235,6 +271,12 @@
                     }
                 }
 
+                /**
+                 * Hàm autoMatchPairs: Kích hoạt thuật toán ghép cặp học tập tự động giữa các Supporter và sinh viên yếu (WEAK).
+                 * API: POST `/api/learning-spaces/{spaceId}/mentoring/auto-match`
+                 * Thuật toán sẽ ghép tối đa 5 sinh viên yếu cho 1 Supporter.
+                 * Sau khi ghép xong, tải lại danh sách sinh viên để hiển thị các cặp mới.
+                 */
                 async function autoMatchPairs() {
                     const result = await Swal.fire({
                         title: 'Proceed with Auto-Match?',

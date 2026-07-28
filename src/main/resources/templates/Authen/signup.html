@@ -17,6 +17,7 @@
   <script type="module" crossorigin th:src="@{/assets/js/main.js}"></script>
   <link rel="stylesheet" crossorigin th:href="@{/assets/css/main.css}">
   <link rel="stylesheet" th:href="@{/assets/css/auth.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
 (function() {
@@ -93,8 +94,8 @@
           <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none text-muted" tabindex="-1" onclick="togglePassword('password', this)" style="padding: 0 12px; z-index: 5;">
             <i class="ti ti-eye fs-5" style="color: rgba(100,100,100,0.5);"></i>
           </button>
+          <div class="invalid-feedback">8-40 chars, needs uppercase, lowercase, number, & special char.</div>
         </div>
-        <div class="invalid-feedback">8-40 chars, needs uppercase, lowercase, number, & special char.</div>
       </div>
 
       <div class="mb-4 position-relative">
@@ -104,8 +105,8 @@
           <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none text-muted" tabindex="-1" onclick="togglePassword('confirmPassword', this)" style="padding: 0 12px; z-index: 5;">
             <i class="ti ti-eye fs-5" style="color: rgba(100,100,100,0.5);"></i>
           </button>
+          <div class="invalid-feedback">Passwords do not match.</div>
         </div>
-        <div class="invalid-feedback">Passwords do not match.</div>
       </div>
 
       <div id="errorMsg" class="auth-msg auth-msg-error" style="display: none;"></div>

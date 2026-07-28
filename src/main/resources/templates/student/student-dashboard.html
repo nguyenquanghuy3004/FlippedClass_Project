@@ -87,7 +87,29 @@
       <!-- RIGHT COLUMN: RECENT DOCS -->
       <div class="col-xl-3">
         <h2 class="fc-section-title text-dark mb-3">New Documents</h2>
-        <div class="bento-card p-3" id="recentDocuments">
+        <style>
+          .recent-docs-scroll {
+            max-height: 450px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 5px;
+          }
+          .recent-docs-scroll::-webkit-scrollbar {
+            width: 6px;
+          }
+          .recent-docs-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 10px;
+          }
+          .recent-docs-scroll::-webkit-scrollbar-thumb {
+            background: #c1c1c1; 
+            border-radius: 10px;
+          }
+          .recent-docs-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8; 
+          }
+        </style>
+        <div class="bento-card p-3 recent-docs-scroll" id="recentDocuments">
           <div class="text-center text-muted py-4">
             <i class="ti ti-folder-off text-primary" style="font-size: 2.4rem;"></i>
             <h5 class="fc-card-title text-dark mt-3 mb-2">Loading documents</h5>
@@ -404,8 +426,13 @@
           <div class="accordion-item border-0">
             <h2 class="accordion-header">
               <button class="accordion-button ${index === 0 ? '' : 'collapsed'} bg-transparent fc-card-title border-0" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index === 0 ? 'true' : 'false'}">
-                <i class="ti ti-book text-primary me-2 fs-4"></i>${escapeHtml(space.name || 'Learning space')}
-                ${pending ? `<span class="fc-badge bg-danger text-white ms-auto me-3 px-2 py-1 rounded-pill">${pending} quizzes to do</span>` : `<span class="fc-badge bg-secondary text-white ms-auto me-3 px-2 py-1 rounded-pill">${quizzes.length ? 'Done' : 'No quizzes yet'}</span>`}
+                <div class="text-truncate" style="max-width: 40%;">
+                  <i class="ti ti-book text-primary me-2 fs-4"></i>
+                  ${escapeHtml(space.name || 'Learning space')}
+                </div>
+                <div class="position-absolute start-50 translate-middle-x">
+                  ${pending ? `<span class="fc-badge bg-danger text-white px-3 py-1 rounded-pill" style="min-width: 130px; text-align: center; display: inline-block;">${pending} quizzes to do</span>` : `<span class="fc-badge bg-secondary text-white px-3 py-1 rounded-pill" style="min-width: 130px; text-align: center; display: inline-block;">${quizzes.length ? 'Done' : 'No quizzes yet'}</span>`}
+                </div>
               </button>
             </h2>
             <div id="${collapseId}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" data-bs-parent="#quizAccordion">

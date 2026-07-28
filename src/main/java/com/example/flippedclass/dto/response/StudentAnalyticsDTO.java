@@ -9,6 +9,7 @@ public class StudentAnalyticsDTO {
     private Long studentId;
     private String studentName;
     private String username;
+    private String studentCode;
     private int progressPercentage;
     private long completedNodes;
     private long totalNodes;

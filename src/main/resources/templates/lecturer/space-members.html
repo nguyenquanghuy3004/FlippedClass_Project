@@ -1,230 +1,234 @@
 <div th:fragment="content">
-        <div class="row">
-          <div class="col-12">
+    <div class="row">
+        <div class="col-12">
             <div class="mb-6">
-              <h1 class="fs-3 mb-1">Member Management</h1>
-              <p>Manage roles and participants in your learning space.</p>
-            </div>
-          </div>
-        </div>
-        
-        <input type="hidden" id="spaceId" th:value="${spaceId}">
-        
-        <div class="card">
-            <div class="card-header bg-white px-4 py-3 border-bottom d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Members List</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Joined At</th>
-                                <th class="text-end pe-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="members-table-body">
-                            <!-- Populated via AJAX -->
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Pagination Controls -->
-                <div id="people-pagination" class="d-flex justify-content-center p-3 border-top"></div>
-            </div>
-        </div>
-
-        <!-- Remove Member Confirmation Modal -->
-        <div class="modal fade" id="removeMemberModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg rounded-4">
-                    <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
-                        <h5 class="modal-title fw-bold text-danger"><i class="ti ti-alert-triangle fs-4 me-1"></i> Confirm Removal</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <p class="mb-0 fs-6">Are you sure you want to remove this member? This action cannot be undone and they will lose access to this learning space.</p>
-                    </div>
-                    <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
-                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger rounded-pill px-4" onclick="executeRemoveMember()">Remove Member</button>
-                    </div>
-                </div>
+                <h1 class="fs-3 mb-1">Member Management</h1>
+                <p>Manage roles and participants in your learning space.</p>
             </div>
         </div>
     </div>
 
-    <th:block th:fragment="scripts">
-        <script>
+    <input type="hidden" id="spaceId" th:value="${spaceId}">
 
-            // SPACE MEMBERS JS (Logic quản lý thành viên trong Không gian học tập)
+    <div class="card">
+        <div class="card-header bg-white px-4 py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Members List</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Name</th>
+                            <!--                                <th>ID</th>-->
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Joined At</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="members-table-body">
+                        <!-- Populated via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination Controls -->
+            <div id="people-pagination" class="d-flex justify-content-center p-3 border-top"></div>
+        </div>
+    </div>
 
-            // Khởi tạo: Tải danh sách thành viên khi trang được tải xong
-            $(document).ready(function() {
-                // Wait for the tab to be shown if it is hidden, but since it could be active from start:
-                if ($('#members-table-body').length && $('#members-table-body').is(':visible')) {
-                    loadMembers();
+    <!-- Remove Member Confirmation Modal -->
+    <div class="modal fade" id="removeMemberModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold text-danger"><i class="ti ti-alert-triangle fs-4 me-1"></i> Confirm
+                        Removal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="mb-0 fs-6">Are you sure you want to remove this member? This action cannot be undone and
+                        they will lose access to this learning space.</p>
+                </div>
+                <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4"
+                        data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4"
+                        onclick="executeRemoveMember()">Remove Member</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:fragment="scripts">
+    <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+    <script>
+
+        // SPACE MEMBERS JS (Logic quản lý thành viên trong Không gian học tập)
+
+        // Khởi tạo: Tải danh sách thành viên khi trang được tải xong
+        $(document).ready(function () {
+            // Wait for the tab to be shown if it is hidden, but since it could be active from start:
+            if ($('#members-table-body').length && $('#members-table-body').is(':visible')) {
+                loadMembers();
+            }
+        });
+
+        // Khi click vào tab People thì mới load danh sách (lazy load)
+        $('a[data-bs-toggle="tab"][href="#people"]').on('shown.bs.tab', function (e) {
+            if ($('#members-table-body').children().length === 0) {
+                loadMembers();
+            }
+        });
+
+        let currentPeoplePage = 0;
+
+        // Hàm gọi API để lấy danh sách thành viên
+        function loadMembers(page = 0) {
+            currentPeoplePage = page;
+            const spaceId = $('#spaceId').val();
+            if (!spaceId) return;
+            $.ajax({
+                url: `/api/spaces/${spaceId}/members?page=${page}&size=10`,  // Số lượng học viên trên mỗi trang của bảng xếp hạng
+                method: 'GET',
+                success: function (data) {
+                    renderTable(data.content);
+                    renderPeoplePagination(data.totalPages, data.number);
+                },
+                error: function () {
+                    alert('Failed to load members.');
                 }
             });
+        }
 
-            // Khi click vào tab People thì mới load danh sách (lazy load)
-            $('a[data-bs-toggle="tab"][href="#people"]').on('shown.bs.tab', function (e) {
-                if ($('#members-table-body').children().length === 0) {
-                    loadMembers();
-                }
-            });
-
-            let currentPeoplePage = 0;
-
-            // Hàm gọi API để lấy danh sách thành viên
-            function loadMembers(page = 0) {
-                currentPeoplePage = page;
-                const spaceId = $('#spaceId').val();
-                if (!spaceId) return;
-                $.ajax({
-                    url: `/api/spaces/${spaceId}/members?page=${page}&size=5`,
-                    method: 'GET',
-                    success: function(data) {
-                        renderTable(data.content);
-                        renderPeoplePagination(data.totalPages, data.number);
-                    },
-                    error: function() {
-                        alert('Failed to load members.');
-                    }
-                });
+        function renderPeoplePagination(totalPages, currentPage) {
+            const pagination = document.getElementById('people-pagination');
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
             }
 
-            function renderPeoplePagination(totalPages, currentPage) {
-                const pagination = document.getElementById('people-pagination');
-                if (totalPages <= 1) {
-                    pagination.innerHTML = '';
-                    return;
-                }
-                
-                let pHtml = '<ul class="pagination pagination-sm mb-0">';
-                pHtml += `<li class="page-item ${currentPage === 0 ? 'disabled' : ''}"><a class="page-link" href="javascript:void(0)" onclick="loadMembers(${currentPage - 1})">Prev</a></li>`;
-                
-                for (let p = 0; p < totalPages; p++) {
-                    pHtml += `<li class="page-item ${currentPage === p ? 'active' : ''}"><a class="page-link" href="javascript:void(0)" onclick="loadMembers(${p})">${p + 1}</a></li>`;
-                }
-                
-                pHtml += `<li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}"><a class="page-link" href="javascript:void(0)" onclick="loadMembers(${currentPage + 1})">Next</a></li>`;
-                pHtml += '</ul>';
-                pagination.innerHTML = pHtml;
+            let pHtml = '<ul class="pagination pagination-sm mb-0">';
+            pHtml += `<li class="page-item ${currentPage === 0 ? 'disabled' : ''}"><a class="page-link" href="javascript:void(0)" onclick="loadMembers(${currentPage - 1})">Prev</a></li>`;
+
+            for (let p = 0; p < totalPages; p++) {
+                pHtml += `<li class="page-item ${currentPage === p ? 'active' : ''}"><a class="page-link" href="javascript:void(0)" onclick="loadMembers(${p})">${p + 1}</a></li>`;
             }
 
-            // Hàm render dữ liệu thành viên ra bảng HTML
-            function renderTable(members) {
-                let html = '';
-                if(members.length === 0) {
-                    html = '<tr><td colspan="5" class="text-center py-4 text-muted">No members found.</td></tr>';
-                } else {
-                    members.forEach(m => {
-                        let badgeClass = 'bg-secondary-subtle text-secondary border border-secondary';
-                        if (m.role === 'OWNER') badgeClass = 'bg-primary-subtle text-primary border border-primary';
-                        if (m.role === 'SUPPORTER') badgeClass = 'bg-success-subtle text-success border border-success';
+            pHtml += `<li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}"><a class="page-link" href="javascript:void(0)" onclick="loadMembers(${currentPage + 1})">Next</a></li>`;
+            pHtml += '</ul>';
+            pagination.innerHTML = pHtml;
+        }
 
-                        let actionsHtml = '';
-                        if (m.role !== 'OWNER') {
-                            if (m.role === 'MEMBER') {
-                                actionsHtml += `<button class="btn btn-sm btn-outline-success me-2" onclick="promote(${m.memberId})"><i class="ti ti-arrow-up"></i> Promote</button>`;
-                            } else if (m.role === 'SUPPORTER') {
-                                actionsHtml += `<button class="btn btn-sm btn-outline-warning me-2" onclick="demote(${m.memberId})"><i class="ti ti-arrow-down"></i> Demote</button>`;
-                            }
-                            actionsHtml += `<button class="btn btn-sm btn-outline-danger" onclick="removeMember(${m.memberId})"><i class="ti ti-trash"></i> Remove</button>`;
-                        } else {
-                            actionsHtml = '<span class="text-muted fst-italic">No actions</span>';
+        // Hàm render dữ liệu thành viên ra bảng HTML
+        function renderTable(members) {
+            let html = '';
+            if (members.length === 0) {
+                html = '<tr><td colspan="5" class="text-center py-4 text-muted">No members found.</td></tr>';
+            } else {
+                members.forEach(m => {
+                    let badgeClass = 'bg-secondary-subtle text-secondary border border-secondary';
+                    if (m.role === 'OWNER') badgeClass = 'bg-primary-subtle text-primary border border-primary';
+                    if (m.role === 'SUPPORTER') badgeClass = 'bg-success-subtle text-success border border-success';
+
+                    let actionsHtml = '';
+                    if (m.role !== 'OWNER') {
+                        if (m.role === 'MEMBER') {
+                            actionsHtml += `<button class="btn btn-sm btn-outline-success me-2" onclick="promote(${m.memberId})"><i class="ti ti-arrow-up"></i> Promote</button>`;
+                        } else if (m.role === 'SUPPORTER') {
+                            actionsHtml += `<button class="btn btn-sm btn-outline-warning me-2" onclick="demote(${m.memberId})"><i class="ti ti-arrow-down"></i> Demote</button>`;
                         }
+                        actionsHtml += `<button class="btn btn-sm btn-outline-danger" onclick="removeMember(${m.memberId})"><i class="ti ti-trash"></i> Remove</button>`;
+                    } else {
+                        actionsHtml = '<span class="text-muted fst-italic">No actions</span>';
+                    }
 
-                        html += `
+                    html += `
                             <tr>
                                 <td class="ps-4">
                                     <div class="fw-semibold text-dark">${m.fullName || 'N/A'}</div>
                                 </td>
+                                <!--!<td>${m.userId || ''}</td>-->
                                 <td>${m.email}</td>
                                 <td><span class="badge ${badgeClass}">${m.role}</span></td>
                                 <td>${new Date(m.joinedAt).toLocaleDateString()}</td>
                                 <td class="text-end pe-4">${actionsHtml}</td>
                             </tr>
                         `;
-                    });
+                });
+            }
+            $('#members-table-body').html(html);
+        }
+
+        // Hàm thăng cấp thành viên lên Supporter
+        function promote(memberId) {
+            const spaceId = $('#spaceId').val();
+            $.ajax({
+                url: `/api/spaces/${spaceId}/members/${memberId}/promote`,
+                method: 'POST',
+                success: function () {
+                    Swal.fire('Success', 'Member has been promoted to Supporter!', 'success');
+                    loadMembers();
+                },
+                error: function (err) {
+                    try {
+                        const response = JSON.parse(err.responseText);
+                        Swal.fire('Error', response.message || 'Error promoting member', 'error');
+                    } catch (e) {
+                        Swal.fire('Error', 'Error promoting member', 'error');
+                    }
                 }
-                $('#members-table-body').html(html);
-            }
+            });
+        }
 
-            // Hàm thăng cấp thành viên lên Supporter
-            function promote(memberId) {
-                const spaceId = $('#spaceId').val();
-                $.ajax({
-                    url: `/api/spaces/${spaceId}/members/${memberId}/promote`,
-                    method: 'POST',
-                    success: function() {
-                        Swal.fire('Thành công', 'Đã thăng cấp thành viên lên Supporter!', 'success');
-                        loadMembers();
-                    },
-                    error: function(err) {
-                        try {
-                            const response = JSON.parse(err.responseText);
-                            Swal.fire('Lỗi', response.message || 'Error promoting member', 'error');
-                        } catch (e) {
-                            Swal.fire('Lỗi', 'Error promoting member', 'error');
-                        }
-                    }
-                });
-            }
+        // Hàm giáng cấp Supporter xuống Member thường
+        function demote(memberId) {
+            const spaceId = $('#spaceId').val();
+            $.ajax({
+                url: `/api/spaces/${spaceId}/members/${memberId}/demote`,
+                method: 'POST',
+                success: function () {
+                    Swal.fire('Success', 'Membership has been downgraded to Member!', 'success');
+                    loadMembers();
+                },
+                error: function (err) {
+                    Swal.fire('Error', 'Error demoting member', 'error');
+                }
+            });
+        }
 
-            // Hàm giáng cấp Supporter xuống Member thường
-            function demote(memberId) {
-                const spaceId = $('#spaceId').val();
-                $.ajax({
-                    url: `/api/spaces/${spaceId}/members/${memberId}/demote`,
-                    method: 'POST',
-                    success: function() {
-                        Swal.fire('Thành công', 'Đã giáng cấp thành viên xuống Member!', 'success');
-                        loadMembers();
-                    },
-                    error: function(err) {
-                        Swal.fire('Lỗi', 'Error demoting member', 'error');
-                    }
-                });
-            }
+        let pendingRemoveMemberId = null;
 
-            let pendingRemoveMemberId = null;
+        // Hàm hiển thị modal xác nhận xóa
+        function removeMember(memberId) {
+            pendingRemoveMemberId = memberId;
+            const btn = document.createElement('button');
+            btn.setAttribute('data-bs-toggle', 'modal');
+            btn.setAttribute('data-bs-target', '#removeMemberModal');
+            btn.classList.add('d-none');
+            document.body.appendChild(btn);
+            btn.click();
+            btn.remove();
+        }
 
-            // Hàm hiển thị modal xác nhận xóa
-            function removeMember(memberId) {
-                pendingRemoveMemberId = memberId;
-                const btn = document.createElement('button');
-                btn.setAttribute('data-bs-toggle', 'modal');
-                btn.setAttribute('data-bs-target', '#removeMemberModal');
-                btn.classList.add('d-none');
-                document.body.appendChild(btn);
-                btn.click();
-                btn.remove();
-            }
-
-            // Hàm thực thi xóa khi bấm nút xác nhận trên Modal
-            function executeRemoveMember() {
-                if (!pendingRemoveMemberId) return;
-                const spaceId = $('#spaceId').val();
-                $.ajax({
-                    url: `/api/spaces/${spaceId}/members/${pendingRemoveMemberId}`,
-                    method: 'DELETE',
-                    success: function() {
-                        $('#removeMemberModal .btn-close').click();
-                        loadMembers(currentPeoplePage); // Reload current page
-                        pendingRemoveMemberId = null;
-                    },
-                    error: function(err) {
-                        alert('Error removing member');
-                        pendingRemoveMemberId = null;
-                    }
-                });
-            }
-        </script>
-    </th:block>
-
-
-
+        // Hàm thực thi xóa khi bấm nút xác nhận trên Modal
+        function executeRemoveMember() {
+            if (!pendingRemoveMemberId) return;
+            const spaceId = $('#spaceId').val();
+            $.ajax({
+                url: `/api/spaces/${spaceId}/members/${pendingRemoveMemberId}`,
+                method: 'DELETE',
+                success: function () {
+                    $('#removeMemberModal .btn-close').click();
+                    loadMembers(currentPeoplePage); // Reload current page
+                    pendingRemoveMemberId = null;
+                },
+                error: function (err) {
+                    alert('Error removing member');
+                    pendingRemoveMemberId = null;
+                }
+            });
+        }
+    </script>
+</th:block>

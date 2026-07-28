@@ -19,4 +19,9 @@ public interface InteractionLogRepository extends JpaRepository<InteractionLog, 
            "WHERE il.student.id = :studentId " +
            "AND il.learningPath.learningSpace.id = :spaceId")
     java.time.LocalDateTime findLastInteractionByStudentAndSpace(@Param("studentId") Long studentId, @Param("spaceId") Long spaceId);
+
+    @Query("SELECT il.student.id, MAX(il.occurredAt) FROM InteractionLog il " +
+           "WHERE il.learningPath.learningSpace.id = :spaceId " +
+           "GROUP BY il.student.id")
+    List<Object[]> findLastInteractionGroupedByStudent(@Param("spaceId") Long spaceId);
 }

@@ -20,7 +20,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LearningNodeController {
 
-    private final LearningNodeService learningNodeService;
     private final FileStorageService fileStorageService;
     private final LearningNodeItemService learningNodeItemService;
 

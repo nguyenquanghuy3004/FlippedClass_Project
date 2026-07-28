@@ -31,9 +31,16 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
     @Autowired
     private LearningPathRepository learningPathRepository;
-
     @Autowired
     private NodeConnectionRepository nodeConnectionRepository;
+    @Autowired
+    private LearningNodeItemRepository learningNodeItemRepository;
+
+    @Autowired
+    private QuizRepository quizRepository;
+
+    @jakarta.persistence.PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public LearningNodeResponse createLearningNode(Long pathId, CreateLearningNodeRequest request) {
@@ -58,6 +65,7 @@ public class LearningNodeServiceImpl implements LearningNodeService {
 
         LearningNode savedNode = learningNodeRepository.save(node);
 
+        // Xử lý Điều kiện tiên quyết (Prerequisite)
         if (request.getPrerequisiteNodeId() != null && request.getPrerequisiteNodeId() > 0) {
             LearningNode sourceNode = learningNodeRepository.findById(request.getPrerequisiteNodeId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy Prerequisite node"));
@@ -85,14 +93,6 @@ public class LearningNodeServiceImpl implements LearningNodeService {
                 .build();
     }
 
-    @Autowired
-    private LearningNodeItemRepository learningNodeItemRepository;
-
-    @Autowired
-    private QuizRepository quizRepository;
-
-    @jakarta.persistence.PersistenceContext
-    private EntityManager entityManager;
 
     @Override
     @Transactional
@@ -113,6 +113,15 @@ public class LearningNodeServiceImpl implements LearningNodeService {
             throw new IllegalArgumentException("Cannot delete this lesson because students have already participated. Please archive the module instead.");
         }
         
+        /*
+        // Xóa các liên kết tiên quyết (NodeConnection) để không làm hỏng chuỗi bài học
+        entityManager.createQuery("DELETE FROM NodeConnection c WHERE c.sourceNode.id = :nodeId OR c.targetNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+
+        // Xóa mềm: Chuyển trạng thái thành DELETED
+        node.setStatus("DELETED");
+        learningNodeRepository.save(node);
+        */
+
         // Break self-referencing relationships first
         entityManager.createQuery("UPDATE NodeDiscussion d SET d.parentDiscussion = null WHERE d.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         
@@ -132,6 +141,14 @@ public class LearningNodeServiceImpl implements LearningNodeService {
         entityManager.createQuery("DELETE FROM StudyGroupMember sgm WHERE sgm.group.id IN (SELECT sg.id FROM StudyGroup sg WHERE sg.activity.learningNode.id = :nodeId)").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM StudyGroup sg WHERE sg.activity.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
         entityManager.createQuery("DELETE FROM GroupActivity g WHERE g.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        
+        // Delete LearningNodeItem and Quiz directly via JPQL to prevent FK constraint errors
+        entityManager.createQuery("DELETE FROM LearningNodeItem i WHERE i.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        entityManager.createQuery("DELETE FROM Quiz q WHERE q.learningNode.id = :nodeId").setParameter("nodeId", nodeId).executeUpdate();
+        
+        // Clear collections to prevent Hibernate from issuing UPDATE SET learning_node_id = NULL
+        if (node.getItems() != null) node.getItems().clear();
+        if (node.getQuizzes() != null) node.getQuizzes().clear();
 
         learningNodeRepository.delete(node);
     }

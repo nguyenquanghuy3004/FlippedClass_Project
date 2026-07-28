@@ -119,7 +119,12 @@
     <div th:fragment="nodeModals">
 
         <!-- Create Quiz Modal -->
-        <div class="modal fade" id="createQuizModal" tabindex="-1" aria-hidden="true">
+        
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: CREATEQUIZMODAL 
+     ========================================== -->
+<div class="modal fade" id="createQuizModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 rounded-4 shadow-lg">
                     <div class="modal-header border-0 pb-0">
@@ -134,7 +139,10 @@
                         <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body pt-3">
-                        <form id="createQuizForm">
+                        
+
+<!-- === BIỂU MẪU (FORM): CREATEQUIZFORM === -->
+<form id="createQuizForm">
                             <input type="hidden" id="quizNodeId">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold small" style="color:#312e81;">Quiz Title</label>
@@ -168,7 +176,12 @@
         </div>
 
         <!-- Create Node Modal -->
-        <div class="modal fade" id="createNodeModal" tabindex="-1" aria-hidden="true">
+        
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: CREATENODEMODAL 
+     ========================================== -->
+<div class="modal fade" id="createNodeModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 rounded-4 shadow-lg">
                     <div class="modal-header border-0 pb-0">
@@ -183,7 +196,10 @@
                         <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body pt-3">
-                        <form id="createNodeForm">
+                        
+
+<!-- === BIỂU MẪU (FORM): CREATENODEFORM === -->
+<form id="createNodeForm">
                             <input type="hidden" id="nodePathId">
                             <div class="mb-3">
                                 <label for="nodeTitle" class="form-label fw-semibold small"
@@ -234,7 +250,12 @@
         </div>
 
         <!-- Edit Node Modal -->
-        <div class="modal fade" id="editNodeModal" tabindex="-1" aria-hidden="true">
+        
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: EDITNODEMODAL 
+     ========================================== -->
+<div class="modal fade" id="editNodeModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 rounded-4 shadow-lg">
                     <div class="modal-header border-0 pb-0">
@@ -249,7 +270,10 @@
                         <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body pt-3">
-                        <form id="editNodeForm">
+                        
+
+<!-- === BIỂU MẪU (FORM): EDITNODEFORM === -->
+<form id="editNodeForm">
                             <input type="hidden" id="editNodePathId">
                             <input type="hidden" id="editNodeId">
                             <div class="mb-3">
@@ -315,7 +339,12 @@
         </div>
 
         <!-- Add Youtube Modal -->
-        <div class="modal fade" id="addYoutubeModal" tabindex="-1" aria-hidden="true">
+        
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: ADDYOUTUBEMODAL 
+     ========================================== -->
+<div class="modal fade" id="addYoutubeModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 rounded-4 shadow-lg">
                     <div class="modal-header border-0 pb-0">
@@ -330,7 +359,10 @@
                         <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body pt-3">
-                        <form id="addYoutubeForm">
+                        
+
+<!-- === BIỂU MẪU (FORM): ADDYOUTUBEFORM === -->
+<form id="addYoutubeForm">
                             <input type="hidden" id="youtubeNodeId">
                             <div class="mb-3">
                                 <label for="youtubeUrl" class="form-label fw-semibold small" style="color:#312e81;">Youtube URL</label>
@@ -356,7 +388,10 @@
         <!-- Hidden file inputs -->
         <input type="file" id="hiddenVideoInput" accept="video/mp4,video/x-m4v,video/*" style="display:none;">
         <input type="file" id="hiddenDocumentInput" accept=".pdf" style="display:none;">
-        <script>
+        <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
             document.addEventListener('show.bs.dropdown', function(event) {
                 let nodeCard = event.target.closest('.node-card');
                 let pathBody = event.target.closest('.path-collapsible-body');

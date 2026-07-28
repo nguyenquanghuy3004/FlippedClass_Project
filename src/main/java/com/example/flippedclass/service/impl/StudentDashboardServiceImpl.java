@@ -7,15 +7,20 @@ import com.example.flippedclass.dto.response.CourseDocumentResponse;
 import com.example.flippedclass.dto.response.StudentDashboardResponse;
 import com.example.flippedclass.dto.response.StudentProfileResponse;
 import com.example.flippedclass.dto.response.QuizResponse;
+import com.example.flippedclass.entity.LearningSpace;
 import com.example.flippedclass.entity.LearningSpaceMember;
 import com.example.flippedclass.entity.StudentProfile;
 import com.example.flippedclass.entity.User;
+import com.example.flippedclass.enums.LearningSpaceStatus;
+import com.example.flippedclass.enums.VisibilityType;
 import com.example.flippedclass.repository.CourseDocumentRepository;
 import com.example.flippedclass.repository.LearningSpaceMemberRepository;
 import com.example.flippedclass.repository.QuizQuestionRepository;
 import com.example.flippedclass.repository.StudentProfileRepository;
 import com.example.flippedclass.repository.UserRepository;
 import com.example.flippedclass.service.StudentDashboardService;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -52,14 +57,14 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 .orElse(null);
 
         List<LearningSpaceMember> memberships = learningSpaceMemberRepository.findByUser_IdOrderByJoinedAtDesc(studentId).stream()
-                .filter(m -> m.getLearningSpace().getStatus() == com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE)
+                .filter(m -> m.getLearningSpace().getStatus() != com.example.flippedclass.enums.LearningSpaceStatus.DELETE)
                 .toList();
         List<Long> joinedSpaceIds = memberships.stream()
                 .map(member -> member.getLearningSpace().getId())
                 .distinct()
                 .toList();
 
-        List<DashboardLearningSpaceResponse> learningSpaces = new java.util.ArrayList<>();
+        List<DashboardLearningSpaceResponse> learningSpaces = new ArrayList<>();
         List<Long> allSpaceIds = new java.util.ArrayList<>(joinedSpaceIds);
 
         // Thêm khóa học đã tham gia
@@ -89,10 +94,10 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
         });
 
         // Thêm khóa học PUBLIC chưa tham gia
-        List<com.example.flippedclass.entity.LearningSpace> publicSpaces = learningSpaceRepository
-                .findByVisibilityAndStatus(com.example.flippedclass.enums.VisibilityType.PUBLIC, com.example.flippedclass.enums.LearningSpaceStatus.ACTIVE);
+        List<LearningSpace> publicSpaces = learningSpaceRepository
+                .findByVisibilityAndStatus(VisibilityType.PUBLIC, LearningSpaceStatus.ACTIVE);
         
-        for (com.example.flippedclass.entity.LearningSpace space : publicSpaces) {
+        for (LearningSpace space : publicSpaces) {
             if (!joinedSpaceIds.contains(space.getId())) {
                 allSpaceIds.add(space.getId());
                 List<QuizResponse> quizzes = quizRepository.findByLearningNode_LearningPath_LearningSpace_IdAndActiveTrue(space.getId()).stream()
@@ -177,6 +182,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
         profile.setClassName(trimToNull(request.getClassName()));
         profile.setMajor(trimToNull(request.getMajor()));
         profile.setEnrollmentYear(request.getEnrollmentYear());
+        profile.setPhoneNumber(trimToNull(request.getPhoneNumber()));
 
         userRepository.save(user);
         studentProfileRepository.save(profile);
@@ -190,7 +196,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
         return trimmed.isEmpty() ? null : trimmed;
     }
 
-    private com.example.flippedclass.dto.response.StudentProfileResponse toStudentProfileResponse(com.example.flippedclass.entity.StudentProfile profile) {
+    private StudentProfileResponse toStudentProfileResponse(StudentProfile profile) {
         if (profile == null) return null;
         return com.example.flippedclass.dto.response.StudentProfileResponse.builder()
             .id(profile.getId())
@@ -200,7 +206,6 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
             .className(profile.getClassName())
             .enrollmentYear(profile.getEnrollmentYear())
             .phoneNumber(profile.getPhoneNumber())
-            .bio(profile.getBio())
             .build();
     }
 }

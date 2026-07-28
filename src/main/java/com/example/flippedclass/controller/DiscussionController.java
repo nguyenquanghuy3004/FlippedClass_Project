@@ -18,9 +18,7 @@ public class DiscussionController {
     private final DiscussionService discussionService;
 
     @GetMapping
-    public ResponseEntity<List<DiscussionResponse>> getDiscussions(
-            @PathVariable Long nodeId,
-            @RequestParam(required = false) Long groupId) {
+    public ResponseEntity<List<DiscussionResponse>> getDiscussions(@PathVariable Long nodeId,@RequestParam(required = false) Long groupId) {
         return ResponseEntity.ok(discussionService.getDiscussionsByNodeId(nodeId, groupId));
     }
 

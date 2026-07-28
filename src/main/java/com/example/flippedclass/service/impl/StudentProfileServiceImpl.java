@@ -58,12 +58,9 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         
         userRepository.save(user);
 
-        // Cập nhật phone và bio vào bảng StudentProfile
+        // Cập nhật phone vào bảng StudentProfile
         if (request.getPhoneNumber() != null) {
             profile.setPhoneNumber(request.getPhoneNumber());
-        }
-        if (request.getBio() != null) {
-            profile.setBio(request.getBio());
         }
         studentProfileRepository.save(profile);
 
@@ -84,7 +81,6 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             res.setMajor(profile.getMajor());
             res.setEnrollmentYear(profile.getEnrollmentYear());
             res.setPhoneNumber(profile.getPhoneNumber());
-            res.setBio(profile.getBio());
         }
 
         return res;

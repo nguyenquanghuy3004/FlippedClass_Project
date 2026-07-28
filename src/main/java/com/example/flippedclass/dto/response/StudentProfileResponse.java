@@ -15,7 +15,6 @@ public class StudentProfileResponse {
     private String major;
     private Integer enrollmentYear;
     private String phoneNumber;
-    private String bio;
 
     public static StudentProfileResponse from(StudentProfile profile) {
         return StudentProfileResponse.builder()
@@ -26,7 +25,6 @@ public class StudentProfileResponse {
                 .major(profile.getMajor())
                 .enrollmentYear(profile.getEnrollmentYear())
                 .phoneNumber(profile.getPhoneNumber())
-                .bio(profile.getBio())
                 .build();
     }
 }

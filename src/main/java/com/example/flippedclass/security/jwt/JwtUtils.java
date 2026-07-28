@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -28,7 +29,7 @@ public class JwtUtils {
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
-        java.util.List<String> roles = userPrincipal.getAuthorities().stream()
+        List<String> roles = userPrincipal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
@@ -41,7 +42,7 @@ public class JwtUtils {
                 .compact();
     }
 
-    public String generateJwtTokenFromUsername(String username, java.util.List<String> roles) {
+    public String generateJwtTokenFromUsername(String username, List<String> roles) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("roles", roles)

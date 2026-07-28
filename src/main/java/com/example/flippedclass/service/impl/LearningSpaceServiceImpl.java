@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import com.example.flippedclass.service.LearningPathService;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +39,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
     private final CourseDocumentServiceImpl courseDocumentServicel;
     private final LearningPathRepository learningPathRepository;
     private final CourseDocumentRepository courseDocumentRepository;
+    private final LearningPathService learningPathService;
 
 
     private User getCurrentUser() {
@@ -216,7 +218,7 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
 
     @Transactional
     @Override
-    public LearningSpace updateLearningSpace(Long id, LearningSpace spaceDetail) {
+    public LearningSpaceResponse updateLearningSpace(Long id, LearningSpace spaceDetail) {
         LearningSpace space = learningSpaceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Learning Space not found or has been deleted"));
 
@@ -231,7 +233,19 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
         space.setName(spaceDetail.getName());
         space.setDescription(spaceDetail.getDescription());
         space.setVisibility(spaceDetail.getVisibility());
-        return learningSpaceRepository.save(space);
+        LearningSpace savedSpace = learningSpaceRepository.save(space);
+        
+        return LearningSpaceResponse.builder()
+                .id(savedSpace.getId())
+                .name(savedSpace.getName())
+                .description(savedSpace.getDescription())
+                .inviteCode(savedSpace.getInviteCode())
+                .visibility(savedSpace.getVisibility())
+                .ownerId(savedSpace.getOwner().getId())
+                .ownerUsername(savedSpace.getOwner().getUsername())
+                .createdAt(savedSpace.getCreatedAt())
+                .status(savedSpace.getStatus())
+                .build();
     }
 
 
@@ -304,8 +318,34 @@ public class LearningSpaceServiceImpl implements LearningSpaceService {
             }
         }
 
+
+        // CÁCH 1: XÓA MỀM
+        // ==========================================
         learningSpace.setStatus(LearningSpaceStatus.DELETE);
         learningSpaceRepository.save(learningSpace);
+
+
+        // CÁCH 2: XÓA CỨNG
+        // ==========================================
+        // // 1. Delete all paths (which will delete their nodes)
+//         if (learningSpace.getPaths() != null) {
+//             List<LearningPath> pathsToDel = new java.util.ArrayList<>(learningSpace.getPaths());
+//
+//             for (LearningPath path : pathsToDel) {
+//                 learningPathService.deleteLearningPathModul(id, path.getId());
+//             }
+//
+//             learningSpace.getPaths().clear();
+//         }
+//
+//         // 2. Delete all members
+//         if (learningSpace.getMembers() != null) {
+//             learningSpace.getMembers().clear();
+//             memberRepository.deleteAllByLearningSpaceId(id);
+//         }
+//
+//         // 3. Hard delete the space
+//         learningSpaceRepository.delete(learningSpace);
     }
 
     // restore learning Space

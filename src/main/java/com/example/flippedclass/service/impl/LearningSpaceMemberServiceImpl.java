@@ -26,11 +26,15 @@ public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberServic
     private final com.example.flippedclass.service.PeerMentoringService peerMentoringService;
 
     @Override
+    @Transactional(readOnly = true)
     public Page<MemberDto> getSpaceMembers(Long spaceId, Pageable pageable) {
         Page<LearningSpaceMember> members = memberRepository.findByLearningSpaceId(spaceId, pageable);
         return members.map(member -> MemberDto.builder()
                 .memberId(member.getId())
                 .userId(member.getUser().getId())
+                .studentCode(member.getUser().getStudentProfile() != null && member.getUser().getStudentProfile().getStudentCode() != null 
+                             ? member.getUser().getStudentProfile().getStudentCode() 
+                             : member.getUser().getUsername())
                 .fullName(member.getUser().getFullName())
                 .email(member.getUser().getEmail())
                 .role(member.getRole())
@@ -62,6 +66,9 @@ public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberServic
         
         member.setRole(MemberRole.MEMBER);
         memberRepository.save(member);
+        
+        // Remove mentees associated with this member
+        peerMentoringService.removeAllPairingsForMentor(spaceId, member.getUser().getId());
     }
 
     @Override
@@ -82,6 +89,9 @@ public class LearningSpaceMemberServiceImpl implements LearningSpaceMemberServic
         }
 
         memberRepository.delete(member);
+        
+        // Remove any peer mentoring pairings associated with this member
+        peerMentoringService.removeAllPairingsForMember(spaceId, member.getUser().getId());
     }
     
     private LearningSpaceMember getMember(Long spaceId, Long memberId) {

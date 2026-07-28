@@ -196,7 +196,7 @@ window.renderGroupActivityPage = async function(node, nodeId) {
                                         </div>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        ${isLeader && m.userId !== parseInt(userId) ? `<button class="btn btn-sm btn-outline-primary py-0" style="font-size: 0.7rem;" onclick="transferLeader(${myGroup.id}, ${m.userId})">Chuyển Leader</button>` : ''}
+                                        ${isLeader && m.userId !== parseInt(userId) ? `<button class="btn btn-sm btn-outline-primary py-0" style="font-size: 0.7rem;" onclick="window.transferLeader(${myGroup.id}, ${m.userId}, ${nodeId})">Chuyển Leader</button>` : ''}
                                         ${m.role === 'LEADER' ? '<div style="color: #eab308;"><i class="ti ti-crown"></i></div>' : ''}
                                     </div>
                                 </div>
@@ -325,10 +325,34 @@ window.handleJoinGroup = async (activityId, groupId, nodeId) => {
 
 window.handleLeaveGroup = async (groupId, nodeId, memberCount) => {
     if (memberCount === 1) {
-        alert('Bạn là thành viên duy nhất (Leader). Không thể rời nhóm! Vui lòng thêm ít nhất 1 thành viên khác.');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Không thể rời nhóm',
+                text: 'Bạn là thành viên duy nhất (Leader). Không thể rời nhóm! Vui lòng thêm ít nhất 1 thành viên khác.'
+            });
+        } else {
+            alert('Bạn là thành viên duy nhất (Leader). Không thể rời nhóm! Vui lòng thêm ít nhất 1 thành viên khác.');
+        }
         return;
     }
-    if(!confirm('Bạn có chắc chắn muốn rời nhóm?')) return;
+    
+    if (typeof Swal !== 'undefined') {
+        const result = await Swal.fire({
+            title: 'Rời nhóm',
+            text: 'Bạn có chắc chắn muốn rời nhóm?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Rời nhóm',
+            cancelButtonText: 'Hủy'
+        });
+        if (!result.isConfirmed) return;
+    } else {
+        if (!confirm('Bạn có chắc chắn muốn rời nhóm?')) return;
+    }
+
     try {
         const res = await fetch(`/api/v1/groups/${groupId}/leave`, {
             method: 'DELETE',
@@ -336,7 +360,57 @@ window.handleLeaveGroup = async (groupId, nodeId, memberCount) => {
         });
         if (!res.ok) throw new Error(await readError(res));
         window.renderGroupActivityPage({ nodeType: 'GROUP_ACTIVITY' }, nodeId);
-    } catch (e) { alert(e.message); }
+    } catch (e) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire('Lỗi', e.message, 'error');
+        } else {
+            alert(e.message);
+        }
+    }
+};
+
+window.transferLeader = async (groupId, newLeaderId, nodeId) => {
+    if (typeof Swal !== 'undefined') {
+        const result = await Swal.fire({
+            title: 'Chuyển quyền Leader',
+            text: 'Bạn có chắc chắn muốn chuyển quyền Leader cho thành viên này?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy'
+        });
+        if (!result.isConfirmed) return;
+    } else {
+        if (!confirm('Bạn có chắc chắn muốn chuyển quyền Leader cho thành viên này?')) return;
+    }
+
+    try {
+        const res = await fetch(`/api/v1/groups/${groupId}/transfer-leader`, {
+            method: 'PATCH',
+            headers: authHeaders(true),
+            body: JSON.stringify({ newLeaderId })
+        });
+        if (!res.ok) throw new Error(await readError(res));
+        window.renderGroupActivityPage({ nodeType: 'GROUP_ACTIVITY' }, nodeId);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Đã chuyển quyền Leader thành công',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
+    } catch (e) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire('Lỗi', e.message, 'error');
+        } else {
+            alert(e.message);
+        }
+    }
 };
 
 window.handleSubmitWork = async (groupId, nodeId) => {

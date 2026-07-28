@@ -23,4 +23,10 @@ public interface NodeProgressRepository extends JpaRepository<NodeProgress, Long
     Optional<NodeProgress> findByStudentIdAndLearningNodeId(Long studentId, Long learningNodeId);
 
     void deleteByLearningNodeId(Long learningNodeId);
+
+    @Query("SELECT np.student.id, COUNT(np) FROM NodeProgress np " +
+           "WHERE np.learningNode.learningPath.learningSpace.id = :spaceId " +
+           "AND np.status = 'COMPLETED' " +
+           "GROUP BY np.student.id")
+    List<Object[]> countCompletedNodesGroupedByStudent(@Param("spaceId") Long spaceId);
 }

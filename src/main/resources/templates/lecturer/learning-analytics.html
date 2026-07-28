@@ -13,7 +13,7 @@
             </div>
         </div>
 
-        <!-- Premium Banner -->
+        <!-- Banner thông tin tổng quan (Premium Banner) -->
         <div class="analytics-banner mb-4 shadow-lg">
             <div class="row align-items-center position-relative" style="z-index: 2;">
                 <div class="col-lg-5 mb-4 mb-lg-0">
@@ -31,11 +31,11 @@
                             <h3 class="fw-bold mb-0" id="kpi-active-students">--</h3>
                             <span class="small text-white-50">Active Now</span>
                         </div>
-                        <div class="kpi-glass flex-fill text-center">
+<!--                        <div class="kpi-glass flex-fill text-center">
                             <i class="ti ti-star fs-2 mb-2 d-block text-warning"></i>
                             <h3 class="fw-bold mb-0" id="kpi-candidates">--</h3>
                             <span class="small text-white-50">Stars</span>
-                        </div>
+                        </div>-->
                     </div>
                 </div>
                 
@@ -50,7 +50,7 @@
             </div>
         </div>
 
-        <!-- Insights & Leaderboard -->
+        <!-- Phần hiển thị Thông tin chi tiết (Insights) & Bảng xếp hạng (Leaderboard) -->
         <div class="row g-4">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-end mb-3">
@@ -71,14 +71,16 @@
 
                 <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
                     <div class="table-responsive">
-                        <table class="table align-middle mb-0 text-nowrap">
+                        
+<!-- KHU VỰC BẢNG DỮ LIỆU (TABLE) -->
+<table class="table align-middle mb-0 text-nowrap">
                             <thead class="bg-light text-muted fw-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
                                 <tr>
                                     <th class="ps-4 py-3 border-0 rounded-start">Rank</th>
                                     <th class="py-3 border-0">Student</th>
                                     <th class="py-3 border-0" style="width: 35%;">Learning Journey</th>
                                     <th class="py-3 text-center border-0">Quiz Score</th>
-                                    <th class="py-3 text-center border-0">Status</th>
+<!--                                    <th class="py-3 text-center border-0">Status</th>-->
                                     <th class="py-3 pe-4 text-end border-0 rounded-end">Action</th>
                                 </tr>
                             </thead>
@@ -98,8 +100,13 @@
             </div>
         </div>
 
-    <!-- Student Detail Modal -->
-    <div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
+    <!-- Modal hiển thị chi tiết thông tin học tập của sinh viên (Student Detail Modal) -->
+    
+
+<!-- ==========================================
+     BẮT ĐẦU MODAL: STUDENTDETAILMODAL 
+     ========================================== -->
+<div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header border-bottom-0 pb-0 pt-4 px-4 position-relative">
@@ -165,30 +172,37 @@
 </div>
 
     <th:block th:fragment="scripts">
-        <script>
+        <!-- BẮT ĐẦU: PHẦN JAVASCRIPT (SCRIPT) -->
+
+<!-- KHU VỰC JAVASCRIPT -->
+<script>
+            // Khởi tạo các biến toàn cục để lưu trữ dữ liệu
             let currentStudents = [];
             let selectedStudent = null;
             let detailModal;
             let currentAnalyticsPage = 1;
-            const analyticsPageSize = 5;
+            const analyticsPageSize = 10; // Số lượng học viên trên mỗi trang của bảng xếp hạng
 
             $(document).ready(function() {
+                // Khởi tạo Modal chi tiết học viên
                 const modalEl = document.getElementById('studentDetailModal');
                 if (modalEl) {
                     detailModal = new bootstrap.Modal(modalEl);
                 }
-                // Fetch when tab is opened
+                // Gọi API lấy dữ liệu phân tích khi người dùng mới mở tab (nếu chưa có dữ liệu)
                 if ($('#kpi-total-students').is(':visible') && ($('#kpi-total-students').text() === '0' || $('#kpi-total-students').text() === '--')) {
                     fetchAnalytics();
                 }
             });
 
+            // Lắng nghe sự kiện khi chuyển sang tab "analytics" để tải lại dữ liệu nếu cần
             $('a[data-bs-toggle="tab"][href="#analytics"]').on('shown.bs.tab', function (e) {
                 if ($('#kpi-total-students').text() === '0' || $('#kpi-total-students').text() === '--') {
                     fetchAnalytics();
                 }
             });
 
+            // Hàm gọi API lấy dữ liệu thống kê tổng quan và danh sách sinh viên
             async function fetchAnalytics() {
                 try {
                     const spaceId = document.getElementById('spaceId').value;
@@ -200,17 +214,21 @@
                     if (!response.ok) throw new Error('Failed to fetch data');
                     const data = await response.json();
                     
+                    // Gọi hàm cập nhật các chỉ số tổng quan (KPI)
                     renderKPI(data);
                     
-                    // Sort students by progress and quiz score for Leaderboard
+                    // Sắp xếp sinh viên theo mức độ hoàn thành và điểm quiz để làm Bảng xếp hạng (Leaderboard)
+                    // Công thức: 70% tiến độ (progress) + 30% điểm quiz (quy đổi ra thang 100)
                     currentStudents = data.students || [];
                     currentStudents.sort((a, b) => {
                         const scoreA = (a.progressPercentage * 0.7) + (a.quizAvg * 10 * 0.3);
                         const scoreB = (b.progressPercentage * 0.7) + (b.quizAvg * 10 * 0.3);
-                        return scoreB - scoreA;
+                        return scoreB - scoreA; // Sắp xếp giảm dần
                     });
 
-                    currentAnalyticsPage = 1; // Reset to page 1
+                    currentAnalyticsPage = 1; // Reset về trang đầu tiên
+                    
+                    // Gọi hàm hiển thị bảng xếp hạng và vẽ biểu đồ
                     renderLeaderboard();
                     renderChart(currentStudents);
 
@@ -223,13 +241,16 @@
                 }
             }
 
+            // Hàm gán dữ liệu vào các thẻ hiển thị chỉ số (KPI) trên đầu trang
             function renderKPI(data) {
                 document.getElementById('kpi-total-students').textContent = data.totalStudents || 0;
                 document.getElementById('kpi-avg-progress').textContent = (data.averageProgress || 0) + '%';
                 document.getElementById('kpi-active-students').textContent = data.activeStudents || 0;
-                document.getElementById('kpi-candidates').textContent = data.supporterCandidates || 0;
+                
+                // document.getElementById('kpi-candidates').textContent = data.supporterCandidates || 0;
             }
 
+            // Hàm tạo giao diện bảng xếp hạng sinh viên (Leaderboard) có phân trang
             function renderLeaderboard() {
                 const tbody = document.getElementById('analytics-table-body');
                 const pagination = document.getElementById('analytics-pagination');
@@ -273,14 +294,24 @@
                             <td class="ps-4 py-4">
                                 <div class="rank-badge ${rankClass} shadow-sm">${rank}</div>
                             </td>
+                              <!--LẤY StudentCode or ID-->
+                            <!--
+                            <td class="py-4">
+                                <span class="badge bg-light text-dark border border-secondary-subtle px-2 py-1">
+                                    <i class="ti ti-id"></i> ${s.studentCode !== 'N/A' ? s.studentCode : (s.username || s.studentId)}
+
+                                    <i class="ti ti-id"></i> ID: ${s.studentId}
+                                </span>
+                            </td> -->
+
                             <td class="py-4">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="position-relative">
+                                    <div class="position-relative"> 
                                         <img src="${avatarUrl}" class="rounded-circle shadow-sm" style="width: 44px; height: 44px; border: 2px solid white;">
                                     </div>
                                     <div>
                                         <div class="fw-bold text-dark fs-6">${s.studentName}</div>
-                                        <div class="fs-7 text-muted">Joined recently</div>
+                                        <div class="fs-7 text-muted"><i class="ti ti-clock"></i> Active: ${s.lastActive}</div>
                                     </div>
                                 </div>
                             </td>
@@ -299,7 +330,12 @@
                                     ${s.quizAvg}
                                 </div>
                             </td>
-                            <td class="text-center py-4">${statusHtml}</td>
+                            <!-- <td class="text-center py-4">${statusHtml}</td> -->
+                            <!--
+                            <td class="py-4 text-muted fw-semibold">
+                                ${s.lastActive}
+                            </td>
+                            -->
                             <td class="pe-4 text-end py-4">
                                 <button class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold hover-lift" onclick="showStudentDetail(${absoluteIndex})">
                                     Analyze <i class="ti ti-arrow-right ms-1"></i>
@@ -328,14 +364,16 @@
                 pagination.innerHTML = pHtml;
             }
 
+            // Hàm xử lý khi người dùng nhấn chuyển trang trên bảng xếp hạng
             function changeAnalyticsPage(page) {
                 currentAnalyticsPage = page;
                 renderLeaderboard();
             }
 
+            // Hàm vẽ biểu đồ cột thể hiện tiến trình và điểm quiz của top 5 sinh viên
             function renderChart(students) {
                 const ctx = document.getElementById('performanceChart').getContext('2d');
-                // Limit to top 5 or all for chart
+                // Chỉ lấy tối đa 5 học viên đứng đầu để vẽ biểu đồ cho dễ nhìn
                 const chartData = students.slice(0, 5);
                 const labels = chartData.map(s => s.studentName.split(' ').pop()); // Last name
                 const progressData = chartData.map(s => s.progressPercentage);
@@ -372,11 +410,12 @@
                 });
             }
 
+            // Hàm chuyển hướng sang trang chấm điểm (grading) khi bấm nút phân tích chi tiết
             function showStudentDetail(index) {
                 const selectedStudent = currentStudents[index];
                 if (!selectedStudent) return;
                 
-                // Redirect to grading page with analytics data
+                // Chuyển hướng sang trang chấm điểm (Grading) kèm theo các tham số phân tích
                 const url = new URL(`/lecturer/grading`, window.location.origin);
                 url.searchParams.set('sessionId', '3'); // default mock sessionId
                 url.searchParams.set('studentId', selectedStudent.studentId);
@@ -387,6 +426,8 @@
                 
                 window.location.href = url.toString();
             }
+            
+            // Hàm mở rộng/thu gọn danh sách các học phần (node) đã hoàn thành của sinh viên
             function toggleCompletedNodes() {
                 const listDiv = document.getElementById('completed-nodes-list');
                 const contentDiv = document.getElementById('completed-nodes-content');
